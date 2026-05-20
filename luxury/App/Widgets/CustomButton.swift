@@ -1,0 +1,49 @@
+//
+//  CustomButton.swift
+//  luxury
+//
+//  Created by Aditya Chauhan on 15/05/26.
+//
+
+import SwiftUI
+
+struct CustomButton: View {
+    let title: String
+    let icon: AnyView?
+    let isLoading: Bool
+    let action: () -> Void
+    
+    init(title: String, icon: AnyView? = nil, isLoading: Bool = false, action: @escaping () -> Void) {
+        self.title = title
+        self.icon = icon
+        self.isLoading = isLoading
+        self.action = action
+    }
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                if isLoading {
+                    ProgressView()
+                        .tint(AppColors.background)
+                        .controlSize(.small)
+                } else {
+                    if let icon = icon {
+                        icon
+                    }
+                    Text(title)
+                }
+            }
+            .font(AppFonts.sansSerif(size: 15, weight: .medium))
+            .foregroundStyle(AppColors.background)
+            .frame(maxWidth: .infinity)
+            .frame(height: 56)
+            .background(
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(AppColors.gold)
+            )
+        }
+        .buttonStyle(.plain)
+        .disabled(isLoading)
+    }
+}

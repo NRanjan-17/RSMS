@@ -1,0 +1,146 @@
+//
+//  BoutiqueManagerCanvas.swift
+//  luxury
+//
+//  Created by Aditya Chauhan on 15/05/26.
+//
+
+import SwiftUI
+
+struct BoutiqueManagerCanvas: View {
+    @Environment(BoutiqueManagerAppState.self) private var bmAppState
+    
+    @State private var dashRouter = Router()
+    @State private var teamRouter = Router()
+    @State private var storeRouter = Router()
+    @State private var reportsRouter = Router()
+    
+    var body: some View {
+        TabView(selection: Binding(
+            get: { bmAppState.selectedTab },
+            set: { bmAppState.selectedTab = $0 }
+        )) {
+            NavigationStack(path: $dashRouter.path) {
+                DashboardView()
+                    .navigationDestination(for: BMRoute.self) { route in
+                        destination(for: route, router: dashRouter)
+                    }
+                    .fullScreenCover(item: $dashRouter.presentedFullScreen) { route in
+                        destination(for: route.value as! BMRoute, router: dashRouter)
+                    }
+                    .sheet(item: $dashRouter.presentedSheet) { route in
+                        destination(for: route.value as! BMRoute, router: dashRouter)
+                    }
+            }
+            .environment(dashRouter)
+            .tabItem { Label("Dashboard", systemImage: "chart.bar") }
+            .tag(BMTab.dashboard)
+            
+            NavigationStack(path: $teamRouter.path) {
+                StaffRequestsView()
+                    .navigationDestination(for: BMRoute.self) { route in
+                        destination(for: route, router: teamRouter)
+                    }
+                    .fullScreenCover(item: $teamRouter.presentedFullScreen) { route in
+                        destination(for: route.value as! BMRoute, router: teamRouter)
+                    }
+                    .sheet(item: $teamRouter.presentedSheet) { route in
+                        destination(for: route.value as! BMRoute, router: teamRouter)
+                    }
+            }
+            .environment(teamRouter)
+            .tabItem { Label("Team", systemImage: "person.3") }
+            .tag(BMTab.team)
+            
+            NavigationStack(path: $storeRouter.path) {
+                StoreView()
+                    .navigationDestination(for: BMRoute.self) { route in
+                        destination(for: route, router: storeRouter)
+                    }
+                    .fullScreenCover(item: $storeRouter.presentedFullScreen) { route in
+                        destination(for: route.value as! BMRoute, router: storeRouter)
+                    }
+                    .sheet(item: $storeRouter.presentedSheet) { route in
+                        destination(for: route.value as! BMRoute, router: storeRouter)
+                    }
+            }
+            .environment(storeRouter)
+            .tabItem { Label("Store", systemImage: "building.2") }
+            .tag(BMTab.store)
+            
+            NavigationStack(path: $reportsRouter.path) {
+                ReportsView()
+                    .navigationDestination(for: BMRoute.self) { route in
+                        destination(for: route, router: reportsRouter)
+                    }
+                    .fullScreenCover(item: $reportsRouter.presentedFullScreen) { route in
+                        destination(for: route.value as! BMRoute, router: reportsRouter)
+                    }
+                    .sheet(item: $reportsRouter.presentedSheet) { route in
+                        destination(for: route.value as! BMRoute, router: reportsRouter)
+                    }
+            }
+            .environment(reportsRouter)
+            .tabItem { Label("Reports", systemImage: "doc.text") }
+            .tag(BMTab.reports)
+        }
+        .tint(AppColors.gold)
+    }
+    
+    @ViewBuilder
+    private func destination(for route: BMRoute, router: Router) -> some View {
+        switch route {
+        case .appointmentDetail(let appt):
+            BMAppointmentDetailView(appointment: appt)
+        case .staffPerformanceDetail(let member):
+            StaffPerformanceDetailView(member: member)
+        case .createEvent:
+            CreateEventView()
+        case .salesAnalytics:
+            SalesAnalyticsView()
+        case .staffPerformanceReport:
+            StaffPerformanceReportView()
+        case .shrinkReport:
+            ShrinkReportView()
+        case .clientInsights:
+            ClientInsightsView()
+        case .transferApproval:
+            TransferApprovalView()
+        case .cycleCountSignoff:
+            CycleCountDetailView()
+        case .refundApproval:
+            RefundApprovalView()
+        case .writeOffApproval:
+            WriteOffApprovalView()
+        case .associateRequestDetail(let associate):
+            RequestDetailSheet(
+                title: associate.name,
+                subtitle: "Sales Associate",
+                details: [
+                    ("Email", associate.email),
+                    ("Address", associate.address),
+                    ("Status", associate.status.rawValue.capitalized)
+                ],
+                avatarUrl: associate.avatarUrl,
+                resumeUrl: associate.resumeUrl,
+                onApprove: { router.dismissModal() },
+                onReject: { router.dismissModal() }
+            )
+        case .controllerRequestDetail(let controller):
+            RequestDetailSheet(
+                title: controller.name,
+                subtitle: "Inventory Controller",
+                details: [
+                    ("Email", controller.email),
+                    ("Address", controller.address),
+                    ("Status", controller.status.rawValue.capitalized)
+                ],
+                avatarUrl: controller.avatarUrl,
+                resumeUrl: controller.resumeUrl,
+                onApprove: { router.dismissModal() },
+                onReject: { router.dismissModal() }
+            )
+        
+        }
+    }
+}
