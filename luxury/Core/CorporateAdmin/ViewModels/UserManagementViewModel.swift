@@ -104,4 +104,15 @@ final class UserManagementViewModel {
             }
         }
     }
+    
+    func inviteBoutique(email: String) async throws {
+        let profileService = ProfileService()
+        try await profileService.createSkeletonProfile(
+            userId: UUID(),
+            role: .boutiqueManager,
+            name: "",
+            email: email,
+            provider: "email"
+        )
+    }
 }

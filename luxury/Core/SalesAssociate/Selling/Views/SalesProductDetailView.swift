@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ProductDetailView: View {
+struct SalesProductDetailView: View {
     @Environment(\.dismiss) private var dismiss
     let product: Product
     
@@ -159,5 +159,6 @@ struct ProductDetailView: View {
         }
         .toolbar(.hidden, for: .navigationBar)
         .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .tabBar)
     }
 }

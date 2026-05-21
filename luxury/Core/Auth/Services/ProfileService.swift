@@ -1,10 +1,3 @@
-//
-//  ProfileService.swift
-//  luxury
-//
-//  Created by Aditya Chauhan on 19/05/26.
-//
-
 import Foundation
 import Supabase
 
@@ -43,27 +36,37 @@ final class ProfileService {
             } catch {}
         }
         
-        if role == .salesAssociate || role == nil {
+        if role == .salesAssociate || role == .inventoryController || role == nil {
             do {
-                let associate: SalesAssociate = try await client.from("sales_associates")
+                let staff: StaffModel = try await client.from("staff")
                     .select()
                     .eq("auth_user_id", value: userId)
                     .single()
                     .execute()
                     .value
-                return (.salesAssociate, associate)
+                let mappedRole: UserRole = staff.role == .salesAssociate ? .salesAssociate : .inventoryController
+                return (mappedRole, staff)
             } catch {}
-        }
-        
-        if role == .inventoryController || role == nil {
+            
             do {
-                let controller: InventoryController = try await client.from("inventory_controllers")
+                let staff: StaffModel = try await client.from("staff")
                     .select()
-                    .eq("auth_user_id", value: userId)
+                    .eq("email", value: email)
                     .single()
                     .execute()
                     .value
-                return (.inventoryController, controller)
+                try await client.from("staff")
+                    .update(["auth_user_id": userId.uuidString])
+                    .eq("id", value: staff.id)
+                    .execute()
+                let updatedStaff: StaffModel = try await client.from("staff")
+                    .select()
+                    .eq("id", value: staff.id)
+                    .single()
+                    .execute()
+                    .value
+                let mappedRole: UserRole = updatedStaff.role == .salesAssociate ? .salesAssociate : .inventoryController
+                return (mappedRole, updatedStaff)
             } catch {}
         }
         
@@ -80,7 +83,6 @@ final class ProfileService {
     }
     
     func createSkeletonProfile(userId: UUID, role: UserRole, name: String, email: String, provider: String) async throws {
-        print("DEBUG: createSkeletonProfile called for uid: \(userId), role: \(role.rawValue)")
         switch role {
         case .corporateAdmin:
             let admin = CorporateAdmin(
@@ -91,7 +93,6 @@ final class ProfileService {
                 createdAt: Date()
             )
             try await client.from("corporate_admins").upsert(admin).execute()
-            print("DEBUG: Corporate Admin row upserted in DB")
             
         case .boutiqueManager:
             let boutique = CorporateBoutique(
@@ -106,41 +107,19 @@ final class ProfileService {
                 provider: provider,
                 status: .pending,
                 createdAt: Date(),
-                updatedAt: Date()
+                updatedAt: Date(),
+                onBoardingCompleted: false
             )
             try await client.from("boutiques").upsert(boutique, onConflict: "manager_email").execute()
-            print("DEBUG: Boutique Manager skeleton upserted in DB")
             
-        case .salesAssociate:
-            let associate = SalesAssociate(
+        case .salesAssociate, .inventoryController:
+            let staffRole: StaffRole = role == .salesAssociate ? .salesAssociate : .inventoryController
+            let staff = StaffModel(
                 id: UUID(),
                 authUserId: userId,
                 boutiqueId: nil,
                 employeeId: "TEMP-\(userId.uuidString.prefix(6))",
-                name: name,
-                email: email,
-                phone: "",
-                address: "",
-                location: "",
-                city: "",
-                pinCode: "",
-                resumeUrl: "",
-                provider: provider,
-                avatarUrl: "",
-                status: .pending,
-                createdAt: Date(),
-                updatedAt: Date(),
-                lastLoginAt: nil
-            )
-            try await client.from("sales_associates").upsert(associate, onConflict: "auth_user_id").execute()
-            print("DEBUG: Sales Associate skeleton upserted in DB")
-            
-        case .inventoryController:
-            let controller = InventoryController(
-                id: UUID(),
-                authUserId: userId,
-                boutiqueId: nil,
-                employeeId: "TEMP-\(userId.uuidString.prefix(6))",
+                role: staffRole,
                 name: name,
                 email: email,
                 phone: "",
@@ -155,10 +134,10 @@ final class ProfileService {
                 status: .pending,
                 createdAt: Date(),
                 updatedAt: Date(),
-                lastLoginAt: nil
+                lastLoginAt: nil,
+                onBoardingCompleted: false
             )
-            try await client.from("inventory_controllers").upsert(controller, onConflict: "auth_user_id").execute()
-            print("DEBUG: Inventory Controller skeleton upserted in DB")
+            try await client.from("staff").upsert(staff, onConflict: "email").execute()
         }
     }
 }

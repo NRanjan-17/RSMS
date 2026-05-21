@@ -1,16 +1,8 @@
-//
-//  StaffRequestsView.swift
-//  luxury
-//
-//  Created by Aditya Chauhan on 18/05/26.
-//
-
 import SwiftUI
 
 struct StaffRequestsView: View {
     @State private var viewModel = TeamViewModel()
-    @State private var selectedAssociate: SalesAssociate?
-    @State private var selectedController: InventoryController?
+    @State private var selectedStaff: StaffModel?
     
     var body: some View {
         ZStack {
@@ -26,7 +18,7 @@ struct StaffRequestsView: View {
                     Spacer()
                     ProgressView().tint(AppColors.gold).frame(maxWidth: .infinity)
                     Spacer()
-                } else if viewModel.pendingAssociates.isEmpty && viewModel.pendingControllers.isEmpty {
+                } else if viewModel.pendingStaff.isEmpty {
                     VStack(spacing: 12) {
                         Image(systemName: "person.crop.circle.badge.questionmark")
                             .font(.system(size: 40))
@@ -41,11 +33,8 @@ struct StaffRequestsView: View {
                 } else {
                     ScrollView(showsIndicators: false) {
                         VStack(spacing: 12) {
-                            ForEach(viewModel.pendingAssociates) { request in
-                                staffRequestRow(name: request.name, role: "Sales Associate", date: request.createdAt, request: request)
-                            }
-                            ForEach(viewModel.pendingControllers) { request in
-                                staffRequestRow(name: request.name, role: "Inventory Controller", date: request.createdAt, request: request)
+                            ForEach(viewModel.pendingStaff) { request in
+                                staffRequestRow(name: request.name, role: request.role.displayName, date: request.createdAt, request: request)
                             }
                         }
                     }
@@ -56,65 +45,36 @@ struct StaffRequestsView: View {
         .onAppear {
             viewModel.fetchData()
         }
-        .sheet(item: $selectedAssociate) { associate in
+        .sheet(item: $selectedStaff) { staff in
             RequestDetailSheet(
-                title: associate.name,
-                subtitle: "Sales Associate",
+                title: staff.name,
+                subtitle: staff.role.displayName,
                 details: [
-                    ("Email", associate.email),
-                    ("Address", associate.address),
-                    ("Status", associate.status.rawValue.capitalized)
+                    ("Email", staff.email),
+                    ("Address", staff.address),
+                    ("Status", staff.status.rawValue.capitalized)
                 ],
-                avatarUrl: associate.avatarUrl,
-                resumeUrl: associate.resumeUrl,
-                isApproving: viewModel.actionStaffId == associate.id,
-                isRejecting: viewModel.actionStaffId == associate.id,
+                avatarUrl: staff.avatarUrl,
+                resumeUrl: staff.resumeUrl,
+                isApproving: viewModel.actionStaffId == staff.id,
+                isRejecting: viewModel.actionStaffId == staff.id,
                 onApprove: {
-                    viewModel.approveAssociate(associate) {
-                        selectedAssociate = nil
+                    viewModel.approveStaffMember(staff) {
+                        selectedStaff = nil
                     }
                 },
                 onReject: {
-                    viewModel.rejectAssociate(associate) {
-                        selectedAssociate = nil
-                    }
-                }
-            )
-        }
-        .sheet(item: $selectedController) { controller in
-            RequestDetailSheet(
-                title: controller.name,
-                subtitle: "Inventory Controller",
-                details: [
-                    ("Email", controller.email),
-                    ("Address", controller.address),
-                    ("Status", controller.status.rawValue.capitalized)
-                ],
-                avatarUrl: controller.avatarUrl,
-                resumeUrl: controller.resumeUrl,
-                isApproving: viewModel.actionStaffId == controller.id,
-                isRejecting: viewModel.actionStaffId == controller.id,
-                onApprove: {
-                    viewModel.approveController(controller) {
-                        selectedController = nil
-                    }
-                },
-                onReject: {
-                    viewModel.rejectController(controller) {
-                        selectedController = nil
+                    viewModel.rejectStaffMember(staff) {
+                        selectedStaff = nil
                     }
                 }
             )
         }
     }
     
-    private func staffRequestRow(name: String, role: String, date: Date, request: Any) -> some View {
+    private func staffRequestRow(name: String, role: String, date: Date, request: StaffModel) -> some View {
         Button(action: {
-            if let associate = request as? SalesAssociate {
-                selectedAssociate = associate
-            } else if let controller = request as? InventoryController {
-                selectedController = controller
-            }
+            selectedStaff = request
         }) {
             HStack(spacing: 16) {
                 ZStack {

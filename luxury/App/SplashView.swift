@@ -96,5 +96,9 @@ struct SplashView: View {
     }
 }
 
-// id, product_id, name, description, brand, category(hardcoded strings or enum), avaiable_stock,
-// List of <reversed {map of [uid, reservedDate, deliveryDate, payment info]}>,
+// id, product_id, name, description, brand, category(hardcoded strings or enum), avaiable_stock, ammount, bar code or qr code scanned number,
+// List of <reversed {map of [uid, reservedDate, deliveryDate, payment info, status]}>,
+
+
+
+

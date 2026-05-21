@@ -1,10 +1,3 @@
-//
-//  AppRoutes.swift
-//  luxury
-//
-//  Created by Aditya Chauhan on 15/05/26.
-//
-
 import SwiftUI
 
 enum SARoute: Hashable {
@@ -37,9 +30,9 @@ enum BMRoute: Hashable {
     case cycleCountSignoff
     case refundApproval
     case writeOffApproval
-    case associateRequestDetail(SalesAssociate)
-    case controllerRequestDetail(InventoryController)
-
+    case staffRequestDetail(StaffModel)
+    case pendingStaff
+    case staffDetail(StaffModel)
 }
 
 enum ICRoute: Hashable {
@@ -57,6 +50,9 @@ enum ICRoute: Hashable {
 enum CARoute: Hashable {
     case globalAnalytics
     case userManagement
+    case catalogs
+    case productForm(editProduct: ProductEntity?)
+    case productDetail(ProductEntity)
     case boutiqueConfig
     case boutiqueConfigDetail(CorporateBoutique)
     case systemLogs

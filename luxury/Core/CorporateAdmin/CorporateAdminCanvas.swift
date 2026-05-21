@@ -12,9 +12,10 @@ struct CorporateAdminCanvas: View {
     
     @State private var analyticsRouter = Router()
     @State private var usersRouter = Router()
-    @State private var configRouter = Router()
+    @State private var catalogsRouter = Router()
     @State private var logsRouter = Router()
     @State private var userManagementViewModel = UserManagementViewModel()
+    @State private var catalogsViewModel = CatalogsViewModel()
     
     var body: some View {
         TabView(selection: Binding(
@@ -44,15 +45,16 @@ struct CorporateAdminCanvas: View {
             .tabItem { Label("Requests", systemImage: "person.badge.shield.checkmark.fill") }
             .tag(CATab.userManagement)
             
-            NavigationStack(path: $configRouter.path) {
-                BoutiqueConfigView()
+            NavigationStack(path: $catalogsRouter.path) {
+                CatalogsView()
                     .navigationDestination(for: CARoute.self) { route in
-                        destination(for: route, router: configRouter)
+                        destination(for: route, router: catalogsRouter)
                     }
             }
-            .environment(configRouter)
-            .tabItem { Label("Config", systemImage: "gearshape.2.fill") }
-            .tag(CATab.boutiqueConfig)
+            .environment(catalogsRouter)
+            .environment(catalogsViewModel)
+            .tabItem { Label("Catalogs", systemImage: "book.pages.fill") }
+            .tag(CATab.catalogs)
             
             NavigationStack(path: $logsRouter.path) {
                 SystemLogsView()
@@ -74,6 +76,12 @@ struct CorporateAdminCanvas: View {
             GlobalAnalyticsView()
         case .userManagement:
             UserManagementView(viewModel: userManagementViewModel)
+        case .catalogs:
+            CatalogsView()
+        case .productForm(let editProduct):
+            ProductFormView(editProduct: editProduct)
+        case .productDetail(let product):
+            CorporateProductDetailView(product: product)
         case .boutiqueConfig:
             BoutiqueConfigView()
         case .boutiqueConfigDetail(let boutique):
@@ -101,3 +109,5 @@ struct CorporateAdminCanvas: View {
         }
     }
 }
+
+

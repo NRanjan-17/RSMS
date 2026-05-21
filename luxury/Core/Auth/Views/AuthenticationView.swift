@@ -1,10 +1,3 @@
-//
-//  AuthenticationView.swift
-//  luxury
-//
-//  Created by Aditya Chauhan on 18/05/26.
-//
-
 import SwiftUI
 
 struct AuthenticationView: View {
@@ -40,21 +33,13 @@ struct AuthenticationView: View {
                             .lineSpacing(-5)
                             .padding(.bottom, 16)
                         
-                        Text(authVM.isSignUp ? "Create your \(roleTitle) account" : "Signing in as \(roleTitle)")
+                        Text("Signing in as \(roleTitle)")
                             .font(AppFonts.sansSerif(size: 13, weight: .light))
                             .foregroundStyle(AppColors.secondary)
                             .padding(.bottom, 40)
                     }
                     
                     VStack(spacing: 20) {
-                        if authVM.isSignUp {
-                            CustomTextField(
-                                title: selectedRole == .boutiqueManager ? "MANAGER NAME" : "FULL NAME",
-                                placeholder: "Full Name",
-                                text: $authVM.name
-                            )
-                        }
-                        
                         CustomTextField(
                             title: "EMAIL ADDRESS",
                             placeholder: "name@luxury.com",
@@ -70,17 +55,15 @@ struct AuthenticationView: View {
                     }
                     .padding(.bottom, 12)
                     
-                    if !authVM.isSignUp {
-                        HStack {
-                            Spacer()
-                            Button(action: { authVM.resetPassword() }) {
-                                Text("Forgot Password?")
-                                    .font(AppFonts.sansSerif(size: 12, weight: .medium))
-                                    .foregroundStyle(AppColors.gold)
-                            }
+                    HStack {
+                        Spacer()
+                        Button(action: { authVM.resetPassword() }) {
+                            Text("Forgot Password?")
+                                .font(AppFonts.sansSerif(size: 12, weight: .medium))
+                                .foregroundStyle(AppColors.gold)
                         }
-                        .padding(.bottom, 32)
                     }
+                    .padding(.bottom, 32)
                     
                     VStack(spacing: 16) {
                         if let error = authVM.errorMessage {
@@ -91,7 +74,7 @@ struct AuthenticationView: View {
                         }
                         
                         CustomButton(
-                            title: authVM.isSignUp ? "Create Account" : "Sign In",
+                            title: "Sign In",
                             isLoading: authVM.isLoading,
                             action: {
                                 authVM.authenticate(selectedRole: selectedRole) {
@@ -99,26 +82,6 @@ struct AuthenticationView: View {
                                 }
                             }
                         )
-                        
-                        if selectedRole != .corporateAdmin {
-                            Button(action: {
-                                withAnimation {
-                                    authVM.isSignUp.toggle()
-                                    authVM.errorMessage = nil
-                                }
-                            }) {
-                                HStack(spacing: 4) {
-                                    Text(authVM.isSignUp ? "Already have an account?" : "Don't have an account?")
-                                        .font(AppFonts.sansSerif(size: 13))
-                                        .foregroundStyle(AppColors.secondary)
-                                    Text(authVM.isSignUp ? "Sign In" : "Create")
-                                        .font(AppFonts.sansSerif(size: 13, weight: .bold))
-                                        .foregroundStyle(AppColors.gold)
-                                }
-                            }
-                            .padding(.top, 24)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                        }
                     }
                     
                     if selectedRole != .corporateAdmin {

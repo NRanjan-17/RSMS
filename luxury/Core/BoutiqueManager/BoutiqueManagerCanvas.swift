@@ -1,10 +1,3 @@
-//
-//  BoutiqueManagerCanvas.swift
-//  luxury
-//
-//  Created by Aditya Chauhan on 15/05/26.
-//
-
 import SwiftUI
 
 struct BoutiqueManagerCanvas: View {
@@ -37,7 +30,7 @@ struct BoutiqueManagerCanvas: View {
             .tag(BMTab.dashboard)
             
             NavigationStack(path: $teamRouter.path) {
-                StaffRequestsView()
+                TeamView()
                     .navigationDestination(for: BMRoute.self) { route in
                         destination(for: route, router: teamRouter)
                     }
@@ -112,35 +105,24 @@ struct BoutiqueManagerCanvas: View {
             RefundApprovalView()
         case .writeOffApproval:
             WriteOffApprovalView()
-        case .associateRequestDetail(let associate):
+        case .staffRequestDetail(let staff):
             RequestDetailSheet(
-                title: associate.name,
-                subtitle: "Sales Associate",
+                title: staff.name,
+                subtitle: staff.role.displayName,
                 details: [
-                    ("Email", associate.email),
-                    ("Address", associate.address),
-                    ("Status", associate.status.rawValue.capitalized)
+                    ("Email", staff.email),
+                    ("Address", staff.address),
+                    ("Status", staff.status.rawValue.capitalized)
                 ],
-                avatarUrl: associate.avatarUrl,
-                resumeUrl: associate.resumeUrl,
+                avatarUrl: staff.avatarUrl,
+                resumeUrl: staff.resumeUrl,
                 onApprove: { router.dismissModal() },
                 onReject: { router.dismissModal() }
             )
-        case .controllerRequestDetail(let controller):
-            RequestDetailSheet(
-                title: controller.name,
-                subtitle: "Inventory Controller",
-                details: [
-                    ("Email", controller.email),
-                    ("Address", controller.address),
-                    ("Status", controller.status.rawValue.capitalized)
-                ],
-                avatarUrl: controller.avatarUrl,
-                resumeUrl: controller.resumeUrl,
-                onApprove: { router.dismissModal() },
-                onReject: { router.dismissModal() }
-            )
-        
+        case .pendingStaff:
+            StaffRequestsView()
+        case .staffDetail(let employee):
+            EmployeeDetailView(employee: employee)
         }
     }
 }

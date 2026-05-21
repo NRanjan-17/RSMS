@@ -11,178 +11,277 @@ struct TeamView: View {
     @Environment(Router.self) private var router
     @State private var viewModel = TeamViewModel()
     
+    @State private var showInviteSheet = false
+    @State private var inviteEmail = ""
+    @State private var inviteRole = StaffRole.salesAssociate
+    @State private var isInviting = false
+    @State private var inviteError: String?
+    
     var body: some View {
+        @Bindable var vm = viewModel
         ZStack {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 18) {
-                        HStack(alignment: .top) {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("MAY 2025")
-                                    .font(AppFonts.sansSerif(size: 10))
-                                    .foregroundStyle(AppColors.gold)
-                                    .kerning(2)
-                                Text("Team")
-                                    .font(AppFonts.serif(size: 32, weight: .semibold))
-                                    .foregroundStyle(AppColors.text)
-                            }
-                            Spacer()
-                            Button(action: {}) {
-                                Text("Schedule")
-                                    .font(AppFonts.sansSerif(size: 12))
-                                    .foregroundStyle(AppColors.gold)
-                                    .padding(.horizontal, 14)
-                                    .padding(.vertical, 7)
-                                    .background(AppColors.gold08)
-                                    .clipShape(Capsule())
-                                    .overlay(Capsule().stroke(AppColors.gold15, lineWidth: 0.5))
-                            }
+                HStack(alignment: .center) {
+                    Text("Team")
+                        .font(AppFonts.serif(size: 28, weight: .semibold))
+                        .foregroundStyle(.white)
+                    
+                    Spacer()
+                    
+                    Menu {
+                        Button(action: {
+                            inviteEmail = ""
+                            inviteRole = .salesAssociate
+                            inviteError = nil
+                            showInviteSheet = true
+                        }) {
+                            Label("Invite Staff", systemImage: "envelope.badge")
                         }
-                        .padding(.horizontal, 24)
-                        .padding(.top, 14)
                         
-                        VStack(alignment: .leading, spacing: 12) {
-                            HStack(alignment: .top) {
-                                VStack(alignment: .leading, spacing: 5) {
-                                    Text("STORE MONTHLY TARGET")
-                                        .font(AppFonts.sansSerif(size: 10))
-                                        .foregroundStyle(AppColors.secondary)
-                                        .kerning(1.5)
-                                    Text(viewModel.storeTarget)
-                                        .font(AppFonts.serif(size: 30, weight: .medium))
-                                        .foregroundStyle(AppColors.gold)
-                                    Text("of \(viewModel.storeTotal)")
-                                        .font(AppFonts.sansSerif(size: 11))
-                                        .foregroundStyle(AppColors.secondary)
-                                        .padding(.top, 2)
-                                }
-                                Spacer()
-                                Text("\(Int(viewModel.storePct * 100))%")
-                                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                                    .foregroundStyle(AppColors.gold)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 5)
-                                    .background(AppColors.gold08)
-                                    .clipShape(Capsule())
-                                    .overlay(Capsule().stroke(AppColors.gold15, lineWidth: 0.5))
-                            }
-                            
-                            ProgressView(value: viewModel.storePct)
-                                .progressViewStyle(LuxuryProgressStyle())
-                            
-                            HStack {
-                                Text("5/6 staff on floor")
-                                Spacer()
-                                Text("+18% vs last month")
-                                    .foregroundStyle(AppColors.gold)
-                            }
-                            .font(AppFonts.sansSerif(size: 11))
-                            .foregroundStyle(AppColors.secondary)
-                            .padding(.top, 12)
+                        Button(action: {
+                            router.push(BMRoute.pendingStaff)
+                        }) {
+                            Label("Review Responses", systemImage: "bell")
                         }
-                        .padding(.horizontal, 18)
-                        .padding(.vertical, 16)
-                        .background(AppColors.surface)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
-                        .padding(.horizontal, 24)
-                        
-                        HStack {
-                            Text("STAFF PERFORMANCE")
-                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
-                                .foregroundStyle(AppColors.secondary)
-                                .kerning(1.5)
-                            Spacer()
-                            Text("Full report")
-                                .font(AppFonts.sansSerif(size: 11, weight: .semibold))
+                    } label: {
+                        ZStack(alignment: .topTrailing) {
+                            Image(systemName: "ellipsis.circle.fill")
+                                .font(.system(size: 24))
                                 .foregroundStyle(AppColors.gold)
-                        }
-                        .padding(.horizontal, 24)
-                        .padding(.top, 10)
-                        
-                        VStack(spacing: 10) {
-                            let staff = viewModel.staff
-                            ForEach(staff, id: \.id) { s in
-                                Button(action: {
-                                    router.presentFullScreen(BMRoute.staffPerformanceDetail(s))
-                                }) {
-                                    VStack(spacing: 10) {
-                                        HStack(alignment: .center, spacing: 10) {
-                                            ZStack {
-                                                if let avatarUrl = s.avatarUrl, let url = URL(string: avatarUrl) {
-                                                    AsyncImage(url: url) { image in
-                                                        image.resizable().aspectRatio(contentMode: .fill)
-                                                    } placeholder: {
-                                                        AppColors.gold08
-                                                    }
-                                                    .frame(width: 38, height: 38)
-                                                    .clipShape(RoundedRectangle(cornerRadius: 11))
-                                                } else {
-                                                    RoundedRectangle(cornerRadius: 11)
-                                                        .fill(AppColors.gold08)
-                                                        .frame(width: 38, height: 38)
-                                                    Text(s.initials)
-                                                        .font(AppFonts.serif(size: 13, weight: .semibold))
-                                                        .foregroundStyle(AppColors.gold)
-                                                }
-                                                
-                                                Circle()
-                                                    .fill(s.live ? AppColors.success : AppColors.tertiary)
-                                                    .frame(width: 9, height: 9)
-                                                    .overlay(Circle().stroke(AppColors.background, lineWidth: 1.5))
-                                                    .offset(x: 18, y: 18)
-                                            }
-                                            
-                                            VStack(alignment: .leading, spacing: 4) {
-                                                Text(s.name)
-                                                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                                                    .foregroundStyle(AppColors.text)
-                                                Text("\(s.clients) clients · \(s.live ? "On Floor" : "Off Shift")")
-                                                    .font(AppFonts.sansSerif(size: 11))
-                                                    .foregroundStyle(AppColors.secondary)
-                                            }
-                                            
-                                            Spacer()
-                                            
-                                            VStack(alignment: .trailing, spacing: 4) {
-                                                Text(s.rev)
-                                                    .font(AppFonts.serif(size: 15, weight: .semibold))
-                                                    .foregroundStyle(AppColors.gold)
-                                                Text("of \(s.target)")
-                                                    .font(AppFonts.sansSerif(size: 10))
-                                                    .foregroundStyle(AppColors.secondary)
-                                            }
-                                        }
-                                        
-                                        HStack(spacing: 8) {
-                                            ProgressView(value: s.pct)
-                                                .progressViewStyle(LuxuryProgressStyle(height: 3))
-                                            
-                                            let pctVal = Int(s.pct * 100)
-                                            let pctColor = s.pct >= 0.7 ? AppColors.success : (s.pct >= 0.4 ? AppColors.gold : AppColors.warning)
-                                            Text("\(pctVal)%")
-                                                .font(AppFonts.sansSerif(size: 11, weight: .medium))
-                                                .foregroundStyle(pctColor)
-                                                .frame(width: 30, alignment: .trailing)
-                                        }
-                                    }
-                                    .padding(14)
-                                    .background(AppColors.surface)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                .frame(width: 44, height: 44)
+                                .background(.ultraThinMaterial, in: Circle())
+                            
+                            if viewModel.pendingStaffCount > 0 {
+                                ZStack {
+                                    Circle()
+                                        .fill(AppColors.error)
+                                        .frame(width: 18, height: 18)
+                                    Text("\(viewModel.pendingStaffCount)")
+                                        .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                                        .foregroundStyle(.white)
                                 }
-                                .buttonStyle(.plain)
+                                .offset(x: 10, y: 0)
                             }
                         }
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 40)
                     }
-                    .padding(.top, 14)
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 16)
+                .padding(.bottom, 12)
+                .background(AppColors.background)
+                
+                VStack(spacing: 16) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundStyle(AppColors.tertiary)
+                        
+                        TextField("Search employees…", text: $vm.searchText)
+                            .font(AppFonts.sansSerif(size: 14))
+                            .foregroundStyle(AppColors.text)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(AppColors.surface)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(AppColors.gold15, lineWidth: 0.5)
+                    )
+                    .padding(.horizontal, 24)
+                    .padding(.top, 16)
+                    
+                    if viewModel.isLoading {
+                        Spacer()
+                        ProgressView().tint(AppColors.gold)
+                        Spacer()
+                    } else if let error = viewModel.errorMessage {
+                        Spacer()
+                        Text(error).font(AppFonts.sansSerif(size: 14)).foregroundStyle(AppColors.error).padding(40)
+                        Spacer()
+                    } else {
+                        ScrollView(showsIndicators: false) {
+                            ActiveEmployeesListView(viewModel: viewModel)
+                        }
+                    }
                 }
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .onAppear {
+            viewModel.fetchData()
+        }
+        .sheet(isPresented: $showInviteSheet) {
+            NavigationStack {
+                ZStack {
+                    AppColors.background.ignoresSafeArea()
+                    
+                    VStack(spacing: 24) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Staff Email")
+                                .font(AppFonts.sansSerif(size: 14, weight: .medium))
+                                .foregroundStyle(AppColors.secondary)
+                            
+                            TextField("Enter email address", text: $inviteEmail)
+                                .font(AppFonts.sansSerif(size: 16))
+                                .foregroundStyle(AppColors.text)
+                                .keyboardType(.emailAddress)
+                                .autocorrectionDisabled()
+                                .textInputAutocapitalization(.never)
+                                .padding()
+                                .background(AppColors.surface)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(AppColors.gold15, lineWidth: 0.5)
+                                )
+                        }
+                        .padding(.horizontal, 24)
+                        
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Role")
+                                .font(AppFonts.sansSerif(size: 14, weight: .medium))
+                                .foregroundStyle(AppColors.secondary)
+                            
+                            Picker("Role", selection: $inviteRole) {
+                                Text("Sales Associate").tag(StaffRole.salesAssociate)
+                                Text("Inventory Controller").tag(StaffRole.inventoryController)
+                            }
+                            .pickerStyle(.segmented)
+                            .padding(4)
+                            .background(AppColors.surface)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
+                        .padding(.horizontal, 24)
+                        
+                        if let inviteError {
+                            Text(inviteError)
+                                .font(AppFonts.sansSerif(size: 14))
+                                .foregroundStyle(AppColors.error)
+                                .padding(.horizontal, 24)
+                        }
+                        
+                        Spacer()
+                    }
+                    .padding(.top, 24)
+                }
+                .navigationTitle("Invite Staff")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") {
+                            showInviteSheet = false
+                        }
+                        .foregroundStyle(AppColors.gold)
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        if isInviting {
+                            ProgressView().tint(AppColors.gold)
+                        } else {
+                            Button("Send") {
+                                sendInvitation()
+                            }
+                            .disabled(inviteEmail.isEmpty)
+                            .foregroundStyle(inviteEmail.isEmpty ? AppColors.tertiary : AppColors.gold)
+                        }
+                    }
+                }
+            }
+            .presentationDetents([.medium])
+        }
+    }
+    
+    private func sendInvitation() {
+        guard !inviteEmail.isEmpty else { return }
+        isInviting = true
+        inviteError = nil
+        
+        Task {
+            do {
+                try await viewModel.inviteStaff(email: inviteEmail, role: inviteRole)
+                await MainActor.run {
+                    isInviting = false
+                    showInviteSheet = false
+                }
+            } catch {
+                await MainActor.run {
+                    isInviting = false
+                    inviteError = error.localizedDescription
+                }
+            }
+        }
+    }
+}
+
+private struct ActiveEmployeesListView: View {
+    let viewModel: TeamViewModel
+    @Environment(Router.self) private var router
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            if viewModel.approvedStaff.isEmpty {
+                VStack(spacing: 12) {
+                    Image(systemName: "person.3.fill")
+                        .font(.system(size: 40))
+                        .foregroundStyle(AppColors.tertiary)
+                    Text("No active employees yet")
+                        .font(AppFonts.sansSerif(size: 14))
+                        .foregroundStyle(AppColors.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.top, 60)
+            } else if viewModel.filteredStaff.isEmpty {
+                VStack(spacing: 12) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 40))
+                        .foregroundStyle(AppColors.tertiary)
+                    Text("No results matching \"\(viewModel.searchText)\"")
+                        .font(AppFonts.sansSerif(size: 14))
+                        .foregroundStyle(AppColors.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.top, 60)
+            } else {
+                VStack(spacing: 12) {
+                    ForEach(viewModel.filteredStaff) { employee in
+                        Button(action: {
+                            router.push(BMRoute.staffDetail(employee))
+                        }) {
+                            HStack(spacing: 16) {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(AppColors.gold08)
+                                        .frame(width: 44, height: 44)
+                                    Text(String(employee.name.prefix(1)))
+                                        .font(AppFonts.serif(size: 18, weight: .semibold))
+                                        .foregroundStyle(AppColors.gold)
+                                }
+                                
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(employee.name)
+                                        .font(AppFonts.serif(size: 18, weight: .medium))
+                                        .foregroundStyle(AppColors.text)
+                                    Text("\(employee.role.displayName) · \(employee.employeeId) · \(employee.phone)")
+                                        .font(AppFonts.sansSerif(size: 12))
+                                        .foregroundStyle(AppColors.secondary)
+                                }
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(AppColors.tertiary)
+                            }
+                            .padding(18)
+                            .background(AppColors.surface)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 24)
+            }
+        }
     }
 }

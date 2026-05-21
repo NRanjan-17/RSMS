@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct RootView: View {
     @Environment(AppCoordinator.self) private var coordinator
