@@ -28,6 +28,28 @@ final class AuthService {
         try await client.auth.signOut()
     }
     
+    func adminCreateUser(email: String, password: String, role: UserRole) async throws -> UUID {
+        let payload: [String: AnyJSON] = [
+            "email": .string(email),
+            "password": .string(password),
+            "role": .string(role.rawValue)
+        ]
+        
+        struct CreateUserResponse: Decodable {
+            struct UserData: Decodable {
+                let id: UUID
+            }
+            let user: UserData
+        }
+        
+        let response: CreateUserResponse = try await client.functions.invoke(
+            "create-invited-user",
+            options: FunctionInvokeOptions(body: payload)
+        )
+        
+        return response.user.id
+    }
+    
     func resetPassword(email: String) async throws {
         try await client.auth.resetPasswordForEmail(email)
     }

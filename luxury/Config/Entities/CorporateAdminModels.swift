@@ -1,10 +1,3 @@
-//
-//  CorporateAdminModels.swift
-//  luxury
-//
-//  Created by Aditya Chauhan on 18/05/26.
-//
-
 import Foundation
 
 enum EntityStatus: String, Codable, Hashable {
@@ -40,6 +33,7 @@ struct CorporateBoutique: Identifiable, Hashable, Codable {
     let status: EntityStatus
     let createdAt: Date
     let updatedAt: Date
+    let onBoardingCompleted: Bool
     
     enum CodingKeys: String, CodingKey {
         case id, name, address, city, provider, status
@@ -49,6 +43,7 @@ struct CorporateBoutique: Identifiable, Hashable, Codable {
         case pinCode = "pin_code"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
+        case onBoardingCompleted = "on_boarding_completed"
     }
 }
 

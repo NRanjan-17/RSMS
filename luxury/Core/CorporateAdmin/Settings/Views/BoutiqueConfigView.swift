@@ -90,11 +90,7 @@ struct BoutiqueConfigDetailView: View {
             
             VStack(spacing: 0) {
                 HStack(spacing: 16) {
-                    Button(action: { router.pop() }) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(AppColors.gold)
-                    }
+
                     Text("Configuration")
                         .font(AppFonts.serif(size: 24, weight: .semibold))
                         .foregroundStyle(.white)
@@ -163,7 +159,7 @@ struct BoutiqueConfigDetailView: View {
                 }
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .toolbarBackground(.hidden, for: .navigationBar)
     }
 }
 

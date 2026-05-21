@@ -1,10 +1,3 @@
-//
-//  RegistrationViewModel.swift
-//  luxury
-//
-//  Created by Aditya Chauhan on 19/05/26.
-//
-
 import SwiftUI
 import Observation
 import PhotosUI
@@ -46,6 +39,7 @@ final class RegistrationViewModel {
         let manager_phone: String
         let provider: String
         let updated_at: Date
+        let on_boarding_completed: Bool
     }
     
     private struct StaffUpdate: Encodable {
@@ -60,26 +54,7 @@ final class RegistrationViewModel {
         let avatar_url: String
         let provider: String
         let updated_at: Date
-    }
-    
-    private struct StaffInsert: Encodable {
-        let id: UUID
-        let auth_user_id: UUID
-        let boutique_id: UUID
-        let employee_id: String
-        let name: String
-        let email: String
-        let phone: String
-        let address: String
-        let location: String
-        let city: String
-        let pin_code: String
-        let resume_url: String
-        let avatar_url: String
-        let provider: String
-        let status: EntityStatus
-        let created_at: Date
-        let updated_at: Date
+        let on_boarding_completed: Bool
     }
     
     private struct SavedApplicationID: Decodable {
@@ -89,6 +64,8 @@ final class RegistrationViewModel {
     func loadUserData() {
         Task {
             let session = await authService.getCurrentSession()
+            guard let userId = session?.user.id else { return }
+            
             await MainActor.run {
                 self.email = session?.user.email ?? ""
                 self.password = "••••••••"
@@ -97,6 +74,19 @@ final class RegistrationViewModel {
                 } else {
                     self.name = session?.user.userMetadata["full_name"]?.stringValue ?? ""
                 }
+            }
+            
+            do {
+                let staffMembers: [StaffModel] = try await client.from("staff").select().eq("auth_user_id", value: userId).execute().value
+                if let staff = staffMembers.first, let bId = staff.boutiqueId {
+                    let boutique: CorporateBoutique = try await client.from("boutiques").select().eq("id", value: bId).single().execute().value
+                    await MainActor.run {
+                        self.selectedBoutiqueId = boutique.id
+                        self.city = boutique.city
+                    }
+                }
+            } catch {
+                // Not a staff member or no boutique assigned
             }
         }
     }
@@ -154,10 +144,7 @@ final class RegistrationViewModel {
     }
     
     func submitApplication(role: UserRole, completion: @escaping () -> Void) {
-        print("Registration submit tapped for role: \(role.rawValue)")
-        
         guard validateApplication(role: role) else {
-            print("Registration validation failed: \(errorMessage ?? "Unknown validation error")")
             return
         }
         
@@ -178,32 +165,26 @@ final class RegistrationViewModel {
                 
                 var avatarUrl = ""
                 if let image = avatarImage {
-                    print("Registration uploading avatar image")
                     avatarUrl = try await storageService.uploadAvatar(image: image, userId: userId)
-                    print("Registration uploaded avatar image")
                 }
                 
                 var resumeUrl = ""
                 if let image = resumeImage {
-                    print("Registration uploading resume image")
                     resumeUrl = try await storageService.uploadResume(image: image, userId: userId)
-                    print("Registration uploaded resume image")
                 }
                 
                 switch role {
                 case .boutiqueManager:
-                    let updated = try await submitBoutiqueApplication(
+                    _ = try await submitBoutiqueApplication(
                         sessionEmail: sessionEmail,
                         provider: provider
                     )
-                    print("Registration saved boutique application: \(updated.id)")
                     
-                case .salesAssociate:
+                case .salesAssociate, .inventoryController:
                     guard let selectedBoutiqueId else {
                         throw validationError("Please select an approved boutique.")
                     }
-                    let saved = try await submitStaffApplication(
-                        table: "sales_associates",
+                    _ = try await submitStaffApplication(
                         userId: userId,
                         email: sessionEmail,
                         boutiqueId: selectedBoutiqueId,
@@ -211,22 +192,6 @@ final class RegistrationViewModel {
                         resumeUrl: resumeUrl,
                         provider: provider
                     )
-                    print("Registration saved sales associate application: \(saved.id)")
-                    
-                case .inventoryController:
-                    guard let selectedBoutiqueId else {
-                        throw validationError("Please select an approved boutique.")
-                    }
-                    let saved = try await submitStaffApplication(
-                        table: "inventory_controllers",
-                        userId: userId,
-                        email: sessionEmail,
-                        boutiqueId: selectedBoutiqueId,
-                        avatarUrl: avatarUrl,
-                        resumeUrl: resumeUrl,
-                        provider: provider
-                    )
-                    print("Registration saved inventory controller application: \(saved.id)")
                     
                 case .corporateAdmin:
                     throw validationError("Corporate admin registration is not available.")
@@ -235,13 +200,10 @@ final class RegistrationViewModel {
                 await MainActor.run {
                     UserDefaults.standard.removeObject(forKey: "temp_reg_name")
                     isLoading = false
-                    print("Registration submit completed for role: \(role.rawValue)")
                     completion()
                 }
             } catch {
                 let message = "Application submission failed: \(error.localizedDescription)"
-                print("Registration submit error: \(message)")
-                print("Registration submit raw error: \(error)")
                 await MainActor.run {
                     isLoading = false
                     errorMessage = message
@@ -251,7 +213,6 @@ final class RegistrationViewModel {
     }
     
     private func submitStaffApplication(
-        table: String,
         userId: UUID,
         email: String,
         boutiqueId: UUID,
@@ -270,51 +231,45 @@ final class RegistrationViewModel {
             resume_url: resumeUrl,
             avatar_url: avatarUrl,
             provider: provider,
-            updated_at: Date()
+            updated_at: Date(),
+            on_boarding_completed: true
         )
         
-        if let existing = try await findStaffApplicationId(table: table, userId: userId) {
-            return try await client.from(table)
+        var existingId: UUID?
+        if let existing = try await findStaffApplicationId(userId: userId) {
+            existingId = existing.id
+        } else if let existing = try await findStaffApplicationIdByEmail(email: email) {
+            existingId = existing.id
+        }
+        
+        if let id = existingId {
+            return try await client.from("staff")
                 .update(update)
-                .eq("id", value: existing.id)
+                .eq("id", value: id)
                 .select("id")
                 .single()
                 .execute()
                 .value
         }
         
-        let insert = StaffInsert(
-            id: UUID(),
-            auth_user_id: userId,
-            boutique_id: boutiqueId,
-            employee_id: "TEMP-\(userId.uuidString.prefix(6))",
-            name: name.trimmed,
-            email: email,
-            phone: phone.trimmed,
-            address: address.trimmed,
-            location: city.trimmed,
-            city: city.trimmed,
-            pin_code: pinCode.trimmed,
-            resume_url: resumeUrl,
-            avatar_url: avatarUrl,
-            provider: provider,
-            status: .pending,
-            created_at: Date(),
-            updated_at: Date()
-        )
-        
-        return try await client.from(table)
-            .insert(insert)
-            .select("id")
-            .single()
-            .execute()
-            .value
+        throw validationError("No invited staff record found.")
     }
     
-    private func findStaffApplicationId(table: String, userId: UUID) async throws -> SavedApplicationID? {
-        let matches: [SavedApplicationID] = try await client.from(table)
+    private func findStaffApplicationId(userId: UUID) async throws -> SavedApplicationID? {
+        let matches: [SavedApplicationID] = try await client.from("staff")
             .select("id")
             .eq("auth_user_id", value: userId)
+            .limit(1)
+            .execute()
+            .value
+        
+        return matches.first
+    }
+    
+    private func findStaffApplicationIdByEmail(email: String) async throws -> SavedApplicationID? {
+        let matches: [SavedApplicationID] = try await client.from("staff")
+            .select("id")
+            .eq("email", value: email)
             .limit(1)
             .execute()
             .value
@@ -331,7 +286,8 @@ final class RegistrationViewModel {
             pin_code: pinCode.trimmed,
             manager_phone: phone.trimmed,
             provider: provider,
-            updated_at: Date()
+            updated_at: Date(),
+            on_boarding_completed: true
         )
         
         var existing = try await findBoutiqueApplication(email: sessionEmail)
@@ -362,7 +318,8 @@ final class RegistrationViewModel {
             provider: provider,
             status: .pending,
             createdAt: Date(),
-            updatedAt: Date()
+            updatedAt: Date(),
+            onBoardingCompleted: true
         )
         
         let created: CorporateBoutique = try await client.from("boutiques")

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct FaceIDIcon: View {
     var color: Color = .white

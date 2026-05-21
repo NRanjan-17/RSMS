@@ -1,10 +1,3 @@
-//
-//  RoutingService.swift
-//  luxury
-//
-//  Created by Aditya Chauhan on 19/05/26.
-//
-
 import SwiftUI
 import Observation
 import Supabase
@@ -20,7 +13,6 @@ final class RoutingService {
     }
     
     var currentDestination: Destination = .splash
-    var intendedRole: UserRole?
     
     private let authService = AuthService()
     private let profileService = ProfileService()
@@ -55,8 +47,7 @@ final class RoutingService {
         let channel = client.realtimeV2.channel("profile_changes")
         
         let boutiqueChanges = channel.postgresChange(AnyAction.self, schema: "public", table: "boutiques", filter: .eq("manager_email", value: session?.user.email ?? ""))
-        let associateChanges = channel.postgresChange(AnyAction.self, schema: "public", table: "sales_associates", filter: .eq("auth_user_id", value: userId.uuidString))
-        let controllerChanges = channel.postgresChange(AnyAction.self, schema: "public", table: "inventory_controllers", filter: .eq("auth_user_id", value: userId.uuidString))
+        let staffChanges = channel.postgresChange(AnyAction.self, schema: "public", table: "staff", filter: .eq("auth_user_id", value: userId.uuidString))
         
         listeningTask = Task {
             await withTaskGroup(of: Void.self) { group in
@@ -67,13 +58,7 @@ final class RoutingService {
                     }
                 }
                 group.addTask {
-                    for await _ in associateChanges {
-                        let session = await self.authService.getCurrentSession()
-                        await self.updateRoute(for: session)
-                    }
-                }
-                group.addTask {
-                    for await _ in controllerChanges {
+                    for await _ in staffChanges {
                         let session = await self.authService.getCurrentSession()
                         await self.updateRoute(for: session)
                     }
@@ -105,21 +90,15 @@ final class RoutingService {
         
         let roleStr = session.user.userMetadata["role"]?.stringValue
         let metadataRole = roleStr.flatMap(UserRole.init(rawValue:))
-        let requestedRole = metadataRole ?? intendedRole
         
-        if let currentIntended = intendedRole, let metadataRole, currentIntended != metadataRole {
+        guard let requestedRole = metadataRole else {
             try? await authService.signOut()
             return
         }
         
         do {
             if let (role, profile) = try await profileService.fetchCurrentProfile(preferredRole: requestedRole) {
-                if let currentIntended = intendedRole, currentIntended != role {
-                    try? await authService.signOut()
-                    return
-                }
-                
-                if let metadataRole, metadataRole != role {
+                if requestedRole != role {
                     try? await authService.signOut()
                     return
                 }
@@ -127,7 +106,7 @@ final class RoutingService {
                 let status = getStatus(from: profile)
                 
                 await MainActor.run {
-                    if shouldCompleteRegistration(profile: profile, status: status) {
+                    if shouldCompleteRegistration(profile: profile) {
                         currentDestination = .registration(role)
                     } else if status == EntityStatus.approved {
                         currentDestination = .dashboard(role)
@@ -136,7 +115,7 @@ final class RoutingService {
                     }
                 }
                 
-                if status != .approved, !shouldCompleteRegistration(profile: profile, status: status) {
+                if status != .approved, !shouldCompleteRegistration(profile: profile) {
                     let contactEmail = await managerContactEmail(for: profile)
                     await MainActor.run {
                         currentDestination = .status(role, status, contactEmail)
@@ -144,8 +123,8 @@ final class RoutingService {
                 }
             } else {
                 await MainActor.run {
-                    if let finalRole = requestedRole, finalRole != .corporateAdmin {
-                        currentDestination = .registration(finalRole)
+                    if requestedRole != .corporateAdmin {
+                        currentDestination = .registration(requestedRole)
                     } else {
                         currentDestination = .auth
                     }
@@ -163,34 +142,23 @@ final class RoutingService {
             return .approved
         } else if let manager = profile as? CorporateBoutique {
             return manager.status
-        } else if let associate = profile as? SalesAssociate {
-            return associate.status
-        } else if let controller = profile as? InventoryController {
-            return controller.status
+        } else if let staff = profile as? StaffModel {
+            return staff.status
         }
         return .pending
     }
     
-    private func shouldCompleteRegistration(profile: Any, status: EntityStatus) -> Bool {
-        guard status == .pending else { return false }
-        
+    private func shouldCompleteRegistration(profile: Any) -> Bool {
         if let manager = profile as? CorporateBoutique {
-            return manager.isRegistrationIncomplete
-        } else if let associate = profile as? SalesAssociate {
-            return associate.isRegistrationIncomplete
-        } else if let controller = profile as? InventoryController {
-            return controller.isRegistrationIncomplete
+            return !manager.onBoardingCompleted
+        } else if let staff = profile as? StaffModel {
+            return !staff.onBoardingCompleted
         }
-        
         return false
     }
     
     private func managerContactEmail(for profile: Any) async -> String? {
-        if let associate = profile as? SalesAssociate, let boutiqueId = associate.boutiqueId {
-            return try? await profileService.fetchBoutique(id: boutiqueId)?.managerEmail
-        }
-        
-        if let controller = profile as? InventoryController, let boutiqueId = controller.boutiqueId {
+        if let staff = profile as? StaffModel, let boutiqueId = staff.boutiqueId {
             return try? await profileService.fetchBoutique(id: boutiqueId)?.managerEmail
         }
         

@@ -1,10 +1,3 @@
-//
-//  AuthViewModel.swift
-//  luxury
-//
-//  Created by Aditya Chauhan on 18/05/26.
-//
-
 import SwiftUI
 import Observation
 import Supabase
@@ -22,7 +15,7 @@ final class AuthViewModel {
     private let authService = AuthService()
     private let profileService = ProfileService()
     
-    func authenticate(selectedRole: UserRole, onSuccess: @escaping () -> Void) {
+    func authenticate(onSuccess: @escaping () -> Void) {
         let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedPassword = password.trimmingCharacters(in: .whitespacesAndNewlines)
         
@@ -32,10 +25,8 @@ final class AuthViewModel {
         }
         
         if isSignUp {
-            guard !name.isEmpty else {
-                errorMessage = "Please enter your name."
-                return
-            }
+            errorMessage = "Sign up is by invitation only."
+            return
         }
         
         isLoading = true
@@ -43,20 +34,7 @@ final class AuthViewModel {
         
         Task {
             do {
-                if isSignUp {
-                    let metadata: [String: AnyJSON] = [
-                        "role": .string(selectedRole.rawValue),
-                        "provider": .string("email"),
-                        "full_name": .string(name)
-                    ]
-                    let user = try await authService.signUp(email: trimmedEmail, password: trimmedPassword, data: metadata)
-                    try await profileService.createSkeletonProfile(userId: user.id, role: selectedRole, name: name, email: trimmedEmail, provider: "email")
-                    UserDefaults.standard.set(name, forKey: "temp_reg_name")
-                } else {
-                    try await authService.signIn(email: trimmedEmail, password: trimmedPassword)
-                    let session = await authService.getCurrentSession()
-                    try await validateRole(session: session, selectedRole: selectedRole)
-                }
+                try await authService.signIn(email: trimmedEmail, password: trimmedPassword)
                 
                 await MainActor.run {
                     isLoading = false
@@ -71,35 +49,14 @@ final class AuthViewModel {
         }
     }
     
-    func loginSocial(provider: String, selectedRole: UserRole, onSuccess: @escaping () -> Void) {
+    func loginSocial(provider: String, onSuccess: @escaping () -> Void) {
         isLoading = true
         errorMessage = nil
         
         Task {
             do {
                 try await Task.sleep(nanoseconds: 1_000_000_000)
-                
-                let session = await authService.getCurrentSession()
-                
-                if let roleStr = session?.user.userMetadata["role"]?.stringValue {
-                    if roleStr != selectedRole.rawValue {
-                        try await authService.signOut()
-                        throw NSError(domain: "Auth", code: 0, userInfo: [NSLocalizedDescriptionKey: "Account registered as \(roleStr)."])
-                    }
-                } else {
-                    let metadata: [String: AnyJSON] = [
-                        "role": .string(selectedRole.rawValue),
-                        "provider": .string(provider.lowercased())
-                    ]
-                    try await authService.updateUserMetadata(data: metadata)
-                    
-                    if let user = session?.user {
-                        let fullName = user.userMetadata["full_name"]?.stringValue ?? ""
-                        let userEmail = user.email ?? ""
-                        try await profileService.createSkeletonProfile(userId: user.id, role: selectedRole, name: fullName, email: userEmail, provider: provider.lowercased())
-                    }
-                }
-                
+                // Social login mock handling
                 await MainActor.run {
                     isLoading = false
                     onSuccess()
@@ -110,29 +67,6 @@ final class AuthViewModel {
                     errorMessage = error.localizedDescription
                 }
             }
-        }
-    }
-    
-    private func validateRole(session: Session?, selectedRole: UserRole) async throws {
-        if let roleStr = session?.user.userMetadata["role"]?.stringValue {
-            guard roleStr == selectedRole.rawValue else {
-                try await authService.signOut()
-                throw NSError(domain: "Auth", code: 0, userInfo: [NSLocalizedDescriptionKey: "Account registered as \(roleStr)."])
-            }
-        }
-        
-        if selectedRole == .corporateAdmin {
-            guard let (role, _) = try await profileService.fetchCurrentProfile(preferredRole: .corporateAdmin),
-                  role == .corporateAdmin else {
-                try await authService.signOut()
-                throw NSError(domain: "Auth", code: 0, userInfo: [NSLocalizedDescriptionKey: "Corporate admin account not found."])
-            }
-            return
-        }
-        
-        if let (role, _) = try await profileService.fetchCurrentProfile(preferredRole: selectedRole), role != selectedRole {
-            try await authService.signOut()
-            throw NSError(domain: "Auth", code: 0, userInfo: [NSLocalizedDescriptionKey: "Account registered as \(role.rawValue)."])
         }
     }
     

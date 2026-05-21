@@ -97,7 +97,7 @@ struct SalesAssociateCanvas: View {
         case .editClient(let client):
             EditClientView(client: client)
         case .productDetail(let product):
-            ProductDetailView(product: product)
+            SalesProductDetailView(product: product)
         case .barcodeScanner:
             BarcodeScannerView()
         case .payment:

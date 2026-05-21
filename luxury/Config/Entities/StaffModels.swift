@@ -1,65 +1,23 @@
-//
-//  StaffModels.swift
-//  luxury
-//
-//  Created by Aditya Chauhan on 15/05/26.
-//
-
 import Foundation
 
-struct SalesAssociate: Identifiable, Hashable, Codable, Equatable {
-    let id: UUID
-    let authUserId: UUID
-    let boutiqueId: UUID?
-    let employeeId: String
-    let name: String
-    let email: String
-    let phone: String
-    let address: String
-    let location: String
-    let city: String
-    let pinCode: String
-    let resumeUrl: String
-    let provider: String
-    let avatarUrl: String
-    let status: EntityStatus
-    let createdAt: Date
-    let updatedAt: Date
-    let lastLoginAt: Date?
+enum StaffRole: String, Codable, Hashable {
+    case salesAssociate = "sales_associate"
+    case inventoryController = "inventory_controller"
     
-    enum CodingKeys: String, CodingKey {
-        case id, name, email, phone, address, location, city, status, provider
-        case authUserId = "auth_user_id"
-        case boutiqueId = "boutique_id"
-        case employeeId = "employee_id"
-        case pinCode = "pin_code"
-        case resumeUrl = "resume_url"
-        case avatarUrl = "avatar_url"
-        case createdAt = "created_at"
-        case updatedAt = "updated_at"
-        case lastLoginAt = "last_login_at"
+    var displayName: String {
+        switch self {
+        case .salesAssociate: return "Sales Associate"
+        case .inventoryController: return "Inventory Controller"
+        }
     }
 }
 
-extension SalesAssociate {
-    var isRegistrationIncomplete: Bool {
-        name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-        email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-        phone.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-        address.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-        city.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-        pinCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-        resumeUrl.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-        avatarUrl.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-        boutiqueId == nil
-    }
-}
-
-struct InventoryController: Identifiable, Hashable, Codable, Equatable {
+struct StaffModel: Identifiable, Hashable, Codable, Equatable {
     let id: UUID
-    let authUserId: UUID
+    let authUserId: UUID?
     let boutiqueId: UUID?
     let employeeId: String
+    let role: StaffRole
     let name: String
     let email: String
     let phone: String
@@ -75,9 +33,10 @@ struct InventoryController: Identifiable, Hashable, Codable, Equatable {
     let createdAt: Date
     let updatedAt: Date
     let lastLoginAt: Date?
+    let onBoardingCompleted: Bool
     
     enum CodingKeys: String, CodingKey {
-        case id, name, email, phone, address, location, city, status, provider
+        case id, name, email, phone, address, location, city, status, provider, role
         case authUserId = "auth_user_id"
         case boutiqueId = "boutique_id"
         case employeeId = "employee_id"
@@ -88,10 +47,9 @@ struct InventoryController: Identifiable, Hashable, Codable, Equatable {
         case createdAt = "created_at"
         case updatedAt = "updated_at"
         case lastLoginAt = "last_login_at"
+        case onBoardingCompleted = "on_boarding_completed"
     }
-}
-
-extension InventoryController {
+    
     var isRegistrationIncomplete: Bool {
         name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
         email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
@@ -103,4 +61,7 @@ extension InventoryController {
         avatarUrl.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
         boutiqueId == nil
     }
+    
+    var isSalesAssociate: Bool { role == .salesAssociate }
+    var isInventoryController: Bool { role == .inventoryController }
 }

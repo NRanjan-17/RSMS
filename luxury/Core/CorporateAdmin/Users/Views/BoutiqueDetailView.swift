@@ -18,11 +18,7 @@ struct BoutiqueDetailView: View {
             
             VStack(spacing: 0) {
                 HStack(spacing: 16) {
-                    Button(action: { router.pop() }) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(AppColors.gold)
-                    }
+
                     Text("Boutique Details")
                         .font(AppFonts.serif(size: 24, weight: .semibold))
                         .foregroundStyle(.white)
@@ -141,7 +137,8 @@ struct BoutiqueDetailView: View {
                 }
             }
         }
-        .navigationBarBackButtonHidden(true)
+        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbar(.hidden, for: .tabBar)
     }
     
     private func statusColor(_ status: EntityStatus) -> Color {

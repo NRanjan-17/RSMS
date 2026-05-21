@@ -17,11 +17,6 @@ struct PendingBoutiquesView: View {
             
             VStack(spacing: 0) {
                 HStack(spacing: 16) {
-                    Button(action: { router.pop() }) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(AppColors.gold)
-                    }
                     Text("Pending Requests")
                         .font(AppFonts.serif(size: 24, weight: .semibold))
                         .foregroundStyle(.white)
@@ -82,7 +77,8 @@ struct PendingBoutiquesView: View {
                 }
             }
         }
-        .navigationBarBackButtonHidden(true)
+        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbar(.hidden, for: .tabBar)
         .onAppear {
             viewModel.fetchData()
         }
