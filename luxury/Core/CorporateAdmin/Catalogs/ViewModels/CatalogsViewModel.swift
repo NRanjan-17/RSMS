@@ -2,7 +2,7 @@
 //  CatalogsViewModel.swift
 //  luxury
 //
-//  Created by Gemini CLI on 21/05/26.
+//  Created by Aditya Chauhan on 21/05/26.
 //
 
 import Foundation
@@ -11,7 +11,7 @@ import Observation
 @Observable
 final class CatalogsViewModel {
     var searchText: String = ""
-    var products: [ProductEntity] = []
+    var products: [ProductInventorySummary] = []
     
     var isLoading = false
     var isSaving = false
@@ -22,7 +22,7 @@ final class CatalogsViewModel {
     var newDescription: String = ""
     var newBrand: String = ""
     var newCategory: ProductCategory = .watches
-    var newAvailableStock: String = ""
+    var newCollection: String = ""
     var newAmount: String = ""
     var newBarCode: String = ""
     var newStatus: ProductStatus = .active
@@ -31,15 +31,15 @@ final class CatalogsViewModel {
     
     private let catalogService = CatalogService()
     
-    var filteredProducts: [ProductEntity] {
+    var filteredProducts: [ProductInventorySummary] {
         if searchText.isEmpty {
             return products
         }
-        return products.filter { product in
-            product.name.localizedCaseInsensitiveContains(searchText) ||
-            product.brand.localizedCaseInsensitiveContains(searchText) ||
-            product.productId.localizedCaseInsensitiveContains(searchText) ||
-            product.barCode.localizedCaseInsensitiveContains(searchText)
+        return products.filter { summary in
+            summary.product.name.localizedCaseInsensitiveContains(searchText) ||
+            summary.product.brand.localizedCaseInsensitiveContains(searchText) ||
+            summary.product.productId.localizedCaseInsensitiveContains(searchText) ||
+            summary.product.barCode.localizedCaseInsensitiveContains(searchText)
         }
     }
     
@@ -49,9 +49,37 @@ final class CatalogsViewModel {
         
         Task {
             do {
-                let fetched = try await catalogService.fetchProducts()
+                let productsResponse = try await catalogService.fetchProducts()
+                let inventoryResponse = try await catalogService.fetchInventory()
+                let boutiquesResponse = try await catalogService.fetchBoutiques()
+                
+                var newSummaries: [ProductInventorySummary] = []
+                
+                for product in productsResponse {
+                    let productInventory = inventoryResponse.filter { $0.skuId == product.id }
+                    var locations: [LocationInventoryDetail] = []
+                    var totalQty = 0
+                    
+                    for item in productInventory {
+                        totalQty += item.quantity
+                        let storeName = boutiquesResponse.first(where: { $0.id == item.storeId })?.name ?? "Unknown Location"
+                        locations.append(LocationInventoryDetail(
+                            storeId: item.storeId,
+                            storeName: storeName,
+                            quantity: item.quantity,
+                            isAvailable: item.productAvailable
+                        ))
+                    }
+                    
+                    newSummaries.append(ProductInventorySummary(
+                        product: product,
+                        totalQuantity: totalQty,
+                        locations: locations.sorted(by: { $0.storeName < $1.storeName })
+                    ))
+                }
+                
                 await MainActor.run {
-                    self.products = fetched
+                    self.products = newSummaries.sorted(by: { $0.product.name < $1.product.name })
                     self.isLoading = false
                 }
             } catch {
@@ -64,13 +92,18 @@ final class CatalogsViewModel {
     }
     
     func addProduct(completion: @escaping () -> Void) {
-        guard let stock = Int(newAvailableStock), let amount = Double(newAmount) else {
-            self.errorMessage = "Invalid stock or amount."
+        guard let amount = Double(newAmount) else {
+            self.errorMessage = "Invalid amount."
+            return
+        }
+        
+        guard !newBrand.isEmpty else {
+            self.errorMessage = "Brand is required."
             return
         }
         
         guard !newBarCode.isEmpty else {
-            self.errorMessage = "Barcode is required. Please scan a QR code or Barcode."
+            self.errorMessage = "Barcode is required."
             return
         }
         
@@ -83,19 +116,23 @@ final class CatalogsViewModel {
             name: newName,
             description: newDescription,
             brand: newBrand,
-            category: newCategory,
-            availableStock: stock,
+            category: newCategory.rawValue,
+            availableStock: 0,
             amount: amount,
             barCode: newBarCode,
-            status: newStatus,
-            reserved: []
+            reserved: [],
+            status: newStatus.rawValue,
+            collection: newCollection.isEmpty ? nil : newCollection
         )
         
         Task {
             do {
                 try await catalogService.addProduct(newProduct)
                 await MainActor.run {
-                    self.products.append(newProduct)
+                    // Create an empty summary for the new product
+                    let newSummary = ProductInventorySummary(product: newProduct, totalQuantity: 0, locations: [])
+                    self.products.append(newSummary)
+                    self.products.sort(by: { $0.product.name < $1.product.name })
                     self.isSaving = false
                     self.resetForm()
                     completion()
@@ -113,16 +150,24 @@ final class CatalogsViewModel {
         newName = product.name
         newDescription = product.description
         newBrand = product.brand
-        newCategory = product.category
-        newAvailableStock = "\(product.availableStock)"
+        if let cat = ProductCategory(rawValue: product.category) {
+            newCategory = cat
+        } else {
+            newCategory = .other
+        }
+        newCollection = product.collection ?? ""
         newAmount = "\(product.amount)"
         newBarCode = product.barCode
-        newStatus = product.status
+        if let stat = ProductStatus(rawValue: product.status) {
+            newStatus = stat
+        } else {
+            newStatus = .active
+        }
     }
     
     func updateProduct(_ existingProduct: ProductEntity, completion: @escaping () -> Void) {
-        guard let stock = Int(newAvailableStock), let amount = Double(newAmount) else {
-            self.errorMessage = "Invalid stock or amount."
+        guard let amount = Double(newAmount) else {
+            self.errorMessage = "Invalid amount."
             return
         }
         
@@ -135,20 +180,22 @@ final class CatalogsViewModel {
             name: newName,
             description: newDescription,
             brand: newBrand,
-            category: newCategory,
-            availableStock: stock,
+            category: newCategory.rawValue,
+            availableStock: existingProduct.availableStock,
             amount: amount,
             barCode: newBarCode,
-            status: newStatus,
-            reserved: existingProduct.reserved
+            reserved: existingProduct.reserved,
+            status: newStatus.rawValue,
+            collection: newCollection.isEmpty ? nil : newCollection
         )
         
         Task {
             do {
                 try await catalogService.updateProduct(updatedProduct)
                 await MainActor.run {
-                    if let index = self.products.firstIndex(where: { $0.id == updatedProduct.id }) {
-                        self.products[index] = updatedProduct
+                    if let index = self.products.firstIndex(where: { $0.product.id == updatedProduct.id }) {
+                        let oldSummary = self.products[index]
+                        self.products[index] = ProductInventorySummary(product: updatedProduct, totalQuantity: oldSummary.totalQuantity, locations: oldSummary.locations)
                     }
                     self.isSaving = false
                     self.resetForm()
@@ -171,7 +218,7 @@ final class CatalogsViewModel {
             do {
                 try await catalogService.deleteProduct(id: product.id)
                 await MainActor.run {
-                    self.products.removeAll { $0.id == product.id }
+                    self.products.removeAll { $0.product.id == product.id }
                     self.isSaving = false
                     completion()
                 }
@@ -189,7 +236,7 @@ final class CatalogsViewModel {
         newDescription = ""
         newBrand = ""
         newCategory = .watches
-        newAvailableStock = ""
+        newCollection = ""
         newAmount = ""
         newBarCode = ""
         newStatus = .active

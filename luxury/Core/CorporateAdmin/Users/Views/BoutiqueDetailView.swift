@@ -131,6 +131,77 @@ struct BoutiqueDetailView: View {
                             }
                             .padding(.horizontal, 24)
                             .padding(.top, 16)
+                        } else if boutique.status == .approved || boutique.status == .paused {
+                            VStack(spacing: 16) {
+                                if boutique.status == .approved {
+                                    Button(action: {
+                                        viewModel.disableBoutique(boutique) {
+                                            router.pop()
+                                        }
+                                    }) {
+                                        HStack {
+                                            Spacer()
+                                            if viewModel.actionBoutiqueId == boutique.id {
+                                                ProgressView().tint(.white)
+                                            } else {
+                                                Text("Disable Boutique")
+                                                    .font(AppFonts.sansSerif(size: 16, weight: .semibold))
+                                                    .foregroundStyle(.white)
+                                            }
+                                            Spacer()
+                                        }
+                                        .padding(.vertical, 16)
+                                        .background(AppColors.gold.opacity(0.8))
+                                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    }
+                                    .disabled(viewModel.actionBoutiqueId != nil)
+                                } else {
+                                    Button(action: {
+                                        viewModel.enableBoutique(boutique) {
+                                            router.pop()
+                                        }
+                                    }) {
+                                        HStack {
+                                            Spacer()
+                                            if viewModel.actionBoutiqueId == boutique.id {
+                                                ProgressView().tint(.white)
+                                            } else {
+                                                Text("Enable Boutique")
+                                                    .font(AppFonts.sansSerif(size: 16, weight: .semibold))
+                                                    .foregroundStyle(.white)
+                                            }
+                                            Spacer()
+                                        }
+                                        .padding(.vertical, 16)
+                                        .background(Color.green)
+                                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    }
+                                    .disabled(viewModel.actionBoutiqueId != nil)
+                                }
+                                
+                                Button(action: {
+                                    viewModel.removeBoutique(boutique) {
+                                        router.pop()
+                                    }
+                                }) {
+                                    HStack {
+                                        Spacer()
+                                        Text("Remove Boutique")
+                                            .font(AppFonts.sansSerif(size: 16, weight: .semibold))
+                                            .foregroundStyle(AppColors.error)
+                                        Spacer()
+                                    }
+                                    .padding(.vertical, 16)
+                                    .background(Color.clear)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(AppColors.error, lineWidth: 1)
+                                    )
+                                }
+                                .disabled(viewModel.actionBoutiqueId != nil)
+                            }
+                            .padding(.horizontal, 24)
+                            .padding(.top, 16)
                         }
                     }
                     .padding(.vertical, 24)

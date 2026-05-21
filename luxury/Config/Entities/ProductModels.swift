@@ -61,15 +61,16 @@ struct ProductEntity: Identifiable, Codable, Equatable, Hashable {
     let name: String
     let description: String
     let brand: String
-    let category: ProductCategory
-    let availableStock: Int
+    let category: String
+    var availableStock: Int
     let amount: Double
     let barCode: String
-    var status: ProductStatus
-    var reserved: [ReservedItem]
+    var reserved: [ReservedItem]?
+    var status: String
+    var collection: String?
     
     enum CodingKeys: String, CodingKey {
-        case id, name, description, brand, category, amount, status, reserved
+        case id, name, description, brand, category, amount, reserved, status, collection
         case productId = "product_id"
         case availableStock = "available_stock"
         case barCode = "bar_code"

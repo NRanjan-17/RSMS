@@ -104,6 +104,73 @@ final class UserManagementViewModel {
             }
         }
     }
+    
+    func disableBoutique(_ boutique: CorporateBoutique, completion: @escaping () -> Void = {}) {
+        actionBoutiqueId = boutique.id
+        actionErrorMessage = nil
+        errorMessage = nil
+
+        Task {
+            do {
+                try await approvalService.disableBoutique(id: boutique.id)
+                await MainActor.run {
+                    self.actionBoutiqueId = nil
+                    fetchData()
+                    completion()
+                }
+            } catch {
+                await MainActor.run {
+                    self.actionBoutiqueId = nil
+                    self.actionErrorMessage = "Disable failed: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+    
+    func enableBoutique(_ boutique: CorporateBoutique, completion: @escaping () -> Void = {}) {
+        actionBoutiqueId = boutique.id
+        actionErrorMessage = nil
+        errorMessage = nil
+
+        Task {
+            do {
+                try await approvalService.enableBoutique(id: boutique.id)
+                await MainActor.run {
+                    self.actionBoutiqueId = nil
+                    fetchData()
+                    completion()
+                }
+            } catch {
+                await MainActor.run {
+                    self.actionBoutiqueId = nil
+                    self.actionErrorMessage = "Enable failed: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+    
+    func removeBoutique(_ boutique: CorporateBoutique, completion: @escaping () -> Void = {}) {
+        actionBoutiqueId = boutique.id
+        actionErrorMessage = nil
+        errorMessage = nil
+
+        Task {
+            do {
+                try await approvalService.removeBoutique(id: boutique.id)
+                await MainActor.run {
+                    self.approvedBoutiques.removeAll { $0.id == boutique.id }
+                    self.actionBoutiqueId = nil
+                    fetchData()
+                    completion()
+                }
+            } catch {
+                await MainActor.run {
+                    self.actionBoutiqueId = nil
+                    self.actionErrorMessage = "Removal failed: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
 
     func inviteBoutique(email: String, password: String) async throws {
         let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)

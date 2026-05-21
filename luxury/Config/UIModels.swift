@@ -2,7 +2,7 @@
 //  UIModels.swift
 //  luxury
 //
-//  Created by Gemini CLI on 20/05/26.
+//  Created by Aditya Chauhan on 20/05/26.
 //
 
 import Foundation

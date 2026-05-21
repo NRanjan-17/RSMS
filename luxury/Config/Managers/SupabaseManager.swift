@@ -2,7 +2,7 @@
 //  SupabaseManager.swift
 //  luxury
 //
-//  Created by Gemini CLI on 19/05/26.
+//  Created by Aditya Chauhan on 19/05/26.
 //
 
 import Foundation

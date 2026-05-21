@@ -40,6 +40,7 @@ enum ICRoute: Hashable {
     case stockSearch
     case scanSessionDetail(ScanSession)
     case activeScan
+    case barcodeScan
     case transferDetail(TransferRequest)
     case newTransfer
     case auditDetail(RSMSCycleCount)
@@ -52,13 +53,14 @@ enum CARoute: Hashable {
     case userManagement
     case catalogs
     case productForm(editProduct: ProductEntity?)
-    case productDetail(ProductEntity)
+    case productDetail(ProductInventorySummary)
     case boutiqueConfig
     case boutiqueConfigDetail(CorporateBoutique)
     case systemLogs
     case boutiqueRequestDetail(CorporateBoutique)
     case pendingBoutiques
     case boutiqueDetail(CorporateBoutique)
+    case inventoryDetail(ProductInventorySummary)
 }
 
 enum AppRoutes: Hashable {

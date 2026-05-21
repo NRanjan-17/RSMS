@@ -2,7 +2,7 @@
 //  CatalogsView.swift
 //  luxury
 //
-//  Created by Gemini CLI on 21/05/26.
+//  Created by Aditya Chauhan on 21/05/26.
 //
 
 import SwiftUI
@@ -103,11 +103,11 @@ struct CatalogsView: View {
                 } else {
                     ScrollView(showsIndicators: false) {
                         LazyVStack(spacing: 16) {
-                            ForEach(viewModel.filteredProducts) { product in
+                            ForEach(viewModel.filteredProducts) { summary in
                                 Button(action: {
-                                    router.push(CARoute.productDetail(product))
+                                    router.push(CARoute.productDetail(summary))
                                 }) {
-                                    CatalogItemRow(product: product)
+                                    CatalogItemRow(summary: summary)
                                 }
                                 .buttonStyle(.plain)
                             }
@@ -126,16 +126,16 @@ struct CatalogsView: View {
 }
 
 struct CatalogItemRow: View {
-    let product: ProductEntity
+    let summary: ProductInventorySummary
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(product.name)
+                    Text(summary.product.name)
                         .font(AppFonts.serif(size: 18, weight: .semibold))
                         .foregroundStyle(AppColors.text)
-                    Text(product.brand)
+                    Text(summary.product.brand)
                         .font(AppFonts.sansSerif(size: 12, weight: .semibold))
                         .foregroundStyle(AppColors.gold)
                         .kerning(1.2)
@@ -143,7 +143,7 @@ struct CatalogItemRow: View {
                 
                 Spacer()
                 
-                Text(String(format: "$%.2f", product.amount))
+                Text(String(format: "₹%.2f", summary.product.amount))
                     .font(AppFonts.sansSerif(size: 16, weight: .bold))
                     .foregroundStyle(AppColors.text)
             }
@@ -155,9 +155,20 @@ struct CatalogItemRow: View {
                     Image(systemName: "tag.fill")
                         .font(.system(size: 10))
                         .foregroundStyle(AppColors.secondary)
-                    Text(product.category.rawValue)
+                    Text(summary.product.category)
                         .font(AppFonts.sansSerif(size: 12))
                         .foregroundStyle(AppColors.secondary)
+                    
+                    if let collection = summary.product.collection, !collection.isEmpty {
+                        Text("•")
+                            .font(.system(size: 8))
+                            .foregroundStyle(AppColors.tertiary)
+                        
+                        Text(collection)
+                            .font(AppFonts.sansSerif(size: 12))
+                            .foregroundStyle(AppColors.secondary)
+                            .lineLimit(1)
+                    }
                 }
                 
                 Spacer()
@@ -165,10 +176,10 @@ struct CatalogItemRow: View {
                 HStack(spacing: 6) {
                     Image(systemName: "shippingbox.fill")
                         .font(.system(size: 10))
-                        .foregroundStyle(product.availableStock > 0 ? AppColors.success : AppColors.error)
-                    Text("\(product.availableStock) in stock")
+                        .foregroundStyle(summary.totalQuantity > 0 ? AppColors.success : AppColors.error)
+                    Text("\(summary.totalQuantity) in stock")
                         .font(AppFonts.sansSerif(size: 12, weight: .semibold))
-                        .foregroundStyle(product.availableStock > 0 ? AppColors.success : AppColors.error)
+                        .foregroundStyle(summary.totalQuantity > 0 ? AppColors.success : AppColors.error)
                 }
             }
         }

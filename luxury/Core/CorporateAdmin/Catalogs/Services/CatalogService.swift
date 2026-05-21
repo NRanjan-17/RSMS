@@ -2,7 +2,7 @@
 //  CatalogService.swift
 //  luxury
 //
-//  Created by Gemini CLI on 21/05/26.
+//  Created by Aditya Chauhan on 21/05/26.
 //
 
 import Foundation
@@ -41,5 +41,23 @@ final class CatalogService {
             .delete()
             .eq("id", value: id.uuidString)
             .execute()
+    }
+    
+    func fetchInventory() async throws -> [InventoryItem] {
+        let response: [InventoryItem] = try await client
+            .from("inventory")
+            .select()
+            .execute()
+            .value
+        return response
+    }
+    
+    func fetchBoutiques() async throws -> [CorporateBoutique] {
+        let response: [CorporateBoutique] = try await client
+            .from("boutiques")
+            .select()
+            .execute()
+            .value
+        return response
     }
 }

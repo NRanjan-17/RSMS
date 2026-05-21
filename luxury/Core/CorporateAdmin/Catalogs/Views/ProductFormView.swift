@@ -2,7 +2,7 @@
 //  ProductFormView.swift
 //  luxury
 //
-//  Created by Gemini CLI on 21/05/26.
+//  Created by Aditya Chauhan on 21/05/26.
 //
 
 import SwiftUI
@@ -53,6 +53,7 @@ struct ProductFormView: View {
                         ProductFormTextField(title: "PRODUCT NAME", text: $bindableViewModel.newName)
                         ProductFormTextField(title: "DESCRIPTION", text: $bindableViewModel.newDescription)
                         ProductFormTextField(title: "BRAND", text: $bindableViewModel.newBrand)
+                        ProductFormTextField(title: "COLLECTION (Optional)", text: $bindableViewModel.newCollection)
                         
                         VStack(alignment: .leading, spacing: 8) {
                             Text("CATEGORY")
@@ -85,40 +86,7 @@ struct ProductFormView: View {
                         }
                         
                         HStack(spacing: 16) {
-                            ProductFormTextField(title: "STOCK", text: $bindableViewModel.newAvailableStock, keyboardType: .numberPad)
-                            ProductFormTextField(title: "AMOUNT (₹)", text: $bindableViewModel.newAmount, keyboardType: .decimalPad)
-                        }
-                        
-                        if editProduct != nil {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("STATUS")
-                                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                                    .foregroundStyle(AppColors.secondary)
-                                    .kerning(1.5)
-                                
-                                Menu {
-                                    ForEach([ProductStatus.active, .paused], id: \.self) { status in
-                                        Button(status.rawValue) {
-                                            bindableViewModel.newStatus = status
-                                        }
-                                    }
-                                } label: {
-                                    HStack {
-                                        Text(viewModel.newStatus.rawValue)
-                                            .font(AppFonts.sansSerif(size: 15))
-                                            .foregroundStyle(viewModel.newStatus == .active ? AppColors.success : AppColors.gold)
-                                        Spacer()
-                                        Image(systemName: "chevron.up.chevron.down")
-                                            .font(.system(size: 12))
-                                            .foregroundStyle(AppColors.secondary)
-                                    }
-                                    .padding(.vertical, 16)
-                                    .padding(.horizontal, 18)
-                                    .background(AppColors.surface)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 1))
-                                }
-                            }
+                            ProductFormTextField(title: "UNIT PRICE (₹)", text: $bindableViewModel.newAmount, keyboardType: .decimalPad)
                         }
                     }
                     .padding(.bottom, 32)

@@ -24,7 +24,14 @@ struct StockView: View {
                             Button(action: {
                                 router.push(ICRoute.stockSearch)
                             }) {
-                                MetricCard(title: "Total SKU", value: viewModel.totalItems, subtitle: "Tap to Search", icon: "box.truck")
+                                MetricCard(title: "Total SKU", value: viewModel.totalItems, subtitle: "Tap to Search", icon: "magnifyingglass")
+                            }
+                            .buttonStyle(.plain)
+                            
+                            Button(action: {
+                                router.push(ICRoute.barcodeScan)
+                            }) {
+                                MetricCard(title: "Scan", value: "Scan", subtitle: "Barcode Lookup", icon: "barcode.viewfinder")
                             }
                             .buttonStyle(.plain)
                             
