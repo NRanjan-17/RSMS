@@ -18,7 +18,6 @@ final class AppCoordinator {
     
     func logout() {
         Task {
-            routingService.intendedRole = nil
             try? await AuthService().signOut()
         }
     }

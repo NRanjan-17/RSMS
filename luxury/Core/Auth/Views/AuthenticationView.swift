@@ -1,8 +1,6 @@
 import SwiftUI
 
 struct AuthenticationView: View {
-    let selectedRole: UserRole
-    var onBack: () -> Void
     var onSignInSuccess: () -> Void
     
     @Environment(AppCoordinator.self) private var coordinator
@@ -19,12 +17,7 @@ struct AuthenticationView: View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
                     VStack(alignment: .leading, spacing: 0) {
-                        Button(action: onBack) {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 20, weight: .semibold))
-                                .foregroundStyle(AppColors.gold)
-                                .padding(.vertical, 20)
-                        }
+                        Spacer().frame(height: 40)
                         
                         Text("Verify\nIdentity.")
                             .font(AppFonts.serif(size: 52, weight: .light))
@@ -33,7 +26,7 @@ struct AuthenticationView: View {
                             .lineSpacing(-5)
                             .padding(.bottom, 16)
                         
-                        Text("Signing in as \(roleTitle)")
+                        Text("Enter your credentials to continue.")
                             .font(AppFonts.sansSerif(size: 13, weight: .light))
                             .foregroundStyle(AppColors.secondary)
                             .padding(.bottom, 40)
@@ -77,26 +70,24 @@ struct AuthenticationView: View {
                             title: "Sign In",
                             isLoading: authVM.isLoading,
                             action: {
-                                authVM.authenticate(selectedRole: selectedRole) {
+                                authVM.authenticate {
                                     onSignInSuccess()
                                 }
                             }
                         )
                     }
                     
-                    if selectedRole != .corporateAdmin {
-                        HStack(spacing: 14) {
-                            Rectangle().fill(AppColors.tertiary).frame(height: 0.5)
-                            Text("or continue with")
-                                .font(AppFonts.sansSerif(size: 11))
-                                .foregroundStyle(AppColors.tertiary)
-                            Rectangle().fill(AppColors.tertiary).frame(height: 0.5)
-                        }
-                        .padding(.vertical, 24)
-                        
-                        SocialButton(icon: "apple.logo", title: "Sign in with Apple") {
-                            showComingSoon = true
-                        }
+                    HStack(spacing: 14) {
+                        Rectangle().fill(AppColors.tertiary).frame(height: 0.5)
+                        Text("or continue with")
+                            .font(AppFonts.sansSerif(size: 11))
+                            .foregroundStyle(AppColors.tertiary)
+                        Rectangle().fill(AppColors.tertiary).frame(height: 0.5)
+                    }
+                    .padding(.vertical, 24)
+                    
+                    SocialButton(icon: "apple.logo", title: "Sign in with Apple") {
+                        showComingSoon = true
                     }
                     
                     Spacer().frame(height: 40)
@@ -115,15 +106,7 @@ struct AuthenticationView: View {
             Text("A password reset link has been sent to your email address.")
         }
     }
-    
-    private var roleTitle: String {
-        switch selectedRole {
-        case .salesAssociate: return "Sales Associate"
-        case .boutiqueManager: return "Boutique Manager"
-        case .inventoryController: return "Inventory Controller"
-        case .corporateAdmin: return "Corporate Admin"
-        }
-    }
+
 }
 
 private struct CustomTextField: View {

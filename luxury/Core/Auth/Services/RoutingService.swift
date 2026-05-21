@@ -13,7 +13,6 @@ final class RoutingService {
     }
     
     var currentDestination: Destination = .splash
-    var intendedRole: UserRole?
     
     private let authService = AuthService()
     private let profileService = ProfileService()
@@ -91,21 +90,15 @@ final class RoutingService {
         
         let roleStr = session.user.userMetadata["role"]?.stringValue
         let metadataRole = roleStr.flatMap(UserRole.init(rawValue:))
-        let requestedRole = metadataRole ?? intendedRole
         
-        if let currentIntended = intendedRole, let metadataRole, currentIntended != metadataRole {
+        guard let requestedRole = metadataRole else {
             try? await authService.signOut()
             return
         }
         
         do {
             if let (role, profile) = try await profileService.fetchCurrentProfile(preferredRole: requestedRole) {
-                if let currentIntended = intendedRole, currentIntended != role {
-                    try? await authService.signOut()
-                    return
-                }
-                
-                if let metadataRole, metadataRole != role {
+                if requestedRole != role {
                     try? await authService.signOut()
                     return
                 }
@@ -130,8 +123,8 @@ final class RoutingService {
                 }
             } else {
                 await MainActor.run {
-                    if let finalRole = requestedRole, finalRole != .corporateAdmin {
-                        currentDestination = .registration(finalRole)
+                    if requestedRole != .corporateAdmin {
+                        currentDestination = .registration(requestedRole)
                     } else {
                         currentDestination = .auth
                     }
