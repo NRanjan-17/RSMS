@@ -86,7 +86,7 @@ final class UserManagementViewModel {
         actionBoutiqueId = boutique.id
         actionErrorMessage = nil
         errorMessage = nil
-        
+
         Task {
             do {
                 try await approvalService.rejectBoutique(id: boutique.id)
@@ -104,14 +104,40 @@ final class UserManagementViewModel {
             }
         }
     }
-    
-    func inviteBoutique(email: String) async throws {
+
+    func inviteBoutique(email: String, password: String) async throws {
+        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedPassword = password.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard !trimmedEmail.isEmpty, !trimmedPassword.isEmpty else {
+            throw NSError(domain: "Auth", code: 0, userInfo: [NSLocalizedDescriptionKey: "Email and password are required."])
+        }
+        
+        let ephemeralClient = SupabaseClient(
+            supabaseURL: SupabaseConfig.url,
+            supabaseKey: SupabaseConfig.anonKey,
+            options: SupabaseClientOptions(
+                auth: SupabaseClientOptions.AuthOptions(
+                    storage: InMemoryAuthStorage(),
+                    autoRefreshToken: false
+                )
+            )
+        )
+        
+        let metadata: [String: AnyJSON] = [
+            "role": .string(UserRole.boutiqueManager.rawValue),
+            "provider": .string("email")
+        ]
+        
+        let response = try await ephemeralClient.auth.signUp(email: trimmedEmail, password: trimmedPassword, data: metadata)
+        let newUserId = response.user.id
+        
         let profileService = ProfileService()
         try await profileService.createSkeletonProfile(
-            userId: UUID(),
+            userId: newUserId,
             role: .boutiqueManager,
             name: "",
-            email: email,
+            email: trimmedEmail,
             provider: "email"
         )
     }

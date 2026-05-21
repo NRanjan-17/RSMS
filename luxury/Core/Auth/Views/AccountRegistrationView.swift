@@ -87,8 +87,7 @@ struct AccountRegistrationView: View {
             RegistrationField(
                 title: "MANAGER NAME",
                 placeholder: "Full Name",
-                text: $viewModel.name,
-                isReadOnly: !viewModel.name.isEmpty
+                text: $viewModel.name
             )
             
             RegistrationField(
@@ -98,12 +97,12 @@ struct AccountRegistrationView: View {
                 isReadOnly: true
             )
             
-            RegistrationField(title: "PHONE NUMBER", placeholder: "+91", text: $viewModel.phone)
+            RegistrationField(title: "PHONE NUMBER", placeholder: "+91", text: $viewModel.phone, keyboardType: .numberPad)
             RegistrationField(title: "ADDRESS", placeholder: "Street, Building", text: $viewModel.address)
             
             HStack(spacing: 16) {
                 RegistrationField(title: "CITY", placeholder: "City", text: $viewModel.city)
-                RegistrationField(title: "PIN CODE", placeholder: "000000", text: $viewModel.pinCode)
+                RegistrationField(title: "PIN CODE", placeholder: "000000", text: $viewModel.pinCode, keyboardType: .numberPad)
             }
         }
     }
@@ -113,8 +112,7 @@ struct AccountRegistrationView: View {
             RegistrationField(
                 title: "FULL NAME",
                 placeholder: "Full Name",
-                text: $viewModel.name,
-                isReadOnly: !viewModel.name.isEmpty
+                text: $viewModel.name
             )
             
             RegistrationField(
@@ -124,37 +122,16 @@ struct AccountRegistrationView: View {
                 isReadOnly: true
             )
             
-            RegistrationField(title: "PHONE NUMBER", placeholder: "+91", text: $viewModel.phone)
+            RegistrationField(title: "PHONE NUMBER", placeholder: "+91", text: $viewModel.phone, keyboardType: .numberPad)
             RegistrationField(title: "RESIDENTIAL ADDRESS", placeholder: "Street, Building, City", text: $viewModel.address)
-            RegistrationField(title: "PIN CODE", placeholder: "000000", text: $viewModel.pinCode)
+            RegistrationField(title: "PIN CODE", placeholder: "000000", text: $viewModel.pinCode, keyboardType: .numberPad)
             
-            VStack(alignment: .leading, spacing: 12) {
-                Text("ASSIGNED BOUTIQUE")
-                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                    .foregroundStyle(AppColors.secondary)
-                    .kerning(1.5)
-                
-                Menu {
-                    ForEach(viewModel.boutiques) { boutique in
-                        Button("\(boutique.city) · \(boutique.name)", action: {
-                            viewModel.selectBoutique(boutique)
-                            selectedBoutiqueName = boutique.city
-                        })
-                    }
-                } label: {
-                    HStack {
-                        Text(selectedBoutiqueName)
-                            .font(AppFonts.sansSerif(size: 16, weight: .light))
-                            .foregroundStyle(selectedBoutiqueName == "Select Boutique" ? AppColors.tertiary : AppColors.text)
-                        Spacer()
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 12))
-                            .foregroundStyle(AppColors.gold)
-                    }
-                    .padding(.vertical, 8)
-                }
-                Rectangle().fill(AppColors.gold15).frame(height: 1)
-            }
+            RegistrationField(
+                title: "ASSIGNED BOUTIQUE",
+                placeholder: "Loading...",
+                text: $viewModel.city,
+                isReadOnly: true
+            )
             
             VStack(spacing: 16) {
                 PhotosPicker(selection: $resumePickerItem, matching: .images) {
@@ -204,6 +181,8 @@ struct AccountRegistrationView: View {
                     viewModel.submitApplication(role: role, completion: onSubmit)
                 }
             )
+            .disabled(!viewModel.acceptedTerms)
+            .opacity(viewModel.acceptedTerms ? 1.0 : 0.5)
         }
     }
 }
@@ -214,6 +193,7 @@ private struct RegistrationField: View {
     @Binding var text: String
     var isSecure = false
     var isReadOnly = false
+    var keyboardType: UIKeyboardType = .default
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -233,6 +213,7 @@ private struct RegistrationField: View {
             .foregroundStyle(isReadOnly ? AppColors.tertiary : AppColors.text)
             .autocorrectionDisabled()
             .textInputAutocapitalization(.none)
+            .keyboardType(keyboardType)
             .disabled(isReadOnly)
             .opacity(isReadOnly ? 0.6 : 1.0)
             

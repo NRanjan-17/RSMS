@@ -13,58 +13,36 @@ struct TeamView: View {
     
     @State private var showInviteSheet = false
     @State private var inviteEmail = ""
-    @State private var inviteRole = StaffRole.salesAssociate
+    @State private var invitePassword = ""
+    @State private var inviteRole: StaffRole = .salesAssociate
     @State private var isInviting = false
     @State private var inviteError: String?
-    
+
     var body: some View {
         @Bindable var vm = viewModel
         ZStack {
             AppColors.background.ignoresSafeArea()
-            
+
             VStack(spacing: 0) {
                 HStack(alignment: .center) {
-                    Text("Team")
+                    Text("Team Management")
                         .font(AppFonts.serif(size: 28, weight: .semibold))
                         .foregroundStyle(.white)
-                    
+
                     Spacer()
-                    
-                    Menu {
-                        Button(action: {
-                            inviteEmail = ""
-                            inviteRole = .salesAssociate
-                            inviteError = nil
-                            showInviteSheet = true
-                        }) {
-                            Label("Invite Staff", systemImage: "envelope.badge")
-                        }
-                        
-                        Button(action: {
-                            router.push(BMRoute.pendingStaff)
-                        }) {
-                            Label("Review Responses", systemImage: "bell")
-                        }
-                    } label: {
-                        ZStack(alignment: .topTrailing) {
-                            Image(systemName: "ellipsis.circle.fill")
-                                .font(.system(size: 24))
-                                .foregroundStyle(AppColors.gold)
-                                .frame(width: 44, height: 44)
-                                .background(.ultraThinMaterial, in: Circle())
-                            
-                            if viewModel.pendingStaffCount > 0 {
-                                ZStack {
-                                    Circle()
-                                        .fill(AppColors.error)
-                                        .frame(width: 18, height: 18)
-                                    Text("\(viewModel.pendingStaffCount)")
-                                        .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                                        .foregroundStyle(.white)
-                                }
-                                .offset(x: 10, y: 0)
-                            }
-                        }
+
+                    Button(action: {
+                        inviteEmail = ""
+                        invitePassword = ""
+                        inviteRole = .salesAssociate
+                        inviteError = nil
+                        showInviteSheet = true
+                    }) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 24))
+                            .foregroundStyle(AppColors.gold)
+                            .frame(width: 44, height: 44)
+                            .background(.ultraThinMaterial, in: Circle())
                     }
                 }
                 .padding(.horizontal, 24)
@@ -140,18 +118,51 @@ struct TeamView: View {
                         .padding(.horizontal, 24)
                         
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Role")
+                            Text("Initial Password")
                                 .font(AppFonts.sansSerif(size: 14, weight: .medium))
                                 .foregroundStyle(AppColors.secondary)
                             
-                            Picker("Role", selection: $inviteRole) {
-                                Text("Sales Associate").tag(StaffRole.salesAssociate)
-                                Text("Inventory Controller").tag(StaffRole.inventoryController)
+                            SecureField("Enter password", text: $invitePassword)
+                                .padding()
+                                .background(AppColors.surface)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(AppColors.gold15, lineWidth: 0.5)
+                                )
+                        }
+                        .padding(.horizontal, 24)
+                        
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Staff Role")
+                                .font(AppFonts.sansSerif(size: 14, weight: .medium))
+                                .foregroundStyle(AppColors.secondary)
+                            
+                            Menu {
+                                Picker("Role", selection: $inviteRole) {
+                                    Text("Sales Associate").tag(StaffRole.salesAssociate)
+                                    Text("Inventory Controller").tag(StaffRole.inventoryController)
+                                }
+                            } label: {
+                                HStack {
+                                    Text(inviteRole.displayName)
+                                        .font(AppFonts.sansSerif(size: 16))
+                                        .foregroundStyle(AppColors.text)
+                                    
+                                    Spacer()
+                                    
+                                    Image(systemName: "chevron.down")
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundStyle(AppColors.secondary)
+                                }
+                                .padding()
+                                .background(AppColors.surface)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(AppColors.gold15, lineWidth: 0.5)
+                                )
                             }
-                            .pickerStyle(.segmented)
-                            .padding(4)
-                            .background(AppColors.surface)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
                         }
                         .padding(.horizontal, 24)
                         
@@ -182,8 +193,8 @@ struct TeamView: View {
                             Button("Send") {
                                 sendInvitation()
                             }
-                            .disabled(inviteEmail.isEmpty)
-                            .foregroundStyle(inviteEmail.isEmpty ? AppColors.tertiary : AppColors.gold)
+                            .disabled(inviteEmail.isEmpty || invitePassword.count < 6)
+                            .foregroundStyle((inviteEmail.isEmpty || invitePassword.count < 6) ? AppColors.tertiary : AppColors.gold)
                         }
                     }
                 }
@@ -193,13 +204,13 @@ struct TeamView: View {
     }
     
     private func sendInvitation() {
-        guard !inviteEmail.isEmpty else { return }
+        guard !inviteEmail.isEmpty && invitePassword.count >= 6 else { return }
         isInviting = true
         inviteError = nil
         
         Task {
             do {
-                try await viewModel.inviteStaff(email: inviteEmail, role: inviteRole)
+                try await viewModel.inviteStaff(email: inviteEmail, password: invitePassword, role: inviteRole)
                 await MainActor.run {
                     isInviting = false
                     showInviteSheet = false
@@ -207,7 +218,14 @@ struct TeamView: View {
             } catch {
                 await MainActor.run {
                     isInviting = false
-                    inviteError = error.localizedDescription
+                    let errorMsg = error.localizedDescription.lowercased()
+                    if errorMsg.contains("already registered") || errorMsg.contains("already exists") {
+                        inviteError = "This email address is already registered in the system."
+                    } else if errorMsg.contains("404") {
+                        inviteError = "Invitation service is currently unavailable. Please contact support."
+                    } else {
+                        inviteError = "Failed to send invitation. Please check the email and try again."
+                    }
                 }
             }
         }

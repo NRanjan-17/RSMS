@@ -64,6 +64,8 @@ final class RegistrationViewModel {
     func loadUserData() {
         Task {
             let session = await authService.getCurrentSession()
+            guard let userId = session?.user.id else { return }
+            
             await MainActor.run {
                 self.email = session?.user.email ?? ""
                 self.password = "••••••••"
@@ -72,6 +74,19 @@ final class RegistrationViewModel {
                 } else {
                     self.name = session?.user.userMetadata["full_name"]?.stringValue ?? ""
                 }
+            }
+            
+            do {
+                let staffMembers: [StaffModel] = try await client.from("staff").select().eq("auth_user_id", value: userId).execute().value
+                if let staff = staffMembers.first, let bId = staff.boutiqueId {
+                    let boutique: CorporateBoutique = try await client.from("boutiques").select().eq("id", value: bId).single().execute().value
+                    await MainActor.run {
+                        self.selectedBoutiqueId = boutique.id
+                        self.city = boutique.city
+                    }
+                }
+            } catch {
+                // Not a staff member or no boutique assigned
             }
         }
     }

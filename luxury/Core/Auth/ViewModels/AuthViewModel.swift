@@ -46,40 +46,7 @@ final class AuthViewModel {
                     try await profileService.createSkeletonProfile(userId: user.id, role: selectedRole, name: name, email: trimmedEmail, provider: "email")
                     UserDefaults.standard.set(name, forKey: "temp_reg_name")
                 } else {
-                    do {
-                        try await authService.signIn(email: trimmedEmail, password: trimmedPassword)
-                    } catch {
-                        let client = SupabaseManager.shared.client
-                        if selectedRole == .boutiqueManager {
-                            let boutiques: [CorporateBoutique] = try await client.from("boutiques").select().eq("manager_email", value: trimmedEmail).execute().value
-                            if !boutiques.isEmpty {
-                                let metadata: [String: AnyJSON] = [
-                                    "role": .string(selectedRole.rawValue),
-                                    "provider": .string("email"),
-                                    "full_name": .string(boutiques[0].managerName)
-                                ]
-                                _ = try await authService.signUp(email: trimmedEmail, password: trimmedPassword, data: metadata)
-                            } else {
-                                throw error
-                            }
-                        } else if selectedRole == .salesAssociate || selectedRole == .inventoryController {
-                            let staffRole: StaffRole = selectedRole == .salesAssociate ? .salesAssociate : .inventoryController
-                            let staffMembers: [StaffModel] = try await client.from("staff").select().eq("email", value: trimmedEmail).eq("role", value: staffRole.rawValue).execute().value
-                            if let invitedStaff = staffMembers.first {
-                                let metadata: [String: AnyJSON] = [
-                                    "role": .string(selectedRole.rawValue),
-                                    "provider": .string("email"),
-                                    "full_name": .string(invitedStaff.name)
-                                ]
-                                let user = try await authService.signUp(email: trimmedEmail, password: trimmedPassword, data: metadata)
-                                try await client.from("staff").update(["auth_user_id": user.id.uuidString]).eq("id", value: invitedStaff.id).execute()
-                            } else {
-                                throw error
-                            }
-                        } else {
-                            throw error
-                        }
-                    }
+                    try await authService.signIn(email: trimmedEmail, password: trimmedPassword)
                     let session = await authService.getCurrentSession()
                     try await validateRole(session: session, selectedRole: selectedRole)
                 }

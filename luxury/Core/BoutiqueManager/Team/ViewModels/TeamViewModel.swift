@@ -74,19 +74,46 @@ final class TeamViewModel {
     func rejectStaffMember(_ staff: StaffModel, completion: @escaping () -> Void = {}) {
         updateStaff(id: staff.id, action: { try await self.approvalService.rejectStaff(id: staff.id) }, completion: completion)
     }
-    
-    func inviteStaff(email: String, role: StaffRole) async throws {
+
+    func inviteStaff(email: String, password: String, role: StaffRole) async throws {
         guard let boutiqueId else {
             throw NSError(domain: "Auth", code: 0, userInfo: [NSLocalizedDescriptionKey: "Boutique ID not loaded"])
         }
+        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedPassword = password.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard !trimmedEmail.isEmpty, !trimmedPassword.isEmpty else {
+            throw NSError(domain: "Auth", code: 0, userInfo: [NSLocalizedDescriptionKey: "Email and password are required."])
+        }
+        
+        let ephemeralClient = SupabaseClient(
+            supabaseURL: SupabaseConfig.url,
+            supabaseKey: SupabaseConfig.anonKey,
+            options: SupabaseClientOptions(
+                auth: SupabaseClientOptions.AuthOptions(
+                    storage: InMemoryAuthStorage(),
+                    autoRefreshToken: false
+                )
+            )
+        )
+        
+        let mappedRole: UserRole = role == .salesAssociate ? .salesAssociate : .inventoryController
+        let metadata: [String: AnyJSON] = [
+            "role": .string(mappedRole.rawValue),
+            "provider": .string("email")
+        ]
+        
+        let response = try await ephemeralClient.auth.signUp(email: trimmedEmail, password: trimmedPassword, data: metadata)
+        let newUserId = response.user.id
+        
         let staff = StaffModel(
             id: UUID(),
-            authUserId: nil,
+            authUserId: newUserId,
             boutiqueId: boutiqueId,
-            employeeId: "TEMP-\(UUID().uuidString.prefix(6))",
+            employeeId: "TEMP-\(newUserId.uuidString.prefix(6))",
             role: role,
             name: "",
-            email: email,
+            email: trimmedEmail,
             phone: "",
             address: "",
             location: "",
@@ -96,7 +123,7 @@ final class TeamViewModel {
             provider: "email",
             avatarUrl: "",
             certificationUrl: nil,
-            status: .pending,
+            status: .approved,
             createdAt: Date(),
             updatedAt: Date(),
             lastLoginAt: nil,
@@ -104,9 +131,8 @@ final class TeamViewModel {
         )
         try await SupabaseManager.shared.client.from("staff").upsert(staff, onConflict: "email").execute()
     }
-    
-    private func updateStaff(id: UUID, action: @escaping () async throws -> Void, completion: @escaping () -> Void) {
-        actionStaffId = id
+
+    private func updateStaff(id: UUID, action: @escaping () async throws -> Void, completion: @escaping () -> Void) {        actionStaffId = id
         errorMessage = nil
         
         Task {

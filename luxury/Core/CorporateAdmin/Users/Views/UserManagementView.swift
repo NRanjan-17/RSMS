@@ -13,29 +13,30 @@ struct UserManagementView: View {
     
     @State private var showInviteSheet = false
     @State private var inviteEmail = ""
+    @State private var invitePassword = ""
     @State private var isInviting = false
     @State private var inviteError: String?
-    
+
     var body: some View {
         @Bindable var vm = viewModel
         ZStack {
             AppColors.background.ignoresSafeArea()
-            
+
             VStack(spacing: 0) {
                 HStack(alignment: .center) {
                     Text("Boutique Management")
                         .font(AppFonts.serif(size: 28, weight: .semibold))
                         .foregroundStyle(.white)
-                    
+
                     Spacer()
-                    
+
                     Menu {
                         Button(action: {
                             inviteEmail = ""
+                            invitePassword = ""
                             inviteError = nil
                             showInviteSheet = true
-                        }) {
-                            Label("Invite Boutique", systemImage: "envelope.badge")
+                        }) {                            Label("Invite Boutique", systemImage: "envelope.badge")
                         }
                         
                         Button(action: {
@@ -132,68 +133,89 @@ struct UserManagementView: View {
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 12)
                                         .stroke(AppColors.gold15, lineWidth: 0.5)
-                                )
-                        }
-                        .padding(.horizontal, 24)
-                        
-                        if let inviteError {
-                            Text(inviteError)
-                                .font(AppFonts.sansSerif(size: 14))
-                                .foregroundStyle(AppColors.error)
-                                .padding(.horizontal, 24)
-                        }
-                        
-                        Spacer()
-                    }
-                    .padding(.top, 24)
-                }
-                .navigationTitle("Invite Boutique")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") {
-                            showInviteSheet = false
-                        }
-                        .foregroundStyle(AppColors.gold)
-                    }
-                    ToolbarItem(placement: .confirmationAction) {
-                        if isInviting {
-                            ProgressView().tint(AppColors.gold)
-                        } else {
-                            Button("Send") {
-                                sendInvitation()
-                            }
-                            .disabled(inviteEmail.isEmpty)
-                            .foregroundStyle(inviteEmail.isEmpty ? AppColors.tertiary : AppColors.gold)
-                        }
-                    }
-                }
-            }
-            .presentationDetents([.medium])
-        }
-    }
-    
-    private func sendInvitation() {
-        guard !inviteEmail.isEmpty else { return }
-        isInviting = true
-        inviteError = nil
-        
-        Task {
-            do {
-                try await viewModel.inviteBoutique(email: inviteEmail)
-                await MainActor.run {
-                    isInviting = false
-                    showInviteSheet = false
-                }
-            } catch {
-                await MainActor.run {
-                    isInviting = false
-                    inviteError = error.localizedDescription
-                }
-            }
-        }
-    }
-}
+                                    )
+                                    }
+                                    .padding(.horizontal, 24)
+
+                                    VStack(alignment: .leading, spacing: 8) {
+                                    Text("Initial Password")
+                                    .font(AppFonts.sansSerif(size: 14, weight: .medium))
+                                    .foregroundStyle(AppColors.secondary)
+
+                                    SecureField("Enter password", text: $invitePassword)
+                                    .padding()
+                                    .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(AppColors.gold15, lineWidth: 0.5)
+                                    )
+                                    }
+                                    .padding(.horizontal, 24)
+
+                                    if let inviteError {
+                                    Text(inviteError)
+                                    .font(AppFonts.sansSerif(size: 14))
+                                    .foregroundStyle(AppColors.error)
+                                    .padding(.horizontal, 24)
+                                    }
+
+                                    Spacer()
+                                    }
+                                    .padding(.top, 24)
+                                    }
+                                    .navigationTitle("Invite Boutique")
+                                    .navigationBarTitleDisplayMode(.inline)
+                                    .toolbar {
+                                    ToolbarItem(placement: .cancellationAction) {
+                                    Button("Cancel") {
+                                    showInviteSheet = false
+                                    }
+                                    .foregroundStyle(AppColors.gold)
+                                    }
+                                    ToolbarItem(placement: .confirmationAction) {
+                                    if isInviting {
+                                    ProgressView().tint(AppColors.gold)
+                                    } else {
+                                    Button("Send") {
+                                    sendInvitation()
+                                    }
+                                    .disabled(inviteEmail.isEmpty || invitePassword.count < 6)
+                                    .foregroundStyle((inviteEmail.isEmpty || invitePassword.count < 6) ? AppColors.tertiary : AppColors.gold)
+                                    }
+                                    }
+                                    }
+                                    }
+                                    .presentationDetents([.medium])
+                                    }
+                                    }
+
+                                    private func sendInvitation() {
+                                    guard !inviteEmail.isEmpty && invitePassword.count >= 6 else { return }
+                                    isInviting = true
+                                    inviteError = nil
+
+                                    Task {
+                                    do {
+                                    try await viewModel.inviteBoutique(email: inviteEmail, password: invitePassword)
+                                    await MainActor.run {
+                                    isInviting = false
+                                    showInviteSheet = false
+                                    }
+                                    } catch {
+                                        await MainActor.run {
+                                            isInviting = false
+                                            let errorMsg = error.localizedDescription.lowercased()
+                                            if errorMsg.contains("already registered") || errorMsg.contains("already exists") {
+                                                inviteError = "This email address is already registered in the system."
+                                            } else if errorMsg.contains("404") {
+                                                inviteError = "Invitation service is currently unavailable. Please contact support."
+                                            } else {
+                                                inviteError = "Failed to send invitation. Please check the email and try again."
+                                            }
+                                        }
+                                    }                                    }
+                                    }}
 
 private struct ApprovedBoutiquesListView: View {
     @Bindable var viewModel: UserManagementViewModel
