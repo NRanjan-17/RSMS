@@ -6,15 +6,17 @@
 //
 
 import SwiftUI
+import PhotosUI
 
-struct ProductFormView: View {
+struct CatalogFormView: View {
     @Environment(CatalogsViewModel.self) private var viewModel
     @Environment(Router.self) private var router
     @Environment(\.dismiss) private var dismiss
     
-    var editProduct: ProductEntity?
+    var editCatalog: CatalogEntity?
     
     @State private var showingScanner = false
+    @State private var scannerService = ScannerService()
     
     var body: some View {
         @Bindable var bindableViewModel = viewModel
@@ -27,14 +29,14 @@ struct ProductFormView: View {
                     VStack(alignment: .leading, spacing: 0) {
 
                         
-                        Text(editProduct != nil ? "Edit\nProduct." : "Catalog\nEntry.")
+                        Text(editCatalog != nil ? "Edit\nCatalog." : "Catalog\nEntry.")
                             .font(AppFonts.serif(size: 52, weight: .light))
                             .italic()
                             .foregroundStyle(AppColors.text)
                             .lineSpacing(-5)
                             .padding(.bottom, 16)
                         
-                        Text(editProduct != nil ? "Update the details for this product" : "Add a new product to the catalog")
+                        Text(editCatalog != nil ? "Update the details for this catalog" : "Add a new catalog item")
                             .font(AppFonts.sansSerif(size: 13, weight: .light))
                             .foregroundStyle(AppColors.secondary)
                             .padding(.bottom, 40)
@@ -50,9 +52,9 @@ struct ProductFormView: View {
                     
                     // Form Fields
                     VStack(spacing: 20) {
-                        ProductFormTextField(title: "PRODUCT NAME", text: $bindableViewModel.newName)
-                        ProductFormTextField(title: "DESCRIPTION", text: $bindableViewModel.newDescription)
-                        ProductFormTextField(title: "BRAND", text: $bindableViewModel.newBrand)
+                        CatalogFormTextField(title: "CATALOG NAME", text: $bindableViewModel.newName)
+                        CatalogFormTextField(title: "DESCRIPTION", text: $bindableViewModel.newDescription)
+                        CatalogFormTextField(title: "BRAND", text: $bindableViewModel.newBrand)
                         
                         VStack(alignment: .leading, spacing: 8) {
                             Text("CATEGORY")
@@ -61,7 +63,7 @@ struct ProductFormView: View {
                                 .kerning(1.5)
                             
                             Menu {
-                                ForEach(ProductCategory.allCases, id: \.self) { category in
+                                ForEach(CatalogCategory.allCases, id: \.self) { category in
                                     Button(category.rawValue) {
                                         bindableViewModel.newCategory = category
                                     }
@@ -85,11 +87,10 @@ struct ProductFormView: View {
                         }
                         
                         HStack(spacing: 16) {
-                            ProductFormTextField(title: "STOCK", text: $bindableViewModel.newAvailableStock, keyboardType: .numberPad)
-                            ProductFormTextField(title: "AMOUNT (₹)", text: $bindableViewModel.newAmount, keyboardType: .decimalPad)
+                            CatalogFormTextField(title: "AMOUNT (₹)", text: $bindableViewModel.newAmount, keyboardType: .decimalPad)
                         }
                         
-                        if editProduct != nil {
+                        if editCatalog != nil {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("STATUS")
                                     .font(AppFonts.sansSerif(size: 10, weight: .bold))
@@ -97,7 +98,7 @@ struct ProductFormView: View {
                                     .kerning(1.5)
                                 
                                 Menu {
-                                    ForEach([ProductStatus.active, .paused], id: \.self) { status in
+                                    ForEach([CatalogStatus.active, .paused], id: \.self) { status in
                                         Button(status.rawValue) {
                                             bindableViewModel.newStatus = status
                                         }
@@ -123,10 +124,83 @@ struct ProductFormView: View {
                     }
                     .padding(.bottom, 32)
                     
+                    // Product Images Section
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Text("PRODUCT IMAGES")
+                                .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                                .foregroundStyle(AppColors.secondary)
+                                .kerning(1.5)
+                            
+                            Spacer()
+                            
+                            PhotosPicker(
+                                selection: $bindableViewModel.selectedPhotoItems,
+                                maxSelectionCount: 8,
+                                matching: .images,
+                                photoLibrary: .shared()
+                            ) {
+                                Text("Select Photos (Max 8)")
+                                    .font(AppFonts.sansSerif(size: 12, weight: .semibold))
+                                    .foregroundStyle(AppColors.gold)
+                            }
+                            .onChange(of: viewModel.selectedPhotoItems) { _, _ in
+                                viewModel.loadSelectedImages()
+                            }
+                        }
+                        
+                        if !viewModel.existingImageURLs.isEmpty || !viewModel.selectedPhotoItems.isEmpty {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 12) {
+                                    ForEach(viewModel.existingImageURLs, id: \.self) { url in
+                                        AsyncImage(url: URL(string: url)) { phase in
+                                            if let image = phase.image {
+                                                image
+                                                    .resizable()
+                                                    .aspectRatio(contentMode: .fill)
+                                                    .frame(width: 80, height: 80)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                            } else {
+                                                RoundedRectangle(cornerRadius: 8)
+                                                    .fill(AppColors.surface)
+                                                    .frame(width: 80, height: 80)
+                                                    .overlay(ProgressView())
+                                            }
+                                        }
+                                    }
+                                    
+                                    ForEach(viewModel.selectedImagesData, id: \.self) { data in
+                                        if let uiImage = UIImage(data: data) {
+                                            Image(uiImage: uiImage)
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .frame(width: 80, height: 80)
+                                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                        } else {
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .fill(AppColors.surface)
+                                                .frame(width: 80, height: 80)
+                                                .overlay(
+                                                    Image(systemName: "photo")
+                                                        .foregroundStyle(AppColors.secondary)
+                                                )
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            Text("No images selected")
+                                .font(AppFonts.sansSerif(size: 14))
+                                .foregroundStyle(AppColors.tertiary)
+                                .padding(.vertical, 8)
+                        }
+                    }
+                    .padding(.bottom, 32)
+                    
                     // Save Button
-                    if let product = editProduct {
+                    if let catalog = editCatalog {
                         CustomButton(title: "Save Changes", isLoading: viewModel.isSaving) {
-                            viewModel.updateProduct(product) {
+                            viewModel.updateCatalog(catalog) {
                                 router.pop()
                             }
                         }
@@ -147,33 +221,47 @@ struct ProductFormView: View {
                 Color.black.ignoresSafeArea()
                 
                 VStack(spacing: 0) {
-                    QRScannerView { code in
-                        showingScanner = false
-                        bindableViewModel.newBarCode = code
-                        viewModel.addProduct {
-                            router.pop() // Return to catalogs list after saving
-                        }
-                    }
-                    .ignoresSafeArea(edges: .bottom)
+                    QRScannerView(scannerService: scannerService)
+                        .ignoresSafeArea(edges: .bottom)
                 }
             }
             .toolbar(.visible, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(.hidden, for: .tabBar)
             .navigationTitle("Scan QR")
+            .onAppear {
+                scannerService.continuousMode = false
+                scannerService.onScannedCode = { code in
+                    showingScanner = false
+                    bindableViewModel.newBarCode = code
+                    viewModel.addCatalog {
+                        router.pop() // Return to catalogs list after saving
+                    }
+                }
+            }
         }
         .toolbar(.hidden, for: .tabBar)
         .onAppear {
-            if let product = editProduct {
-                viewModel.populateForm(with: product)
+            if let catalog = editCatalog {
+                viewModel.populateForm(with: catalog)
             } else {
                 viewModel.resetForm()
+            }
+        }
+        .alert("Error", isPresented: Binding(
+            get: { viewModel.errorMessage != nil },
+            set: { _ in viewModel.errorMessage = nil }
+        )) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            if let errorMessage = viewModel.errorMessage {
+                Text(errorMessage)
             }
         }
     }
 }
 
-private struct ProductFormTextField: View {
+private struct CatalogFormTextField: View {
     let title: String
     var placeholder: String = ""
     @Binding var text: String
@@ -191,7 +279,7 @@ private struct ProductFormTextField: View {
                 .foregroundStyle(AppColors.text)
                 .keyboardType(keyboardType)
                 .autocorrectionDisabled()
-                .textInputAutocapitalization(.none)
+                .textInputAutocapitalization(.never)
                 .padding(.vertical, 16)
                 .padding(.horizontal, 18)
                 .background(AppColors.surface)

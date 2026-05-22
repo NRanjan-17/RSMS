@@ -11,33 +11,33 @@ import Supabase
 final class CatalogService {
     private let client = SupabaseManager.shared.client
     
-    func fetchProducts() async throws -> [ProductEntity] {
-        let response: [ProductEntity] = try await client
-            .from("products")
+    func fetchCatalogs() async throws -> [CatalogEntity] {
+        let response: [CatalogEntity] = try await client
+            .from("catalogs")
             .select()
             .execute()
             .value
         return response
     }
     
-    func addProduct(_ product: ProductEntity) async throws {
+    func addCatalog(_ catalog: CatalogEntity) async throws {
         try await client
-            .from("products")
-            .insert(product)
+            .from("catalogs")
+            .insert(catalog)
             .execute()
     }
     
-    func updateProduct(_ product: ProductEntity) async throws {
+    func updateCatalog(_ catalog: CatalogEntity) async throws {
         try await client
-            .from("products")
-            .update(product)
-            .eq("id", value: product.id.uuidString)
+            .from("catalogs")
+            .update(catalog)
+            .eq("id", value: catalog.id.uuidString)
             .execute()
     }
     
-    func deleteProduct(id: UUID) async throws {
+    func deleteCatalog(id: UUID) async throws {
         try await client
-            .from("products")
+            .from("catalogs")
             .delete()
             .eq("id", value: id.uuidString)
             .execute()

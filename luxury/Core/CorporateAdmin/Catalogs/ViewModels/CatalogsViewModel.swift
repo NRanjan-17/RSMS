@@ -7,11 +7,13 @@
 
 import Foundation
 import Observation
+import PhotosUI
+import SwiftUI
 
 @Observable
 final class CatalogsViewModel {
     var searchText: String = ""
-    var products: [ProductEntity] = []
+    var catalogs: [CatalogEntity] = []
     
     var isLoading = false
     var isSaving = false
@@ -21,25 +23,31 @@ final class CatalogsViewModel {
     var newName: String = ""
     var newDescription: String = ""
     var newBrand: String = ""
-    var newCategory: ProductCategory = .watches
-    var newAvailableStock: String = ""
+    var newCategory: CatalogCategory = .watches
     var newAmount: String = ""
     var newBarCode: String = ""
-    var newStatus: ProductStatus = .active
+    var newStatus: CatalogStatus = .active
+    
+    // Image fields
+    var selectedPhotoItems: [PhotosPickerItem] = []
+    var existingImageURLs: [String] = []
+    var selectedImagesData: [Data] = []
     
     var showScanner = false
     
     private let catalogService = CatalogService()
+    private let imagePickerService = ImagePickerService()
+    private let storageService = StorageService()
     
-    var filteredProducts: [ProductEntity] {
+    var filteredCatalogs: [CatalogEntity] {
         if searchText.isEmpty {
-            return products
+            return catalogs
         }
-        return products.filter { product in
-            product.name.localizedCaseInsensitiveContains(searchText) ||
-            product.brand.localizedCaseInsensitiveContains(searchText) ||
-            product.productId.localizedCaseInsensitiveContains(searchText) ||
-            product.barCode.localizedCaseInsensitiveContains(searchText)
+        return catalogs.filter { catalog in
+            catalog.name.localizedCaseInsensitiveContains(searchText) ||
+            catalog.brand.localizedCaseInsensitiveContains(searchText) ||
+            catalog.catalogId.localizedCaseInsensitiveContains(searchText) ||
+            catalog.barCode.localizedCaseInsensitiveContains(searchText)
         }
     }
     
@@ -49,106 +57,142 @@ final class CatalogsViewModel {
         
         Task {
             do {
-                let fetched = try await catalogService.fetchProducts()
+                let fetched = try await catalogService.fetchCatalogs()
                 await MainActor.run {
-                    self.products = fetched
+                    self.catalogs = fetched
                     self.isLoading = false
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to load products: \(error.localizedDescription)"
+                    self.errorMessage = "Failed to load catalogs: \(error.localizedDescription)"
                     self.isLoading = false
                 }
             }
         }
     }
     
-    func addProduct(completion: @escaping () -> Void) {
-        guard let stock = Int(newAvailableStock), let amount = Double(newAmount) else {
-            self.errorMessage = "Invalid stock or amount."
+    func addCatalog(completion: @escaping () -> Void) {
+        guard let amount = Double(newAmount) else {
+            self.errorMessage = "Invalid amount."
             return
         }
         
         guard !newBarCode.isEmpty else {
-            self.errorMessage = "Barcode is required. Please scan a QR code or Barcode."
+            self.errorMessage = "QR/Barcode string is required."
+            return
+        }
+        
+        if catalogs.contains(where: { $0.catalogId == newBarCode }) {
+            self.errorMessage = "Duplicate catalog detected! A catalog with this barcode already exists."
             return
         }
         
         isSaving = true
         errorMessage = nil
         
-        let newProduct = ProductEntity(
+        let newCatalog = CatalogEntity(
             id: UUID(),
-            productId: UUID().uuidString.prefix(8).uppercased(),
+            catalogId: newBarCode, // Treat fetched string as catalogId
             name: newName,
             description: newDescription,
             brand: newBrand,
             category: newCategory,
-            availableStock: stock,
             amount: amount,
             barCode: newBarCode,
             status: newStatus,
-            reserved: []
+            reserved: nil,
+            productIds: nil,
+            productImages: nil
         )
         
         Task {
             do {
-                try await catalogService.addProduct(newProduct)
+                // Upload images first
+                var uploadedURLs: [String] = []
+                
+                for item in selectedPhotoItems {
+                    if let asset = try? await imagePickerService.loadImage(from: item) {
+                        if let url = try? await storageService.uploadCatalogImage(image: asset) {
+                            uploadedURLs.append(url)
+                        }
+                    }
+                }
+                
+                var catalogToSave = newCatalog
+                catalogToSave.productImages = uploadedURLs
+                
+                try await catalogService.addCatalog(catalogToSave)
                 await MainActor.run {
-                    self.products.append(newProduct)
+                    self.catalogs.append(catalogToSave)
                     self.isSaving = false
                     self.resetForm()
                     completion()
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to add product: \(error.localizedDescription)"
+                    self.errorMessage = "Failed to add catalog: \(error.localizedDescription)"
                     self.isSaving = false
                 }
             }
         }
     }
     
-    func populateForm(with product: ProductEntity) {
-        newName = product.name
-        newDescription = product.description
-        newBrand = product.brand
-        newCategory = product.category
-        newAvailableStock = "\(product.availableStock)"
-        newAmount = "\(product.amount)"
-        newBarCode = product.barCode
-        newStatus = product.status
+    func populateForm(with catalog: CatalogEntity) {
+        newName = catalog.name
+        newDescription = catalog.description
+        newBrand = catalog.brand
+        newCategory = catalog.category
+        newAmount = "\(catalog.amount)"
+        newBarCode = catalog.barCode
+        newStatus = catalog.status
+        existingImageURLs = catalog.productImages ?? []
+        selectedPhotoItems = []
     }
     
-    func updateProduct(_ existingProduct: ProductEntity, completion: @escaping () -> Void) {
-        guard let stock = Int(newAvailableStock), let amount = Double(newAmount) else {
-            self.errorMessage = "Invalid stock or amount."
+    func updateCatalog(_ existingCatalog: CatalogEntity, completion: @escaping () -> Void) {
+        guard let amount = Double(newAmount) else {
+            self.errorMessage = "Invalid amount."
             return
         }
         
         isSaving = true
         errorMessage = nil
         
-        let updatedProduct = ProductEntity(
-            id: existingProduct.id,
-            productId: existingProduct.productId,
+        let updatedCatalog = CatalogEntity(
+            id: existingCatalog.id,
+            catalogId: existingCatalog.catalogId,
             name: newName,
             description: newDescription,
             brand: newBrand,
             category: newCategory,
-            availableStock: stock,
             amount: amount,
             barCode: newBarCode,
             status: newStatus,
-            reserved: existingProduct.reserved
+            reserved: existingCatalog.reserved,
+            productIds: existingCatalog.productIds,
+            productImages: existingCatalog.productImages
         )
         
         Task {
             do {
-                try await catalogService.updateProduct(updatedProduct)
+                // Upload new images
+                var uploadedURLs: [String] = existingImageURLs
+                
+                for item in selectedPhotoItems {
+                    if let asset = try? await imagePickerService.loadImage(from: item) {
+                        if let url = try? await storageService.uploadCatalogImage(image: asset) {
+                            uploadedURLs.append(url)
+                        }
+                    }
+                }
+                
+                var catalogToUpdate = updatedCatalog
+                catalogToUpdate.productImages = uploadedURLs
+                
+                try await catalogService.updateCatalog(catalogToUpdate)
                 await MainActor.run {
-                    if let index = self.products.firstIndex(where: { $0.id == updatedProduct.id }) {
-                        self.products[index] = updatedProduct
+                    if let index = self.catalogs.firstIndex(where: { $0.id == updatedCatalog.id }) {
+                        self.catalogs[index] = catalogToUpdate
                     }
                     self.isSaving = false
                     self.resetForm()
@@ -156,28 +200,56 @@ final class CatalogsViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to update product: \(error.localizedDescription)"
+                    self.errorMessage = "Failed to update catalog: \(error.localizedDescription)"
                     self.isSaving = false
                 }
             }
         }
     }
     
-    func deleteProduct(_ product: ProductEntity, completion: @escaping () -> Void) {
+    func deleteCatalog(_ catalog: CatalogEntity, completion: @escaping () -> Void) {
         isSaving = true
         errorMessage = nil
         
         Task {
             do {
-                try await catalogService.deleteProduct(id: product.id)
+                try await catalogService.deleteCatalog(id: catalog.id)
                 await MainActor.run {
-                    self.products.removeAll { $0.id == product.id }
+                    self.catalogs.removeAll { $0.id == catalog.id }
                     self.isSaving = false
                     completion()
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to delete product: \(error.localizedDescription)"
+                    self.errorMessage = "Failed to delete catalog: \(error.localizedDescription)"
+                    self.isSaving = false
+                }
+            }
+        }
+    }
+    
+    func addSerialNumbers(to catalog: CatalogEntity, serials: [String], completion: @escaping () -> Void) {
+        isSaving = true
+        errorMessage = nil
+        
+        var updatedCatalog = catalog
+        var currentProducts = updatedCatalog.productIds ?? []
+        currentProducts.append(contentsOf: serials)
+        updatedCatalog.productIds = currentProducts
+        
+        Task {
+            do {
+                try await catalogService.updateCatalog(updatedCatalog)
+                await MainActor.run {
+                    if let index = self.catalogs.firstIndex(where: { $0.id == updatedCatalog.id }) {
+                        self.catalogs[index] = updatedCatalog
+                    }
+                    self.isSaving = false
+                    completion()
+                }
+            } catch {
+                await MainActor.run {
+                    self.errorMessage = "Failed to add products: \(error.localizedDescription)"
                     self.isSaving = false
                 }
             }
@@ -189,9 +261,25 @@ final class CatalogsViewModel {
         newDescription = ""
         newBrand = ""
         newCategory = .watches
-        newAvailableStock = ""
         newAmount = ""
         newBarCode = ""
         newStatus = .active
+        existingImageURLs = []
+        selectedPhotoItems = []
+        selectedImagesData = []
+    }
+    
+    func loadSelectedImages() {
+        Task {
+            var loadedData: [Data] = []
+            for item in selectedPhotoItems {
+                if let asset = try? await imagePickerService.loadImage(from: item) {
+                    loadedData.append(asset.data)
+                }
+            }
+            await MainActor.run {
+                self.selectedImagesData = loadedData
+            }
+        }
     }
 }

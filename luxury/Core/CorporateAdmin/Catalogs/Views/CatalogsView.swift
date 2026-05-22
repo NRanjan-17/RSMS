@@ -33,7 +33,7 @@ struct CatalogsView: View {
                     
                     // Add Button in top right
                     Button(action: {
-                        router.push(CARoute.productForm(editProduct: nil))
+                        router.push(CARoute.catalogForm(editCatalog: nil))
                     }) {
                         Image(systemName: "plus")
                             .font(.system(size: 20))
@@ -90,24 +90,24 @@ struct CatalogsView: View {
                     .foregroundStyle(AppColors.gold)
                     .padding(.top, 16)
                     Spacer()
-                } else if viewModel.filteredProducts.isEmpty {
+                } else if viewModel.filteredCatalogs.isEmpty {
                     Spacer()
                     Image(systemName: "box.truck.badge.clock.fill")
                         .font(.system(size: 40))
                         .foregroundStyle(AppColors.secondary)
                         .padding(.bottom, 16)
-                    Text(viewModel.searchText.isEmpty ? "No products found in catalog." : "No matching products.")
+                    Text(viewModel.searchText.isEmpty ? "No catalogs found." : "No matching catalogs.")
                         .font(AppFonts.sansSerif(size: 14))
                         .foregroundStyle(AppColors.secondary)
                     Spacer()
                 } else {
                     ScrollView(showsIndicators: false) {
                         LazyVStack(spacing: 16) {
-                            ForEach(viewModel.filteredProducts) { product in
+                            ForEach(viewModel.filteredCatalogs) { catalog in
                                 Button(action: {
-                                    router.push(CARoute.productDetail(product))
+                                    router.push(CARoute.catalogDetail(catalog))
                                 }) {
-                                    CatalogItemRow(product: product)
+                                    CatalogItemRow(catalog: catalog)
                                 }
                                 .buttonStyle(.plain)
                             }
@@ -126,16 +126,20 @@ struct CatalogsView: View {
 }
 
 struct CatalogItemRow: View {
-    let product: ProductEntity
+    let catalog: CatalogEntity
+    
+    var availableStock: Int {
+        (catalog.productIds?.count ?? 0) - (catalog.reserved?.count ?? 0)
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(product.name)
+                    Text(catalog.name)
                         .font(AppFonts.serif(size: 18, weight: .semibold))
                         .foregroundStyle(AppColors.text)
-                    Text(product.brand)
+                    Text(catalog.brand)
                         .font(AppFonts.sansSerif(size: 12, weight: .semibold))
                         .foregroundStyle(AppColors.gold)
                         .kerning(1.2)
@@ -143,7 +147,7 @@ struct CatalogItemRow: View {
                 
                 Spacer()
                 
-                Text(String(format: "$%.2f", product.amount))
+                Text(String(format: "$%.2f", catalog.amount))
                     .font(AppFonts.sansSerif(size: 16, weight: .bold))
                     .foregroundStyle(AppColors.text)
             }
@@ -155,7 +159,7 @@ struct CatalogItemRow: View {
                     Image(systemName: "tag.fill")
                         .font(.system(size: 10))
                         .foregroundStyle(AppColors.secondary)
-                    Text(product.category.rawValue)
+                    Text(catalog.category.rawValue)
                         .font(AppFonts.sansSerif(size: 12))
                         .foregroundStyle(AppColors.secondary)
                 }
@@ -165,10 +169,10 @@ struct CatalogItemRow: View {
                 HStack(spacing: 6) {
                     Image(systemName: "shippingbox.fill")
                         .font(.system(size: 10))
-                        .foregroundStyle(product.availableStock > 0 ? AppColors.success : AppColors.error)
-                    Text("\(product.availableStock) in stock")
+                        .foregroundStyle(availableStock > 0 ? AppColors.success : AppColors.error)
+                    Text("\(availableStock) in stock")
                         .font(AppFonts.sansSerif(size: 12, weight: .semibold))
-                        .foregroundStyle(product.availableStock > 0 ? AppColors.success : AppColors.error)
+                        .foregroundStyle(availableStock > 0 ? AppColors.success : AppColors.error)
                 }
             }
         }

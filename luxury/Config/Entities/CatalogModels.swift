@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum ProductCategory: String, Codable, CaseIterable, Equatable, Hashable {
+enum CatalogCategory: String, Codable, CaseIterable, Equatable, Hashable {
     case watches = "Watches"
     case jewelry = "Jewelry"
     case bags = "Bags"
@@ -17,37 +17,48 @@ enum ProductCategory: String, Codable, CaseIterable, Equatable, Hashable {
     case other = "Other"
 }
 
-enum ReservationStatus: String, Codable, CaseIterable, Equatable, Hashable {
+enum PurchaseStatus: String, Codable, CaseIterable, Equatable, Hashable {
     case pending = "Pending"
     case confirmed = "Confirmed"
     case cancelled = "Cancelled"
     case delivered = "Delivered"
 }
 
-enum ProductStatus: String, Codable, CaseIterable, Equatable, Hashable {
+enum CatalogStatus: String, Codable, CaseIterable, Equatable, Hashable {
     case active = "Active"
     case paused = "Paused"
     case archived = "Archived"
 }
 
-struct ReservedItem: Identifiable, Codable, Equatable, Hashable {
+struct PurchasedItem: Identifiable, Codable, Equatable, Hashable {
     let id: UUID
     let uid: UUID
+    let productId: UUID
     let reservedDate: Date
     let deliveryDate: Date?
     let transactionId: String
-    let status: ReservationStatus
+    let status: PurchaseStatus
     
     enum CodingKeys: String, CodingKey {
         case id, uid, status
+        case productId = "product_id"
         case reservedDate = "reserved_date"
         case deliveryDate = "delivery_date"
         case transactionId = "transaction_id"
     }
     
-    init(id: UUID = UUID(), uid: UUID, reservedDate: Date = Date(), deliveryDate: Date? = nil, transactionId: String, status: ReservationStatus = .pending) {
+    init(
+        id: UUID = UUID(),
+        uid: UUID,
+        productId: UUID,
+        reservedDate: Date = Date(),
+        deliveryDate: Date? = nil,
+        transactionId: String,
+        status: PurchaseStatus = .pending
+    ) {
         self.id = id
         self.uid = uid
+        self.productId = productId
         self.reservedDate = reservedDate
         self.deliveryDate = deliveryDate
         self.transactionId = transactionId
@@ -55,23 +66,27 @@ struct ReservedItem: Identifiable, Codable, Equatable, Hashable {
     }
 }
 
-struct ProductEntity: Identifiable, Codable, Equatable, Hashable {
+struct CatalogEntity: Identifiable, Codable, Equatable, Hashable {
     let id: UUID
-    let productId: String
+    let catalogId: String
     let name: String
     let description: String
     let brand: String
-    let category: ProductCategory
-    let availableStock: Int
+    let category: CatalogCategory
     let amount: Double
     let barCode: String
-    var status: ProductStatus
-    var reserved: [ReservedItem]
+    var status: CatalogStatus
+    var reserved: [String]?
+    var productIds: [String]?
+    var productImages: [String]?
     
     enum CodingKeys: String, CodingKey {
         case id, name, description, brand, category, amount, status, reserved
-        case productId = "product_id"
-        case availableStock = "available_stock"
+        case catalogId = "catalog_id"
         case barCode = "bar_code"
+        case productIds = "product_ids"
+        case productImages = "product_images"
     }
 }
+
+

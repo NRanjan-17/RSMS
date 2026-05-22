@@ -4,7 +4,7 @@ enum SARoute: Hashable {
     case clientProfile(Client)
     case newClient
     case editClient(Client)
-    case productDetail(Product)
+    case catalogDetail(CatalogEntity)
     case barcodeScanner
     case payment
     case receipt
@@ -51,8 +51,8 @@ enum CARoute: Hashable {
     case globalAnalytics
     case userManagement
     case catalogs
-    case productForm(editProduct: ProductEntity?)
-    case productDetail(ProductEntity)
+    case catalogForm(editCatalog: CatalogEntity?)
+    case catalogDetail(CatalogEntity)
     case boutiqueConfig
     case boutiqueConfigDetail(CorporateBoutique)
     case systemLogs
