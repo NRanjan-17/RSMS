@@ -13,7 +13,7 @@ final class CatalogService {
     
     func fetchProducts() async throws -> [ProductEntity] {
         let response: [ProductEntity] = try await client
-            .from("products")
+            .from("catalogs")
             .select()
             .execute()
             .value
@@ -22,14 +22,14 @@ final class CatalogService {
     
     func addProduct(_ product: ProductEntity) async throws {
         try await client
-            .from("products")
+            .from("catalogs")
             .insert(product)
             .execute()
     }
     
     func updateProduct(_ product: ProductEntity) async throws {
         try await client
-            .from("products")
+            .from("catalogs")
             .update(product)
             .eq("id", value: product.id.uuidString)
             .execute()
@@ -37,7 +37,7 @@ final class CatalogService {
     
     func deleteProduct(id: UUID) async throws {
         try await client
-            .from("products")
+            .from("catalogs")
             .delete()
             .eq("id", value: id.uuidString)
             .execute()

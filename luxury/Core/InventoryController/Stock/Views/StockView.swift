@@ -36,6 +36,13 @@ struct StockView: View {
                             .buttonStyle(.plain)
                             
                             MetricCard(title: "Low Stock", value: viewModel.lowStockCount, subtitle: "Action Required", icon: "exclamationmark.triangle")
+                            
+                            Button(action: {
+                                router.push(ICRoute.sfsOrders)
+                            }) {
+                                MetricCard(title: "SFS Orders", value: viewModel.sfsOrdersCount, subtitle: "Fulfillment Hub", icon: "shippingbox")
+                            }
+                            .buttonStyle(.plain)
                         }
                         .padding(.horizontal, 20)
                         
@@ -87,5 +94,8 @@ struct StockView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .onAppear {
+            viewModel.fetchSFSCount()
+        }
     }
 }

@@ -60,7 +60,7 @@ final class GlobalInventoryViewModel {
         Task {
             do {
                 // Fetch products, boutiques, and inventory
-                let productsResponse: [ProductEntity] = try await client.from("products").select().execute().value
+                let productsResponse: [ProductEntity] = try await client.from("catalogs").select().execute().value
                 let inventoryResponse: [InventoryItem] = try await client.from("inventory").select().execute().value
                 let boutiquesResponse: [CorporateBoutique] = try await client.from("boutiques").select().execute().value
                 

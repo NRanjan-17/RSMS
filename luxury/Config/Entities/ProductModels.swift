@@ -71,8 +71,53 @@ struct ProductEntity: Identifiable, Codable, Equatable, Hashable {
     
     enum CodingKeys: String, CodingKey {
         case id, name, description, brand, category, amount, reserved, status, collection
-        case productId = "product_id"
+        case productId = "catalog_id"
         case availableStock = "available_stock"
         case barCode = "bar_code"
+    }
+    
+    init(id: UUID = UUID(), productId: String, name: String, description: String, brand: String, category: String, availableStock: Int = 0, amount: Double, barCode: String, reserved: [ReservedItem]? = nil, status: String, collection: String? = nil) {
+        self.id = id
+        self.productId = productId
+        self.name = name
+        self.description = description
+        self.brand = brand
+        self.category = category
+        self.availableStock = availableStock
+        self.amount = amount
+        self.barCode = barCode
+        self.reserved = reserved
+        self.status = status
+        self.collection = collection
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        productId = try container.decode(String.self, forKey: .productId)
+        name = try container.decode(String.self, forKey: .name)
+        description = try container.decode(String.self, forKey: .description)
+        brand = try container.decode(String.self, forKey: .brand)
+        category = try container.decode(String.self, forKey: .category)
+        availableStock = try container.decodeIfPresent(Int.self, forKey: .availableStock) ?? 0
+        amount = try container.decode(Double.self, forKey: .amount)
+        barCode = try container.decode(String.self, forKey: .barCode)
+        reserved = try container.decodeIfPresent([ReservedItem].self, forKey: .reserved)
+        status = try container.decode(String.self, forKey: .status)
+        collection = try container.decodeIfPresent(String.self, forKey: .collection)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(productId, forKey: .productId)
+        try container.encode(name, forKey: .name)
+        try container.encode(description, forKey: .description)
+        try container.encode(brand, forKey: .brand)
+        try container.encode(category, forKey: .category)
+        try container.encode(amount, forKey: .amount)
+        try container.encode(barCode, forKey: .barCode)
+        try container.encode(status, forKey: .status)
+        try container.encodeIfPresent(reserved, forKey: .reserved)
     }
 }
