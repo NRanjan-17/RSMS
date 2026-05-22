@@ -114,6 +114,18 @@ struct Client: Identifiable, Hashable {
     let initial: String
     let isHot: Bool
     
+    // Stable Mock IDs
+    static let mockRahulId = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
+    static let mockPriyaId = UUID(uuidString: "00000000-0000-0000-0000-000000000002")!
+    static let mockDeepaId = UUID(uuidString: "00000000-0000-0000-0000-000000000003")!
+    static let mockAnanyaId = UUID(uuidString: "00000000-0000-0000-0000-000000000004")!
+    static let mockVikramId = UUID(uuidString: "00000000-0000-0000-0000-000000000005")!
+    static let mockRohitId = UUID(uuidString: "00000000-0000-0000-0000-000000000006")!
+    
+    static let mockIds: Set<UUID> = [
+        mockRahulId, mockPriyaId, mockDeepaId, mockAnanyaId, mockVikramId, mockRohitId
+    ]
+    
     init(id: UUID = UUID(), name: String, tier: ClientTier, lastVisit: String, ltv: String, initial: String, isHot: Bool = false) {
         self.id = id
         self.name = name
@@ -122,6 +134,40 @@ struct Client: Identifiable, Hashable {
         self.ltv = ltv
         self.initial = initial
         self.isHot = isHot
+    }
+}
+
+extension Client {
+    init(entity: ClientEntity) {
+        self.id = entity.id
+        self.name = entity.name
+        
+        let clientTier = ClientTier(rawValue: entity.tier ?? "Standard") ?? .standard
+        self.tier = clientTier
+        
+        let hasPurchases = !(entity.productsPurchased?.isEmpty ?? true)
+        self.lastVisit = hasPurchases ? "Today" : "New Client"
+        
+        // Tier-based default LTV for premium look, but only if they have purchases
+        if hasPurchases {
+            switch clientTier {
+            case .standard:
+                self.ltv = "₹4,50,000"
+            case .vip:
+                self.ltv = "₹28,00,000"
+            case .uhnw:
+                self.ltv = "₹1,15,00,000"
+            }
+        } else {
+            self.ltv = "₹0"
+        }
+        
+        let parts = entity.name.components(separatedBy: " ")
+        let firstInit = parts.first?.prefix(1) ?? ""
+        let lastInit = parts.count > 1 ? (parts.last?.prefix(1) ?? "") : ""
+        self.initial = "\(firstInit)\(lastInit)".uppercased()
+        
+        self.isHot = (clientTier == .uhnw && hasPurchases)
     }
 }
 

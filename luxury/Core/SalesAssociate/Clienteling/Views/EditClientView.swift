@@ -21,13 +21,23 @@ struct EditClientView: View {
     @State private var dataConsent: Bool = true
     @State private var thirdPartyConsent: Bool = false
     
+    @State private var isLoading = false
+    @State private var errorMessage: String? = nil
+    @State private var showErrorAlert = false
+    @State private var clientEntity: ClientEntity? = nil
+    
+    private let clientService = ClientService()
+    
     init(client: Client) {
         self.client = client
-        _firstName = State(initialValue: client.name.components(separatedBy: " ").first ?? "")
-        _lastName = State(initialValue: client.name.components(separatedBy: " ").last ?? "")
+        let nameParts = client.name.components(separatedBy: " ")
+        _firstName = State(initialValue: nameParts.first ?? "")
+        _lastName = State(initialValue: nameParts.count > 1 ? nameParts.dropFirst().joined(separator: " ") : "")
         _selectedTier = State(initialValue: client.tier.rawValue)
+        
+        let emailPrefix = nameParts.first?.lowercased() ?? "client"
+        _email = State(initialValue: "\(emailPrefix)@example.com")
         _mobile = State(initialValue: "+91 98210 54321")
-        _email = State(initialValue: "rahul.b@example.com")
     }
     
     var body: some View {
@@ -48,10 +58,11 @@ struct EditClientView: View {
                     Spacer()
                     
                     Button("Save") {
-                        dismiss()
+                        updateClient()
                     }
                     .font(AppFonts.sansSerif(size: 13))
                     .foregroundStyle(AppColors.gold)
+                    .disabled(isLoading)
                 }
                 .padding(.horizontal, 24)
                 .padding(.vertical, 16)
@@ -160,7 +171,7 @@ struct EditClientView: View {
                 }
                 
                 VStack(spacing: 0) {
-                    CustomButton(title: "Save Changes", action: { dismiss() })
+                    CustomButton(title: "Save Changes", isLoading: isLoading, action: { updateClient() })
                         .padding(.horizontal, 24)
                         .padding(.vertical, 14)
                         .padding(.bottom, 38)
@@ -171,6 +182,88 @@ struct EditClientView: View {
         .toolbar(.hidden, for: .navigationBar)
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .tabBar)
+        .task {
+            await loadClientData()
+        }
+        .alert("Error Saving Client", isPresented: $showErrorAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            if let errorMessage = errorMessage {
+                Text(errorMessage)
+            }
+        }
+    }
+    
+    private func loadClientData() async {
+        isLoading = true
+        do {
+            let entity = try await clientService.fetchClient(id: client.id)
+            await MainActor.run {
+                self.clientEntity = entity
+                self.firstName = entity.name.components(separatedBy: " ").first ?? ""
+                self.lastName = entity.name.components(separatedBy: " ").dropFirst().joined(separator: " ")
+                self.email = entity.email
+                self.mobile = entity.phone ?? ""
+                self.selectedTier = entity.tier ?? "Standard"
+                self.isLoading = false
+            }
+        } catch {
+            await MainActor.run {
+                self.isLoading = false
+                print("Error loading client from database: \(error)")
+            }
+        }
+    }
+    
+    private func updateClient() {
+        let trimmedFirst = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedLast = lastName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedMobile = mobile.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard !trimmedFirst.isEmpty else {
+            errorMessage = "First name is required."
+            showErrorAlert = true
+            return
+        }
+        
+        guard !trimmedEmail.isEmpty else {
+            errorMessage = "Email is required."
+            showErrorAlert = true
+            return
+        }
+        
+        let fullName = trimmedLast.isEmpty ? trimmedFirst : "\(trimmedFirst) \(trimmedLast)"
+        
+        let updatedEntity = ClientEntity(
+            id: client.id,
+            name: fullName,
+            email: trimmedEmail,
+            phone: trimmedMobile.isEmpty ? nil : trimmedMobile,
+            dob: clientEntity?.dob,
+            tier: selectedTier,
+            productsPurchased: clientEntity?.productsPurchased ?? [],
+            createdAt: clientEntity?.createdAt ?? Date(),
+            updatedAt: Date()
+        )
+        
+        isLoading = true
+        Task {
+            do {
+                try await clientService.updateClient(updatedEntity)
+                await MainActor.run {
+                    isLoading = false
+                    NotificationCenter.default.post(name: NSNotification.Name("RefreshClients"), object: nil)
+                    dismiss()
+                }
+            } catch {
+                await MainActor.run {
+                    isLoading = false
+                    errorMessage = error.localizedDescription
+                    showErrorAlert = true
+                }
+            }
+        }
     }
 }
 

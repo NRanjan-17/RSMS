@@ -65,7 +65,7 @@ struct ClientProfileView: View {
                             
                             HStack(spacing: 8) {
                                 StatusBadge(text: viewModel.client.tier.rawValue, status: viewModel.client.tier.badgeStatus)
-                                Text("Maison Mumbai · Since Nov 2019")
+                                Text(viewModel.joinedDateText)
                                     .font(AppFonts.sansSerif(size: 11))
                                     .foregroundStyle(AppColors.secondary)
                             }
@@ -172,6 +172,19 @@ struct ClientProfileView: View {
             Text("Add a quick note for \(viewModel.client.name)")
         }
         .toolbar(.hidden, for: .navigationBar)
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshClients"))) { _ in
+            Task {
+                do {
+                    let updatedEntity = try await ClientService().fetchClient(id: viewModel.client.id)
+                    let updatedClient = Client(entity: updatedEntity)
+                    await MainActor.run {
+                        viewModel.client = updatedClient
+                    }
+                } catch {
+                    print("Error reloading profile details: \(error)")
+                }
+            }
+        }
     }
 }
 
@@ -194,17 +207,24 @@ private struct ClientOverviewTab: View {
                     .foregroundStyle(AppColors.secondary)
                     .kerning(1.5)
                 
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        ForEach(viewModel.preferences, id: \.self) { pref in
-                            Text(pref)
-                                .font(AppFonts.sansSerif(size: 11))
-                                .foregroundStyle(AppColors.gold)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 5)
-                                .background(AppColors.gold08)
-                                .clipShape(Capsule())
-                                .overlay(Capsule().stroke(AppColors.gold15, lineWidth: 0.5))
+                if viewModel.preferences.isEmpty {
+                    Text("No preferences specified")
+                        .font(AppFonts.sansSerif(size: 12))
+                        .foregroundStyle(AppColors.secondary)
+                        .padding(.vertical, 4)
+                } else {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(viewModel.preferences, id: \.self) { pref in
+                                Text(pref)
+                                    .font(AppFonts.sansSerif(size: 11))
+                                    .foregroundStyle(AppColors.gold)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 5)
+                                    .background(AppColors.gold08)
+                                    .clipShape(Capsule())
+                                    .overlay(Capsule().stroke(AppColors.gold15, lineWidth: 0.5))
+                            }
                         }
                     }
                 }
@@ -216,130 +236,139 @@ private struct ClientOverviewTab: View {
                     .foregroundStyle(AppColors.secondary)
                     .kerning(1.5)
                 
-                VStack(spacing: 10) {
-                    let sortedTickets = viewModel.tickets.sorted { $0.isActive && !$1.isActive }
-                    ForEach(sortedTickets) { ticket in
-                        Button(action: onTicketTap) {
-                            HStack(spacing: 12) {
-                                Circle()
-                                    .fill(ticket.isActive ? AppColors.gold : AppColors.tertiary)
-                                    .frame(width: 8, height: 8)
-                                
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(ticket.title)
-                                        .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                                        .foregroundStyle(.white)
-                                    Text("\(ticket.status) · \(ticket.date)")
-                                        .font(AppFonts.sansSerif(size: 11))
-                                        .foregroundStyle(AppColors.secondary)
+                if viewModel.tickets.isEmpty {
+                    Text("No active service tickets")
+                        .font(AppFonts.sansSerif(size: 12))
+                        .foregroundStyle(AppColors.secondary)
+                        .padding(.vertical, 4)
+                } else {
+                    VStack(spacing: 10) {
+                        let sortedTickets = viewModel.tickets.sorted { $0.isActive && !$1.isActive }
+                        ForEach(sortedTickets) { ticket in
+                            Button(action: onTicketTap) {
+                                HStack(spacing: 12) {
+                                    Circle()
+                                        .fill(ticket.isActive ? AppColors.gold : AppColors.tertiary)
+                                        .frame(width: 8, height: 8)
+                                    
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(ticket.title)
+                                            .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                            .foregroundStyle(.white)
+                                        Text("\(ticket.status) · \(ticket.date)")
+                                            .font(AppFonts.sansSerif(size: 11))
+                                            .foregroundStyle(AppColors.secondary)
+                                    }
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(AppColors.tertiary)
                                 }
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .font(.system(size: 12))
-                                    .foregroundStyle(AppColors.tertiary)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 12)
+                                .background(AppColors.surface)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
                             }
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 12)
-                            .background(AppColors.surface)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
                     }
                 }
             }
             
-            VStack(alignment: .leading, spacing: 12) {
-                Text("UPCOMING")
-                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                    .foregroundStyle(AppColors.secondary)
-                    .kerning(1.5)
+            if viewModel.hasMockData {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("UPCOMING")
+                        .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                        .foregroundStyle(AppColors.secondary)
+                        .kerning(1.5)
+                    
+                    HStack(spacing: 10) {
+                        Text("Today 2:30 PM")
+                            .font(AppFonts.sansSerif(size: 10, weight: .medium))
+                            .foregroundStyle(AppColors.gold)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(AppColors.gold08)
+                            .clipShape(RoundedRectangle(cornerRadius: 7))
+                        
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Watch Consultation")
+                                .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                .foregroundStyle(.white)
+                            Text("Arjun Singh · In-Store")
+                                .font(AppFonts.sansSerif(size: 11))
+                                .foregroundStyle(AppColors.secondary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12))
+                            .foregroundStyle(AppColors.tertiary)
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 12)
+                    .background(AppColors.surface)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                }
+                
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("LAST PURCHASE")
+                        .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                        .foregroundStyle(AppColors.secondary)
+                        .kerning(1.5)
+                    
+                    HStack(spacing: 12) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(AppColors.surface2)
+                                .frame(width: 42, height: 42)
+                            Image(systemName: "circle.grid.cross")
+                                .font(.system(size: 16))
+                                .foregroundStyle(AppColors.gold)
+                                .opacity(0.4)
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Patek Philippe Nautilus 5711/1A")
+                                .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                .foregroundStyle(.white)
+                            Text("₹82,00,000 · March 2025")
+                                .font(AppFonts.sansSerif(size: 11))
+                                .foregroundStyle(AppColors.gold)
+                        }
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 12)
+                    .background(AppColors.surface)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                }
                 
                 HStack(spacing: 10) {
-                    Text("Today 2:30 PM")
-                        .font(AppFonts.sansSerif(size: 10, weight: .medium))
-                        .foregroundStyle(AppColors.gold)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(AppColors.gold08)
-                        .clipShape(RoundedRectangle(cornerRadius: 7))
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(AppColors.gold08)
+                            .frame(width: 36, height: 36)
+                        Text("🎂")
+                            .font(.system(size: 16))
+                    }
                     
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Watch Consultation")
-                            .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                            .foregroundStyle(.white)
-                        Text("Arjun Singh · In-Store")
+                        Text("Birthday in 33 days")
+                            .font(AppFonts.sansSerif(size: 12, weight: .medium))
+                            .foregroundStyle(AppColors.gold)
+                        Text("June 15 · Consider Cartier Love Bracelet")
                             .font(AppFonts.sansSerif(size: 11))
                             .foregroundStyle(AppColors.secondary)
                     }
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 12))
-                        .foregroundStyle(AppColors.tertiary)
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 12)
-                .background(AppColors.surface)
+                .background(AppColors.gold.opacity(0.05))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold50, lineWidth: 0.5))
             }
-            
-            VStack(alignment: .leading, spacing: 12) {
-                Text("LAST PURCHASE")
-                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                    .foregroundStyle(AppColors.secondary)
-                    .kerning(1.5)
-                
-                HStack(spacing: 12) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(AppColors.surface2)
-                            .frame(width: 42, height: 42)
-                        Image(systemName: "circle.grid.cross")
-                            .font(.system(size: 16))
-                            .foregroundStyle(AppColors.gold)
-                            .opacity(0.4)
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Patek Philippe Nautilus 5711/1A")
-                            .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                            .foregroundStyle(.white)
-                        Text("₹82,00,000 · March 2025")
-                            .font(AppFonts.sansSerif(size: 11))
-                            .foregroundStyle(AppColors.gold)
-                    }
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 12)
-                .background(AppColors.surface)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
-            }
-            
-            HStack(spacing: 10) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(AppColors.gold08)
-                        .frame(width: 36, height: 36)
-                    Text("🎂")
-                        .font(.system(size: 16))
-                }
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Birthday in 33 days")
-                        .font(AppFonts.sansSerif(size: 12, weight: .medium))
-                        .foregroundStyle(AppColors.gold)
-                    Text("June 15 · Consider Cartier Love Bracelet")
-                        .font(AppFonts.sansSerif(size: 11))
-                        .foregroundStyle(AppColors.secondary)
-                }
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
-            .background(AppColors.gold.opacity(0.05))
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold50, lineWidth: 0.5))
         }
     }
 }
@@ -371,38 +400,54 @@ private struct QuickActionButton: View {
 private struct ClientHistoryTab: View {
     let viewModel: ClientDetailViewModel
     var body: some View {
-        VStack(spacing: 1) {
+        VStack {
             let purchases = viewModel.purchases
-            ForEach(purchases, id: \.id) { p in
-                HStack(spacing: 12) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 9)
-                            .fill(AppColors.surface2)
-                            .frame(width: 36, height: 36)
-                        Image(systemName: "handbag")
-                            .font(.system(size: 14))
-                            .foregroundStyle(AppColors.gold)
-                            .opacity(0.4)
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(p.name)
-                            .font(AppFonts.sansSerif(size: 12, weight: .medium))
-                            .foregroundStyle(.white)
-                        Text(p.date)
-                            .font(AppFonts.sansSerif(size: 11))
-                            .foregroundStyle(AppColors.secondary)
-                    }
-                    
-                    Spacer()
-                    
-                    Text(p.price)
-                        .font(AppFonts.serif(size: 13, weight: .semibold))
-                        .foregroundStyle(AppColors.gold)
+            if purchases.isEmpty {
+                VStack(spacing: 8) {
+                    Image(systemName: "handbag")
+                        .font(.system(size: 24))
+                        .foregroundStyle(AppColors.gold.opacity(0.5))
+                    Text("No purchase history yet")
+                        .font(AppFonts.sansSerif(size: 13))
+                        .foregroundStyle(AppColors.secondary)
                 }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 13)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 24)
                 .background(AppColors.surface)
+            } else {
+                VStack(spacing: 1) {
+                    ForEach(purchases, id: \.id) { p in
+                        HStack(spacing: 12) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 9)
+                                    .fill(AppColors.surface2)
+                                    .frame(width: 36, height: 36)
+                                Image(systemName: "handbag")
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(AppColors.gold)
+                                    .opacity(0.4)
+                            }
+                            
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(p.name)
+                                    .font(AppFonts.sansSerif(size: 12, weight: .medium))
+                                    .foregroundStyle(.white)
+                                Text(p.date)
+                                    .font(AppFonts.sansSerif(size: 11))
+                                    .foregroundStyle(AppColors.secondary)
+                            }
+                            
+                            Spacer()
+                            
+                            Text(p.price)
+                                .font(AppFonts.serif(size: 13, weight: .semibold))
+                                .foregroundStyle(AppColors.gold)
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 13)
+                        .background(AppColors.surface)
+                    }
+                }
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -413,48 +458,66 @@ private struct ClientHistoryTab: View {
 private struct ClientWishlistTab: View {
     let viewModel: ClientDetailViewModel
     var body: some View {
-        VStack(spacing: 10) {
+        VStack {
             let wishlist = viewModel.wishlist
-            ForEach(wishlist, id: \.id) { w in
-                HStack(spacing: 12) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(AppColors.surface2)
-                            .frame(width: 44, height: 44)
-                        Image(systemName: "circle.grid.cross")
-                            .font(.system(size: 18))
-                            .foregroundStyle(AppColors.gold)
-                            .opacity(0.4)
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(w.brand.uppercased())
-                            .font(AppFonts.sansSerif(size: 10))
-                            .foregroundStyle(AppColors.gold)
-                            .kerning(1)
-                        Text(w.name)
-                            .font(AppFonts.serif(size: 14, weight: .medium))
-                            .foregroundStyle(.white)
-                        Text(w.price)
-                            .font(AppFonts.serif(size: 15, weight: .semibold))
-                            .foregroundStyle(AppColors.gold)
-                    }
-                    
-                    Spacer()
-                    
-                    Button("Add") {}
-                        .font(AppFonts.sansSerif(size: 11, weight: .medium))
-                        .foregroundStyle(AppColors.background)
-                        .padding(.horizontal, 12)
-                        .frame(height: 32)
-                        .background(AppColors.gold)
-                        .clipShape(RoundedRectangle(cornerRadius: 9))
+            if wishlist.isEmpty {
+                VStack(spacing: 8) {
+                    Image(systemName: "circle.grid.cross")
+                        .font(.system(size: 24))
+                        .foregroundStyle(AppColors.gold.opacity(0.5))
+                    Text("No items in wishlist yet")
+                        .font(AppFonts.sansSerif(size: 13))
+                        .foregroundStyle(AppColors.secondary)
                 }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 12)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 24)
                 .background(AppColors.surface)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+            } else {
+                VStack(spacing: 10) {
+                    ForEach(wishlist, id: \.id) { w in
+                        HStack(spacing: 12) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(AppColors.surface2)
+                                    .frame(width: 44, height: 44)
+                                Image(systemName: "circle.grid.cross")
+                                    .font(.system(size: 18))
+                                    .foregroundStyle(AppColors.gold)
+                                    .opacity(0.4)
+                            }
+                            
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(w.brand.uppercased())
+                                    .font(AppFonts.sansSerif(size: 10))
+                                    .foregroundStyle(AppColors.gold)
+                                    .kerning(1)
+                                Text(w.name)
+                                    .font(AppFonts.serif(size: 14, weight: .medium))
+                                    .foregroundStyle(.white)
+                                Text(w.price)
+                                    .font(AppFonts.serif(size: 15, weight: .semibold))
+                                    .foregroundStyle(AppColors.gold)
+                            }
+                            
+                            Spacer()
+                            
+                            Button("Add") {}
+                                .font(AppFonts.sansSerif(size: 11, weight: .medium))
+                                .foregroundStyle(AppColors.background)
+                                .padding(.horizontal, 12)
+                                .frame(height: 32)
+                                .background(AppColors.gold)
+                                .clipShape(RoundedRectangle(cornerRadius: 9))
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 12)
+                        .background(AppColors.surface)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                    }
+                }
             }
         }
     }
@@ -463,27 +526,45 @@ private struct ClientWishlistTab: View {
 private struct ClientNotesTab: View {
     let viewModel: ClientDetailViewModel
     var body: some View {
-        VStack(spacing: 10) {
+        VStack {
             let notes = viewModel.notes
-            ForEach(notes, id: \.id) { n in
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("\"\(n.note)\"")
-                        .font(AppFonts.sansSerif(size: 13, weight: .light))
-                        .foregroundStyle(.white)
-                        .lineSpacing(4)
-                    
-                    HStack(spacing: 6) {
-                        Circle().fill(AppColors.gold).frame(width: 5, height: 5).opacity(0.6)
-                        Text("\(n.author) · \(n.date)")
-                        Text("· Encrypted").foregroundStyle(AppColors.tertiary)
-                    }
-                    .font(AppFonts.sansSerif(size: 10))
-                    .foregroundStyle(AppColors.secondary)
+            if notes.isEmpty {
+                VStack(spacing: 8) {
+                    Image(systemName: "square.and.pencil")
+                        .font(.system(size: 24))
+                        .foregroundStyle(AppColors.gold.opacity(0.5))
+                    Text("No notes recorded yet")
+                        .font(AppFonts.sansSerif(size: 13))
+                        .foregroundStyle(AppColors.secondary)
                 }
-                .padding(14)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 24)
                 .background(AppColors.surface)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+            } else {
+                VStack(spacing: 10) {
+                    ForEach(notes, id: \.id) { n in
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("\"\(n.note)\"")
+                                .font(AppFonts.sansSerif(size: 13, weight: .light))
+                                .foregroundStyle(.white)
+                                .lineSpacing(4)
+                            
+                            HStack(spacing: 6) {
+                                Circle().fill(AppColors.gold).frame(width: 5, height: 5).opacity(0.6)
+                                Text("\(n.author) · \(n.date)")
+                                Text("· Encrypted").foregroundStyle(AppColors.tertiary)
+                            }
+                            .font(AppFonts.sansSerif(size: 10))
+                            .foregroundStyle(AppColors.secondary)
+                        }
+                        .padding(14)
+                        .background(AppColors.surface)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                    }
+                }
             }
         }
     }
