@@ -18,7 +18,17 @@ final class BarcodeScanViewModel {
     
     var isScanning = true
     
+    let scannerService = ScannerService()
+    
     private let client = SupabaseManager.shared.client
+    
+    init() {
+        scannerService.onScannedCode = { [weak self] code in
+            Task { @MainActor in
+                self?.lookupBarcode(code)
+            }
+        }
+    }
     
     func lookupBarcode(_ barcode: String) {
         guard !isLoading else { return }
@@ -30,7 +40,7 @@ final class BarcodeScanViewModel {
         Task {
             do {
                 // 1. Find product by barcode
-                let productsResponse: [ProductEntity] = try await client.from("catalogs")
+                let productsResponse: [ProductEntity] = try await client.from("products")
                     .select()
                     .eq("bar_code", value: barcode)
                     .execute()

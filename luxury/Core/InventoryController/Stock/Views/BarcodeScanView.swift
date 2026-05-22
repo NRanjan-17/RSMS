@@ -37,9 +37,7 @@ struct BarcodeScanView: View {
                 // Scanner Area
                 ZStack {
                     if viewModel.isScanning {
-                        QRScannerView { code in
-                            viewModel.lookupBarcode(code)
-                        }
+                        QRScannerView(scannerService: viewModel.scannerService)
                         .clipShape(RoundedRectangle(cornerRadius: 24))
                         .padding(.horizontal, 24)
                         
