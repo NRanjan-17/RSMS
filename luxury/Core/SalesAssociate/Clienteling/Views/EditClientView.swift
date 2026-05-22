@@ -35,9 +35,18 @@ struct EditClientView: View {
         _lastName = State(initialValue: nameParts.count > 1 ? nameParts.dropFirst().joined(separator: " ") : "")
         _selectedTier = State(initialValue: client.tier.rawValue)
         
-        let emailPrefix = nameParts.first?.lowercased() ?? "client"
-        _email = State(initialValue: "\(emailPrefix)@example.com")
-        _mobile = State(initialValue: "+91 98210 54321")
+        if let clientEmail = client.email, !clientEmail.isEmpty {
+            _email = State(initialValue: clientEmail)
+        } else {
+            let emailPrefix = nameParts.first?.lowercased() ?? "client"
+            _email = State(initialValue: "\(emailPrefix)@example.com")
+        }
+        
+        if let clientPhone = client.phone, !clientPhone.isEmpty {
+            _mobile = State(initialValue: clientPhone)
+        } else {
+            _mobile = State(initialValue: "+91 98210 54321")
+        }
     }
     
     var body: some View {

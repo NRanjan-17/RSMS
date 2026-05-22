@@ -113,6 +113,8 @@ struct Client: Identifiable, Hashable {
     let ltv: String
     let initial: String
     let isHot: Bool
+    let phone: String?
+    let email: String?
     
     // Stable Mock IDs
     static let mockRahulId = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
@@ -126,7 +128,7 @@ struct Client: Identifiable, Hashable {
         mockRahulId, mockPriyaId, mockDeepaId, mockAnanyaId, mockVikramId, mockRohitId
     ]
     
-    init(id: UUID = UUID(), name: String, tier: ClientTier, lastVisit: String, ltv: String, initial: String, isHot: Bool = false) {
+    init(id: UUID = UUID(), name: String, tier: ClientTier, lastVisit: String, ltv: String, initial: String, isHot: Bool = false, phone: String? = nil, email: String? = nil) {
         self.id = id
         self.name = name
         self.tier = tier
@@ -134,6 +136,8 @@ struct Client: Identifiable, Hashable {
         self.ltv = ltv
         self.initial = initial
         self.isHot = isHot
+        self.phone = phone
+        self.email = email
     }
 }
 
@@ -168,6 +172,8 @@ extension Client {
         self.initial = "\(firstInit)\(lastInit)".uppercased()
         
         self.isHot = (clientTier == .uhnw && hasPurchases)
+        self.phone = entity.phone
+        self.email = entity.email
     }
 }
 
