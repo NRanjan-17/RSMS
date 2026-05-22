@@ -15,12 +15,16 @@ final class ClientDetailViewModel {
     var client: Client {
         didSet {
             refreshWishlist()
+            refreshSizes()
+            refreshPurchases()
         }
     }
     var selectedTab: String = "overview"
     let tabs = [("overview", "Overview"), ("history", "History"), ("wishlist", "Wishlist"), ("notes", "Notes")]
     
     var wishlistItems: [ClientWishlistItem] = []
+    var sizes: ClientSizePreference = ClientSizePreference()
+    var purchases: [ClientPurchase] = []
     
     var hasMockData: Bool {
         return Client.mockIds.contains(client.id)
@@ -39,28 +43,78 @@ final class ClientDetailViewModel {
     
     var stats: [(String, String)] {
         let countText = String(wishlistItems.count)
-        if hasMockData {
-            return [
-                (client.ltv, "Lifetime Value"),
-                ("28", "Purchases"),
-                (countText, "Wishlist")
-            ]
-        } else {
-            return [
-                ("₹0", "Lifetime Value"),
-                ("0", "Purchases"),
-                (countText, "Wishlist")
-            ]
-        }
+        let purchaseCountText = String(purchases.count)
+        return [
+            (client.ltv, "Lifetime Value"),
+            (purchaseCountText, "Purchases"),
+            (countText, "Wishlist")
+        ]
     }
     
     init(client: Client = ClientDetailViewModel.defaultClient) {
         self.client = client
         refreshWishlist()
+        refreshSizes()
+        refreshPurchases()
     }
     
     func refreshWishlist() {
         self.wishlistItems = WishlistService.shared.fetchWishlist(clientId: client.id)
+    }
+    
+    func refreshSizes() {
+        self.sizes = SizePreferenceService.shared.fetchSizePreference(clientId: client.id)
+    }
+    
+    func refreshPurchases() {
+        self.purchases = PurchaseHistoryService.shared.fetchPurchases(clientId: client.id)
+    }
+    
+    func saveSizes(_ newSizes: ClientSizePreference) {
+        SizePreferenceService.shared.saveSizePreference(newSizes, for: client.id)
+        self.sizes = newSizes
+    }
+    
+    private func parsePrice(_ priceStr: String) -> Int {
+        let cleanStr = priceStr.filter { $0.isNumber }
+        return Int(cleanStr) ?? 0
+    }
+    
+    private func formatIndianCurrency(_ value: Int) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.locale = Locale(identifier: "en_IN")
+        if let formatted = formatter.string(from: NSNumber(value: value)) {
+            return "₹\(formatted)"
+        }
+        return "₹\(value)"
+    }
+    
+    func addClientPurchase(brand: String, name: String, price: String) {
+        let fullName = brand.isEmpty ? name : "\(brand) \(name)"
+        PurchaseHistoryService.shared.addPurchase(clientId: client.id, name: fullName, price: price)
+        
+        let currentLtvVal = parsePrice(client.ltv)
+        let addedVal = parsePrice(price)
+        let newLtvVal = currentLtvVal + addedVal
+        let newLtvStr = formatIndianCurrency(newLtvVal)
+        
+        UserDefaults.standard.set(newLtvStr, forKey: "luxury_ltv_\(client.id.uuidString)")
+        
+        let updatedClient = Client(
+            id: client.id,
+            name: client.name,
+            tier: client.tier,
+            lastVisit: "Today",
+            ltv: newLtvStr,
+            initial: client.initial,
+            isHot: client.isHot,
+            phone: client.phone,
+            email: client.email
+        )
+        self.client = updatedClient
+        
+        NotificationCenter.default.post(name: NSNotification.Name("RefreshClients"), object: nil)
     }
     
     func addProductToWishlist(brand: String, name: String, price: String) async {
@@ -86,17 +140,7 @@ final class ClientDetailViewModel {
         }
     }
     
-    var purchases: [ClientPurchase] {
-        if hasMockData {
-            return [
-                ClientPurchase(name: "Patek Philippe Nautilus 5711/1A", price: "₹82,00,000", date: "Mar 2025"),
-                ClientPurchase(name: "Bottega Veneta The Pouch", price: "₹2,20,000", date: "Jan 2025"),
-                ClientPurchase(name: "Rolex Submariner Date 126610", price: "₹14,50,000", date: "Nov 2024")
-            ]
-        } else {
-            return []
-        }
-    }
+    // purchases is now stored and updated dynamically in the purchases array property
     
     var wishlist: [GroupedWishlistItem] {
         var groups: [String: [ClientWishlistItem]] = [:]

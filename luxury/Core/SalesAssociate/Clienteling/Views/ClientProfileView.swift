@@ -231,6 +231,21 @@ private struct ClientOverviewTab: View {
             }
             
             VStack(alignment: .leading, spacing: 12) {
+                Text("SIZE PREFERENCES")
+                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                    .foregroundStyle(AppColors.secondary)
+                    .kerning(1.5)
+                
+                let sizes = viewModel.sizes
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                    SizeCard(title: "Ring", value: sizes.ringSize.isEmpty ? "—" : sizes.ringSize, icon: "circle.circle")
+                    SizeCard(title: "Wrist", value: sizes.wristSize.isEmpty ? "—" : sizes.wristSize, icon: "hand.raised")
+                    SizeCard(title: "Apparel", value: sizes.apparelSize.isEmpty ? "—" : sizes.apparelSize, icon: "tshirt")
+                    SizeCard(title: "Shoes", value: sizes.shoeSize.isEmpty ? "—" : sizes.shoeSize, icon: "shoeprints.fill")
+                }
+            }
+            
+            VStack(alignment: .leading, spacing: 12) {
                 Text("TICKET TRACKING")
                     .font(AppFonts.sansSerif(size: 10, weight: .bold))
                     .foregroundStyle(AppColors.secondary)
@@ -399,21 +414,59 @@ private struct QuickActionButton: View {
 
 private struct ClientHistoryTab: View {
     let viewModel: ClientDetailViewModel
+    @State private var showPurchasePicker = false
+    
     var body: some View {
-        VStack {
+        VStack(spacing: 10) {
+            HStack {
+                Spacer()
+                
+                Button(action: {
+                    showPurchasePicker = true
+                }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "plus")
+                        Text("Record Purchase")
+                    }
+                    .font(AppFonts.sansSerif(size: 11, weight: .semibold))
+                    .foregroundStyle(AppColors.gold)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(AppColors.gold08)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(AppColors.gold15, lineWidth: 0.5))
+                }
+            }
+            .padding(.bottom, 2)
+            
             let purchases = viewModel.purchases
             if purchases.isEmpty {
-                VStack(spacing: 8) {
+                VStack(spacing: 12) {
                     Image(systemName: "handbag")
                         .font(.system(size: 24))
                         .foregroundStyle(AppColors.gold.opacity(0.5))
                     Text("No purchase history yet")
                         .font(AppFonts.sansSerif(size: 13))
                         .foregroundStyle(AppColors.secondary)
+                    
+                    Button(action: {
+                        showPurchasePicker = true
+                    }) {
+                        Text("Record Purchase")
+                            .font(AppFonts.sansSerif(size: 12, weight: .semibold))
+                            .foregroundStyle(AppColors.background)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(AppColors.gold)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+                    .padding(.top, 4)
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 24)
+                .padding(.vertical, 32)
                 .background(AppColors.surface)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
             } else {
                 VStack(spacing: 1) {
                     ForEach(purchases, id: \.id) { p in
@@ -448,10 +501,13 @@ private struct ClientHistoryTab: View {
                         .background(AppColors.surface)
                     }
                 }
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+        .sheet(isPresented: $showPurchasePicker) {
+            PurchaseProductSelectionView(viewModel: viewModel)
+        }
     }
 }
 
@@ -777,5 +833,170 @@ private struct ClientNotesTab: View {
                 }
             }
         }
+    }
+}
+
+private struct SizeCard: View {
+    let title: String
+    let value: String
+    let icon: String
+    
+    var body: some View {
+        HStack(spacing: 10) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(AppColors.gold08)
+                    .frame(width: 30, height: 30)
+                Image(systemName: icon)
+                    .font(.system(size: 13))
+                    .foregroundStyle(AppColors.gold)
+            }
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title.uppercased())
+                    .font(AppFonts.sansSerif(size: 8, weight: .bold))
+                    .foregroundStyle(AppColors.secondary)
+                    .kerning(0.5)
+                Text(value)
+                    .font(AppFonts.sansSerif(size: 12, weight: .medium))
+                    .foregroundStyle(.white)
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(AppColors.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(AppColors.gold15, lineWidth: 0.5))
+    }
+}
+
+private struct PurchaseProductSelectionView: View {
+    let viewModel: ClientDetailViewModel
+    @Environment(\.dismiss) private var dismiss
+    @State private var searchVM = SellingViewModel()
+    
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                AppColors.background.ignoresSafeArea()
+                
+                VStack(spacing: 0) {
+                    // Search Bar
+                    HStack(spacing: 12) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundStyle(AppColors.tertiary)
+                        
+                        TextField("Search by name or brand…", text: $searchVM.searchText)
+                            .font(AppFonts.sansSerif(size: 14))
+                            .foregroundStyle(AppColors.text)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(AppColors.surface)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(AppColors.gold15, lineWidth: 0.5)
+                    )
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 16)
+                    
+                    // Categories
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(searchVM.categories, id: \.self) { cat in
+                                let isSelected = searchVM.selectedCategory == cat
+                                Text(cat)
+                                    .font(AppFonts.sansSerif(size: 11, weight: isSelected ? .medium : .light))
+                                    .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(isSelected ? AppColors.gold : Color.clear)
+                                    .clipShape(Capsule())
+                                    .overlay(
+                                        Capsule()
+                                            .stroke(isSelected ? Color.clear : AppColors.gold15, lineWidth: 0.5)
+                                    )
+                                    .onTapGesture {
+                                        withAnimation {
+                                            searchVM.selectedCategory = cat
+                                        }
+                                    }
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 16)
+                    
+                    // Product List
+                    ScrollView {
+                        VStack(spacing: 12) {
+                            ForEach(searchVM.filteredProducts) { product in
+                                Button(action: {
+                                    viewModel.addClientPurchase(
+                                        brand: product.brand,
+                                        name: product.name,
+                                        price: product.price
+                                    )
+                                    dismiss()
+                                }) {
+                                    HStack(spacing: 12) {
+                                        ZStack {
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .fill(AppColors.surface2)
+                                                .frame(width: 48, height: 48)
+                                            Image(systemName: "circle.grid.cross")
+                                                .font(.system(size: 16))
+                                                .foregroundStyle(AppColors.gold)
+                                                .opacity(0.3)
+                                        }
+                                        
+                                        VStack(alignment: .leading, spacing: 3) {
+                                            Text(product.brand.uppercased())
+                                                .font(AppFonts.sansSerif(size: 9, weight: .bold))
+                                                .foregroundStyle(AppColors.gold)
+                                                .kerning(1)
+                                            Text(product.name)
+                                                .font(AppFonts.serif(size: 14, weight: .medium))
+                                                .foregroundStyle(.white)
+                                            Text(product.price)
+                                                .font(AppFonts.sansSerif(size: 12))
+                                                .foregroundStyle(AppColors.secondary)
+                                        }
+                                        Spacer()
+                                        Image(systemName: "plus.circle.fill")
+                                            .font(.system(size: 20))
+                                            .foregroundStyle(AppColors.gold)
+                                    }
+                                    .padding(12)
+                                    .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(AppColors.gold15, lineWidth: 0.5)
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 24)
+                    }
+                }
+            }
+            .navigationTitle("Record Purchase")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                    .font(AppFonts.sansSerif(size: 14))
+                    .foregroundStyle(AppColors.gold)
+                }
+            }
+        }
+        .preferredColorScheme(.dark)
     }
 }
