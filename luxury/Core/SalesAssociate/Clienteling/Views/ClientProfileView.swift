@@ -457,25 +457,62 @@ private struct ClientHistoryTab: View {
 
 private struct ClientWishlistTab: View {
     let viewModel: ClientDetailViewModel
+    @State private var showProductPicker = false
+    
     var body: some View {
         VStack {
             let wishlist = viewModel.wishlist
             if wishlist.isEmpty {
-                VStack(spacing: 8) {
-                    Image(systemName: "circle.grid.cross")
+                VStack(spacing: 12) {
+                    Image(systemName: "heart.fill")
                         .font(.system(size: 24))
                         .foregroundStyle(AppColors.gold.opacity(0.5))
+                    
                     Text("No items in wishlist yet")
                         .font(AppFonts.sansSerif(size: 13))
                         .foregroundStyle(AppColors.secondary)
+                    
+                    Button(action: {
+                        showProductPicker = true
+                    }) {
+                        Text("Add to Wishlist")
+                            .font(AppFonts.sansSerif(size: 12, weight: .semibold))
+                            .foregroundStyle(AppColors.background)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(AppColors.gold)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+                    .padding(.top, 4)
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 24)
+                .padding(.vertical, 32)
                 .background(AppColors.surface)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
             } else {
                 VStack(spacing: 10) {
+                    HStack {
+                        Spacer()
+                        
+                        Button(action: {
+                            showProductPicker = true
+                        }) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "plus")
+                                Text("Add Item")
+                            }
+                            .font(AppFonts.sansSerif(size: 11, weight: .semibold))
+                            .foregroundStyle(AppColors.gold)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(AppColors.gold08)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(AppColors.gold15, lineWidth: 0.5))
+                        }
+                    }
+                    .padding(.bottom, 6)
+                    
                     ForEach(wishlist, id: \.id) { w in
                         HStack(spacing: 12) {
                             ZStack {
@@ -503,13 +540,51 @@ private struct ClientWishlistTab: View {
                             
                             Spacer()
                             
-                            Button("Add") {}
-                                .font(AppFonts.sansSerif(size: 11, weight: .medium))
-                                .foregroundStyle(AppColors.background)
-                                .padding(.horizontal, 12)
-                                .frame(height: 32)
-                                .background(AppColors.gold)
-                                .clipShape(RoundedRectangle(cornerRadius: 9))
+                            HStack(spacing: 8) {
+                                // Minus/Trash Button
+                                Button(action: {
+                                    if let lastItem = w.originalItems.last {
+                                        Task {
+                                            await viewModel.removeProductFromWishlist(itemId: lastItem.id)
+                                        }
+                                    }
+                                }) {
+                                    Image(systemName: w.quantity == 1 ? "trash" : "minus")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundStyle(w.quantity == 1 ? Color.red.opacity(0.8) : AppColors.gold)
+                                        .frame(width: 26, height: 26)
+                                        .background(AppColors.surface)
+                                        .clipShape(Circle())
+                                }
+                                .buttonStyle(.plain)
+                                
+                                // Quantity Text
+                                Text("\(w.quantity)")
+                                    .font(AppFonts.sansSerif(size: 13, weight: .semibold))
+                                    .foregroundStyle(.white)
+                                    .frame(minWidth: 16)
+                                    .multilineTextAlignment(.center)
+                                
+                                // Plus Button
+                                Button(action: {
+                                    Task {
+                                        await viewModel.addProductToWishlist(brand: w.brand, name: w.name, price: w.price)
+                                    }
+                                }) {
+                                    Image(systemName: "plus")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundStyle(AppColors.gold)
+                                        .frame(width: 26, height: 26)
+                                        .background(AppColors.surface)
+                                        .clipShape(Circle())
+                                }
+                                .buttonStyle(.plain)
+                            }
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 4)
+                            .background(AppColors.surface2)
+                            .clipShape(Capsule())
+                            .overlay(Capsule().stroke(AppColors.gold15, lineWidth: 0.5))
                         }
                         .padding(.horizontal, 14)
                         .padding(.vertical, 12)
@@ -520,6 +595,141 @@ private struct ClientWishlistTab: View {
                 }
             }
         }
+        .sheet(isPresented: $showProductPicker) {
+            WishlistProductSelectionView(viewModel: viewModel)
+        }
+    }
+}
+
+private struct WishlistProductSelectionView: View {
+    let viewModel: ClientDetailViewModel
+    @Environment(\.dismiss) private var dismiss
+    @State private var searchVM = SellingViewModel()
+    
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                AppColors.background.ignoresSafeArea()
+                
+                VStack(spacing: 0) {
+                    // Search Bar
+                    HStack(spacing: 12) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundStyle(AppColors.tertiary)
+                        
+                        TextField("Search by name or brand…", text: $searchVM.searchText)
+                            .font(AppFonts.sansSerif(size: 14))
+                            .foregroundStyle(AppColors.text)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(AppColors.surface)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(AppColors.gold15, lineWidth: 0.5)
+                    )
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 16)
+                    
+                    // Categories
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(searchVM.categories, id: \.self) { cat in
+                                let isSelected = searchVM.selectedCategory == cat
+                                Text(cat)
+                                    .font(AppFonts.sansSerif(size: 11, weight: isSelected ? .medium : .light))
+                                    .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(isSelected ? AppColors.gold : Color.clear)
+                                    .clipShape(Capsule())
+                                    .overlay(
+                                        Capsule()
+                                            .stroke(isSelected ? Color.clear : AppColors.gold15, lineWidth: 0.5)
+                                    )
+                                    .onTapGesture {
+                                        withAnimation {
+                                            searchVM.selectedCategory = cat
+                                        }
+                                    }
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 16)
+                    
+                    // Product List
+                    ScrollView {
+                        VStack(spacing: 12) {
+                            ForEach(searchVM.filteredProducts) { product in
+                                Button(action: {
+                                    Task {
+                                        await viewModel.addProductToWishlist(
+                                            brand: product.brand,
+                                            name: product.name,
+                                            price: product.price
+                                        )
+                                        dismiss()
+                                    }
+                                }) {
+                                    HStack(spacing: 12) {
+                                        ZStack {
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .fill(AppColors.surface2)
+                                                .frame(width: 48, height: 48)
+                                            Image(systemName: "circle.grid.cross")
+                                                .font(.system(size: 16))
+                                                .foregroundStyle(AppColors.gold)
+                                                .opacity(0.3)
+                                        }
+                                        
+                                        VStack(alignment: .leading, spacing: 3) {
+                                            Text(product.brand.uppercased())
+                                                .font(AppFonts.sansSerif(size: 9, weight: .bold))
+                                                .foregroundStyle(AppColors.gold)
+                                                .kerning(1)
+                                            Text(product.name)
+                                                .font(AppFonts.serif(size: 14, weight: .medium))
+                                                .foregroundStyle(.white)
+                                            Text(product.price)
+                                                .font(AppFonts.sansSerif(size: 12))
+                                                .foregroundStyle(AppColors.secondary)
+                                        }
+                                        Spacer()
+                                        Image(systemName: "plus.circle.fill")
+                                            .font(.system(size: 20))
+                                            .foregroundStyle(AppColors.gold)
+                                    }
+                                    .padding(12)
+                                    .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(AppColors.gold15, lineWidth: 0.5)
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 24)
+                    }
+                }
+            }
+            .navigationTitle("Add to Wishlist")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                    .font(AppFonts.sansSerif(size: 14))
+                    .foregroundStyle(AppColors.gold)
+                }
+            }
+        }
+        .preferredColorScheme(.dark)
     }
 }
 

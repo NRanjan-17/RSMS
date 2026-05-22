@@ -191,11 +191,18 @@ struct ClientPurchase: Identifiable, Hashable {
     let date: String
 }
 
-struct ClientWishlistItem: Identifiable, Hashable {
-    let id: UUID = UUID()
+struct ClientWishlistItem: Identifiable, Hashable, Codable {
+    var id: UUID
     let brand: String
     let name: String
     let price: String
+    
+    init(id: UUID = UUID(), brand: String, name: String, price: String) {
+        self.id = id
+        self.brand = brand
+        self.name = name
+        self.price = price
+    }
 }
 
 struct ClientTicket: Identifiable, Hashable {

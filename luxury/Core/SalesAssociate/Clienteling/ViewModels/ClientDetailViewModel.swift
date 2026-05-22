@@ -12,9 +12,15 @@ import Observation
 final class ClientDetailViewModel {
     static let defaultClient = Client(name: "Rahul Bajaj", tier: .uhnw, lastVisit: "Today", ltv: "₹1,24,50,000", initial: "RB", isHot: true)
     
-    var client: Client
+    var client: Client {
+        didSet {
+            refreshWishlist()
+        }
+    }
     var selectedTab: String = "overview"
     let tabs = [("overview", "Overview"), ("history", "History"), ("wishlist", "Wishlist"), ("notes", "Notes")]
+    
+    var wishlistItems: [ClientWishlistItem] = []
     
     var hasMockData: Bool {
         return Client.mockIds.contains(client.id)
@@ -32,23 +38,44 @@ final class ClientDetailViewModel {
     }
     
     var stats: [(String, String)] {
+        let countText = String(wishlistItems.count)
         if hasMockData {
             return [
                 (client.ltv, "Lifetime Value"),
                 ("28", "Purchases"),
-                ("5", "Wishlist")
+                (countText, "Wishlist")
             ]
         } else {
             return [
                 ("₹0", "Lifetime Value"),
                 ("0", "Purchases"),
-                ("0", "Wishlist")
+                (countText, "Wishlist")
             ]
         }
     }
     
     init(client: Client = ClientDetailViewModel.defaultClient) {
         self.client = client
+        refreshWishlist()
+    }
+    
+    func refreshWishlist() {
+        self.wishlistItems = WishlistService.shared.fetchWishlist(clientId: client.id)
+    }
+    
+    func addProductToWishlist(brand: String, name: String, price: String) async {
+        let newItem = ClientWishlistItem(brand: brand, name: name, price: price)
+        await WishlistService.shared.addToWishlist(clientId: client.id, item: newItem)
+        await MainActor.run {
+            self.refreshWishlist()
+        }
+    }
+    
+    func removeProductFromWishlist(itemId: UUID) async {
+        await WishlistService.shared.removeFromWishlist(clientId: client.id, itemId: itemId)
+        await MainActor.run {
+            self.refreshWishlist()
+        }
     }
     
     var preferences: [String] {
@@ -71,14 +98,29 @@ final class ClientDetailViewModel {
         }
     }
     
-    var wishlist: [ClientWishlistItem] {
-        if hasMockData {
-            return [
-                ClientWishlistItem(brand: "Audemars Piguet", name: "Royal Oak 15500ST", price: "₹42,00,000"),
-                ClientWishlistItem(brand: "Hermès", name: "Kelly 28 Retourné", price: "₹12,80,000")
-            ]
-        } else {
-            return []
+    var wishlist: [GroupedWishlistItem] {
+        var groups: [String: [ClientWishlistItem]] = [:]
+        var uniqueKeys: [String] = []
+        
+        for item in wishlistItems {
+            let key = "\(item.brand.lowercased())-\(item.name.lowercased())"
+            if groups[key] == nil {
+                groups[key] = []
+                uniqueKeys.append(key)
+            }
+            groups[key]?.append(item)
+        }
+        
+        return uniqueKeys.compactMap { key in
+            guard let items = groups[key], let first = items.first else { return nil }
+            return GroupedWishlistItem(
+                id: first.id,
+                brand: first.brand,
+                name: first.name,
+                price: first.price,
+                quantity: items.count,
+                originalItems: items
+            )
         }
     }
     
@@ -104,4 +146,13 @@ final class ClientDetailViewModel {
             return []
         }
     }
+}
+
+struct GroupedWishlistItem: Identifiable, Hashable {
+    let id: UUID
+    let brand: String
+    let name: String
+    let price: String
+    let quantity: Int
+    let originalItems: [ClientWishlistItem]
 }
