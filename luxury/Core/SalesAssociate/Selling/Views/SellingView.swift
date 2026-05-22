@@ -69,9 +69,28 @@ struct SellingView: View {
                     
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
+                            // "All" button
+                            let isAllSelected = viewModel.selectedCategory == nil
+                            Text("All")
+                                .font(AppFonts.sansSerif(size: 11, weight: isAllSelected ? .medium : .light))
+                                .foregroundStyle(isAllSelected ? AppColors.background : AppColors.secondary)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(isAllSelected ? AppColors.gold : Color.clear)
+                                .clipShape(Capsule())
+                                .overlay(
+                                    Capsule()
+                                        .stroke(isAllSelected ? Color.clear : AppColors.gold15, lineWidth: 0.5)
+                                )
+                                .onTapGesture {
+                                    withAnimation {
+                                        viewModel.selectedCategory = nil
+                                    }
+                                }
+                            
                             ForEach(viewModel.categories, id: \.self) { cat in
                                 let isSelected = viewModel.selectedCategory == cat
-                                Text(cat)
+                                Text(cat.rawValue)
                                     .font(AppFonts.sansSerif(size: 11, weight: isSelected ? .medium : .light))
                                     .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
                                     .padding(.horizontal, 12)
@@ -107,9 +126,9 @@ struct SellingView: View {
                 
                 ScrollView(showsIndicators: false) {
                     LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
-                        ForEach(viewModel.filteredProducts) { product in
+                        ForEach(viewModel.filteredCatalogs) { catalog in
                             Button(action: {
-                                router.push(SARoute.productDetail(product))
+                                router.push(SARoute.catalogDetail(catalog))
                             }) {
                                 VStack(alignment: .leading, spacing: 0) {
                                     ZStack {
@@ -124,28 +143,29 @@ struct SellingView: View {
                                     }
                                     
                                     VStack(alignment: .leading, spacing: 4) {
-                                        Text(product.brand.uppercased())
+                                        Text(catalog.brand.uppercased())
                                             .font(AppFonts.sansSerif(size: 9, weight: .bold))
                                             .foregroundStyle(AppColors.gold)
                                             .kerning(1.5)
                                         
-                                        Text(product.name)
+                                        Text(catalog.name)
                                             .font(AppFonts.serif(size: 14, weight: .medium))
                                             .foregroundStyle(.white)
                                             .lineLimit(1)
                                         
-                                        Text(product.price)
+                                        Text(String(format: "$%.2f", catalog.amount))
                                             .font(AppFonts.serif(size: 15, weight: .semibold))
                                             .foregroundStyle(AppColors.gold)
                                             .padding(.top, 2)
                                         
+                                        let inStock = ((catalog.productIds?.count ?? 0) - (catalog.reserved?.count ?? 0)) > 0
                                         HStack(spacing: 4) {
                                             Circle()
-                                                .fill(product.inStock ? AppColors.success : AppColors.error)
+                                                .fill(inStock ? AppColors.success : AppColors.error)
                                                 .frame(width: 6, height: 6)
-                                            Text(product.inStock ? "In Stock" : "Out of Stock")
+                                            Text(inStock ? "In Stock" : "Out of Stock")
                                                 .font(AppFonts.sansSerif(size: 9))
-                                                .foregroundStyle(product.inStock ? AppColors.success : AppColors.error)
+                                                .foregroundStyle(inStock ? AppColors.success : AppColors.error)
                                         }
                                         .padding(.top, 4)
                                     }
@@ -168,5 +188,8 @@ struct SellingView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .onAppear {
+            viewModel.fetchData()
+        }
     }
 }

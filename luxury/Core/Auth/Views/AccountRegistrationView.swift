@@ -212,7 +212,7 @@ private struct RegistrationField: View {
             .font(AppFonts.sansSerif(size: 16, weight: .light))
             .foregroundStyle(isReadOnly ? AppColors.tertiary : AppColors.text)
             .autocorrectionDisabled()
-            .textInputAutocapitalization(.none)
+            .textInputAutocapitalization(.never)
             .keyboardType(keyboardType)
             .disabled(isReadOnly)
             .opacity(isReadOnly ? 0.6 : 1.0)

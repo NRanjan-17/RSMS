@@ -91,10 +91,10 @@ struct CorporateAdminCanvas: View {
             UserManagementView(viewModel: userManagementViewModel)
         case .catalogs:
             CatalogsView()
-        case .productForm(let editProduct):
-            ProductFormView(editProduct: editProduct)
-        case .productDetail(let summary):
-            CorporateProductDetailView(summary: summary)
+        case .catalogForm(let editCatalog):
+            CatalogFormView(editCatalog: editCatalog)
+        case .catalogDetail(let catalog):
+            CatalogDetailView(catalog: catalog)
         case .boutiqueConfig:
             BoutiqueConfigView()
         case .boutiqueConfigDetail(let boutique):

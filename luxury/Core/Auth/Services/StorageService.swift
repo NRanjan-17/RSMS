@@ -24,6 +24,12 @@ final class StorageService {
         return try client.storage.from(bucket).getPublicURL(path: path).absoluteString
     }
     
+    func uploadCatalogImage(image: PickedImageAsset) async throws -> String {
+        let path = "catalogs/\(UUID().uuidString)-\(Int(Date().timeIntervalSince1970)).\(image.fileExtension)"
+        try await upload(image: image, path: path)
+        return try client.storage.from(bucket).getPublicURL(path: path).absoluteString
+    }
+    
     private func upload(image: PickedImageAsset, path: String) async throws {
         let session = try await client.auth.session
         var request = URLRequest(url: storageObjectURL(path: path))

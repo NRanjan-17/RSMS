@@ -1,0 +1,293 @@
+//
+//  ProductFormView.swift
+//  luxury
+//
+//  Created by Gemini CLI on 21/05/26.
+//
+
+import SwiftUI
+import PhotosUI
+
+struct CatalogFormView: View {
+    @Environment(CatalogsViewModel.self) private var viewModel
+    @Environment(Router.self) private var router
+    @Environment(\.dismiss) private var dismiss
+    
+    var editCatalog: CatalogEntity?
+    
+    @State private var showingScanner = false
+    @State private var scannerService = ScannerService()
+    
+    var body: some View {
+        @Bindable var bindableViewModel = viewModel
+        
+        ZStack {
+            AppColors.background.ignoresSafeArea()
+            
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 0) {
+                    VStack(alignment: .leading, spacing: 0) {
+
+                        
+                        Text(editCatalog != nil ? "Edit\nCatalog." : "Catalog\nEntry.")
+                            .font(AppFonts.serif(size: 52, weight: .light))
+                            .italic()
+                            .foregroundStyle(AppColors.text)
+                            .lineSpacing(-5)
+                            .padding(.bottom, 16)
+                        
+                        Text(editCatalog != nil ? "Update the details for this catalog" : "Add a new catalog item")
+                            .font(AppFonts.sansSerif(size: 13, weight: .light))
+                            .foregroundStyle(AppColors.secondary)
+                            .padding(.bottom, 40)
+                    }
+                    
+                    if let errorMessage = viewModel.errorMessage {
+                        Text(errorMessage)
+                            .font(AppFonts.sansSerif(size: 12))
+                            .foregroundStyle(AppColors.error)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.bottom, 16)
+                    }
+                    
+                    // Form Fields
+                    VStack(spacing: 20) {
+                        CatalogFormTextField(title: "CATALOG NAME", text: $bindableViewModel.newName)
+                        CatalogFormTextField(title: "DESCRIPTION", text: $bindableViewModel.newDescription)
+                        CatalogFormTextField(title: "BRAND", text: $bindableViewModel.newBrand)
+                        
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("CATEGORY")
+                                .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                                .foregroundStyle(AppColors.secondary)
+                                .kerning(1.5)
+                            
+                            Menu {
+                                ForEach(CatalogCategory.allCases, id: \.self) { category in
+                                    Button(category.rawValue) {
+                                        bindableViewModel.newCategory = category
+                                    }
+                                }
+                            } label: {
+                                HStack {
+                                    Text(viewModel.newCategory.rawValue)
+                                        .font(AppFonts.sansSerif(size: 15))
+                                        .foregroundStyle(AppColors.text)
+                                    Spacer()
+                                    Image(systemName: "chevron.up.chevron.down")
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(AppColors.secondary)
+                                }
+                                .padding(.vertical, 16)
+                                .padding(.horizontal, 18)
+                                .background(AppColors.surface)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 1))
+                            }
+                        }
+                        
+                        HStack(spacing: 16) {
+                            CatalogFormTextField(title: "AMOUNT (₹)", text: $bindableViewModel.newAmount, keyboardType: .decimalPad)
+                        }
+                        
+                        if editCatalog != nil {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("STATUS")
+                                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                                    .foregroundStyle(AppColors.secondary)
+                                    .kerning(1.5)
+                                
+                                Menu {
+                                    ForEach([CatalogStatus.active, .paused], id: \.self) { status in
+                                        Button(status.rawValue) {
+                                            bindableViewModel.newStatus = status
+                                        }
+                                    }
+                                } label: {
+                                    HStack {
+                                        Text(viewModel.newStatus.rawValue)
+                                            .font(AppFonts.sansSerif(size: 15))
+                                            .foregroundStyle(viewModel.newStatus == .active ? AppColors.success : AppColors.gold)
+                                        Spacer()
+                                        Image(systemName: "chevron.up.chevron.down")
+                                            .font(.system(size: 12))
+                                            .foregroundStyle(AppColors.secondary)
+                                    }
+                                    .padding(.vertical, 16)
+                                    .padding(.horizontal, 18)
+                                    .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 1))
+                                }
+                            }
+                        }
+                    }
+                    .padding(.bottom, 32)
+                    
+                    // Product Images Section
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Text("PRODUCT IMAGES")
+                                .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                                .foregroundStyle(AppColors.secondary)
+                                .kerning(1.5)
+                            
+                            Spacer()
+                            
+                            PhotosPicker(
+                                selection: $bindableViewModel.selectedPhotoItems,
+                                maxSelectionCount: 8,
+                                matching: .images,
+                                photoLibrary: .shared()
+                            ) {
+                                Text("Select Photos (Max 8)")
+                                    .font(AppFonts.sansSerif(size: 12, weight: .semibold))
+                                    .foregroundStyle(AppColors.gold)
+                            }
+                            .onChange(of: viewModel.selectedPhotoItems) { _, _ in
+                                viewModel.loadSelectedImages()
+                            }
+                        }
+                        
+                        if !viewModel.existingImageURLs.isEmpty || !viewModel.selectedPhotoItems.isEmpty {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 12) {
+                                    ForEach(viewModel.existingImageURLs, id: \.self) { url in
+                                        AsyncImage(url: URL(string: url)) { phase in
+                                            if let image = phase.image {
+                                                image
+                                                    .resizable()
+                                                    .aspectRatio(contentMode: .fill)
+                                                    .frame(width: 80, height: 80)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                            } else {
+                                                RoundedRectangle(cornerRadius: 8)
+                                                    .fill(AppColors.surface)
+                                                    .frame(width: 80, height: 80)
+                                                    .overlay(ProgressView())
+                                            }
+                                        }
+                                    }
+                                    
+                                    ForEach(viewModel.selectedImagesData, id: \.self) { data in
+                                        if let uiImage = UIImage(data: data) {
+                                            Image(uiImage: uiImage)
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .frame(width: 80, height: 80)
+                                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                        } else {
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .fill(AppColors.surface)
+                                                .frame(width: 80, height: 80)
+                                                .overlay(
+                                                    Image(systemName: "photo")
+                                                        .foregroundStyle(AppColors.secondary)
+                                                )
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            Text("No images selected")
+                                .font(AppFonts.sansSerif(size: 14))
+                                .foregroundStyle(AppColors.tertiary)
+                                .padding(.vertical, 8)
+                        }
+                    }
+                    .padding(.bottom, 32)
+                    
+                    // Save Button
+                    if let catalog = editCatalog {
+                        CustomButton(title: "Save Changes", isLoading: viewModel.isSaving) {
+                            viewModel.updateCatalog(catalog) {
+                                router.pop()
+                            }
+                        }
+                    } else {
+                        CustomButton(title: "Scan QR & Save", icon: AnyView(Image(systemName: "qrcode.viewfinder")), isLoading: viewModel.isSaving) {
+                            showingScanner = true
+                        }
+                    }
+                    
+                    Spacer().frame(height: 40)
+                }
+                .padding(.horizontal, 28)
+            }
+        }
+        .toolbarBackground(.hidden, for: .navigationBar)
+        .navigationDestination(isPresented: $showingScanner) {
+            ZStack {
+                Color.black.ignoresSafeArea()
+                
+                VStack(spacing: 0) {
+                    QRScannerView(scannerService: scannerService)
+                        .ignoresSafeArea(edges: .bottom)
+                }
+            }
+            .toolbar(.visible, for: .navigationBar)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar(.hidden, for: .tabBar)
+            .navigationTitle("Scan QR")
+            .onAppear {
+                scannerService.continuousMode = false
+                scannerService.onScannedCode = { code in
+                    showingScanner = false
+                    bindableViewModel.newBarCode = code
+                    viewModel.addCatalog {
+                        router.pop() // Return to catalogs list after saving
+                    }
+                }
+            }
+        }
+        .toolbar(.hidden, for: .tabBar)
+        .onAppear {
+            if let catalog = editCatalog {
+                viewModel.populateForm(with: catalog)
+            } else {
+                viewModel.resetForm()
+            }
+        }
+        .alert("Error", isPresented: Binding(
+            get: { viewModel.errorMessage != nil },
+            set: { _ in viewModel.errorMessage = nil }
+        )) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            if let errorMessage = viewModel.errorMessage {
+                Text(errorMessage)
+            }
+        }
+    }
+}
+
+private struct CatalogFormTextField: View {
+    let title: String
+    var placeholder: String = ""
+    @Binding var text: String
+    var keyboardType: UIKeyboardType = .default
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                .foregroundStyle(AppColors.secondary)
+                .kerning(1.5)
+            
+            TextField("", text: $text, prompt: Text(placeholder).foregroundStyle(AppColors.tertiary))
+                .font(AppFonts.sansSerif(size: 15))
+                .foregroundStyle(AppColors.text)
+                .keyboardType(keyboardType)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+                .padding(.vertical, 16)
+                .padding(.horizontal, 18)
+                .background(AppColors.surface)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(AppColors.gold15, lineWidth: 1)
+                )
+        }
+    }
+}
