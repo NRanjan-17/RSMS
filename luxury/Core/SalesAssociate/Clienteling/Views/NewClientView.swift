@@ -19,6 +19,12 @@ struct NewClientView: View {
     @State private var dataConsent = true
     @State private var thirdPartyConsent = false
     
+    @State private var isLoading = false
+    @State private var errorMessage: String? = nil
+    @State private var showErrorAlert = false
+    
+    private let clientService = ClientService()
+    
     var body: some View {
         ZStack {
             AppColors.background.ignoresSafeArea()
@@ -37,10 +43,11 @@ struct NewClientView: View {
                     Spacer()
                     
                     Button("Save") {
-                        dismiss()
+                        saveClient()
                     }
                     .font(AppFonts.sansSerif(size: 13))
                     .foregroundStyle(AppColors.gold)
+                    .disabled(isLoading)
                 }
                 .padding(.horizontal, 24)
                 .padding(.vertical, 16)
@@ -136,7 +143,7 @@ struct NewClientView: View {
                 }
                 
                 VStack(spacing: 0) {
-                    CustomButton(title: "Create Profile", action: { dismiss() })
+                    CustomButton(title: "Create Profile", isLoading: isLoading, action: { saveClient() })
                         .padding(.horizontal, 24)
                         .padding(.vertical, 14)
                         .padding(.bottom, 38)
@@ -147,6 +154,64 @@ struct NewClientView: View {
         .toolbar(.hidden, for: .navigationBar)
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .tabBar)
+        .alert("Error Saving Client", isPresented: $showErrorAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            if let errorMessage = errorMessage {
+                Text(errorMessage)
+            }
+        }
+    }
+    
+    private func saveClient() {
+        let trimmedFirst = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedLast = lastName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedMobile = mobile.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard !trimmedFirst.isEmpty else {
+            errorMessage = "First name is required."
+            showErrorAlert = true
+            return
+        }
+        
+        guard !trimmedEmail.isEmpty else {
+            errorMessage = "Email is required."
+            showErrorAlert = true
+            return
+        }
+        
+        let fullName = trimmedLast.isEmpty ? trimmedFirst : "\(trimmedFirst) \(trimmedLast)"
+        
+        let clientEntity = ClientEntity(
+            id: UUID(),
+            name: fullName,
+            email: trimmedEmail,
+            phone: trimmedMobile.isEmpty ? nil : trimmedMobile,
+            dob: nil,
+            tier: selectedTier,
+            productsPurchased: [],
+            createdAt: Date(),
+            updatedAt: Date()
+        )
+        
+        isLoading = true
+        Task {
+            do {
+                try await clientService.createClient(clientEntity)
+                await MainActor.run {
+                    isLoading = false
+                    NotificationCenter.default.post(name: NSNotification.Name("RefreshClients"), object: nil)
+                    dismiss()
+                }
+            } catch {
+                await MainActor.run {
+                    isLoading = false
+                    errorMessage = error.localizedDescription
+                    showErrorAlert = true
+                }
+            }
+        }
     }
 }
 

@@ -16,39 +16,92 @@ final class ClientDetailViewModel {
     var selectedTab: String = "overview"
     let tabs = [("overview", "Overview"), ("history", "History"), ("wishlist", "Wishlist"), ("notes", "Notes")]
     
+    var hasMockData: Bool {
+        return Client.mockIds.contains(client.id)
+    }
+    
+    var joinedDateText: String {
+        if hasMockData {
+            return "Maison Mumbai · Since Nov 2019"
+        } else {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "MMM yyyy"
+            let dateStr = formatter.string(from: Date())
+            return "Maison Mumbai · Since \(dateStr)"
+        }
+    }
+    
     var stats: [(String, String)] {
-        [
-            (client.ltv, "Lifetime Value"),
-            ("28", "Purchases"),
-            ("5", "Wishlist")
-        ]
+        if hasMockData {
+            return [
+                (client.ltv, "Lifetime Value"),
+                ("28", "Purchases"),
+                ("5", "Wishlist")
+            ]
+        } else {
+            return [
+                ("₹0", "Lifetime Value"),
+                ("0", "Purchases"),
+                ("0", "Wishlist")
+            ]
+        }
     }
     
     init(client: Client = ClientDetailViewModel.defaultClient) {
         self.client = client
     }
     
-    var preferences: [String] = ["Rolex", "Patek Philippe", "AP", "Dark Leather", "Slim Watches", "Navy"]
+    var preferences: [String] {
+        if hasMockData {
+            return ["Rolex", "Patek Philippe", "AP", "Dark Leather", "Slim Watches", "Navy"]
+        } else {
+            return []
+        }
+    }
     
-    var purchases: [ClientPurchase] = [
-        ClientPurchase(name: "Patek Philippe Nautilus 5711/1A", price: "₹82,00,000", date: "Mar 2025"),
-        ClientPurchase(name: "Bottega Veneta The Pouch", price: "₹2,20,000", date: "Jan 2025"),
-        ClientPurchase(name: "Rolex Submariner Date 126610", price: "₹14,50,000", date: "Nov 2024")
-    ]
+    var purchases: [ClientPurchase] {
+        if hasMockData {
+            return [
+                ClientPurchase(name: "Patek Philippe Nautilus 5711/1A", price: "₹82,00,000", date: "Mar 2025"),
+                ClientPurchase(name: "Bottega Veneta The Pouch", price: "₹2,20,000", date: "Jan 2025"),
+                ClientPurchase(name: "Rolex Submariner Date 126610", price: "₹14,50,000", date: "Nov 2024")
+            ]
+        } else {
+            return []
+        }
+    }
     
-    var wishlist: [ClientWishlistItem] = [
-        ClientWishlistItem(brand: "Audemars Piguet", name: "Royal Oak 15500ST", price: "₹42,00,000"),
-        ClientWishlistItem(brand: "Hermès", name: "Kelly 28 Retourné", price: "₹12,80,000")
-    ]
+    var wishlist: [ClientWishlistItem] {
+        if hasMockData {
+            return [
+                ClientWishlistItem(brand: "Audemars Piguet", name: "Royal Oak 15500ST", price: "₹42,00,000"),
+                ClientWishlistItem(brand: "Hermès", name: "Kelly 28 Retourné", price: "₹12,80,000")
+            ]
+        } else {
+            return []
+        }
+    }
     
-    var notes: [ClientNote] = [
-        ClientNote(note: "Prefers unhurried appointments — always allocate 90 min minimum. Deep interest in movement mechanics.", date: "May 10", author: "Arjun Singh"),
-        ClientNote(note: "Wife's birthday June 28. Currently scouting Cartier Love bracelet and Van Cleef Alhambra.", date: "Apr 22", author: "Arjun Singh")
-    ]
+    var notes: [ClientNote] {
+        if hasMockData {
+            return [
+                ClientNote(note: "Prefers unhurried appointments — always allocate 90 min minimum. Deep interest in movement mechanics.", date: "May 10", author: "Arjun Singh"),
+                ClientNote(note: "Wife's birthday June 28. Currently scouting Cartier Love bracelet and Van Cleef Alhambra.", date: "Apr 22", author: "Arjun Singh")
+            ]
+        } else {
+            return []
+        }
+    }
     
-    var tickets: [ClientTicket] = [
-        ClientTicket(title: "Watch Servicing - Rolex Daytona", status: "Active", date: "May 12", isActive: true),
-        ClientTicket(title: "Jewelry Repair - Diamond Ring", status: "Completed", date: "Apr 05", isActive: false),
-        ClientTicket(title: "Polishing - AP Royal Oak", status: "Active", date: "May 15", isActive: true)
-    ]
+    var tickets: [ClientTicket] {
+        if hasMockData {
+            return [
+                ClientTicket(title: "Watch Servicing - Rolex Daytona", status: "Active", date: "May 12", isActive: true),
+                ClientTicket(title: "Jewelry Repair - Diamond Ring", status: "Completed", date: "Apr 05", isActive: false),
+                ClientTicket(title: "Polishing - AP Royal Oak", status: "Active", date: "May 15", isActive: true)
+            ]
+        } else {
+            return []
+        }
+    }
 }
