@@ -152,7 +152,7 @@ struct CatalogFormView: View {
                         if !viewModel.existingImageURLs.isEmpty || !viewModel.selectedPhotoItems.isEmpty {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 12) {
-                                    ForEach(viewModel.existingImageURLs, id: \.self) { url in
+                                    ForEach(Array(viewModel.existingImageURLs.enumerated()), id: \.offset) { index, url in
                                         AsyncImage(url: URL(string: url)) { phase in
                                             if let image = phase.image {
                                                 image
@@ -169,7 +169,7 @@ struct CatalogFormView: View {
                                         }
                                     }
                                     
-                                    ForEach(viewModel.selectedImagesData, id: \.self) { data in
+                                    ForEach(Array(viewModel.selectedImagesData.enumerated()), id: \.offset) { _, data in
                                         if let uiImage = UIImage(data: data) {
                                             Image(uiImage: uiImage)
                                                 .resizable()

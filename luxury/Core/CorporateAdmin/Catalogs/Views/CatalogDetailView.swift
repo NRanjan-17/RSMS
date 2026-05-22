@@ -62,7 +62,7 @@ struct CatalogDetailView: View {
                 Section("Product Images") {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
-                            ForEach(images, id: \.self) { url in
+                            ForEach(Array(images.enumerated()), id: \.offset) { _, url in
                                 AsyncImage(url: URL(string: url)) { phase in
                                     if let image = phase.image {
                                         image
@@ -101,7 +101,7 @@ struct CatalogDetailView: View {
                 }
                 
                 if let productIds = currentCatalog.productIds, !productIds.isEmpty {
-                    ForEach(productIds, id: \.self) { serial in
+                    ForEach(Array(productIds.enumerated()), id: \.offset) { _, serial in
                         Text(serial)
                             .font(AppFonts.sansSerif(size: 14))
                             .foregroundStyle(AppColors.text)
@@ -114,7 +114,7 @@ struct CatalogDetailView: View {
             }
             Section("Reservations") {
                 if let reserved = currentCatalog.reserved, !reserved.isEmpty {
-                    ForEach(reserved, id: \.self) { reservationId in
+                    ForEach(Array(reserved.enumerated()), id: \.offset) { _, reservationId in
                         Text(reservationId)
                             .font(AppFonts.sansSerif(size: 14))
                             .foregroundStyle(AppColors.text)
@@ -299,7 +299,7 @@ struct ScannedSerialsListView: View {
                         Text("Scan items to add them here.")
                             .foregroundStyle(AppColors.secondary)
                     } else {
-                        ForEach(scannedSerials.reversed(), id: \.self) { serial in
+                        ForEach(Array(scannedSerials.reversed().enumerated()), id: \.offset) { _, serial in
                             HStack {
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundStyle(AppColors.success)
