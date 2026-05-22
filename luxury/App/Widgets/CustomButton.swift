@@ -20,6 +20,8 @@ struct CustomButton: View {
         self.action = action
     }
     
+    @Environment(\.isEnabled) private var isEnabled
+    
     var body: some View {
         Button(action: action) {
             HStack(spacing: 10) {
@@ -42,6 +44,7 @@ struct CustomButton: View {
                 RoundedRectangle(cornerRadius: 14)
                     .fill(AppColors.gold)
             )
+            .opacity(isEnabled ? 1.0 : 0.5)
         }
         .buttonStyle(.plain)
         .disabled(isLoading)
