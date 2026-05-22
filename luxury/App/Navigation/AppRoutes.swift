@@ -46,6 +46,8 @@ enum ICRoute: Hashable {
     case auditDetail(RSMSCycleCount)
     case activeAudit
     case serialCertificate
+    case sfsOrders
+    case sfsVerification(PurchasedItemEntity)
 }
 
 enum CARoute: Hashable {

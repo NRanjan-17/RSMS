@@ -7,6 +7,7 @@
 
 import Foundation
 import Observation
+import Supabase
 
 @Observable
 final class StockViewModel {
@@ -14,10 +15,30 @@ final class StockViewModel {
     var lowStockCount: String = "12"
     var outOfStockCount: String = "5"
     
+    var sfsOrdersCount: String = "0"
+    
     var alerts: [InventoryAlert] = [
         InventoryAlert(itemName: "Royal Oak Selfwinding", sku: "AP-15500ST", currentQty: 0, status: .error),
         InventoryAlert(itemName: "Serpenti Seduttori", sku: "BV-103145", currentQty: 1, status: .warning),
         InventoryAlert(itemName: "Oyster Perpetual 41", sku: "RX-124300", currentQty: 0, status: .error),
         InventoryAlert(itemName: "Tank Louis Cartier", sku: "CR-WGTA0011", currentQty: 2, status: .warning)
     ]
+    
+    func fetchSFSCount() {
+        Task {
+            do {
+                let items: [PurchasedItemEntity] = try await SupabaseManager.shared.client
+                    .from("purchased_items")
+                    .select()
+                    .eq("status", value: "Pending")
+                    .execute()
+                    .value
+                
+                await MainActor.run {
+                    self.sfsOrdersCount = "\(items.count)"
+                }
+            } catch {
+            }
+        }
+    }
 }

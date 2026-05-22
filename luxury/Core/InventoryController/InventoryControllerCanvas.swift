@@ -14,6 +14,7 @@ struct InventoryControllerCanvas: View {
     @State private var rfidRouter = Router()
     @State private var transfersRouter = Router()
     @State private var auditRouter = Router()
+    @State private var sfsViewModel = FulfillmentViewModel()
     
     var body: some View {
         TabView(selection: Binding(
@@ -33,6 +34,7 @@ struct InventoryControllerCanvas: View {
                     }
             }
             .environment(stockRouter)
+            .environment(sfsViewModel)
             .tabItem { Label("Stock", systemImage: "box.truck") }
             .tag(ICTab.stock)
             
@@ -110,6 +112,10 @@ struct InventoryControllerCanvas: View {
             ActiveAuditView()
         case .serialCertificate:
             SerializationView()
+        case .sfsOrders:
+            FulfillmentView()
+        case .sfsVerification(let order):
+            SFSVerificationView(order: order)
         }
     }
 }
