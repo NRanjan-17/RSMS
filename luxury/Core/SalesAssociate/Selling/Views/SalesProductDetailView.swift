@@ -9,10 +9,10 @@ import SwiftUI
 
 struct SalesProductDetailView: View {
     @Environment(\.dismiss) private var dismiss
-    let product: Product
+    let catalog: CatalogEntity
     
-    init(product: Product = Product(brand: "Rolex", name: "Submariner Date", price: "₹14,50,000", inStock: true)) {
-        self.product = product
+    var inStock: Bool {
+        ((catalog.productIds?.count ?? 0) - (catalog.reserved?.count ?? 0)) > 0
     }
     
     var body: some View {
@@ -67,20 +67,20 @@ struct SalesProductDetailView: View {
                         .padding(.top, 10)
                         
                         VStack(alignment: .leading, spacing: 0) {
-                            Text(product.brand.uppercased())
+                            Text(catalog.brand.uppercased())
                                 .font(AppFonts.sansSerif(size: 10))
                                 .foregroundStyle(AppColors.gold)
                                 .kerning(2)
                                 .padding(.bottom, 6)
                             
-                            Text(product.name)
+                            Text(catalog.name)
                                 .font(AppFonts.serif(size: 26, weight: .medium))
                                 .foregroundStyle(AppColors.text)
                                 .lineSpacing(4)
                                 .padding(.bottom, 10)
                             
                             HStack(alignment: .firstTextBaseline, spacing: 8) {
-                                Text(product.price)
+                                Text(String(format: "$%.2f", catalog.amount))
                                     .font(AppFonts.serif(size: 30, weight: .semibold))
                                     .foregroundStyle(AppColors.gold)
                                 Text("incl. 3% GST")
@@ -90,7 +90,7 @@ struct SalesProductDetailView: View {
                             .padding(.bottom, 14)
                             
                             HStack(spacing: 8) {
-                                StatusBadge(text: product.inStock ? "● In Stock" : "● Out of Stock", status: product.inStock ? .success : .warning)
+                                StatusBadge(text: inStock ? "● In Stock" : "● Out of Stock", status: inStock ? .success : .warning)
                                 StatusBadge(text: "Serialized", status: .warning)
                                 StatusBadge(text: "RFID", status: .warning)
                             }

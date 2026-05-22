@@ -127,7 +127,7 @@ private struct CustomTextField: View {
                 .foregroundStyle(AppColors.text)
                 .keyboardType(keyboardType)
                 .autocorrectionDisabled()
-                .textInputAutocapitalization(.none)
+                .textInputAutocapitalization(.never)
                 .padding(.vertical, 16)
                 .padding(.horizontal, 18)
                 .background(AppColors.surface)
@@ -195,3 +195,7 @@ private struct SocialButton: View {
         }
     }
 }
+
+
+
+
