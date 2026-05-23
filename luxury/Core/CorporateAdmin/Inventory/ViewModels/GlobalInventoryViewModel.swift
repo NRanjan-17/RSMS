@@ -59,36 +59,29 @@ final class GlobalInventoryViewModel {
         
         Task {
             do {
-                // Fetch products, boutiques, and inventory
+                // Fetch catalogs directly as inventory is stored inside productIds array
                 let catalogsResponse: [CatalogEntity] = try await client.from("catalogs").select().execute().value
-                let inventoryResponse: [InventoryItem] = try await client.from("inventory").select().execute().value
-                let boutiquesResponse: [CorporateBoutique] = try await client.from("boutiques").select().execute().value
                 
                 var newSummaries: [ProductInventorySummary] = []
                 
                 for catalog in catalogsResponse {
-                    let productInventory = inventoryResponse.filter { $0.skuId == catalog.id }
+                    let totalQty = (catalog.productIds?.count ?? 0) - (catalog.reserved?.count ?? 0)
                     
+                    // Since dev branch catalogs don't track location yet, assign stock to a default warehouse
                     var locations: [LocationInventoryDetail] = []
-                    var totalQty = 0
-                    
-                    for item in productInventory {
-                        totalQty += item.quantity
-                        
-                        let storeName = boutiquesResponse.first(where: { $0.id == item.storeId })?.name ?? "Unknown Location"
-                        
+                    if totalQty > 0 {
                         locations.append(LocationInventoryDetail(
-                            storeId: item.storeId,
-                            storeName: storeName,
-                            quantity: item.quantity,
-                            isAvailable: item.productAvailable
+                            storeId: UUID(),
+                            storeName: "Central Warehouse",
+                            quantity: totalQty,
+                            isAvailable: true
                         ))
                     }
                     
                     newSummaries.append(ProductInventorySummary(
                         product: catalog,
                         totalQuantity: totalQty,
-                        locations: locations.sorted(by: { $0.storeName < $1.storeName })
+                        locations: locations
                     ))
                 }
                 
