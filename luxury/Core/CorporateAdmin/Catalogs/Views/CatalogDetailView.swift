@@ -101,10 +101,13 @@ struct CatalogDetailView: View {
                 }
                 
                 if let productIds = currentCatalog.productIds, !productIds.isEmpty {
-                    ForEach(Array(productIds.enumerated()), id: \.offset) { _, serial in
+                    ForEach(productIds, id: \.self) { serial in
                         Text(serial)
                             .font(AppFonts.sansSerif(size: 14))
                             .foregroundStyle(AppColors.text)
+                    }
+                    .onDelete { indexSet in
+                        viewModel.removeSerialNumbers(from: currentCatalog, at: indexSet)
                     }
                 } else {
                     Text("No physical products added yet.")

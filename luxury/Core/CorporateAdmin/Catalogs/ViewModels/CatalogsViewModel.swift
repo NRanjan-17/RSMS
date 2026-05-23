@@ -256,6 +256,32 @@ final class CatalogsViewModel {
         }
     }
     
+    func removeSerialNumbers(from catalog: CatalogEntity, at offsets: IndexSet) {
+        guard let currentProducts = catalog.productIds else { return }
+        
+        var updatedProducts = currentProducts
+        updatedProducts.remove(atOffsets: offsets)
+        
+        var updatedCatalog = catalog
+        updatedCatalog.productIds = updatedProducts
+        
+        Task {
+            do {
+                try await catalogService.updateCatalog(updatedCatalog)
+                await MainActor.run {
+                    if let index = self.catalogs.firstIndex(where: { $0.id == updatedCatalog.id }) {
+                        self.catalogs[index] = updatedCatalog
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    self.errorMessage = "Failed to remove products: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+
+    
     func resetForm() {
         newName = ""
         newDescription = ""
