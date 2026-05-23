@@ -90,33 +90,45 @@ struct NewTransferView: View {
                             
                             VStack(spacing: 1) {
                                 ForEach(viewModel.items) { item in
-                                    HStack(spacing: 16) {
-                                        VStack(alignment: .leading, spacing: 2) {
-                                            Text(item.name)
-                                                .font(AppFonts.sansSerif(size: 14, weight: .medium))
-                                                .foregroundStyle(.white)
-                                            Text(item.sku)
-                                                .font(AppFonts.sansSerif(size: 11))
-                                                .foregroundStyle(AppColors.tertiary)
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        HStack(spacing: 16) {
+                                            VStack(alignment: .leading, spacing: 2) {
+                                                Text(item.name)
+                                                    .font(AppFonts.sansSerif(size: 14, weight: .medium))
+                                                    .foregroundStyle(.white)
+                                                Text(item.sku)
+                                                    .font(AppFonts.sansSerif(size: 11))
+                                                    .foregroundStyle(AppColors.tertiary)
+                                            }
+                                            
+                                            Spacer()
+                                            
+                                            HStack(spacing: 16) {
+                                                Button(action: {
+                                                    viewModel.decrementQty(for: item.id)
+                                                }) {
+                                                    Image(systemName: "minus.circle")
+                                                        .foregroundStyle(AppColors.secondary)
+                                                }
+                                                
+                                                Text("\(item.qty)")
+                                                    .font(AppFonts.serif(size: 18, weight: .bold))
+                                                    .foregroundStyle(AppColors.gold)
+                                                    .frame(width: 24)
+                                                
+                                                Button(action: {
+                                                    viewModel.incrementQty(for: item.id)
+                                                }) {
+                                                    Image(systemName: "plus.circle.fill")
+                                                        .foregroundStyle(AppColors.gold)
+                                                }
+                                            }
                                         }
                                         
-                                        Spacer()
-                                        
-                                        HStack(spacing: 16) {
-                                            Button(action: {}) {
-                                                Image(systemName: "minus.circle")
-                                                    .foregroundStyle(AppColors.secondary)
-                                            }
-                                            
-                                            Text("\(item.qty)")
-                                                .font(AppFonts.serif(size: 18, weight: .bold))
-                                                .foregroundStyle(AppColors.gold)
-                                                .frame(width: 24)
-                                            
-                                            Button(action: {}) {
-                                                Image(systemName: "plus.circle.fill")
-                                                    .foregroundStyle(AppColors.gold)
-                                            }
+                                        if item.qty > item.availableQty {
+                                            Text("Insufficient stock. Only \(item.availableQty) units available.")
+                                                .font(AppFonts.sansSerif(size: 12, weight: .medium))
+                                                .foregroundStyle(AppColors.error)
                                         }
                                     }
                                     .padding(.horizontal, 24)
@@ -143,6 +155,7 @@ struct NewTransferView: View {
                             viewModel.completeSession()
                             dismiss()
                         })
+                        .disabled(viewModel.hasStockError)
                     }
                         .padding(.horizontal, 24)
                 }

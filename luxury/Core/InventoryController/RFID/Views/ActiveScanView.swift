@@ -10,6 +10,7 @@ import SwiftUI
 struct ActiveScanView: View {
     @State private var viewModel = ActiveScanViewModel()
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
     
     var body: some View {
         ZStack {
@@ -17,7 +18,10 @@ struct ActiveScanView: View {
             
             VStack(spacing: 0) {
                 HStack {
-                    Button(action: { dismiss() }) {
+                    Button(action: {
+                        viewModel.pauseAndSaveSession()
+                        dismiss()
+                    }) {
                         Image(systemName: "xmark")
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundStyle(AppColors.secondary)
@@ -69,6 +73,41 @@ struct ActiveScanView: View {
                 .padding(.horizontal, 24)
                 .padding(.bottom, 32)
                 
+                if viewModel.show24hWarning {
+                    VStack(spacing: 12) {
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(AppColors.warning)
+                                .font(.system(size: 20))
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Session paused for over 24 hours. Please verify counts before resuming.")
+                                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                    .foregroundStyle(.white)
+                            }
+                            Spacer()
+                        }
+                        
+                        Button(action: {
+                            viewModel.show24hWarning = false
+                        }) {
+                            Text("Acknowledge & Resume")
+                                .font(AppFonts.sansSerif(size: 12, weight: .bold))
+                                .foregroundStyle(AppColors.background)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 36)
+                                .background(AppColors.gold)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
+                    }
+                    .padding(16)
+                    .background(AppColors.surface)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.warning.opacity(0.35), lineWidth: 0.5))
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 16)
+                }
+                
                 HStack(spacing: 10) {
                     Button(viewModel.isPaused ? "Resume" : "Pause") {
                         viewModel.isPaused ? viewModel.startScan() : viewModel.pauseSession()
@@ -79,6 +118,7 @@ struct ActiveScanView: View {
                     .frame(height: 44)
                     .background(AppColors.gold)
                     .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .disabled(viewModel.show24hWarning)
                     
                     Button("Manual SKU") {
                         viewModel.recordScan(epc: "MANUAL-SKU-001", name: "Manual SKU exception", ok: false)
@@ -88,6 +128,7 @@ struct ActiveScanView: View {
                     .frame(maxWidth: .infinity)
                     .frame(height: 44)
                     .overlay(RoundedRectangle(cornerRadius: 10).stroke(AppColors.gold50, lineWidth: 0.5))
+                    .disabled(viewModel.show24hWarning)
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 16)
@@ -166,5 +207,19 @@ struct ActiveScanView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .onAppear {
+            viewModel.checkAndRestoreSession()
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .background || newPhase == .inactive {
+                viewModel.pauseAndSaveSession()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
+            viewModel.pauseAndSaveSession()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { _ in
+            viewModel.pauseAndSaveSession()
+        }
     }
 }

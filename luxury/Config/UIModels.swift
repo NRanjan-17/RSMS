@@ -339,7 +339,7 @@ struct ScanSession: Identifiable, Hashable {
     }
 }
 
-struct RFIDTag: Identifiable, Hashable {
+struct RFIDTag: Identifiable, Hashable, Codable {
     let id: UUID
     let epc: String
     let name: String
@@ -358,12 +358,14 @@ struct TransferItem: Identifiable, Hashable {
     let sku: String
     let name: String
     var qty: Int
+    var availableQty: Int
     
-    init(id: UUID = UUID(), sku: String, name: String, qty: Int) {
+    init(id: UUID = UUID(), sku: String, name: String, qty: Int, availableQty: Int = 10) {
         self.id = id
         self.sku = sku
         self.name = name
         self.qty = qty
+        self.availableQty = availableQty
     }
 }
 
