@@ -16,21 +16,7 @@ struct SystemLogsView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                HStack {
-                    Text("System Logs")
-                        .font(AppFonts.serif(size: 28, weight: .semibold))
-                        .foregroundStyle(.white)
-                    Spacer()
-                    Button(action: { coordinator.logout() }) {
-                        Image(systemName: "rectangle.portrait.and.arrow.right")
-                            .font(.system(size: 20))
-                            .foregroundStyle(AppColors.gold)
-                    }
-                }
-                .padding(.horizontal, 24)
-                .padding(.top, 16)
-                .padding(.bottom, 12)
-                .background(AppColors.background)
+                CustomHeader(title: "System Logs")
                 
                 VStack(spacing: 20) {
                     ScrollView(.horizontal, showsIndicators: false) {
