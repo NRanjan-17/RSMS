@@ -35,6 +35,7 @@ final class AuthViewModel {
         Task {
             do {
                 try await authService.signIn(email: trimmedEmail, password: trimmedPassword)
+                SystemLogService.shared.logAction(category: .access, severity: .info, message: "User logged in: \(trimmedEmail)")
                 
                 await MainActor.run {
                     isLoading = false
@@ -83,6 +84,7 @@ final class AuthViewModel {
         Task {
             do {
                 try await authService.resetPassword(email: trimmedEmail)
+                SystemLogService.shared.logAction(category: .access, severity: .info, message: "Password reset requested for: \(trimmedEmail)")
                 await MainActor.run {
                     isLoading = false
                     showResetSuccess = true

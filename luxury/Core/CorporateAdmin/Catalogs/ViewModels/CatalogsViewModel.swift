@@ -122,6 +122,7 @@ final class CatalogsViewModel {
                 catalogToSave.productImages = uploadedURLs
                 
                 try await catalogService.addCatalog(catalogToSave)
+                SystemLogService.shared.logAction(category: .inventory, severity: .info, message: "Added new catalog \(catalogToSave.name) (\(catalogToSave.catalogId))")
                 await MainActor.run {
                     self.catalogs.append(catalogToSave)
                     self.isSaving = false
@@ -190,6 +191,7 @@ final class CatalogsViewModel {
                 catalogToUpdate.productImages = uploadedURLs
                 
                 try await catalogService.updateCatalog(catalogToUpdate)
+                SystemLogService.shared.logAction(category: .inventory, severity: .info, message: "Updated catalog \(catalogToUpdate.name) (\(catalogToUpdate.catalogId))")
                 await MainActor.run {
                     if let index = self.catalogs.firstIndex(where: { $0.id == updatedCatalog.id }) {
                         self.catalogs[index] = catalogToUpdate
@@ -214,6 +216,7 @@ final class CatalogsViewModel {
         Task {
             do {
                 try await catalogService.deleteCatalog(id: catalog.id)
+                SystemLogService.shared.logAction(category: .inventory, severity: .warning, message: "Deleted catalog \(catalog.name) (\(catalog.catalogId))")
                 await MainActor.run {
                     self.catalogs.removeAll { $0.id == catalog.id }
                     self.isSaving = false
@@ -240,6 +243,7 @@ final class CatalogsViewModel {
         Task {
             do {
                 try await catalogService.updateCatalog(updatedCatalog)
+                SystemLogService.shared.logAction(category: .inventory, severity: .info, message: "Added \(serials.count) serial numbers to catalog \(catalog.name) (\(catalog.catalogId))")
                 await MainActor.run {
                     if let index = self.catalogs.firstIndex(where: { $0.id == updatedCatalog.id }) {
                         self.catalogs[index] = updatedCatalog
@@ -268,6 +272,7 @@ final class CatalogsViewModel {
         Task {
             do {
                 try await catalogService.updateCatalog(updatedCatalog)
+                SystemLogService.shared.logAction(category: .inventory, severity: .warning, message: "Removed \(offsets.count) serial numbers from catalog \(catalog.name) (\(catalog.catalogId))")
                 await MainActor.run {
                     if let index = self.catalogs.firstIndex(where: { $0.id == updatedCatalog.id }) {
                         self.catalogs[index] = updatedCatalog

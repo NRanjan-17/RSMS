@@ -67,6 +67,7 @@ final class UserManagementViewModel {
         Task {
             do {
                 try await approvalService.approveBoutique(id: boutique.id)
+                SystemLogService.shared.logAction(category: .access, severity: .info, message: "Approved boutique: \(boutique.name)", boutiqueName: boutique.name)
                 await MainActor.run {
                     self.pendingBoutiques.removeAll { $0.id == boutique.id }
                     self.actionBoutiqueId = nil
@@ -90,6 +91,7 @@ final class UserManagementViewModel {
         Task {
             do {
                 try await approvalService.rejectBoutique(id: boutique.id)
+                SystemLogService.shared.logAction(category: .access, severity: .warning, message: "Rejected boutique: \(boutique.name)", boutiqueName: boutique.name)
                 await MainActor.run {
                     self.pendingBoutiques.removeAll { $0.id == boutique.id }
                     self.actionBoutiqueId = nil
@@ -113,6 +115,7 @@ final class UserManagementViewModel {
         Task {
             do {
                 try await approvalService.disableBoutique(id: boutique.id)
+                SystemLogService.shared.logAction(category: .access, severity: .warning, message: "Disabled boutique: \(boutique.name)", boutiqueName: boutique.name)
                 await MainActor.run {
                     self.actionBoutiqueId = nil
                     fetchData()
@@ -135,6 +138,7 @@ final class UserManagementViewModel {
         Task {
             do {
                 try await approvalService.enableBoutique(id: boutique.id)
+                SystemLogService.shared.logAction(category: .access, severity: .info, message: "Enabled boutique: \(boutique.name)", boutiqueName: boutique.name)
                 await MainActor.run {
                     self.actionBoutiqueId = nil
                     fetchData()
@@ -157,6 +161,7 @@ final class UserManagementViewModel {
         Task {
             do {
                 try await approvalService.removeBoutique(id: boutique.id)
+                SystemLogService.shared.logAction(category: .security, severity: .critical, message: "Removed boutique: \(boutique.name)", boutiqueName: boutique.name)
                 await MainActor.run {
                     self.approvedBoutiques.removeAll { $0.id == boutique.id }
                     self.actionBoutiqueId = nil
@@ -207,5 +212,7 @@ final class UserManagementViewModel {
             email: trimmedEmail,
             provider: "email"
         )
+        
+        SystemLogService.shared.logAction(category: .access, severity: .info, message: "Invited new boutique manager: \(trimmedEmail)")
     }
 }
