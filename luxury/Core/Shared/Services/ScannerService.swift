@@ -12,16 +12,13 @@ import AVFoundation
 final class ScannerService: NSObject, AVCaptureMetadataOutputObjectsDelegate {
     var captureSession: AVCaptureSession
     var isRunning: Bool = false
-    
-    // Config
     var continuousMode: Bool = true
     var debounceSeconds: TimeInterval = 2.0
-    
-    // Output
     var onScannedCode: ((String) -> Void)?
     
     private var lastScannedCode: String?
     private var lastScannedTime: Date?
+    private var isConfigured = false
     
     override init() {
         self.captureSession = AVCaptureSession()
@@ -29,6 +26,10 @@ final class ScannerService: NSObject, AVCaptureMetadataOutputObjectsDelegate {
     }
     
     func configure() -> Bool {
+        if isConfigured {
+            return true
+        }
+        
         guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else { return false }
         
         let videoInput: AVCaptureDeviceInput
@@ -53,6 +54,7 @@ final class ScannerService: NSObject, AVCaptureMetadataOutputObjectsDelegate {
             return false
         }
         
+        isConfigured = true
         return true
     }
     
@@ -80,7 +82,6 @@ final class ScannerService: NSObject, AVCaptureMetadataOutputObjectsDelegate {
     }
     
     func playErrorFeedback() {
-        // System sound for error (bzz)
         AudioServicesPlaySystemSound(1053) 
     }
     
@@ -95,11 +96,10 @@ final class ScannerService: NSObject, AVCaptureMetadataOutputObjectsDelegate {
         
         let now = Date()
         
-        // Debounce identical codes in continuous mode
         if continuousMode {
             if let lastTime = lastScannedTime, let lastCode = lastScannedCode, stringValue == lastCode {
                 if now.timeIntervalSince(lastTime) < debounceSeconds {
-                    return // Ignore rapid consecutive scans of the same code
+                    return
                 }
             }
         } else {
