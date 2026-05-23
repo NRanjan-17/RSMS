@@ -40,15 +40,13 @@ final class ActiveScanViewModel {
         startNetworkMonitoring()
     }
     
-    deinit {
-        networkObservationTask?.cancel()
-    }
-    
+
     func startNetworkMonitoring() {
         networkObservationTask = Task { [weak self] in
             while !Task.isCancelled {
+                guard let self = self else { break }
                 if NetworkMonitor.shared.isConnected {
-                    await self?.syncOfflineScans()
+                    await self.syncOfflineScans()
                 }
                 do {
                     try await Task.sleep(nanoseconds: 1_000_000_000)

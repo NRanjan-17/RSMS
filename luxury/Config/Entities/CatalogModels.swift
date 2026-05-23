@@ -42,4 +42,8 @@ struct CatalogEntity: Identifiable, Codable, Equatable, Hashable {
         case productIds = "product_ids"
         case productImages = "product_images"
     }
+    
+    var formattedPrice: String {
+        return "₹\(Int(amount))"
+    }
 }

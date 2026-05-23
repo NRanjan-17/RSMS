@@ -693,7 +693,7 @@ private struct WishlistProductSelectionView: View {
                         HStack(spacing: 8) {
                             ForEach(searchVM.categories, id: \.self) { cat in
                                 let isSelected = searchVM.selectedCategory == cat
-                                Text(cat)
+                                Text(cat.rawValue)
                                     .font(AppFonts.sansSerif(size: 11, weight: isSelected ? .medium : .light))
                                     .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
                                     .padding(.horizontal, 12)
@@ -718,52 +718,18 @@ private struct WishlistProductSelectionView: View {
                     // Product List
                     ScrollView {
                         VStack(spacing: 12) {
-                            ForEach(searchVM.filteredProducts) { product in
+                            ForEach(searchVM.filteredCatalogs) { product in
                                 Button(action: {
                                     Task {
                                         await viewModel.addProductToWishlist(
                                             brand: product.brand,
                                             name: product.name,
-                                            price: product.price
+                                            price: product.formattedPrice
                                         )
                                         dismiss()
                                     }
                                 }) {
-                                    HStack(spacing: 12) {
-                                        ZStack {
-                                            RoundedRectangle(cornerRadius: 10)
-                                                .fill(AppColors.surface2)
-                                                .frame(width: 48, height: 48)
-                                            Image(systemName: "circle.grid.cross")
-                                                .font(.system(size: 16))
-                                                .foregroundStyle(AppColors.gold)
-                                                .opacity(0.3)
-                                        }
-                                        
-                                        VStack(alignment: .leading, spacing: 3) {
-                                            Text(product.brand.uppercased())
-                                                .font(AppFonts.sansSerif(size: 9, weight: .bold))
-                                                .foregroundStyle(AppColors.gold)
-                                                .kerning(1)
-                                            Text(product.name)
-                                                .font(AppFonts.serif(size: 14, weight: .medium))
-                                                .foregroundStyle(.white)
-                                            Text(product.price)
-                                                .font(AppFonts.sansSerif(size: 12))
-                                                .foregroundStyle(AppColors.secondary)
-                                        }
-                                        Spacer()
-                                        Image(systemName: "plus.circle.fill")
-                                            .font(.system(size: 20))
-                                            .foregroundStyle(AppColors.gold)
-                                    }
-                                    .padding(12)
-                                    .background(AppColors.surface)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .stroke(AppColors.gold15, lineWidth: 0.5)
-                                    )
+                                    ClientProfileProductRowView(product: product)
                                 }
                                 .buttonStyle(.plain)
                             }
@@ -907,7 +873,7 @@ private struct PurchaseProductSelectionView: View {
                         HStack(spacing: 8) {
                             ForEach(searchVM.categories, id: \.self) { cat in
                                 let isSelected = searchVM.selectedCategory == cat
-                                Text(cat)
+                                Text(cat.rawValue)
                                     .font(AppFonts.sansSerif(size: 11, weight: isSelected ? .medium : .light))
                                     .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
                                     .padding(.horizontal, 12)
@@ -932,50 +898,16 @@ private struct PurchaseProductSelectionView: View {
                     // Product List
                     ScrollView {
                         VStack(spacing: 12) {
-                            ForEach(searchVM.filteredProducts) { product in
+                            ForEach(searchVM.filteredCatalogs) { product in
                                 Button(action: {
                                     viewModel.addClientPurchase(
                                         brand: product.brand,
                                         name: product.name,
-                                        price: product.price
+                                        price: product.formattedPrice
                                     )
                                     dismiss()
                                 }) {
-                                    HStack(spacing: 12) {
-                                        ZStack {
-                                            RoundedRectangle(cornerRadius: 10)
-                                                .fill(AppColors.surface2)
-                                                .frame(width: 48, height: 48)
-                                            Image(systemName: "circle.grid.cross")
-                                                .font(.system(size: 16))
-                                                .foregroundStyle(AppColors.gold)
-                                                .opacity(0.3)
-                                        }
-                                        
-                                        VStack(alignment: .leading, spacing: 3) {
-                                            Text(product.brand.uppercased())
-                                                .font(AppFonts.sansSerif(size: 9, weight: .bold))
-                                                .foregroundStyle(AppColors.gold)
-                                                .kerning(1)
-                                            Text(product.name)
-                                                .font(AppFonts.serif(size: 14, weight: .medium))
-                                                .foregroundStyle(.white)
-                                            Text(product.price)
-                                                .font(AppFonts.sansSerif(size: 12))
-                                                .foregroundStyle(AppColors.secondary)
-                                        }
-                                        Spacer()
-                                        Image(systemName: "plus.circle.fill")
-                                            .font(.system(size: 20))
-                                            .foregroundStyle(AppColors.gold)
-                                    }
-                                    .padding(12)
-                                    .background(AppColors.surface)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .stroke(AppColors.gold15, lineWidth: 0.5)
-                                    )
+                                    ClientProfileProductRowView(product: product)
                                 }
                                 .buttonStyle(.plain)
                             }
@@ -998,5 +930,47 @@ private struct PurchaseProductSelectionView: View {
             }
         }
         .preferredColorScheme(.dark)
+    }
+}
+
+struct ClientProfileProductRowView: View {
+    let product: CatalogEntity
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(AppColors.surface2)
+                    .frame(width: 48, height: 48)
+                Image(systemName: "circle.grid.cross")
+                    .font(.system(size: 16))
+                    .foregroundStyle(AppColors.gold)
+                    .opacity(0.3)
+            }
+            
+            VStack(alignment: .leading, spacing: 3) {
+                Text(product.brand)
+                    .font(AppFonts.sansSerif(size: 9, weight: .bold))
+                    .foregroundStyle(AppColors.gold)
+                    .kerning(1)
+                Text(product.name)
+                    .font(AppFonts.serif(size: 14, weight: .medium))
+                    .foregroundStyle(.white)
+                Text(product.formattedPrice)
+                    .font(AppFonts.sansSerif(size: 12))
+                    .foregroundStyle(AppColors.secondary)
+            }
+            Spacer()
+            Image(systemName: "plus.circle.fill")
+                .font(.system(size: 20))
+                .foregroundStyle(AppColors.gold)
+        }
+        .padding(12)
+        .background(AppColors.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(AppColors.gold15, lineWidth: 0.5)
+        )
     }
 }
