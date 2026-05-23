@@ -16,7 +16,21 @@ struct SystemLogsView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                CustomHeader(title: "System Logs")
+                HStack {
+                    Text("System Logs")
+                        .font(AppFonts.serif(size: 28, weight: .semibold))
+                        .foregroundStyle(.white)
+                    Spacer()
+                    Button(action: { coordinator.logout() }) {
+                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                            .font(.system(size: 20))
+                            .foregroundStyle(AppColors.gold)
+                    }
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 16)
+                .padding(.bottom, 12)
+                .background(AppColors.background)
                 
                 VStack(spacing: 20) {
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -56,17 +70,7 @@ struct SystemLogsView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                             .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
                             .padding(.horizontal, 24)
-                            
-                            CustomButton(
-                                title: "Logout",
-                                icon: AnyView(Image(systemName: "rectangle.portrait.and.arrow.right").font(.system(size: 14, weight: .semibold))),
-                                action: {
-                                    coordinator.logout()
-                                }
-                            )
-                            .padding(.horizontal, 24)
-                            .padding(.top, 32)
-                            .padding(.bottom, 40)
+                            .padding(.bottom, 60)
                         }
                     }
                 }

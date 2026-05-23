@@ -17,7 +17,21 @@ struct GlobalAnalyticsView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                CustomHeader(title: "Global Overview")
+                HStack {
+                    Text("Global Overview")
+                        .font(AppFonts.serif(size: 28, weight: .semibold))
+                        .foregroundStyle(.white)
+                    Spacer()
+                    Button(action: { coordinator.logout() }) {
+                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                            .font(.system(size: 20))
+                            .foregroundStyle(AppColors.gold)
+                    }
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 16)
+                .padding(.bottom, 12)
+                .background(AppColors.background)
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 28) {
@@ -101,11 +115,7 @@ struct GlobalAnalyticsView: View {
                                 }
                             }
                         }
-                        .padding(.horizontal, 24)
-                        
-                        CustomButton(title: "Logout", action: { coordinator.logout() })
-                            .padding(.horizontal, 24)
-                            .padding(.bottom, 60)
+                        .padding(.bottom, 60)
                     }
                     .padding(.top, 20)
                 }
