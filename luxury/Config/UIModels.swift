@@ -133,7 +133,11 @@ struct Client: Identifiable, Hashable {
         self.name = name
         self.tier = tier
         self.lastVisit = lastVisit
-        self.ltv = ltv
+        if let storedLTV = UserDefaults.standard.string(forKey: "luxury_ltv_\(id.uuidString)") {
+            self.ltv = storedLTV
+        } else {
+            self.ltv = ltv
+        }
         self.initial = initial
         self.isHot = isHot
         self.phone = phone
@@ -153,7 +157,9 @@ extension Client {
         self.lastVisit = hasPurchases ? "Today" : "New Client"
         
         // Tier-based default LTV for premium look, but only if they have purchases
-        if hasPurchases {
+        if let storedLTV = UserDefaults.standard.string(forKey: "luxury_ltv_\(entity.id.uuidString)") {
+            self.ltv = storedLTV
+        } else if hasPurchases {
             switch clientTier {
             case .standard:
                 self.ltv = "₹4,50,000"
@@ -184,18 +190,48 @@ struct ClientNote: Identifiable, Hashable {
     let author: String
 }
 
-struct ClientPurchase: Identifiable, Hashable {
-    let id: UUID = UUID()
+struct ClientPurchase: Identifiable, Hashable, Codable {
+    var id: UUID
     let name: String
     let price: String
     let date: String
+    
+    init(id: UUID = UUID(), name: String, price: String, date: String) {
+        self.id = id
+        self.name = name
+        self.price = price
+        self.date = date
+    }
 }
 
-struct ClientWishlistItem: Identifiable, Hashable {
-    let id: UUID = UUID()
+struct ClientSizePreference: Identifiable, Hashable, Codable {
+    var id: UUID
+    var ringSize: String
+    var wristSize: String
+    var apparelSize: String
+    var shoeSize: String
+    
+    init(id: UUID = UUID(), ringSize: String = "", wristSize: String = "", apparelSize: String = "", shoeSize: String = "") {
+        self.id = id
+        self.ringSize = ringSize
+        self.wristSize = wristSize
+        self.apparelSize = apparelSize
+        self.shoeSize = shoeSize
+    }
+}
+
+struct ClientWishlistItem: Identifiable, Hashable, Codable {
+    var id: UUID
     let brand: String
     let name: String
     let price: String
+    
+    init(id: UUID = UUID(), brand: String, name: String, price: String) {
+        self.id = id
+        self.brand = brand
+        self.name = name
+        self.price = price
+    }
 }
 
 struct ClientTicket: Identifiable, Hashable {

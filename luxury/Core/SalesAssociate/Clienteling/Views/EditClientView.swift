@@ -17,6 +17,11 @@ struct EditClientView: View {
     @State private var email: String = ""
     @State private var selectedTier: String = ""
     
+    @State private var ringSize: String = ""
+    @State private var wristSize: String = ""
+    @State private var apparelSize: String = ""
+    @State private var shoeSize: String = ""
+    
     @State private var marketingConsent: Bool = true
     @State private var dataConsent: Bool = true
     @State private var thirdPartyConsent: Bool = false
@@ -34,6 +39,12 @@ struct EditClientView: View {
         _firstName = State(initialValue: nameParts.first ?? "")
         _lastName = State(initialValue: nameParts.count > 1 ? nameParts.dropFirst().joined(separator: " ") : "")
         _selectedTier = State(initialValue: client.tier.rawValue)
+        
+        let initialSizes = SizePreferenceService.shared.fetchSizePreference(clientId: client.id)
+        _ringSize = State(initialValue: initialSizes.ringSize)
+        _wristSize = State(initialValue: initialSizes.wristSize)
+        _apparelSize = State(initialValue: initialSizes.apparelSize)
+        _shoeSize = State(initialValue: initialSizes.shoeSize)
         
         if let clientEmail = client.email, !clientEmail.isEmpty {
             _email = State(initialValue: clientEmail)
@@ -130,6 +141,26 @@ struct EditClientView: View {
                         .padding(.bottom, 16)
                         
                         VStack(alignment: .leading, spacing: 12) {
+                            Text("SIZE PREFERENCES")
+                                .font(AppFonts.sansSerif(size: 10))
+                                .foregroundStyle(AppColors.gold)
+                                .kerning(2)
+                                .padding(.top, 4)
+                            
+                            HStack(spacing: 10) {
+                                RSMSField(label: "Ring Size", placeholder: "e.g. 9", text: $ringSize)
+                                RSMSField(label: "Wrist Size", placeholder: "e.g. 18.5 cm", text: $wristSize)
+                            }
+                            
+                            HStack(spacing: 10) {
+                                RSMSField(label: "Apparel Size", placeholder: "e.g. L", text: $apparelSize)
+                                RSMSField(label: "Shoe Size", placeholder: "e.g. 43", text: $shoeSize)
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 16)
+                        
+                        VStack(alignment: .leading, spacing: 12) {
                             Text("PRIVACY CONSENTS")
                                 .font(AppFonts.sansSerif(size: 10))
                                 .foregroundStyle(AppColors.gold)
@@ -214,6 +245,11 @@ struct EditClientView: View {
                 self.email = entity.email
                 self.mobile = entity.phone ?? ""
                 self.selectedTier = entity.tier ?? "Standard"
+                let localSizes = SizePreferenceService.shared.fetchSizePreference(clientId: client.id)
+                self.ringSize = localSizes.ringSize
+                self.wristSize = localSizes.wristSize
+                self.apparelSize = localSizes.apparelSize
+                self.shoeSize = localSizes.shoeSize
                 self.isLoading = false
             }
         } catch {
@@ -255,6 +291,16 @@ struct EditClientView: View {
             createdAt: clientEntity?.createdAt ?? Date(),
             updatedAt: Date()
         )
+        
+        // Save size preferences locally
+        let newSizes = ClientSizePreference(
+            id: client.id,
+            ringSize: ringSize,
+            wristSize: wristSize,
+            apparelSize: apparelSize,
+            shoeSize: shoeSize
+        )
+        SizePreferenceService.shared.saveSizePreference(newSizes, for: client.id)
         
         isLoading = true
         Task {
