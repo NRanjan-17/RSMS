@@ -155,6 +155,8 @@ private struct CustomSecureField: View {
             SecureField("", text: $text, prompt: Text(placeholder).foregroundStyle(AppColors.tertiary))
                 .font(AppFonts.sansSerif(size: 15))
                 .foregroundStyle(AppColors.text)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
                 .padding(.vertical, 16)
                 .padding(.horizontal, 18)
                 .background(AppColors.surface)

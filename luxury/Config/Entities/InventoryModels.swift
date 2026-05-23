@@ -25,7 +25,7 @@ struct InventoryItem: Identifiable, Codable, Equatable, Hashable {
 // Composite model for the Corporate Admin dashboard UI
 struct ProductInventorySummary: Identifiable, Equatable, Hashable {
     var id: UUID { product.id }
-    let product: ProductEntity
+    let product: CatalogEntity
     let totalQuantity: Int
     let locations: [LocationInventoryDetail]
     

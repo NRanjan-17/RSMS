@@ -40,7 +40,7 @@ final class BarcodeScanViewModel {
         Task {
             do {
                 // 1. Find product by barcode
-                let productsResponse: [ProductEntity] = try await client.from("products")
+                let productsResponse: [CatalogEntity] = try await client.from("catalogs")
                     .select()
                     .eq("bar_code", value: barcode)
                     .execute()

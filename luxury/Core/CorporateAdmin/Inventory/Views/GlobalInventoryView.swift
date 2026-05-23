@@ -196,7 +196,7 @@ private struct InventorySummaryRow: View {
                     Text(summary.product.name)
                         .font(AppFonts.serif(size: 18, weight: .semibold))
                         .foregroundStyle(AppColors.text)
-                    Text("\(summary.product.productId) • \(summary.product.brand)")
+                    Text("\(summary.product.catalogId) • \(summary.product.brand)")
                         .font(AppFonts.sansSerif(size: 12, weight: .semibold))
                         .foregroundStyle(AppColors.gold)
                         .kerning(1.2)

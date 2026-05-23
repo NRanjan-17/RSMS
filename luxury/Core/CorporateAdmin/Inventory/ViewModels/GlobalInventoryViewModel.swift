@@ -33,7 +33,7 @@ final class GlobalInventoryViewModel {
             result = result.filter { summary in
                 summary.product.name.localizedCaseInsensitiveContains(searchText) ||
                 summary.product.brand.localizedCaseInsensitiveContains(searchText) ||
-                summary.product.productId.localizedCaseInsensitiveContains(searchText) ||
+                summary.product.catalogId.localizedCaseInsensitiveContains(searchText) ||
                 summary.product.barCode.localizedCaseInsensitiveContains(searchText)
             }
         }
@@ -60,14 +60,14 @@ final class GlobalInventoryViewModel {
         Task {
             do {
                 // Fetch products, boutiques, and inventory
-                let productsResponse: [ProductEntity] = try await client.from("products").select().execute().value
+                let catalogsResponse: [CatalogEntity] = try await client.from("catalogs").select().execute().value
                 let inventoryResponse: [InventoryItem] = try await client.from("inventory").select().execute().value
                 let boutiquesResponse: [CorporateBoutique] = try await client.from("boutiques").select().execute().value
                 
                 var newSummaries: [ProductInventorySummary] = []
                 
-                for product in productsResponse {
-                    let productInventory = inventoryResponse.filter { $0.skuId == product.id }
+                for catalog in catalogsResponse {
+                    let productInventory = inventoryResponse.filter { $0.skuId == catalog.id }
                     
                     var locations: [LocationInventoryDetail] = []
                     var totalQty = 0
@@ -86,7 +86,7 @@ final class GlobalInventoryViewModel {
                     }
                     
                     newSummaries.append(ProductInventorySummary(
-                        product: product,
+                        product: catalog,
                         totalQuantity: totalQty,
                         locations: locations.sorted(by: { $0.storeName < $1.storeName })
                     ))

@@ -39,7 +39,7 @@ final class FulfillmentViewModel {
                     .execute()
                     .value
                 
-                let products: [ProductEntity] = try await client
+                let products: [CatalogEntity] = try await client
                     .from("catalogs")
                     .select()
                     .execute()
@@ -50,7 +50,7 @@ final class FulfillmentViewModel {
                     if let product = products.first(where: { $0.id == item.productId }) {
                         item.productName = product.name
                         item.productBrand = product.brand
-                        item.productSku = product.productId
+                        item.productSku = product.catalogId
                         item.productImages = product.reserved?.compactMap { _ in nil }
                     }
                     resolved.append(item)

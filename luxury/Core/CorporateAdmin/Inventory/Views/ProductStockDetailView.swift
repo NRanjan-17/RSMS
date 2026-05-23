@@ -20,7 +20,7 @@ struct ProductStockDetailView: View {
                         .foregroundStyle(AppColors.text)
                     
                     HStack {
-                        Text(summary.product.productId)
+                        Text(summary.product.catalogId)
                             .font(AppFonts.sansSerif(size: 14, weight: .bold))
                             .foregroundStyle(AppColors.gold)
                             .kerning(1.5)

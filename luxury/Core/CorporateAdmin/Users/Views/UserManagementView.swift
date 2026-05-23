@@ -143,7 +143,9 @@ struct UserManagementView: View {
                                     .foregroundStyle(AppColors.secondary)
 
                                     SecureField("Enter password", text: $invitePassword)
-                                    .padding()
+                                        .autocorrectionDisabled()
+                                        .textInputAutocapitalization(.never)
+                                        .padding()
                                     .background(AppColors.surface)
                                     .clipShape(RoundedRectangle(cornerRadius: 12))
                                     .overlay(

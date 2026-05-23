@@ -99,7 +99,7 @@ struct BarcodeScanView: View {
                                         .font(AppFonts.serif(size: 22, weight: .bold))
                                         .foregroundStyle(.white)
                                     
-                                    Text(summary.product.productId)
+                                    Text(summary.product.catalogId)
                                         .font(AppFonts.sansSerif(size: 14))
                                         .foregroundStyle(AppColors.secondary)
                                 }
