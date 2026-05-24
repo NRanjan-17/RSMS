@@ -51,7 +51,7 @@ struct InventoryControllerCanvas: View {
                     }
             }
             .environment(rfidRouter)
-            .tabItem { Label("RFID", systemImage: "antenna.radiowaves.left.and.right") }
+            .tabItem { Label("Scan", systemImage: "barcode.viewfinder") }
             .tag(ICTab.rfid)
             
             NavigationStack(path: $transfersRouter.path) {

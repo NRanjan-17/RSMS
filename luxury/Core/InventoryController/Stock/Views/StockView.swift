@@ -110,6 +110,7 @@ struct StockView: View {
         }
         .toolbar(.hidden, for: .navigationBar)
         .onAppear {
+            viewModel.fetchInventoryStats()
             viewModel.fetchSFSCount()
         }
     }
