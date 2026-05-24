@@ -98,10 +98,8 @@ struct InventoryControllerCanvas: View {
             StockSearchView()
         case .scanSessionDetail(let session):
             ScanSessionDetailView(session: session)
-        case .activeScan:
-            ActiveScanView()
         case .barcodeScan:
-            BarcodeScanView()
+            BarcodeLookupView()
         case .transferDetail(let transfer):
             TransferDetailView(transfer: transfer)
         case .newTransfer:

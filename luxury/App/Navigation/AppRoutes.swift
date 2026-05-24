@@ -39,7 +39,6 @@ enum ICRoute: Hashable {
     case stockDetail(InventoryAlert)
     case stockSearch
     case scanSessionDetail(ScanSession)
-    case activeScan
     case barcodeScan
     case transferDetail(TransferRequest)
     case newTransfer

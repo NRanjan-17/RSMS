@@ -57,30 +57,32 @@ struct BatchScannerSheet: View {
             }
         }
         .sheet(isPresented: $showingList) {
-            ScannedSerialsListView(scannedSerials: $scannedSerials)
+            ScannedSerialsListView(scannedSerials: $scannedSerials, onManualEntry: handleScannedCode)
                 .presentationDetents([.fraction(0.2), .medium, .large])
                 .presentationBackgroundInteraction(.enabled(upThrough: .large))
                 .presentationBackground(.ultraThinMaterial)
                 .interactiveDismissDisabled()
         }
         .onAppear {
-            scannerService.onScannedCode = { code in
-                let trimmed = code.trimmingCharacters(in: .whitespacesAndNewlines)
-                guard !trimmed.isEmpty else { return }
-                
-                if !scannedSerials.contains(trimmed) && !existingSerials.contains(trimmed) {
-                    withAnimation {
-                        scannedSerials.append(trimmed)
-                    }
-                    scannerService.playSuccessFeedback()
-                } else {
-                    scannerService.playErrorFeedback()
-                    if existingSerials.contains(trimmed) {
-                        showToast("Already in System: \(trimmed)")
-                    } else {
-                        showToast("Duplicate: \(trimmed)")
-                    }
-                }
+            scannerService.onScannedCode = handleScannedCode
+        }
+    }
+    
+    private func handleScannedCode(_ code: String) {
+        let trimmed = code.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        
+        if !scannedSerials.contains(trimmed) && !existingSerials.contains(trimmed) {
+            withAnimation {
+                scannedSerials.append(trimmed)
+            }
+            scannerService.playSuccessFeedback()
+        } else {
+            scannerService.playErrorFeedback()
+            if existingSerials.contains(trimmed) {
+                showToast("Already in System: \(trimmed)")
+            } else {
+                showToast("Duplicate: \(trimmed)")
             }
         }
     }
@@ -101,10 +103,34 @@ struct BatchScannerSheet: View {
 
 struct ScannedSerialsListView: View {
     @Binding var scannedSerials: [String]
+    let onManualEntry: (String) -> Void
+    
+    @State private var manualEntry: String = ""
     
     var body: some View {
         NavigationStack {
             List {
+                Section(header: Text("Manual Entry")) {
+                    HStack {
+                        TextField("Type barcode or serial...", text: $manualEntry)
+                            .font(AppFonts.sansSerif(size: 16))
+                            .textInputAutocapitalization(.characters)
+                            .autocorrectionDisabled(true)
+                            .submitLabel(.done)
+                            .onSubmit {
+                                submitManualEntry()
+                            }
+                        
+                        Button(action: submitManualEntry) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 24))
+                                .foregroundStyle(manualEntry.isEmpty ? AppColors.tertiary : AppColors.gold)
+                        }
+                        .disabled(manualEntry.isEmpty)
+                        .buttonStyle(.plain)
+                    }
+                }
+                
                 Section(header: Text("Scanned Serials (\(scannedSerials.count))")) {
                     if scannedSerials.isEmpty {
                         Text("Scan items to add them here.")
@@ -145,6 +171,14 @@ struct ScannedSerialsListView: View {
             .navigationTitle("Scanned Items")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.visible, for: .navigationBar)
+        }
+    }
+    
+    private func submitManualEntry() {
+        let code = manualEntry.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !code.isEmpty {
+            onManualEntry(code)
+            manualEntry = ""
         }
     }
 }
