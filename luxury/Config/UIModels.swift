@@ -162,14 +162,14 @@ extension Client {
         } else if hasPurchases {
             switch clientTier {
             case .standard:
-                self.ltv = "₹4,50,000"
+                self.ltv = "\(CurrencyManager.shared.symbol)4,50,000"
             case .vip:
-                self.ltv = "₹28,00,000"
+                self.ltv = "\(CurrencyManager.shared.symbol)28,00,000"
             case .uhnw:
-                self.ltv = "₹1,15,00,000"
+                self.ltv = "\(CurrencyManager.shared.symbol)1,15,00,000"
             }
         } else {
-            self.ltv = "₹0"
+            self.ltv = "\(CurrencyManager.shared.symbol)0"
         }
         
         let parts = entity.name.components(separatedBy: " ")

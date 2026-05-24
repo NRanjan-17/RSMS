@@ -10,7 +10,7 @@ import Observation
 
 @Observable
 final class ClientDetailViewModel {
-    static let defaultClient = Client(name: "Rahul Bajaj", tier: .uhnw, lastVisit: "Today", ltv: "₹1,24,50,000", initial: "RB", isHot: true)
+    static let defaultClient = Client(name: "Rahul Bajaj", tier: .uhnw, lastVisit: "Today", ltv: "\(CurrencyManager.shared.symbol)1,24,50,000", initial: "RB", isHot: true)
     
     var client: Client {
         didSet {
@@ -85,9 +85,9 @@ final class ClientDetailViewModel {
         formatter.numberStyle = .decimal
         formatter.locale = Locale(identifier: "en_IN")
         if let formatted = formatter.string(from: NSNumber(value: value)) {
-            return "₹\(formatted)"
+            return "\(CurrencyManager.shared.symbol)\(formatted)"
         }
-        return "₹\(value)"
+        return "\(CurrencyManager.shared.symbol)\(value)"
     }
     
     func addClientPurchase(brand: String, name: String, price: String) {

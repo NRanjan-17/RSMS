@@ -9,6 +9,7 @@ import SwiftUI
 
 struct StockView: View {
     @Environment(Router.self) private var router
+    @Environment(AppCoordinator.self) private var coordinator
     @State private var viewModel = StockViewModel()
     
     var body: some View {
@@ -16,7 +17,21 @@ struct StockView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                CustomHeader(title: "Stock")
+                HStack {
+                    Text("Stock")
+                        .font(AppFonts.serif(size: 28, weight: .semibold))
+                        .foregroundStyle(.white)
+                    Spacer()
+                    Button(action: { coordinator.logout() }) {
+                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                            .font(.system(size: 20))
+                            .foregroundStyle(AppColors.gold)
+                    }
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 16)
+                .padding(.bottom, 12)
+                .background(AppColors.background)
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 24) {

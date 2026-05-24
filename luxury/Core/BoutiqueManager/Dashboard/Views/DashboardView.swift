@@ -12,12 +12,28 @@ struct DashboardView: View {
     @Environment(Router.self) private var router
     @State private var viewModel = DashboardViewModel()
 
+    @State private var showingSettings = false
+    
     var body: some View {
         ZStack {
             AppColors.background.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                CustomHeader(title: "Dashboard")
+                HStack {
+                    Text("Dashboard")
+                        .font(AppFonts.serif(size: 28, weight: .semibold))
+                        .foregroundStyle(.white)
+                    Spacer()
+                    Button(action: { showingSettings = true }) {
+                        Image(systemName: "gearshape")
+                            .font(.system(size: 20))
+                            .foregroundStyle(AppColors.gold)
+                    }
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 16)
+                .padding(.bottom, 12)
+                .background(AppColors.background)
 
                 if viewModel.isOffline {
                     HStack(spacing: 10) {
@@ -179,11 +195,6 @@ struct DashboardView: View {
                                 }
                             }
                         }
-
-                        CustomButton(title: "Logout", action: { coordinator.logout() })
-                            .padding(.horizontal, 24)
-                            .padding(.top, 20)
-                            .padding(.bottom, 40)
                     }
                     .padding(.top, 20)
                 }
@@ -196,6 +207,9 @@ struct DashboardView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .sheet(isPresented: $showingSettings) {
+            BoutiqueManagerSettingsView()
+        }
     }
 }
 

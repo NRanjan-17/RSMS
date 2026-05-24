@@ -10,7 +10,7 @@ import Observation
 
 @Observable
 final class ShrinkReportViewModel {
-    var totalShrinkValue: String = "₹1,45,000"
+    var totalShrinkValue: String = "\(CurrencyManager.shared.symbol)1,45,000"
     var accuracy: String = "98.2%"
     
     var recentWriteOffs: [RSMSVarianceItem] = [

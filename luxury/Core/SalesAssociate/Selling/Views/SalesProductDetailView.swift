@@ -80,7 +80,7 @@ struct SalesProductDetailView: View {
                                 .padding(.bottom, 10)
                             
                             HStack(alignment: .firstTextBaseline, spacing: 8) {
-                                Text(String(format: "$%.2f", catalog.amount))
+                                Text(CurrencyManager.shared.format(amount: catalog.amount))
                                     .font(AppFonts.serif(size: 30, weight: .semibold))
                                     .foregroundStyle(AppColors.gold)
                                 Text("incl. 3% GST")
@@ -110,8 +110,8 @@ struct SalesProductDetailView: View {
                             
                             HStack(spacing: 10) {
                                 let pairings = [
-                                    ("ROLEX", "Datejust 41", "₹9,20,000"),
-                                    ("ROLEX", "GMT-Master II", "₹18,40,000")
+                                    ("ROLEX", "Datejust 41", "\(CurrencyManager.shared.symbol)9,20,000"),
+                                    ("ROLEX", "GMT-Master II", "\(CurrencyManager.shared.symbol)18,40,000")
                                 ]
                                 ForEach(pairings, id: \.1) { pair in
                                     VStack(alignment: .leading, spacing: 0) {

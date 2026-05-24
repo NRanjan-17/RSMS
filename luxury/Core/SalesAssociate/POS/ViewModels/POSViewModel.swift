@@ -61,9 +61,9 @@ final class POSViewModel {
     func formatCurrency(_ amount: Int) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
-        formatter.currencySymbol = "₹"
+        formatter.currencySymbol = CurrencyManager.shared.symbol
         formatter.locale = Locale(identifier: "en_IN")
         formatter.maximumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: amount)) ?? "₹\(amount)"
+        return formatter.string(from: NSNumber(value: amount)) ?? "\(CurrencyManager.shared.symbol)\(amount)"
     }
 }

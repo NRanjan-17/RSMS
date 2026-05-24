@@ -143,9 +143,9 @@ private struct PacingProgressBar: View {
         AppColors.background.ignoresSafeArea()
         VStack(spacing: 16) {
             SalesTargetCard(
-                actual: "₹12,45,000", target: "₹15,00,000",
+                actual: "\(CurrencyManager.shared.symbol)12,45,000", target: "\(CurrencyManager.shared.symbol)15,00,000",
                 actualProgress: 0.83, pacingProgress: 0.60,
-                projectedSales: "₹15,60,000", pacingStatus: .ahead,
+                projectedSales: "\(CurrencyManager.shared.symbol)15,60,000", pacingStatus: .ahead,
                 isTargetConfigured: true
             )
             SalesTargetCard(
@@ -155,9 +155,9 @@ private struct PacingProgressBar: View {
                 isTargetConfigured: false
             )
             SalesTargetCard(
-                actual: "₹16,00,000", target: "₹15,00,000",
+                actual: "\(CurrencyManager.shared.symbol)16,00,000", target: "\(CurrencyManager.shared.symbol)15,00,000",
                 actualProgress: 1.07, pacingProgress: 0.90,
-                projectedSales: "₹16,00,000", pacingStatus: .exceeded,
+                projectedSales: "\(CurrencyManager.shared.symbol)16,00,000", pacingStatus: .exceeded,
                 isTargetConfigured: true
             )
         }

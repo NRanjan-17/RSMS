@@ -348,7 +348,7 @@ private struct ClientOverviewTab: View {
                             Text("Patek Philippe Nautilus 5711/1A")
                                 .font(AppFonts.sansSerif(size: 13, weight: .medium))
                                 .foregroundStyle(.white)
-                            Text("₹82,00,000 · March 2025")
+                            Text("\(CurrencyManager.shared.symbol)82,00,000 · March 2025")
                                 .font(AppFonts.sansSerif(size: 11))
                                 .foregroundStyle(AppColors.gold)
                         }

@@ -96,8 +96,8 @@ final class GlobalAnalyticsViewModel {
             }
             
             // Format KPI values
-            let formattedRevenue = totalRevenue > 0 ? "₹\(String(format: "%.2f", totalRevenue / 10000000.0)) Cr" : "₹0"
-            let formattedInventoryValue = totalInventoryValue > 0 ? "₹\(String(format: "%.2f", totalInventoryValue / 10000000.0)) Cr" : "₹0"
+            let formattedRevenue = totalRevenue > 0 ? "\(CurrencyManager.shared.symbol)\(String(format: "%.2f", totalRevenue / 10000000.0)) Cr" : "\(CurrencyManager.shared.symbol)0"
+            let formattedInventoryValue = totalInventoryValue > 0 ? "\(CurrencyManager.shared.symbol)\(String(format: "%.2f", totalInventoryValue / 10000000.0)) Cr" : "\(CurrencyManager.shared.symbol)0"
             
             let newKpis = [
                 GlobalKPI(label: "Global Revenue", value: formattedRevenue, trend: 5.2, icon: "indianrupeesign.circle.fill"),

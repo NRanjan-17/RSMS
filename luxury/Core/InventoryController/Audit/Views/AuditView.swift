@@ -79,13 +79,7 @@ struct AuditView: View {
                             .font(AppFonts.sansSerif(size: 11, weight: .bold))
                             .foregroundStyle(AppColors.secondary)
                     }
-                    
-                    Section {
-                        CustomButton(title: "Logout", action: { coordinator.logout() })
-                            .padding(.vertical, 10)
-                    }
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 20, leading: 20, bottom: 40, trailing: 20))
+
                 }
                 .scrollContentBackground(.hidden)
                 .background(AppColors.background)

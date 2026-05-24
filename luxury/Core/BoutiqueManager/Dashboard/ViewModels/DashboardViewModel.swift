@@ -74,8 +74,8 @@ final class DashboardViewModel {
     }
 
     var pendingApprovals: [ApprovalRequest] = [
-        ApprovalRequest(associateName: "Aman Gupta", clientName: "Vikram Seth", amount: "₹4,50,000", discount: "15%"),
-        ApprovalRequest(associateName: "Priya R.",   clientName: "Ananya M.",   amount: "₹1,20,000", discount: "12%")
+        ApprovalRequest(associateName: "Aman Gupta", clientName: "Vikram Seth", amount: "\(CurrencyManager.shared.symbol)4,50,000", discount: "15%"),
+        ApprovalRequest(associateName: "Priya R.",   clientName: "Ananya M.",   amount: "\(CurrencyManager.shared.symbol)1,20,000", discount: "12%")
     ]
 
     var appointments: [BMAppointment] = [
@@ -142,9 +142,9 @@ final class DashboardViewModel {
     private func formatINR(_ value: Double) -> String {
         let f                   = NumberFormatter()
         f.numberStyle           = .currency
-        f.currencySymbol        = "₹"
+        f.currencySymbol = CurrencyManager.shared.symbol
         f.maximumFractionDigits = 0
         f.locale                = Locale(identifier: "en_IN")
-        return f.string(from: NSNumber(value: value)) ?? "₹0"
+        return f.string(from: NSNumber(value: value)) ?? "\(CurrencyManager.shared.symbol)0"
     }
 }

@@ -44,6 +44,6 @@ struct CatalogEntity: Identifiable, Codable, Equatable, Hashable {
     }
     
     var formattedPrice: String {
-        return "₹\(Int(amount))"
+        return "\(CurrencyManager.shared.symbol)\(Int(amount))"
     }
 }

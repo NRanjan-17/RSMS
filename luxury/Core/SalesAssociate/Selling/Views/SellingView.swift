@@ -153,7 +153,7 @@ struct SellingView: View {
                                             .foregroundStyle(.white)
                                             .lineLimit(1)
                                         
-                                        Text(String(format: "$%.2f", catalog.amount))
+                                        Text(CurrencyManager.shared.format(amount: catalog.amount))
                                             .font(AppFonts.serif(size: 15, weight: .semibold))
                                             .foregroundStyle(AppColors.gold)
                                             .padding(.top, 2)

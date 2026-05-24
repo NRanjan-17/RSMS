@@ -54,7 +54,7 @@ struct CatalogDetailView: View {
                 LabeledContent("Category", value: currentCatalog.category.rawValue)
                 LabeledContent("Description", value: currentCatalog.description)
                 LabeledContent("Stock", value: "\((currentCatalog.productIds?.count ?? 0) - (currentCatalog.reserved?.count ?? 0))")
-                LabeledContent("Amount", value: String(format: "$%.2f", currentCatalog.amount))
+                LabeledContent("Amount", value: CurrencyManager.shared.format(amount: currentCatalog.amount))
                 LabeledContent("Barcode", value: currentCatalog.barCode)
             }
             

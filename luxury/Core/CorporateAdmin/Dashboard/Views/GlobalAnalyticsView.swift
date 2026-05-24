@@ -11,6 +11,7 @@ import Charts
 struct GlobalAnalyticsView: View {
     @Environment(AppCoordinator.self) private var coordinator
     @State private var viewModel = GlobalAnalyticsViewModel()
+    @State private var showingSettings = false
     
     var body: some View {
         ZStack {
@@ -22,8 +23,8 @@ struct GlobalAnalyticsView: View {
                         .font(AppFonts.serif(size: 28, weight: .semibold))
                         .foregroundStyle(.white)
                     Spacer()
-                    Button(action: { coordinator.logout() }) {
-                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                    Button(action: { showingSettings = true }) {
+                        Image(systemName: "gearshape")
                             .font(.system(size: 20))
                             .foregroundStyle(AppColors.gold)
                     }
@@ -127,6 +128,9 @@ struct GlobalAnalyticsView: View {
         }
         .onAppear {
             viewModel.fetchData()
+        }
+        .sheet(isPresented: $showingSettings) {
+            CorporateAdminSettingsView()
         }
     }
 }

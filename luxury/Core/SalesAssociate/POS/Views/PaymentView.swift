@@ -45,7 +45,7 @@ struct PaymentView: View {
                                 .font(AppFonts.sansSerif(size: 11))
                                 .foregroundStyle(AppColors.secondary)
                                 .kerning(1.5)
-                            Text("₹16,06,179")
+                            Text("\(CurrencyManager.shared.symbol)16,06,179")
                                 .font(AppFonts.serif(size: 40, weight: .semibold))
                                 .foregroundStyle(AppColors.gold)
                                 .kerning(-1)
@@ -167,7 +167,7 @@ struct PaymentView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                                 .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
                             } else if selectedMethod == .split {
-                                let splits = [("Credit Card", "₹12,00,000"), ("Gift Voucher", "₹4,06,179")]
+                                let splits = [("Credit Card", "\(CurrencyManager.shared.symbol)12,00,000"), ("Gift Voucher", "\(CurrencyManager.shared.symbol)4,06,179")]
                                 ForEach(splits, id: \.0) { split in
                                     HStack {
                                         Text(split.0)
@@ -197,7 +197,7 @@ struct PaymentView: View {
                     Button(action: {
                         router.push(SARoute.receipt)
                     }) {
-                        Text("Process Payment · ₹16,06,179")
+                        Text("Process Payment · \(CurrencyManager.shared.symbol)16,06,179")
                             .font(AppFonts.sansSerif(size: 15, weight: .medium))
                             .foregroundStyle(AppColors.background)
                             .frame(maxWidth: .infinity)

@@ -14,7 +14,7 @@ struct RefundApprovalView: View {
     var body: some View {
         ManagerDecisionView(
             title:   "Refund Approval",
-            heading: "Refund ₹2,45,000",
+            heading: "Refund \(CurrencyManager.shared.symbol)2,45,000",
             detail:  "Rahul Bajaj · Bottega Veneta The Jodie · Receipt verified · Tax-free documents attached",
             state:   $state,
             dismiss: dismiss
@@ -29,7 +29,7 @@ struct WriteOffApprovalView: View {
     var body: some View {
         ManagerDecisionView(
             title:   "Write-Off Approval",
-            heading: "Inventory write-off ₹8,20,000",
+            heading: "Inventory write-off \(CurrencyManager.shared.symbol)8,20,000",
             detail:  "Cycle Count CC-2026-05 · 3 variance items · Recount completed · Audit trail locked",
             state:   $state,
             dismiss: dismiss

@@ -68,10 +68,6 @@ struct ReportsView: View {
                             }
                         }
                         
-                        CustomButton(title: "Logout", action: { coordinator.logout() })
-                            .padding(.horizontal, 24)
-                            .padding(.top, 16)
-                        
                         VStack(alignment: .center, spacing: 8) {
                             Image(systemName: "lock.shield")
                                 .font(.system(size: 24))

@@ -87,7 +87,7 @@ struct CatalogFormView: View {
                         }
                         
                         HStack(spacing: 16) {
-                            CatalogFormTextField(title: "AMOUNT (₹)", text: $bindableViewModel.newAmount, keyboardType: .decimalPad)
+                            CatalogFormTextField(title: "AMOUNT (\(CurrencyManager.shared.symbol))", text: $bindableViewModel.newAmount, keyboardType: .decimalPad)
                         }
                         
                         if editCatalog != nil {
