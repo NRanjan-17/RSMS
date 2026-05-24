@@ -34,16 +34,23 @@ struct SystemLogsView: View {
                         .padding(.horizontal, 24)
                     }
                     
-                    if viewModel.isLoading {
-                        Spacer()
-                        ProgressView().tint(AppColors.gold)
-                        Spacer()
-                    } else if let error = viewModel.errorMessage {
-                        Spacer()
-                        Text(error).font(AppFonts.sansSerif(size: 14)).foregroundStyle(AppColors.error).padding(40)
-                        Spacer()
-                    } else {
-                        ScrollView(showsIndicators: false) {
+                    ScrollView(showsIndicators: false) {
+                        if viewModel.isLoading {
+                            ProgressView().tint(AppColors.gold).padding(.top, 40)
+                        } else if let error = viewModel.errorMessage {
+                            Text(error)
+                                .font(AppFonts.sansSerif(size: 14))
+                                .foregroundStyle(AppColors.error)
+                                .padding(40)
+                                .multilineTextAlignment(.center)
+                                .frame(maxWidth: .infinity, minHeight: 200)
+                        } else if viewModel.filteredLogs.isEmpty {
+                            Text("No logs found for this category.")
+                                .font(AppFonts.sansSerif(size: 14))
+                                .foregroundStyle(AppColors.secondary)
+                                .padding(.top, 40)
+                                .frame(maxWidth: .infinity, minHeight: 200)
+                        } else {
                             VStack(spacing: 0) {
                                 ForEach(viewModel.filteredLogs) { log in
                                     LogRow(log: log)
@@ -58,9 +65,9 @@ struct SystemLogsView: View {
                             .padding(.horizontal, 24)
                             .padding(.bottom, 60)
                         }
-                        .refreshable {
-                            viewModel.fetchData()
-                        }
+                    }
+                    .refreshable {
+                        viewModel.fetchData()
                     }
                 }
                 .padding(.top, 20)
