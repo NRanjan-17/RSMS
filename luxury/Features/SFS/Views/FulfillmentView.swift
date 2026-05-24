@@ -145,11 +145,30 @@ struct FulfillmentView: View {
                                                 
                                                 Spacer()
                                                 
-                                                if order.status.lowercased() == "secured" {
-                                                    StatusBadge(text: "Secured", status: .success)
+                                                if order.status.lowercased() == "ready to pick" {
+                                                    StatusBadge(text: "Ready to Pick", status: .success)
+                                                } else if order.status.lowercased() == "secured" {
+                                                    StatusBadge(text: "Secured", status: .neutral)
                                                 } else {
                                                     StatusBadge(text: "Pending", status: .warning)
                                                 }
+                                            }
+                                            
+                                            if order.status.lowercased() == "secured" {
+                                                Button(action: {
+                                                    Task {
+                                                        await viewModel.updateStatusToReadyToPick(orderId: order.id)
+                                                    }
+                                                }) {
+                                                    Text("Mark Ready to Pick")
+                                                        .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                                        .foregroundStyle(AppColors.background)
+                                                        .frame(maxWidth: .infinity)
+                                                        .padding(.vertical, 12)
+                                                        .background(AppColors.gold)
+                                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                }
+                                                .padding(.top, 8)
                                             }
                                         }
                                         .padding(16)

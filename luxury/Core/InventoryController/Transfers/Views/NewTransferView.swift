@@ -8,7 +8,9 @@
 import SwiftUI
 
 struct NewTransferView: View {
+    @Environment(Router.self) private var router
     @State private var viewModel = NewTransferViewModel()
+    @State private var showSearchSheet = false
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -34,41 +36,74 @@ struct NewTransferView: View {
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 32) {
-                        VStack(spacing: 12) {
+                        // Source & Destination
+                        VStack(spacing: 8) {
+                            // Source
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("SOURCE")
                                         .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                                        .foregroundStyle(AppColors.tertiary)
-                                    Text(viewModel.sourceStore)
-                                        .font(AppFonts.serif(size: 18))
-                                        .foregroundStyle(.white)
+                                        .foregroundStyle(AppColors.secondary)
+                                        .kerning(1.5)
+                                    
+                                    Menu {
+                                        ForEach(viewModel.availableBoutiques) { boutique in
+                                            Button(boutique.name) { viewModel.sourceStore = boutique }
+                                        }
+                                    } label: {
+                                        HStack {
+                                            Text(viewModel.sourceStore?.name ?? "Select Source")
+                                                .font(AppFonts.serif(size: 18, weight: .medium))
+                                                .foregroundStyle(viewModel.sourceStore == nil ? AppColors.tertiary : .white)
+                                                .lineLimit(1)
+                                            Image(systemName: "chevron.up.chevron.down")
+                                                .font(.system(size: 10))
+                                                .foregroundStyle(AppColors.secondary)
+                                        }
+                                    }
                                 }
                                 Spacer()
                                 Image(systemName: "building.2")
                                     .foregroundStyle(AppColors.gold)
                             }
-                            .padding(20)
+                            .padding()
                             .background(AppColors.surface)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                             
                             Image(systemName: "arrow.down")
                                 .foregroundStyle(AppColors.tertiary)
+                                .padding(.vertical, 4)
                             
+                            // Destination
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("DESTINATION")
                                         .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                                        .foregroundStyle(AppColors.tertiary)
-                                    Text(viewModel.destinationStore)
-                                        .font(AppFonts.serif(size: 18))
-                                        .foregroundStyle(.white)
+                                        .foregroundStyle(AppColors.secondary)
+                                        .kerning(1.5)
+                                    
+                                    Menu {
+                                        Button("Select Destination") { viewModel.destinationStore = nil }
+                                        ForEach(viewModel.availableBoutiques) { boutique in
+                                            Button(boutique.name) { viewModel.destinationStore = boutique }
+                                        }
+                                    } label: {
+                                        HStack {
+                                            Text(viewModel.destinationStore?.name ?? "Select Destination")
+                                                .font(AppFonts.serif(size: 18, weight: .medium))
+                                                .foregroundStyle(viewModel.destinationStore == nil ? AppColors.tertiary : .white)
+                                                .lineLimit(1)
+                                            Image(systemName: "chevron.up.chevron.down")
+                                                .font(.system(size: 10))
+                                                .foregroundStyle(AppColors.secondary)
+                                        }
+                                    }
                                 }
                                 Spacer()
-                                Image(systemName: "chevron.right")
-                                    .foregroundStyle(AppColors.secondary)
+                                Image(systemName: "building.2")
+                                    .foregroundStyle(AppColors.gold)
                             }
-                            .padding(20)
+                            .padding()
                             .background(AppColors.surface)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                         }
@@ -82,6 +117,7 @@ struct NewTransferView: View {
                                     .kerning(1.5)
                                 Spacer()
                                 Button("+ Add Item") {
+                                    showSearchSheet = true
                                 }
                                 .font(AppFonts.sansSerif(size: 12, weight: .semibold))
                                 .foregroundStyle(AppColors.gold)
@@ -120,8 +156,9 @@ struct NewTransferView: View {
                                                     viewModel.incrementQty(for: item.id)
                                                 }) {
                                                     Image(systemName: "plus.circle.fill")
-                                                        .foregroundStyle(AppColors.gold)
+                                                        .foregroundStyle(item.qty >= item.availableQty ? AppColors.tertiary : AppColors.gold)
                                                 }
+                                                .disabled(item.qty >= item.availableQty)
                                             }
                                         }
                                         
@@ -155,9 +192,9 @@ struct NewTransferView: View {
                             viewModel.completeSession()
                             dismiss()
                         })
-                        .disabled(viewModel.hasStockError)
+                        .disabled(viewModel.hasStockError || viewModel.destinationStore == nil)
                     }
-                        .padding(.horizontal, 24)
+                    .padding(.horizontal, 24)
                 }
                 .padding(.top, 20)
                 .padding(.bottom, 40)
@@ -165,5 +202,13 @@ struct NewTransferView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .onAppear {
+            viewModel.fetchBoutiques()
+        }
+        .sheet(isPresented: $showSearchSheet) {
+            TransferItemSearchSheet { selectedItem in
+                viewModel.addItem(selectedItem)
+            }
+        }
     }
 }

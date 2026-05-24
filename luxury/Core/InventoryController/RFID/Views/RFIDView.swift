@@ -9,9 +9,12 @@ import SwiftUI
 
 struct RFIDView: View {
     @Environment(Router.self) private var router
+    @Environment(\.scenePhase) private var scenePhase
     @State private var viewModel = RFIDViewModel()
     @State private var showingScanner = false
     @State private var scannedSerials: [String] = []
+    
+    @AppStorage("saved_scanned_serials") private var savedScannedSerialsRaw: String = ""
     
     var body: some View {
         ZStack {
@@ -21,9 +24,12 @@ struct RFIDView: View {
                 CustomHeader(title: "Barcode & QR Scanner")
                 
                 VStack(spacing: 20) {
-                    CustomButton(title: "Start New Scan Session", icon: AnyView(Image(systemName: "barcode.viewfinder")), action: {
+                    CustomButton(
+                        title: scannedSerials.isEmpty ? "Start New Scan Session" : "Resume Scan Session (\(scannedSerials.count) items)",
+                        icon: AnyView(Image(systemName: "barcode.viewfinder"))
+                    ) {
                         showingScanner = true
-                    })
+                    }
                     
                     Text("Point device at QR or Barcodes to track")
                         .font(AppFonts.sansSerif(size: 12))
@@ -112,6 +118,14 @@ struct RFIDView: View {
                     scannedSerials.removeAll()
                 }
             }
+        }
+        .onAppear {
+            if !savedScannedSerialsRaw.isEmpty {
+                scannedSerials = savedScannedSerialsRaw.components(separatedBy: ",")
+            }
+        }
+        .onChange(of: scannedSerials) { _, newValue in
+            savedScannedSerialsRaw = newValue.joined(separator: ",")
         }
     }
 }

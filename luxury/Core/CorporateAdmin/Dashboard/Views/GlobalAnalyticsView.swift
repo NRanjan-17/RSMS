@@ -131,6 +131,7 @@ struct GlobalAnalyticsView: View {
         }
         .sheet(isPresented: $showingSettings) {
             CorporateAdminSettingsView()
+                .presentationDragIndicator(.visible)
         }
     }
 }

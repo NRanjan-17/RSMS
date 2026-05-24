@@ -15,6 +15,7 @@ struct InventoryControllerCanvas: View {
     @State private var transfersRouter = Router()
     @State private var auditRouter = Router()
     @State private var sfsViewModel = FulfillmentViewModel()
+    @State private var notificationService = SFSNotificationService()
     
     var body: some View {
         TabView(selection: Binding(
@@ -87,6 +88,57 @@ struct InventoryControllerCanvas: View {
             .tag(ICTab.audit)
         }
         .tint(AppColors.gold)
+        .overlay(
+            VStack {
+                if notificationService.hasNewOrder {
+                    Button(action: {
+                        notificationService.hasNewOrder = false
+                        icAppState.selectedTab = .stock
+                        stockRouter.push(ICRoute.sfsOrders)
+                    }) {
+                        HStack(spacing: 12) {
+                            Image(systemName: "shippingbox.fill")
+                                .font(.system(size: 20))
+                                .foregroundStyle(AppColors.gold)
+                            
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Fulfillment Alert")
+                                    .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                    .foregroundStyle(.white)
+                                Text(notificationService.lastOrderMessage)
+                                    .font(AppFonts.sansSerif(size: 12))
+                                    .foregroundStyle(AppColors.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundStyle(AppColors.tertiary)
+                        }
+                        .padding(16)
+                        .background(AppColors.surface)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .shadow(color: .black.opacity(0.5), radius: 10, y: 5)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(AppColors.gold15, lineWidth: 1)
+                        )
+                        .padding(.horizontal, 16)
+                    }
+                    .buttonStyle(.plain)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .animation(.spring(response: 0.4, dampingFraction: 0.7), value: notificationService.hasNewOrder)
+                }
+                Spacer()
+            }
+            .padding(.top, 40)
+            .ignoresSafeArea()
+        )
+        .onAppear {
+            notificationService.startListening()
+        }
+        .onDisappear {
+            notificationService.stopListening()
+        }
     }
     
     @ViewBuilder

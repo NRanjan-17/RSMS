@@ -18,11 +18,17 @@ final class FulfillmentViewModel {
     
     private let client = SupabaseManager.shared.client
     
+    init() {
+        NotificationCenter.default.addObserver(forName: NSNotification.Name("SFSOrderReceived"), object: nil, queue: .main) { [weak self] _ in
+            self?.fetchOrders()
+        }
+    }
+    
     var filteredOrders: [PurchasedItemEntity] {
         if selectedSegment == 0 {
             return orders.filter { $0.status.lowercased() == "pending" }
         } else {
-            return orders.filter { $0.status.lowercased() == "secured" }
+            return orders.filter { $0.status.lowercased() == "secured" || $0.status.lowercased() == "ready to pick" }
         }
     }
     
@@ -81,6 +87,28 @@ final class FulfillmentViewModel {
                 if let index = self.orders.firstIndex(where: { $0.id == orderId }) {
                     self.orders[index].status = "Secured"
                     self.orders[index].deliveryDate = Date()
+                }
+            }
+            return true
+        } catch {
+            await MainActor.run {
+                self.errorMessage = error.localizedDescription
+            }
+            return false
+        }
+    }
+    
+    func updateStatusToReadyToPick(orderId: UUID) async -> Bool {
+        do {
+            try await client
+                .from("purchased_items")
+                .update(["status": "Ready to Pick"])
+                .eq("id", value: orderId.uuidString)
+                .execute()
+            
+            await MainActor.run {
+                if let index = self.orders.firstIndex(where: { $0.id == orderId }) {
+                    self.orders[index].status = "Ready to Pick"
                 }
             }
             return true

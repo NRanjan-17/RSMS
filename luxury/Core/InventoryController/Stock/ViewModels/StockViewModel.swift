@@ -19,6 +19,12 @@ final class StockViewModel {
     
     var alerts: [InventoryAlert] = []
     
+    init() {
+        NotificationCenter.default.addObserver(forName: NSNotification.Name("SFSOrderReceived"), object: nil, queue: .main) { [weak self] _ in
+            self?.fetchSFSCount()
+        }
+    }
+    
     func fetchInventoryStats() {
         Task {
             do {

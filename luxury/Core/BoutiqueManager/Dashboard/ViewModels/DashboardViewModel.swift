@@ -8,6 +8,7 @@
 import Foundation
 import Observation
 import Network
+import Supabase
 
 enum PacingStatus: String {
     case exceeded = "Target Achieved"
@@ -28,19 +29,24 @@ enum PacingStatus: String {
 @Observable
 final class DashboardViewModel {
 
-    private var salesActualRaw: Double = 1_245_000
-    private let salesTargetRaw: Double = 1_500_000
+    private var salesActualRaw: Double = 0
     private let storeOpenHour:  Double = 10
     private let storeCloseHour: Double = 20
     private var updateTask:  Task<Void, Never>?
     private var monitorTask: Task<Void, Never>?
 
-    var isTargetConfigured: Bool = true
+    var salesTargetRaw: Double {
+        get { UserDefaults.standard.double(forKey: "bm_daily_sales_target") }
+        set { UserDefaults.standard.set(newValue, forKey: "bm_daily_sales_target") }
+    }
+
+    var isTargetConfigured: Bool { salesTargetRaw > 0 }
     var isOffline:          Bool = false
     var lastSyncedAt:       Date = Date()
+    var isLoadingSales:     Bool = false
 
-    var todaySales:  String { isTargetConfigured ? formatINR(salesActualRaw) : "—" }
-    var salesTarget: String { isTargetConfigured ? formatINR(salesTargetRaw) : "No target set" }
+    var todaySales:  String { isTargetConfigured ? formatCurrency(salesActualRaw) : formatCurrency(salesActualRaw) }
+    var salesTarget: String { isTargetConfigured ? formatCurrency(salesTargetRaw) : "No target set" }
 
     var salesProgress: Double {
         guard isTargetConfigured, salesTargetRaw > 0 else { return 0 }
@@ -64,7 +70,7 @@ final class DashboardViewModel {
 
     var projectedSales: String {
         guard isTargetConfigured, pacingProgress > 0.01 else { return salesTarget }
-        return formatINR(salesActualRaw / pacingProgress)
+        return formatCurrency(salesActualRaw / pacingProgress)
     }
 
     var lastSyncedText: String {
@@ -85,6 +91,7 @@ final class DashboardViewModel {
     ]
 
     func startRealTimeUpdates() {
+        fetchTodaySales()
         startSalesPolling()
         startNetworkMonitoring()
     }
@@ -104,11 +111,46 @@ final class DashboardViewModel {
         pendingApprovals.removeAll { $0.id == request.id }
     }
 
+    // MARK: – Live Sales Fetch
+
+    func fetchTodaySales() {
+        isLoadingSales = true
+        Task {
+            do {
+                let calendar = Calendar.current
+                let startOfDay = calendar.startOfDay(for: Date())
+                let isoFormatter = ISO8601DateFormatter()
+                isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                let startISO = isoFormatter.string(from: startOfDay)
+
+                let orders: [OrderEntity] = try await SupabaseManager.shared.client
+                    .from("order")
+                    .select()
+                    .gte("date_of_purchase", value: startISO)
+                    .execute()
+                    .value
+
+                let totalRevenue = orders.reduce(0.0) { $0 + $1.totalPrice }
+
+                await MainActor.run {
+                    self.salesActualRaw = totalRevenue
+                    self.lastSyncedAt = Date()
+                    self.isLoadingSales = false
+                }
+            } catch {
+                await MainActor.run {
+                    self.isLoadingSales = false
+                }
+                print("Failed to fetch today's sales: \(error)")
+            }
+        }
+    }
+
     private func startSalesPolling() {
         updateTask = Task { @MainActor [weak self] in
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(30))
-                self?.fetchLatestSales()
+                self?.fetchTodaySales()
             }
         }
     }
@@ -134,12 +176,7 @@ final class DashboardViewModel {
         }
     }
 
-    private func fetchLatestSales() {
-        salesActualRaw += Double.random(in: 5_000...20_000)
-        lastSyncedAt    = Date()
-    }
-
-    private func formatINR(_ value: Double) -> String {
+    private func formatCurrency(_ value: Double) -> String {
         let f                   = NumberFormatter()
         f.numberStyle           = .currency
         f.currencySymbol = CurrencyManager.shared.symbol
