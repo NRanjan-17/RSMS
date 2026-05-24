@@ -14,20 +14,9 @@ final class GlobalAnalyticsViewModel {
     var isLoading = false
     var errorMessage: String?
     
-    var kpis: [GlobalKPI] = [
-        GlobalKPI(label: "Global Revenue", value: "₹0 Cr", trend: 0.0, icon: "indianrupeesign.circle.fill"),
-        GlobalKPI(label: "Active Boutiques", value: "14", trend: 0.0, icon: "building.2.fill"),
-        GlobalKPI(label: "Total Staff", value: "242", trend: 4.2, icon: "person.3.fill"),
-        GlobalKPI(label: "Global Shrink", value: "0.82%", trend: -2.1, icon: "exclamationmark.triangle.fill")
-    ]
+    var kpis: [GlobalKPI] = []
     
-    var revenueChartData: [RevenueData] = [
-        RevenueData(month: "Jan", amount: 18.2),
-        RevenueData(month: "Feb", amount: 21.5),
-        RevenueData(month: "Mar", amount: 24.8),
-        RevenueData(month: "Apr", amount: 22.1),
-        RevenueData(month: "May", amount: 26.4)
-    ]
+    var revenueChartData: [RevenueData] = []
     
     var boutiquePerformance: [CorporateBoutique] = []
     
@@ -100,15 +89,10 @@ final class GlobalAnalyticsViewModel {
                 }
             }
             
-            // Fallback to mock chart data if totally empty (so UI doesn't look broken during initial testing)
+            // If chartData is empty, provide a flatline baseline for the current month so the UI doesn't look broken
             if chartData.isEmpty {
-                chartData = [
-                    RevenueData(month: "Jan", amount: 18.2),
-                    RevenueData(month: "Feb", amount: 21.5),
-                    RevenueData(month: "Mar", amount: 24.8),
-                    RevenueData(month: "Apr", amount: 22.1),
-                    RevenueData(month: "May", amount: 26.4)
-                ]
+                let currentMonth = sortedMonths[Calendar.current.component(.month, from: Date()) - 1]
+                chartData = [RevenueData(month: currentMonth, amount: 0.0)]
             }
             
             // Format KPI values
