@@ -58,12 +58,12 @@ struct SystemLogsView: View {
                             .padding(.horizontal, 24)
                             .padding(.bottom, 60)
                         }
+                        .refreshable {
+                            viewModel.fetchData()
+                        }
                     }
                 }
                 .padding(.top, 20)
-                .refreshable {
-                    viewModel.fetchData()
-                }
             }
         }
         .onAppear {
