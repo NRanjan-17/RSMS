@@ -59,6 +59,7 @@ struct SystemLogsView: View {
                                     }
                                 }
                             }
+                            .frame(maxWidth: .infinity)
                             .background(AppColors.surface)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                             .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
