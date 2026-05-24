@@ -115,6 +115,7 @@ struct GlobalAnalyticsView: View {
                                 }
                             }
                         }
+                        .padding(.horizontal, 24)
                         .padding(.bottom, 60)
                     }
                     .padding(.top, 20)
