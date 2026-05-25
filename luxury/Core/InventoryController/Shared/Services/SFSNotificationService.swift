@@ -49,7 +49,7 @@ final class SFSNotificationService {
         }
         
         Task {
-            await channel?.subscribe()
+            try? await channel?.subscribeWithError()
         }
     }
     
