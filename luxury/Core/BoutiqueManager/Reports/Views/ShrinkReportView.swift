@@ -51,6 +51,39 @@ struct ShrinkReportView: View {
                                 }
                             }
                         }
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("LIVE INVENTORY")
+                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                .foregroundStyle(AppColors.secondary)
+                                .kerning(1.5)
+                                .padding(.horizontal, 24)
+                            
+                            if viewModel.isLoading {
+                                HStack {
+                                    Spacer()
+                                    ProgressView()
+                                        .tint(AppColors.gold)
+                                    Spacer()
+                                }
+                                .padding(.top, 20)
+                            } else if let error = viewModel.errorMessage {
+                                Text(error)
+                                    .font(AppFonts.sansSerif(size: 13))
+                                    .foregroundStyle(AppColors.error)
+                                    .padding(.horizontal, 24)
+                            } else if viewModel.liveInventory.isEmpty {
+                                Text("No inventory data found.")
+                                    .font(AppFonts.sansSerif(size: 13))
+                                    .foregroundStyle(AppColors.secondary)
+                                    .padding(.horizontal, 24)
+                            } else {
+                                VStack(spacing: 1) {
+                                    ForEach(viewModel.liveInventory) { item in
+                                        LiveInventoryRow(item: item)
+                                    }
+                                }
+                            }
+                        }
                     }
                     .padding(.top, 12)
                     .padding(.bottom, 40)
@@ -58,6 +91,9 @@ struct ShrinkReportView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .onAppear {
+            viewModel.fetchInventory()
+        }
     }
 }
 
@@ -98,6 +134,43 @@ private struct ShrinkWriteOffRow: View {
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 18)
+        .background(AppColors.surface)
+    }
+}
+
+private struct LiveInventoryRow: View {
+    let item: CatalogEntity
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(item.name)
+                    .font(AppFonts.serif(size: 17, weight: .medium))
+                    .foregroundStyle(.white)
+                
+                Spacer()
+                
+                Text("\(item.productIds?.count ?? 0)")
+                    .font(AppFonts.sansSerif(size: 16, weight: .bold))
+                    .foregroundStyle(AppColors.gold)
+            }
+            
+            HStack {
+                Text(item.brand)
+                Text("•")
+                Text(item.category.rawValue)
+                
+                Spacer()
+                
+                Text("in stock")
+                    .font(AppFonts.sansSerif(size: 11))
+                    .foregroundStyle(AppColors.secondary)
+            }
+            .font(AppFonts.sansSerif(size: 12))
+            .foregroundStyle(AppColors.secondary)
+        }
+        .padding(.horizontal, 24)
+        .padding(.vertical, 16)
         .background(AppColors.surface)
     }
 }
