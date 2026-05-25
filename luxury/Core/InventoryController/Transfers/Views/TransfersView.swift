@@ -25,7 +25,6 @@ struct TransfersView: View {
                     })
                 }
                 .padding(24)
-                .background(AppColors.surface)
                 
                 Picker("Filter", selection: $selectedFilter) {
                     Text("Pending").tag(0)

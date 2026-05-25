@@ -11,7 +11,9 @@ struct RFIDView: View {
     @Environment(Router.self) private var router
     @Environment(\.scenePhase) private var scenePhase
     @State private var viewModel = RFIDViewModel()
+    @State private var showingProductSelection = false
     @State private var showingScanner = false
+    @State private var selectedCatalog: CatalogEntity?
     @State private var scannedSerials: [String] = []
     
     @AppStorage("saved_scanned_serials") private var savedScannedSerialsRaw: String = ""
@@ -28,7 +30,7 @@ struct RFIDView: View {
                         title: scannedSerials.isEmpty ? "Start New Scan Session" : "Resume Scan Session (\(scannedSerials.count) items)",
                         icon: AnyView(Image(systemName: "barcode.viewfinder"))
                     ) {
-                        showingScanner = true
+                        showingProductSelection = true
                     }
                     
                     Text("Point device at QR or Barcodes to track")
@@ -36,8 +38,7 @@ struct RFIDView: View {
                         .foregroundStyle(AppColors.secondary)
                 }
                 .padding(24)
-                .background(AppColors.surface)
-                .padding(.bottom, 24)
+                .padding(.bottom, 8)
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 16) {
@@ -103,19 +104,22 @@ struct RFIDView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .sheet(isPresented: $showingProductSelection) {
+            ProductSelectionSheet(viewModel: viewModel) { catalog in
+                selectedCatalog = catalog
+                showingScanner = true
+            }
+        }
         .fullScreenCover(isPresented: $showingScanner) {
-            BatchScannerSheet(scannedSerials: $scannedSerials, existingSerials: []) {
+            BatchScannerSheet(scannedSerials: $scannedSerials, existingSerials: selectedCatalog?.productIds ?? []) {
                 showingScanner = false
-                if !scannedSerials.isEmpty {
-                    let newSession = ScanSession(
-                        date: "Just Now",
-                        zone: "Manual Scan",
-                        scannedCount: scannedSerials.count,
-                        expectedCount: scannedSerials.count,
-                        variance: 0
-                    )
-                    viewModel.recentSessions.insert(newSession, at: 0)
-                    scannedSerials.removeAll()
+                if let catalog = selectedCatalog, !scannedSerials.isEmpty {
+                    viewModel.saveScannedItems(to: catalog, serials: scannedSerials) {
+                        scannedSerials.removeAll()
+                        selectedCatalog = nil
+                    }
+                } else {
+                    selectedCatalog = nil
                 }
             }
         }
