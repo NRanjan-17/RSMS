@@ -156,9 +156,8 @@ struct NewTransferView: View {
                                                     viewModel.incrementQty(for: item.id)
                                                 }) {
                                                     Image(systemName: "plus.circle.fill")
-                                                        .foregroundStyle(item.qty >= item.availableQty ? AppColors.tertiary : AppColors.gold)
+                                                        .foregroundStyle(AppColors.gold)
                                                 }
-                                                .disabled(item.qty >= item.availableQty)
                                             }
                                         }
                                         
@@ -209,6 +208,17 @@ struct NewTransferView: View {
             TransferItemSearchSheet { selectedItem in
                 viewModel.addItem(selectedItem)
             }
+        }
+        .alert(
+            "Stock Limit Reached",
+            isPresented: Binding(
+                get: { viewModel.showAlert },
+                set: { viewModel.showAlert = $0 }
+            )
+        ) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(viewModel.alertMessage)
         }
     }
 }

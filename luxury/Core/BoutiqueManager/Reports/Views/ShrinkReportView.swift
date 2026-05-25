@@ -45,11 +45,12 @@ struct ShrinkReportView: View {
                                 .kerning(1.5)
                                 .padding(.horizontal, 24)
                             
-                            VStack(spacing: 1) {
+                            VStack(spacing: 12) {
                                 ForEach(viewModel.recentWriteOffs) { item in
                                     ShrinkWriteOffRow(item: item)
                                 }
                             }
+                            .padding(.horizontal, 24)
                         }
                         VStack(alignment: .leading, spacing: 16) {
                             Text("LIVE INVENTORY")
@@ -77,11 +78,12 @@ struct ShrinkReportView: View {
                                     .foregroundStyle(AppColors.secondary)
                                     .padding(.horizontal, 24)
                             } else {
-                                VStack(spacing: 1) {
+                                VStack(spacing: 12) {
                                     ForEach(viewModel.liveInventory) { item in
                                         LiveInventoryRow(item: item)
                                     }
                                 }
+                                .padding(.horizontal, 24)
                             }
                         }
                     }
@@ -132,9 +134,13 @@ private struct ShrinkWriteOffRow: View {
             .font(AppFonts.sansSerif(size: 12))
             .foregroundStyle(AppColors.secondary)
         }
-        .padding(.horizontal, 24)
-        .padding(.vertical, 18)
+        .padding(20)
         .background(AppColors.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(AppColors.gold15, lineWidth: 0.5)
+        )
     }
 }
 
@@ -169,8 +175,12 @@ private struct LiveInventoryRow: View {
             .font(AppFonts.sansSerif(size: 12))
             .foregroundStyle(AppColors.secondary)
         }
-        .padding(.horizontal, 24)
-        .padding(.vertical, 16)
+        .padding(20)
         .background(AppColors.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(AppColors.gold15, lineWidth: 0.5)
+        )
     }
 }

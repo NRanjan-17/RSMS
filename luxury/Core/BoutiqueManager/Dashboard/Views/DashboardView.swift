@@ -20,7 +20,7 @@ struct DashboardView: View {
 
             VStack(spacing: 0) {
                 HStack {
-                    Text("Dashboard")
+                    Text(viewModel.boutiqueName)
                         .font(AppFonts.serif(size: 28, weight: .semibold))
                         .foregroundStyle(.white)
                     Spacer()
@@ -156,7 +156,7 @@ struct DashboardView: View {
                                 .kerning(1.5)
                                 .padding(.horizontal, 24)
 
-                            VStack(spacing: 1) {
+                            VStack(spacing: 12) {
                                 ForEach(viewModel.appointments) { appointment in
                                     Button(action: {
                                         router.presentFullScreen(BMRoute.appointmentDetail(appointment))
@@ -171,7 +171,7 @@ struct DashboardView: View {
                                                     .foregroundStyle(AppColors.tertiary)
                                             }
                                             .frame(width: 70, alignment: .leading)
-
+                                            
                                             VStack(alignment: .leading, spacing: 2) {
                                                 Text(appointment.clientName)
                                                     .font(AppFonts.serif(size: 17, weight: .medium))
@@ -180,20 +180,25 @@ struct DashboardView: View {
                                                     .font(AppFonts.sansSerif(size: 12))
                                                     .foregroundStyle(AppColors.secondary)
                                             }
-
+                                            
                                             Spacer()
-
+                                            
                                             Image(systemName: "chevron.right")
                                                 .font(AppFonts.sansSerif(size: 12))
                                                 .foregroundStyle(AppColors.tertiary)
                                         }
-                                        .padding(.horizontal, 24)
-                                        .padding(.vertical, 18)
+                                        .padding(20)
                                         .background(AppColors.surface)
+                                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 16)
+                                                .stroke(AppColors.gold15, lineWidth: 0.5)
+                                        )
                                     }
                                     .buttonStyle(.plain)
                                 }
                             }
+                            .padding(.horizontal, 24)
                         }
                     }
                     .padding(.top, 20)
