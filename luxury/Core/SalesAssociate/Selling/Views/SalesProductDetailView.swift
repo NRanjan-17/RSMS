@@ -37,34 +37,8 @@ struct SalesProductDetailView: View {
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 0) {
-                        ZStack {
-                            Rectangle()
-                                .fill(AppColors.surface)
-                                .frame(height: 240)
-                                .overlay(
-                                    VStack {
-                                        Rectangle().fill(AppColors.gold15).frame(height: 0.5)
-                                        Spacer()
-                                        Rectangle().fill(AppColors.gold15).frame(height: 0.5)
-                                    }
-                                )
-                            
-                            VStack(spacing: 10) {
-                                ZStack {
-                                    Circle().stroke(AppColors.gold.opacity(0.25), lineWidth: 0.8).frame(width: 56, height: 56)
-                                    Circle().stroke(AppColors.gold.opacity(0.2), lineWidth: 0.5).frame(width: 44, height: 44)
-                                    Circle().fill(AppColors.gold.opacity(0.45)).frame(width: 6, height: 6)
-                                    Image(systemName: "clock")
-                                        .font(.system(size: 24))
-                                        .foregroundStyle(AppColors.gold.opacity(0.55))
-                                }
-                                Text("PRODUCT IMAGE")
-                                    .font(AppFonts.sansSerif(size: 10))
-                                    .foregroundStyle(AppColors.tertiary)
-                                    .kerning(2)
-                            }
-                        }
-                        .padding(.top, 10)
+                        ProductImageGalleryView(imageUrls: catalog.productImages)
+                            .padding(.top, 10)
                         
                         VStack(alignment: .leading, spacing: 0) {
                             Text(catalog.brand.uppercased())
