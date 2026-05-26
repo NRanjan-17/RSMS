@@ -21,18 +21,14 @@ struct ProductImageGalleryView: View {
             if urls.isEmpty {
                 emptyState
             } else {
-                ZStack {
-                    TabView(selection: $currentIndex) {
-                        ForEach(Array(urls.enumerated()), id: \.offset) { index, url in
-                            ZoomableImageView(url: url).tag(index)
-                        }
+                TabView(selection: $currentIndex) {
+                    ForEach(Array(urls.enumerated()), id: \.offset) { index, url in
+                        ZoomableImageView(url: url).tag(index)
                     }
-                    .tabViewStyle(.page(indexDisplayMode: .never))
-                    .frame(height: 300)
-                    .background(AppColors.surface)
-
-                    chevrons
                 }
+                .tabViewStyle(.page(indexDisplayMode: .never))
+                .frame(height: 300)
+                .background(AppColors.surface)
 
                 if urls.count > 1 {
                     HStack(spacing: 6) {
@@ -57,42 +53,6 @@ struct ProductImageGalleryView: View {
         }
     }
 
-    @ViewBuilder
-    private var chevrons: some View {
-        HStack {
-            if currentIndex > 0 {
-                chevronButton(.left) {
-                    withAnimation(.spring(duration: 0.3)) { currentIndex -= 1 }
-                }
-            } else {
-                Color.clear.frame(width: 44)
-            }
-            Spacer()
-            if currentIndex < urls.count - 1 {
-                chevronButton(.right) {
-                    withAnimation(.spring(duration: 0.3)) { currentIndex += 1 }
-                }
-            } else {
-                Color.clear.frame(width: 44)
-            }
-        }
-        .padding(.horizontal, 12)
-    }
-
-    private func chevronButton(_ direction: ChevronDirection, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            ZStack {
-                Circle()
-                    .fill(.black.opacity(0.45))
-                    .frame(width: 36, height: 36)
-                Image(systemName: direction == .left ? "chevron.left" : "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(AppColors.gold)
-            }
-        }
-        .buttonStyle(.plain)
-    }
-
     private var emptyState: some View {
         ZStack {
             Rectangle().fill(AppColors.surface).frame(height: 300)
@@ -107,8 +67,6 @@ struct ProductImageGalleryView: View {
             }
         }
     }
-
-    private enum ChevronDirection { case left, right }
 }
 
 struct ZoomableImageView: View {
@@ -121,118 +79,82 @@ struct ZoomableImageView: View {
 
     private let maxScale: CGFloat = 4.0
     private let minScale: CGFloat = 1.0
-    private let zoomStep: CGFloat = 0.75
 
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            AsyncImage(url: url) { phase in
-                switch phase {
-                case .empty:
-                    ZStack {
-                        Rectangle().fill(AppColors.surface2)
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                            .tint(AppColors.gold)
-                            .scaleEffect(1.2)
-                    }
-
-                case .success(let image):
-                    image
-                        .resizable()
-                        .scaledToFit()
-                        .scaleEffect(scale)
-                        .offset(offset)
-                        .gesture(
-                            MagnificationGesture()
-                                .onChanged { value in
-                                    scale = min(max(lastScale * value, minScale), maxScale)
-                                }
-                                .onEnded { _ in
-                                    lastScale = scale
-                                    if scale <= minScale { resetZoom() }
-                                }
-                        )
-                        .simultaneousGesture(
-                            DragGesture()
-                                .onChanged { value in
-                                    guard scale > 1.0 else { return }
-                                    offset = CGSize(
-                                        width:  lastOffset.width  + value.translation.width,
-                                        height: lastOffset.height + value.translation.height
-                                    )
-                                }
-                                .onEnded { _ in
-                                    guard scale > 1.0 else { return }
-                                    lastOffset = offset
-                                }
-                        )
-                        .onTapGesture(count: 2) {
-                            withAnimation(.spring(duration: 0.35)) {
-                                if scale > 1.0 {
-                                    resetZoom()
-                                } else {
-                                    scale = 2.5
-                                    lastScale = 2.5
-                                }
+        AsyncImage(url: url) { phase in
+            switch phase {
+            case .empty:
+                ZStack {
+                    Rectangle().fill(AppColors.surface2)
+                    ProgressView().progressViewStyle(.circular).tint(AppColors.gold).scaleEffect(1.2)
+                }
+            case .success(let image):
+                image
+                    .resizable()
+                    .scaledToFit()
+                    .scaleEffect(scale)
+                    .offset(offset)
+                    .gesture(
+                        MagnificationGesture()
+                            .onChanged { scale = min(max(lastScale * $0, minScale), maxScale) }
+                            .onEnded { _ in
+                                lastScale = scale
+                                if scale <= minScale { resetZoom() }
                             }
+                    )
+                    .simultaneousGesture(
+                        DragGesture()
+                            .onChanged { value in
+                                guard scale > 1.0 else { return }
+                                offset = CGSize(
+                                    width:  lastOffset.width  + value.translation.width,
+                                    height: lastOffset.height + value.translation.height
+                                )
+                            }
+                            .onEnded { _ in
+                                guard scale > 1.0 else { return }
+                                lastOffset = offset
+                            }
+                    )
+                    .onTapGesture(count: 2) {
+                        withAnimation(.spring(duration: 0.35)) {
+                            if scale > 1.0 { resetZoom() } else { scale = 2.5; lastScale = 2.5 }
                         }
-
-                case .failure:
-                    ZStack {
-                        Rectangle().fill(AppColors.surface2)
-                        Image(systemName: "photo")
-                            .font(.system(size: 28))
-                            .foregroundStyle(AppColors.gold.opacity(0.4))
                     }
-
-                @unknown default:
-                    EmptyView()
+            case .failure:
+                ZStack {
+                    Rectangle().fill(AppColors.surface2)
+                    Image(systemName: "photo")
+                        .font(.system(size: 28))
+                        .foregroundStyle(AppColors.gold.opacity(0.4))
                 }
+            @unknown default:
+                EmptyView()
             }
-            .frame(height: 300)
-            .clipped()
-
-            VStack(spacing: 0) {
-                Button(action: zoomIn) {
-                    Image(systemName: "plus.magnifyingglass")
-                        .font(.system(size: 30))
-                        .foregroundStyle(AppColors.gold)
-                        .shadow(color: .black.opacity(0.4), radius: 4)
-                }
-                .disabled(scale >= maxScale)
-                .opacity(scale >= maxScale ? 0.35 : 1)
-
-                Button(action: zoomOut) {
-                    Image(systemName: "minus.magnifyingglass")
-                        .font(.system(size: 30))
-                        .foregroundStyle(scale > 1.0 ? AppColors.gold : AppColors.gold.opacity(0.35))
-                        .shadow(color: .black.opacity(0.4), radius: 4)
-                }
-                .disabled(scale <= minScale)
-            }
-            .padding(10)
         }
-    }
-
-    private func zoomIn() {
-        withAnimation(.spring(duration: 0.3)) {
-            scale = min(scale + zoomStep, maxScale)
-            lastScale = scale
-        }
-    }
-
-    private func zoomOut() {
-        withAnimation(.spring(duration: 0.3)) {
-            scale = max(scale - zoomStep, minScale)
-            lastScale = scale
-            if scale <= minScale { resetZoom() }
-        }
+        .frame(height: 300)
+        .clipped()
     }
 
     private func resetZoom() {
-        scale = minScale
-        lastScale = minScale
-        offset = .zero
-        lastOffset = .zero
+        scale = minScale; lastScale = minScale; offset = .zero; lastOffset = .zero
     }
+}
+
+#Preview("With Images") {
+    ProductImageGalleryView(imageUrls: [
+        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600",
+        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600",
+        "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=600"
+    ])
+}
+
+#Preview("Single Image") {
+    ProductImageGalleryView(imageUrls: [
+        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600"
+    ])
+}
+
+#Preview("No Image") {
+    ProductImageGalleryView(imageUrls: nil)
 }

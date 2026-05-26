@@ -129,6 +129,9 @@ struct SellingView: View {
 private struct CatalogGridCard: View {
     let catalog: CatalogEntity
 
+    private let imageHeight: CGFloat = 150
+    private let textHeight:  CGFloat = 88
+
     private var firstURL: URL? {
         catalog.productImages?.first.flatMap { URL(string: $0) }
     }
@@ -138,57 +141,65 @@ private struct CatalogGridCard: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            ZStack {
-                AppColors.surface2
-                AsyncImage(url: firstURL) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image.resizable().scaledToFill()
-                    case .empty:
-                        ProgressView().tint(AppColors.gold)
-                    default:
-                        Image(systemName: "photo")
-                            .font(.system(size: 28))
-                            .foregroundStyle(AppColors.gold.opacity(0.35))
+        GeometryReader { geo in
+            let w = geo.size.width
+            VStack(alignment: .leading, spacing: 0) {
+                ZStack {
+                    AppColors.surface2
+                    AsyncImage(url: firstURL) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: w, height: imageHeight)
+                                .clipped()
+                        case .empty:
+                            ProgressView().tint(AppColors.gold)
+                        default:
+                            Image(systemName: "photo")
+                                .font(.system(size: 28))
+                                .foregroundStyle(AppColors.gold.opacity(0.35))
+                        }
                     }
                 }
-            }
-            .frame(maxWidth: .infinity, minHeight: 140, maxHeight: 140)
-            .clipped()
+                .frame(width: w, height: imageHeight)
+                .clipped()
 
-            VStack(alignment: .leading, spacing: 3) {
-                Text(catalog.brand.uppercased())
-                    .font(AppFonts.sansSerif(size: 9, weight: .bold))
-                    .foregroundStyle(AppColors.gold)
-                    .kerning(1.5)
-                    .lineLimit(1)
-                Text(catalog.name)
-                    .font(AppFonts.serif(size: 14, weight: .medium))
-                    .foregroundStyle(.white)
-                    .lineLimit(1)
-                Text(CurrencyManager.shared.format(amount: catalog.amount))
-                    .font(AppFonts.serif(size: 15, weight: .semibold))
-                    .foregroundStyle(AppColors.gold)
-                    .lineLimit(1)
-                HStack(spacing: 4) {
-                    Circle()
-                        .fill(inStock ? AppColors.success : AppColors.error)
-                        .frame(width: 6, height: 6)
-                    Text(inStock ? "In Stock" : "Out of Stock")
-                        .font(AppFonts.sansSerif(size: 9))
-                        .foregroundStyle(inStock ? AppColors.success : AppColors.error)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(catalog.brand.uppercased())
+                        .font(AppFonts.sansSerif(size: 9, weight: .bold))
+                        .foregroundStyle(AppColors.gold)
+                        .kerning(1.5)
                         .lineLimit(1)
+                    Text(catalog.name)
+                        .font(AppFonts.serif(size: 14, weight: .medium))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                    Text(CurrencyManager.shared.format(amount: catalog.amount))
+                        .font(AppFonts.serif(size: 15, weight: .semibold))
+                        .foregroundStyle(AppColors.gold)
+                        .lineLimit(1)
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(inStock ? AppColors.success : AppColors.error)
+                            .frame(width: 6, height: 6)
+                        Text(inStock ? "In Stock" : "Out of Stock")
+                            .font(AppFonts.sansSerif(size: 9))
+                            .foregroundStyle(inStock ? AppColors.success : AppColors.error)
+                            .lineLimit(1)
+                    }
                 }
+                .padding(10)
+                .frame(width: w, height: textHeight, alignment: .topLeading)
+                .clipped()
             }
-            .padding(10)
-            .frame(maxWidth: .infinity, minHeight: 90, maxHeight: 90, alignment: .topLeading)
-            .clipped()
+            .frame(width: w, height: imageHeight + textHeight)
+            .background(AppColors.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
         }
-        .frame(maxWidth: .infinity, minHeight: 230, maxHeight: 230)
-        .background(AppColors.surface)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+        .frame(height: imageHeight + textHeight)
     }
 }
 
