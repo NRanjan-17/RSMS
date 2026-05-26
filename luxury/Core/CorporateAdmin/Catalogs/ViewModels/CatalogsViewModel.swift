@@ -286,6 +286,29 @@ final class CatalogsViewModel {
         }
     }
 
+    func removeImage(at index: Int, from catalog: CatalogEntity) {
+        var updatedCatalog = catalog
+        var images = updatedCatalog.productImages ?? []
+        guard index >= 0 && index < images.count else { return }
+        
+        images.remove(at: index)
+        updatedCatalog.productImages = images
+        
+        Task {
+            do {
+                try await catalogService.updateCatalog(updatedCatalog)
+                await MainActor.run {
+                    if let idx = self.catalogs.firstIndex(where: { $0.id == updatedCatalog.id }) {
+                        self.catalogs[idx] = updatedCatalog
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    self.errorMessage = "Failed to remove image: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
     
     func resetForm() {
         newName = ""
@@ -298,6 +321,17 @@ final class CatalogsViewModel {
         existingImageURLs = []
         selectedPhotoItems = []
         selectedImagesData = []
+    }
+    
+    func removeExistingImage(at index: Int) {
+        guard index >= 0 && index < existingImageURLs.count else { return }
+        existingImageURLs.remove(at: index)
+    }
+    
+    func removeSelectedImage(at index: Int) {
+        guard index >= 0 && index < selectedImagesData.count else { return }
+        selectedImagesData.remove(at: index)
+        selectedPhotoItems.remove(at: index)
     }
     
     func loadSelectedImages() {
