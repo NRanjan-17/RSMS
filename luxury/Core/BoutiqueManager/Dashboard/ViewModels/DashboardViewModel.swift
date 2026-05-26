@@ -187,10 +187,10 @@ final class DashboardViewModel {
         return f.string(from: NSNumber(value: value)) ?? "\(CurrencyManager.shared.symbol)0"
     }
 
-    private func fetchBoutiqueName() {
+    func fetchBoutiqueName() {
         Task {
             do {
-                if let (role, profile) = try await ProfileService().fetchCurrentProfile() {
+                if let (_, profile) = try await ProfileService().fetchCurrentProfile() {
                     if let boutique = profile as? CorporateBoutique {
                         await MainActor.run {
                             self.boutiqueName = boutique.name.isEmpty ? "Dashboard" : boutique.name

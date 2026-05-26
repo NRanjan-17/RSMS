@@ -63,6 +63,8 @@ enum CARoute: Hashable {
     case pendingBoutiques
     case boutiqueDetail(CorporateBoutique)
     case inventoryDetail(ProductInventorySummary)
+    case staffList
+    case staffDetail(StaffModel)
 }
 
 enum AppRoutes: Hashable {

@@ -9,8 +9,14 @@ struct MFASetupView: View {
     @State private var verifyCode: String = ""
     @State private var errorMessage: String?
     @State private var isLoading = false
+    @Environment(\.dismiss) private var dismiss
     
+    let isFromSettings: Bool
     private let authService = AuthService()
+    
+    init(isFromSettings: Bool = false) {
+        self.isFromSettings = isFromSettings
+    }
     
     var body: some View {
         NavigationStack {
@@ -54,7 +60,7 @@ struct MFASetupView: View {
                             .font(AppFonts.sansSerif(size: 14, weight: .semibold))
                             .foregroundStyle(AppColors.text)
                         
-                        TextField("123456", text: $verifyCode)
+                        TextField("Security code", text: $verifyCode)
                             .keyboardType(.numberPad)
                             .padding()
                             .background(Color(.systemGray6))
@@ -88,15 +94,28 @@ struct MFASetupView: View {
                     .padding(.horizontal, 24)
                     .padding(.top, 16)
                     
-                    Button("Logout") {
-                        coordinator.logout()
+                    if !isFromSettings {
+                        Button("Logout") {
+                            coordinator.logout()
+                        }
+                        .foregroundStyle(AppColors.error)
+                        .padding(.top, 16)
                     }
-                    .foregroundStyle(AppColors.error)
-                    .padding(.top, 16)
                 }
             }
             .background(AppColors.background)
             .onAppear(perform: setupMFA)
+            .toolbar {
+                if isFromSettings {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Cancel") {
+                            dismiss()
+                        }
+                        .font(AppFonts.sansSerif(size: 16))
+                        .foregroundStyle(AppColors.gold)
+                    }
+                }
+            }
         }
     }
     
@@ -114,7 +133,7 @@ struct MFASetupView: View {
                 }
                 
                 // Now enroll a new factor
-                let friendlyName = "Device-\(UUID().uuidString.prefix(8))"
+                let friendlyName = UIDevice.current.name
                 let response = try await SupabaseManager.shared.client.auth.mfa.enroll(params: Auth.MFATotpEnrollParams(issuer: "LuxuryApp", friendlyName: friendlyName))
                 factorId = response.id
                 
@@ -140,6 +159,8 @@ struct MFASetupView: View {
                 // Refresh session & route
                 let session = await authService.getCurrentSession()
                 await coordinator.routingService.updateRoute(for: session)
+                
+                dismiss()
             } catch {
                 errorMessage = "Invalid code. Please try again."
             }

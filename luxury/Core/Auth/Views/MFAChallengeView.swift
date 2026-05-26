@@ -31,7 +31,7 @@ struct MFAChallengeView: View {
                     .padding(.horizontal, 32)
                 
                 VStack(alignment: .leading, spacing: 8) {
-                    TextField("123456", text: $verifyCode)
+                    TextField("Security code", text: $verifyCode)
                         .keyboardType(.numberPad)
                         .padding()
                         .background(Color(.systemGray6))

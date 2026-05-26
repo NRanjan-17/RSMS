@@ -212,7 +212,9 @@ struct DashboardView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
-        .sheet(isPresented: $showingSettings) {
+        .sheet(isPresented: $showingSettings, onDismiss: {
+            viewModel.fetchBoutiqueName()
+        }) {
             BoutiqueManagerSettingsView()
         }
     }

@@ -10,6 +10,7 @@ import Charts
 
 struct GlobalAnalyticsView: View {
     @Environment(AppCoordinator.self) private var coordinator
+    @Environment(Router.self) private var router
     @State private var viewModel = GlobalAnalyticsViewModel()
     @State private var showingSettings = false
     
@@ -38,7 +39,14 @@ struct GlobalAnalyticsView: View {
                     VStack(alignment: .leading, spacing: 28) {
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
                             ForEach(viewModel.kpis) { kpi in
-                                GlobalMetricCard(kpi: kpi)
+                                if kpi.label == "Total Staff" {
+                                    GlobalMetricCard(kpi: kpi)
+                                        .onTapGesture {
+                                            router.push(CARoute.staffList)
+                                        }
+                                } else {
+                                    GlobalMetricCard(kpi: kpi)
+                                }
                             }
                         }
                         .padding(.horizontal, 24)
@@ -140,11 +148,12 @@ struct GlobalMetricCard: View {
     let kpi: GlobalKPI
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .top) {
                 Image(systemName: kpi.icon)
                     .font(.system(size: 18))
                     .foregroundStyle(AppColors.gold)
+                    .frame(height: 20)
                 Spacer()
                 if kpi.trend != 0 {
                     HStack(spacing: 2) {
@@ -153,20 +162,32 @@ struct GlobalMetricCard: View {
                     }
                     .font(AppFonts.sansSerif(size: 10, weight: .bold))
                     .foregroundStyle(kpi.trend > 0 ? AppColors.success : AppColors.error)
+                    .frame(height: 20)
+                } else {
+                    Text("0%")
+                        .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                        .opacity(0)
+                        .frame(height: 20)
                 }
             }
+            
+            Spacer(minLength: 16)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(kpi.value)
                     .font(AppFonts.serif(size: 22, weight: .bold))
                     .foregroundStyle(.white)
+                    .minimumScaleFactor(0.8)
+                    .lineLimit(1)
                 Text(kpi.label.uppercased())
                     .font(AppFonts.sansSerif(size: 9, weight: .bold))
                     .foregroundStyle(AppColors.secondary)
                     .kerning(1)
+                    .lineLimit(1)
             }
         }
         .padding(16)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(AppColors.surface)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))

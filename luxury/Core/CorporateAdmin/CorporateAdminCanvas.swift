@@ -121,6 +121,10 @@ struct CorporateAdminCanvas: View {
             BoutiqueDetailView(boutique: boutique, viewModel: userManagementViewModel)
         case .inventoryDetail(let summary):
             ProductStockDetailView(summary: summary)
+        case .staffList:
+            CAStaffListView()
+        case .staffDetail(let staff):
+            EmployeeDetailView(employee: staff)
         }
     }
 }

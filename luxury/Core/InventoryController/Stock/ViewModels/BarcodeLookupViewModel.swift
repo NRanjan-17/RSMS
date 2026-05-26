@@ -28,7 +28,7 @@ final class BarcodeLookupViewModel {
                     item = try await SupabaseManager.shared.client
                         .from("catalogs")
                         .select()
-                        .ilike("bar_code", value: trimmed)
+                        .ilike("bar_code", pattern: trimmed)
                         .single()
                         .execute()
                         .value
@@ -36,7 +36,7 @@ final class BarcodeLookupViewModel {
                     item = try await SupabaseManager.shared.client
                         .from("catalogs")
                         .select()
-                        .ilike("catalog_id", value: trimmed)
+                        .ilike("catalog_id", pattern: trimmed)
                         .single()
                         .execute()
                         .value

@@ -6,6 +6,7 @@ struct AuthenticationView: View {
     @Environment(AppCoordinator.self) private var coordinator
     @State private var viewModel = AuthViewModel()
     @State private var showComingSoon = false
+    @State private var showForgotPassword = false
     
     var body: some View {
         @Bindable var authVM = viewModel
@@ -50,7 +51,7 @@ struct AuthenticationView: View {
                     
                     HStack {
                         Spacer()
-                        Button(action: { authVM.resetPassword() }) {
+                        Button(action: { showForgotPassword = true }) {
                             Text("Forgot Password?")
                                 .font(AppFonts.sansSerif(size: 12, weight: .medium))
                                 .foregroundStyle(AppColors.gold)
@@ -105,11 +106,14 @@ struct AuthenticationView: View {
         } message: {
             Text("A password reset link has been sent to your email address.")
         }
+        .sheet(isPresented: $showForgotPassword) {
+            ForgotPasswordView()
+        }
     }
 
 }
 
-private struct CustomTextField: View {
+struct CustomTextField: View {
     let title: String
     let placeholder: String
     @Binding var text: String
@@ -140,7 +144,7 @@ private struct CustomTextField: View {
     }
 }
 
-private struct CustomSecureField: View {
+struct CustomSecureField: View {
     let title: String
     let placeholder: String
     @Binding var text: String
