@@ -7,6 +7,8 @@ final class RoutingService {
     enum Destination: Equatable {
         case splash
         case auth
+        case mfaSetup
+        case mfaChallenge
         case registration(UserRole)
         case status(UserRole, EntityStatus, String?)
         case dashboard(UserRole)
@@ -98,6 +100,33 @@ final class RoutingService {
         }
         
         do {
+            let aalResponse = try await client.auth.mfa.getAuthenticatorAssuranceLevel()
+            let currentAAL = aalResponse.currentLevel
+            let nextAAL = aalResponse.nextLevel
+            
+            if currentAAL == "aal1" {
+                if nextAAL == "aal2" {
+                    await MainActor.run {
+                        currentDestination = .mfaChallenge
+                    }
+                    return
+                } else {
+                    let factorsResponse = try await client.auth.mfa.listFactors()
+                    let totpFactors = factorsResponse.totp
+                    
+                    if totpFactors.contains(where: { $0.status == .verified }) {
+                        await MainActor.run {
+                            currentDestination = .mfaChallenge
+                        }
+                    } else {
+                        await MainActor.run {
+                            currentDestination = .mfaSetup
+                        }
+                    }
+                    return
+                }
+            }
+            
             if let (role, profile) = try await profileService.fetchCurrentProfile(preferredRole: requestedRole) {
                 if requestedRole != role {
                     try? await authService.signOut()

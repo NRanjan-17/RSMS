@@ -57,6 +57,7 @@ final class AuthService {
     func updateUserMetadata(data: [String: AnyJSON]) async throws {
         _ = try await client.auth.update(user: UserAttributes(data: data))
     }
+
     
     func observeAuthState(onChange: @escaping (AuthChangeEvent, Session?) -> Void) {
         Task {
