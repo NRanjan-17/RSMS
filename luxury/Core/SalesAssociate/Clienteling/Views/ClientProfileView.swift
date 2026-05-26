@@ -125,7 +125,7 @@ struct ClientProfileView: View {
                         
                         HStack(spacing: 10) {
                             CustomOutlineButton(title: "Service Intake", icon: AnyView(Image(systemName: "wrench.and.screwdriver")), action: {
-                                router.push(SARoute.afterSalesIntake)
+                                router.push(SARoute.afterSalesIntake(clientName: viewModel.client.name, serialNumber: nil, isWarrantyActive: true))
                             })
                             
                             CustomOutlineButton(title: "Track Ticket", icon: AnyView(Image(systemName: "clock.badge.checkmark")), action: {
@@ -470,35 +470,38 @@ private struct ClientHistoryTab: View {
             } else {
                 VStack(spacing: 1) {
                     ForEach(purchases, id: \.id) { p in
-                        HStack(spacing: 12) {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 9)
-                                    .fill(AppColors.surface2)
-                                    .frame(width: 36, height: 36)
-                                Image(systemName: "handbag")
-                                    .font(.system(size: 14))
+                        NavigationLink(value: SARoute.purchaseDetails(client: viewModel.client, purchase: p)) {
+                            HStack(spacing: 12) {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 9)
+                                        .fill(AppColors.surface2)
+                                        .frame(width: 36, height: 36)
+                                    Image(systemName: "handbag")
+                                        .font(.system(size: 14))
+                                        .foregroundStyle(AppColors.gold)
+                                        .opacity(0.4)
+                                }
+                                
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(p.name)
+                                        .font(AppFonts.sansSerif(size: 12, weight: .medium))
+                                        .foregroundStyle(.white)
+                                    Text(p.date)
+                                        .font(AppFonts.sansSerif(size: 11))
+                                        .foregroundStyle(AppColors.secondary)
+                                }
+                                
+                                Spacer()
+                                
+                                Text(p.price)
+                                    .font(AppFonts.serif(size: 13, weight: .semibold))
                                     .foregroundStyle(AppColors.gold)
-                                    .opacity(0.4)
                             }
-                            
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(p.name)
-                                    .font(AppFonts.sansSerif(size: 12, weight: .medium))
-                                    .foregroundStyle(.white)
-                                Text(p.date)
-                                    .font(AppFonts.sansSerif(size: 11))
-                                    .foregroundStyle(AppColors.secondary)
-                            }
-                            
-                            Spacer()
-                            
-                            Text(p.price)
-                                .font(AppFonts.serif(size: 13, weight: .semibold))
-                                .foregroundStyle(AppColors.gold)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 13)
+                            .background(AppColors.surface)
                         }
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 13)
-                        .background(AppColors.surface)
+                        .buttonStyle(.plain)
                     }
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 12))
