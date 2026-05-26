@@ -347,4 +347,27 @@ final class CatalogsViewModel {
             }
         }
     }
+    
+    func hasUnsavedChanges(comparedTo editCatalog: CatalogEntity?) -> Bool {
+        if let catalog = editCatalog {
+            let parsedAmount = Double(newAmount) ?? 0.0
+            return newName != catalog.name ||
+                   newDescription != catalog.description ||
+                   newBrand != catalog.brand ||
+                   newCategory != catalog.category ||
+                   parsedAmount != catalog.amount ||
+                   newBarCode != catalog.barCode ||
+                   newStatus != catalog.status ||
+                   existingImageURLs != (catalog.productImages ?? []) ||
+                   !selectedPhotoItems.isEmpty
+        } else {
+            return !newName.isEmpty ||
+                   !newDescription.isEmpty ||
+                   !newBrand.isEmpty ||
+                   !newAmount.isEmpty ||
+                   !newBarCode.isEmpty ||
+                   !existingImageURLs.isEmpty ||
+                   !selectedPhotoItems.isEmpty
+        }
+    }
 }

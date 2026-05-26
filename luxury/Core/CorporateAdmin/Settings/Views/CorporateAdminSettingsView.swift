@@ -10,6 +10,7 @@ import SwiftUI
 struct CorporateAdminSettingsView: View {
     @Environment(AppCoordinator.self) private var coordinator
     @State private var currencyManager = CurrencyManager.shared
+    @State private var showLogoutAlert = false
     
     var body: some View {
         NavigationStack {
@@ -82,12 +83,20 @@ struct CorporateAdminSettingsView: View {
                                 .padding(.horizontal, 24)
                             }
                             
-                            CustomButton(title: "Logout", action: { coordinator.logout() })
+                            CustomButton(title: "Logout", action: { showLogoutAlert = true })
                                 .padding(.horizontal, 24)
                         }
                         .padding(.top, 24)
                     }
                 }
+            }
+            .alert("Logout", isPresented: $showLogoutAlert) {
+                Button("Logout", role: .destructive) {
+                    coordinator.logout()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Are you sure you want to logout?")
             }
         }
     }

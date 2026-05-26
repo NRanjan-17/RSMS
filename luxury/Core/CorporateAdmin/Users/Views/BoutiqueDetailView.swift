@@ -13,6 +13,8 @@ struct BoutiqueDetailView: View {
     @Bindable var viewModel: UserManagementViewModel
     @Environment(Router.self) private var router
     @State private var showEditBoutique = false
+    @State private var showDisableAlert = false
+    @State private var showRemoveAlert = false
 
     init(boutique: CorporateBoutique, viewModel: UserManagementViewModel) {
         _currentBoutique = State(initialValue: boutique)
@@ -149,9 +151,7 @@ struct BoutiqueDetailView: View {
                             VStack(spacing: 16) {
                                 if currentBoutique.status == .approved {
                                     Button(action: {
-                                        viewModel.disableBoutique(currentBoutique) {
-                                            router.pop()
-                                        }
+                                        showDisableAlert = true
                                     }) {
                                         HStack {
                                             Spacer()
@@ -194,9 +194,7 @@ struct BoutiqueDetailView: View {
                                 }
                                 
                                 Button(action: {
-                                    viewModel.removeBoutique(currentBoutique) {
-                                        router.pop()
-                                    }
+                                    showRemoveAlert = true
                                 }) {
                                     HStack {
                                         Spacer()
@@ -234,6 +232,26 @@ struct BoutiqueDetailView: View {
             }
         }) {
             EditBoutiqueView(viewModel: EditBoutiqueViewModel(boutique: currentBoutique))
+        }
+        .alert("Disable Boutique", isPresented: $showDisableAlert) {
+            Button("Disable", role: .destructive) {
+                viewModel.disableBoutique(currentBoutique) {
+                    router.pop()
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Are you sure you want to disable this boutique?")
+        }
+        .alert("Remove Boutique", isPresented: $showRemoveAlert) {
+            Button("Remove", role: .destructive) {
+                viewModel.removeBoutique(currentBoutique) {
+                    router.pop()
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Are you sure you want to completely remove this boutique?")
         }
     }
     
