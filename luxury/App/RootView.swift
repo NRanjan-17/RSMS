@@ -17,6 +17,10 @@ struct RootView: View {
             SplashView()
         case .auth:
             AuthView()
+        case .mfaSetup:
+            MFASetupView()
+        case .mfaChallenge:
+            MFAChallengeView()
         case .registration(let role):
             AccountRegistrationView(
                 role: role,
