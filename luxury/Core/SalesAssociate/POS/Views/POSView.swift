@@ -195,15 +195,33 @@ struct POSView: View {
                 }
                 
                 VStack(spacing: 0) {
-                    Divider().background(AppColors.gold15).padding(.bottom, 10)
+                    if let error = viewModel.paymentError {
+                        Text(error)
+                            .font(AppFonts.sansSerif(size: 12))
+                            .foregroundStyle(AppColors.error)
+                            .padding(.bottom, 8)
+                    }
+                    
                     Button(action: {
-                        viewModel.completeMockPayment()
-                        router.push(SARoute.payment)
+                        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                              let rootVC = scene.windows.first?.rootViewController else { return }
+                        
+                        Task {
+                            let success = await viewModel.processPayment(presentingViewController: rootVC)
+                            if success {
+                                router.push(SARoute.payment)
+                            }
+                        }
                     }) {
                         HStack(spacing: 10) {
-                            Text("Checkout · \(viewModel.formatCurrency(viewModel.total))")
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 14, weight: .semibold))
+                            if viewModel.isProcessingPayment {
+                                ProgressView()
+                                    .tint(AppColors.background)
+                            } else {
+                                Text("Checkout · \(viewModel.formatCurrency(viewModel.total))")
+                                Image(systemName: "arrow.right")
+                                    .font(.system(size: 14, weight: .semibold))
+                            }
                         }
                         .font(AppFonts.sansSerif(size: 15, weight: .medium))
                         .foregroundStyle(AppColors.background)
@@ -212,8 +230,8 @@ struct POSView: View {
                         .background(RoundedRectangle(cornerRadius: 14).fill(AppColors.gold))
                     }
                     .buttonStyle(.plain)
-                    .disabled(viewModel.requiresApproval && viewModel.approvalState != .approved)
-                    .opacity(viewModel.requiresApproval && viewModel.approvalState != .approved ? 0.45 : 1)
+                    .disabled((viewModel.requiresApproval && viewModel.approvalState != .approved) || viewModel.isProcessingPayment)
+                    .opacity((viewModel.requiresApproval && viewModel.approvalState != .approved) || viewModel.isProcessingPayment ? 0.45 : 1)
                     .padding(.horizontal, 24)
                     .padding(.bottom, 40)
                 }

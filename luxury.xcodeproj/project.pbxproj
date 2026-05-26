@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BE1ABC082FC56B6400845BA0 /* RazorpayCheckout in Frameworks */ = {isa = PBXBuildFile; productRef = BE1ABC072FC56B6400845BA0 /* RazorpayCheckout */; };
 		BEAC6FF72FBCE45A006BB496 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = BEAC6FF62FBCE45A006BB496 /* Auth */; };
 		BEAC6FF92FBCE45A006BB496 /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = BEAC6FF82FBCE45A006BB496 /* Functions */; };
 		BEAC6FFB2FBCE45A006BB496 /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = BEAC6FFA2FBCE45A006BB496 /* PostgREST */; };
@@ -34,6 +35,7 @@
 			files = (
 				BEAC6FFB2FBCE45A006BB496 /* PostgREST in Frameworks */,
 				BEAC6FF92FBCE45A006BB496 /* Functions in Frameworks */,
+				BE1ABC082FC56B6400845BA0 /* RazorpayCheckout in Frameworks */,
 				BEAC70012FBCE45A006BB496 /* Supabase in Frameworks */,
 				BEAC6FF72FBCE45A006BB496 /* Auth in Frameworks */,
 				BEAC6FFF2FBCE45A006BB496 /* Storage in Frameworks */,
@@ -86,6 +88,7 @@
 				BEAC6FFC2FBCE45A006BB496 /* Realtime */,
 				BEAC6FFE2FBCE45A006BB496 /* Storage */,
 				BEAC70002FBCE45A006BB496 /* Supabase */,
+				BE1ABC072FC56B6400845BA0 /* RazorpayCheckout */,
 			);
 			productName = luxury;
 			productReference = BEAC6E042FB6DAB5006BB496 /* luxury.app */;
@@ -117,6 +120,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				BEAC6FF52FBCE45A006BB496 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				BE1ABC062FC56B6400845BA0 /* XCRemoteSwiftPackageReference "razorpay-pod" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = BEAC6E052FB6DAB5006BB496 /* Products */;
@@ -387,6 +391,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		BE1ABC062FC56B6400845BA0 /* XCRemoteSwiftPackageReference "razorpay-pod" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/razorpay/razorpay-pod";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.5.3;
+			};
+		};
 		BEAC6FF52FBCE45A006BB496 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/supabase/supabase-swift";
@@ -398,6 +410,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		BE1ABC072FC56B6400845BA0 /* RazorpayCheckout */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BE1ABC062FC56B6400845BA0 /* XCRemoteSwiftPackageReference "razorpay-pod" */;
+			productName = RazorpayCheckout;
+		};
 		BEAC6FF62FBCE45A006BB496 /* Auth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = BEAC6FF52FBCE45A006BB496 /* XCRemoteSwiftPackageReference "supabase-swift" */;

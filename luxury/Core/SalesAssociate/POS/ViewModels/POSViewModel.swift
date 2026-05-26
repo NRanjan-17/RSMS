@@ -7,6 +7,7 @@
 
 import Foundation
 import Observation
+import UIKit
 
 @Observable
 final class POSViewModel {
@@ -20,6 +21,10 @@ final class POSViewModel {
     var taxFree: Bool = false
     var approvalState: MockApprovalState = .waiting
     var offlineCartQueued: Bool = true
+    
+    var isProcessingPayment: Bool = false
+    var paymentError: String? = nil
+    var lastTransactionId: String? = nil
     
     var discount: Int {
         Int(Double(subtotal) * discountRate)
@@ -56,6 +61,28 @@ final class POSViewModel {
     
     func completeMockPayment() {
         offlineCartQueued = false
+    }
+    
+    @MainActor
+    func processPayment(presentingViewController: UIViewController) async -> Bool {
+        isProcessingPayment = true
+        paymentError = nil
+        
+        do {
+            let transactionId = try await PaymentService.shared.processPayment(
+                amount: Double(total),
+                presentingViewController: presentingViewController
+            )
+            
+            self.lastTransactionId = transactionId
+            self.offlineCartQueued = false
+            self.isProcessingPayment = false
+            return true
+        } catch {
+            self.paymentError = error.localizedDescription
+            self.isProcessingPayment = false
+            return false
+        }
     }
     
     func formatCurrency(_ amount: Int) -> String {
