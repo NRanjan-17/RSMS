@@ -21,6 +21,12 @@ struct CatalogDetailView: View {
         viewModel.catalogs.first(where: { $0.id == catalog.id }) ?? catalog
     }
     
+    private var availableStock: Int {
+        let total = currentCatalog.productIds?.count ?? 0
+        let reserved = currentCatalog.reserved?.count ?? 0
+        return total - reserved
+    }
+    
     var body: some View {
         List {
             Section {
@@ -53,7 +59,7 @@ struct CatalogDetailView: View {
                 LabeledContent("Catalog ID", value: currentCatalog.catalogId)
                 LabeledContent("Category", value: currentCatalog.category.rawValue)
                 LabeledContent("Description", value: currentCatalog.description)
-                LabeledContent("Stock", value: "\((currentCatalog.productIds?.count ?? 0) - (currentCatalog.reserved?.count ?? 0))")
+                LabeledContent("Stock", value: "\(availableStock)")
                 LabeledContent("Amount", value: CurrencyManager.shared.format(amount: currentCatalog.amount))
                 LabeledContent("Barcode", value: currentCatalog.barCode)
             }
@@ -62,7 +68,7 @@ struct CatalogDetailView: View {
                 Section("Product Images") {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
-                            ForEach(Array(images.enumerated()), id: \.offset) { _, url in
+                            ForEach(Array(images.enumerated()), id: \.offset) { offset, url in
                                 AsyncImage(url: URL(string: url)) { phase in
                                     if let image = phase.image {
                                         image

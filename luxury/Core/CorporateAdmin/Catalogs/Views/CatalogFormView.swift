@@ -160,6 +160,17 @@ struct CatalogFormView: View {
                                                     .aspectRatio(contentMode: .fill)
                                                     .frame(width: 80, height: 80)
                                                     .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                    .overlay(alignment: .topTrailing) {
+                                                        Button(action: {
+                                                            viewModel.removeExistingImage(at: index)
+                                                        }) {
+                                                            Image(systemName: "xmark.circle.fill")
+                                                                .font(.system(size: 20))
+                                                                .foregroundStyle(AppColors.error)
+                                                                .background(Circle().fill(Color.white).frame(width: 16, height: 16))
+                                                                .padding(4)
+                                                        }
+                                                    }
                                             } else {
                                                 RoundedRectangle(cornerRadius: 8)
                                                     .fill(AppColors.surface)
@@ -169,13 +180,24 @@ struct CatalogFormView: View {
                                         }
                                     }
                                     
-                                    ForEach(Array(viewModel.selectedImagesData.enumerated()), id: \.offset) { _, data in
+                                    ForEach(Array(viewModel.selectedImagesData.enumerated()), id: \.offset) { index, data in
                                         if let uiImage = UIImage(data: data) {
                                             Image(uiImage: uiImage)
                                                 .resizable()
                                                 .aspectRatio(contentMode: .fill)
                                                 .frame(width: 80, height: 80)
                                                 .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                .overlay(alignment: .topTrailing) {
+                                                    Button(action: {
+                                                        viewModel.removeSelectedImage(at: index)
+                                                    }) {
+                                                        Image(systemName: "xmark.circle.fill")
+                                                            .font(.system(size: 20))
+                                                            .foregroundStyle(AppColors.error)
+                                                            .background(Circle().fill(Color.white).frame(width: 16, height: 16))
+                                                            .padding(4)
+                                                    }
+                                                }
                                         } else {
                                             RoundedRectangle(cornerRadius: 8)
                                                 .fill(AppColors.surface)
