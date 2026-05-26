@@ -120,6 +120,7 @@ struct MFASetupView: View {
     }
     
     private func setupMFA() {
+        guard factorId.isEmpty else { return }
         Task {
             isLoading = true
             do {
@@ -133,7 +134,7 @@ struct MFASetupView: View {
                 }
                 
                 // Now enroll a new factor
-                let friendlyName = UIDevice.current.name
+                let friendlyName = "\(UIDevice.current.name.replacingOccurrences(of: " ", with: ""))_\(Int(Date().timeIntervalSince1970) % 10000)"
                 let response = try await SupabaseManager.shared.client.auth.mfa.enroll(params: Auth.MFATotpEnrollParams(issuer: "LuxuryApp", friendlyName: friendlyName))
                 factorId = response.id
                 
@@ -153,8 +154,9 @@ struct MFASetupView: View {
             isLoading = true
             errorMessage = nil
             do {
+                let cleanCode = verifyCode.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: " ", with: "")
                 let challengeResponse = try await SupabaseManager.shared.client.auth.mfa.challenge(params: Auth.MFAChallengeParams(factorId: factorId))
-                let _ = try await SupabaseManager.shared.client.auth.mfa.verify(params: Auth.MFAVerifyParams(factorId: factorId, challengeId: challengeResponse.id, code: verifyCode))
+                let _ = try await SupabaseManager.shared.client.auth.mfa.verify(params: Auth.MFAVerifyParams(factorId: factorId, challengeId: challengeResponse.id, code: cleanCode))
                 
                 // Refresh session & route
                 let session = await authService.getCurrentSession()
@@ -162,7 +164,7 @@ struct MFASetupView: View {
                 
                 dismiss()
             } catch {
-                errorMessage = "Invalid code. Please try again."
+                errorMessage = error.localizedDescription
             }
             isLoading = false
         }

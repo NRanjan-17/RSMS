@@ -237,7 +237,7 @@ private struct ClientOverviewTab: View {
                     .kerning(1.5)
                 
                 let sizes = viewModel.sizes
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible())], spacing: 10) {
                     SizeCard(title: "Ring", value: sizes.ringSize.isEmpty ? "—" : sizes.ringSize, icon: "circle.circle")
                     SizeCard(title: "Wrist", value: sizes.wristSize.isEmpty ? "—" : sizes.wristSize, icon: "hand.raised")
                     SizeCard(title: "Apparel", value: sizes.apparelSize.isEmpty ? "—" : sizes.apparelSize, icon: "tshirt")
