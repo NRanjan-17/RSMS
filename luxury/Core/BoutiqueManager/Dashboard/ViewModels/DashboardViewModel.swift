@@ -44,6 +44,7 @@ final class DashboardViewModel {
     var isOffline:          Bool = false
     var lastSyncedAt:       Date = Date()
     var isLoadingSales:     Bool = false
+    var boutiqueName:       String = "Dashboard"
 
     var todaySales:  String { isTargetConfigured ? formatCurrency(salesActualRaw) : formatCurrency(salesActualRaw) }
     var salesTarget: String { isTargetConfigured ? formatCurrency(salesTargetRaw) : "No target set" }
@@ -91,6 +92,7 @@ final class DashboardViewModel {
     ]
 
     func startRealTimeUpdates() {
+        fetchBoutiqueName()
         fetchTodaySales()
         startSalesPolling()
         startNetworkMonitoring()
@@ -183,5 +185,21 @@ final class DashboardViewModel {
         f.maximumFractionDigits = 0
         f.locale                = Locale(identifier: "en_IN")
         return f.string(from: NSNumber(value: value)) ?? "\(CurrencyManager.shared.symbol)0"
+    }
+
+    private func fetchBoutiqueName() {
+        Task {
+            do {
+                if let (role, profile) = try await ProfileService().fetchCurrentProfile() {
+                    if let boutique = profile as? CorporateBoutique {
+                        await MainActor.run {
+                            self.boutiqueName = boutique.name.isEmpty ? "Dashboard" : boutique.name
+                        }
+                    }
+                }
+            } catch {
+                print("Failed to fetch boutique name: \(error)")
+            }
+        }
     }
 }

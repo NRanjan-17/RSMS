@@ -20,6 +20,9 @@ final class NewTransferViewModel {
     var approvalState: MockApprovalState = .waiting
     var packingSlipGenerated: Bool = false
     
+    var showAlert: Bool = false
+    var alertMessage: String = ""
+    
     var hasStockError: Bool {
         items.contains(where: { $0.qty > $0.availableQty })
     }
@@ -53,22 +56,28 @@ final class NewTransferViewModel {
         
         let stock = max(0, (catalogItem.productIds?.count ?? 0) - (catalogItem.reserved?.count ?? 0))
         
+        if stock < 1 {
+            alertMessage = "This item has no available stock to transfer."
+            showAlert = true
+            return
+        }
+        
         let newItem = TransferItem(
             sku: catalogItem.barCode,
             name: catalogItem.name,
             qty: 1, // Default to 1
             availableQty: stock
         )
-        
-        if newItem.qty <= newItem.availableQty {
-            items.append(newItem)
-        }
+        items.append(newItem)
     }
     
     func incrementQty(for itemId: UUID) {
         if let index = items.firstIndex(where: { $0.id == itemId }) {
             if items[index].qty < items[index].availableQty {
                 items[index].qty += 1
+            } else {
+                alertMessage = "Cannot request more than the available stock (\(items[index].availableQty) units)."
+                showAlert = true
             }
         }
     }

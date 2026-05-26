@@ -86,7 +86,7 @@ struct StoreView: View {
                             }
                             .padding(.horizontal, 24)
                             
-                            VStack(spacing: 1) {
+                            VStack(spacing: 12) {
                                 ForEach(viewModel.events) { event in
                                     HStack {
                                         VStack(alignment: .leading, spacing: 4) {
@@ -111,11 +111,12 @@ struct StoreView: View {
                                                 .foregroundStyle(AppColors.tertiary)
                                         }
                                     }
-                                    .padding(.horizontal, 24)
-                                    .padding(.vertical, 18)
+                                    .padding(20)
                                     .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
                                 }
                             }
+                            .padding(.horizontal, 24)
                         }
                     }
                     .padding(.top, 20)
