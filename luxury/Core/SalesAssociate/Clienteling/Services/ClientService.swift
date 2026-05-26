@@ -79,13 +79,14 @@ final class ClientService {
     func fetchClients() async throws -> [ClientEntity] {
         var dbClients: [ClientEntity] = []
         do {
-            dbClients = try await client
+            let response = try await client
                 .from("client")
                 .select()
                 .execute()
-                .value
+            
+            dbClients = try localDecoder.decode([ClientEntity].self, from: response.data)
         } catch {
-            print("Database fetch clients failed: \(error). Falling back to local/cached.")
+            print("Database fetch clients failed with error: \(error). Raw error: \(String(describing: error))")
         }
         
         let localClients = getLocalClients()
@@ -106,14 +107,15 @@ final class ClientService {
             return local
         }
         
-        let response: ClientEntity = try await client
+        let response = try await client
             .from("client")
             .select()
             .eq("id", value: id.uuidString)
             .single()
             .execute()
-            .value
-        return response
+            
+        let entity = try localDecoder.decode(ClientEntity.self, from: response.data)
+        return entity
     }
     
     func createClient(_ clientEntity: ClientEntity) async throws {

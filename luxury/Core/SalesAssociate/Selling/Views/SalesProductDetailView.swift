@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SalesProductDetailView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(SalesAssociateAppState.self) private var saAppState
     let catalog: CatalogEntity
     
     var inStock: Bool {
@@ -120,7 +121,26 @@ struct SalesProductDetailView: View {
                                 CustomButton(
                                     title: "Add to Cart",
                                     icon: AnyView(Image(systemName: "cart.badge.plus").font(.system(size: 14, weight: .semibold))),
-                                    action: { dismiss() }
+                                    action: { 
+                                        let item = CatalogItem(
+                                            id: catalog.id,
+                                            catalogId: catalog.catalogId,
+                                            name: catalog.name,
+                                            description: catalog.description,
+                                            brand: catalog.brand,
+                                            category: catalog.category.rawValue,
+                                            amount: catalog.amount,
+                                            barCode: catalog.barCode,
+                                            status: catalog.status.rawValue,
+                                            reserved: catalog.reserved,
+                                            productIds: catalog.productIds,
+                                            createdAt: nil,
+                                            productImages: catalog.productImages
+                                        )
+                                        POSViewModel.shared.addToCart(item)
+                                        saAppState.selectedTab = .pos
+                                        dismiss()
+                                    }
                                 )
                                 .padding(.bottom, 40)
                             }
