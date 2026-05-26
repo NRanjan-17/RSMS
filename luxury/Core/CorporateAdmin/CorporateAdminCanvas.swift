@@ -19,6 +19,9 @@ struct CorporateAdminCanvas: View {
     @State private var inventoryRouter = Router()
     @State private var inventoryViewModel = GlobalInventoryViewModel()
     
+    @State private var performanceRouter = Router()
+    @State private var performanceViewModel = StorePerformanceViewModel()
+    
     var body: some View {
         TabView(selection: Binding(
             get: { caAppState.selectedTab },
@@ -78,6 +81,17 @@ struct CorporateAdminCanvas: View {
             .environment(inventoryViewModel)
             .tabItem { Label("Inventory", systemImage: "shippingbox.fill") }
             .tag(CATab.inventory)
+            
+            NavigationStack(path: $performanceRouter.path) {
+                StorePerformanceView()
+                    .navigationDestination(for: CARoute.self) { route in
+                        destination(for: route, router: performanceRouter)
+                    }
+            }
+            .environment(performanceRouter)
+            .tabItem { Label("Performance", systemImage: "chart.bar.xaxis") }
+            .tag(CATab.storePerformance)
+            
         }
         .tint(AppColors.gold)
     }
@@ -123,6 +137,8 @@ struct CorporateAdminCanvas: View {
             ProductStockDetailView(summary: summary)
         case .storePerformance:
             StorePerformanceView()
+        case .storePerformanceDetail(let boutique):
+            AssociateMetricsView(boutique: boutique)
         @unknown default:
             // Fallback to a neutral view to satisfy exhaustiveness and aid forward-compatibility
             EmptyView()
