@@ -115,7 +115,7 @@ struct MFASetupView: View {
                 
                 // Now enroll a new factor
                 let friendlyName = "Device-\(UUID().uuidString.prefix(8))"
-                let response = try await SupabaseManager.shared.client.auth.mfa.enroll(params: Auth.MFAEnrollParams(issuer: "LuxuryApp", friendlyName: friendlyName))
+                let response = try await SupabaseManager.shared.client.auth.mfa.enroll(params: Auth.MFATotpEnrollParams(issuer: "LuxuryApp", friendlyName: friendlyName))
                 factorId = response.id
                 
                 if let qrString = response.totp?.uri {
