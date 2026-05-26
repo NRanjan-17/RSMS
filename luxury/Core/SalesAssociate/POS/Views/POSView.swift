@@ -9,7 +9,8 @@ import SwiftUI
 
 struct POSView: View {
     @Environment(Router.self) private var router
-    @State private var viewModel = POSViewModel()
+    @State private var viewModel = POSViewModel.shared
+    @State private var showClientSheet = false
     
     var body: some View {
         ZStack {
@@ -20,27 +21,56 @@ struct POSView: View {
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 0) {
-                        HStack(spacing: 7) {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 7)
-                                    .fill(AppColors.gold15)
-                                    .frame(width: 22, height: 22)
-                                Text("RB")
-                                    .font(AppFonts.serif(size: 10, weight: .bold))
-                                    .foregroundStyle(AppColors.gold)
+                        if let client = viewModel.selectedClient {
+                            HStack(spacing: 7) {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 7)
+                                        .fill(AppColors.gold15)
+                                        .frame(width: 22, height: 22)
+                                    Text(String(client.name.prefix(2)).uppercased())
+                                        .font(AppFonts.serif(size: 10, weight: .bold))
+                                        .foregroundStyle(AppColors.gold)
+                                }
+                                Text(client.name)
+                                    .font(AppFonts.sansSerif(size: 12, weight: .medium))
+                                    .foregroundStyle(.white)
+                                if let tier = client.tier {
+                                    StatusBadge(text: tier, status: .success)
+                                }
+                                Spacer()
+                                Button("Change") {
+                                    showClientSheet = true
+                                }
+                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                .foregroundStyle(AppColors.gold)
                             }
-                            Text("Rahul Bajaj")
-                                .font(AppFonts.sansSerif(size: 12, weight: .medium))
-                                .foregroundStyle(.white)
-                            StatusBadge(text: "UHNW", status: .success)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(AppColors.gold08)
+                            .clipShape(Capsule())
+                            .overlay(Capsule().stroke(AppColors.gold15, lineWidth: 0.5))
+                            .padding(.horizontal, 24)
+                            .padding(.bottom, 18)
+                        } else {
+                            HStack(spacing: 7) {
+                                Image(systemName: "person.crop.circle.badge.plus")
+                                    .foregroundStyle(AppColors.gold)
+                                Text("Attach Client")
+                                    .font(AppFonts.sansSerif(size: 12, weight: .medium))
+                                    .foregroundStyle(AppColors.gold)
+                                Spacer()
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(AppColors.gold08)
+                            .clipShape(Capsule())
+                            .overlay(Capsule().stroke(AppColors.gold15, lineWidth: 0.5))
+                            .padding(.horizontal, 24)
+                            .padding(.bottom, 18)
+                            .onTapGesture {
+                                showClientSheet = true
+                            }
                         }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(AppColors.gold08)
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(AppColors.gold15, lineWidth: 0.5))
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 18)
                         
                         if viewModel.offlineCartQueued {
                             HStack(spacing: 10) {
@@ -60,6 +90,36 @@ struct POSView: View {
                             .padding(.bottom, 14)
                         }
                         
+                        // Available Products (Mock Add)
+                        if !viewModel.availableProducts.isEmpty {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 12) {
+                                    ForEach(viewModel.availableProducts) { product in
+                                        Button(action: {
+                                            viewModel.addToCart(product)
+                                        }) {
+                                            VStack {
+                                                Text(product.name)
+                                                    .font(AppFonts.sansSerif(size: 12, weight: .bold))
+                                                    .foregroundStyle(.white)
+                                                Text("+ Add")
+                                                    .font(AppFonts.sansSerif(size: 10, weight: .medium))
+                                                    .foregroundStyle(AppColors.gold)
+                                            }
+                                            .padding()
+                                            .background(AppColors.surface)
+                                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(AppColors.gold15, lineWidth: 0.5))
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal, 24)
+                            }
+                            .padding(.bottom, 16)
+                        } else if viewModel.isLoadingProducts {
+                            ProgressView().padding(.bottom, 16)
+                        }
+                        
                         VStack(spacing: 10) {
                             ForEach(viewModel.cartItems) { item in
                                 HStack(spacing: 12) {
@@ -74,14 +134,14 @@ struct POSView: View {
                                     }
                                     
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text(item.brand.uppercased())
+                                        Text(item.product.brand.uppercased())
                                             .font(AppFonts.sansSerif(size: 10, weight: .bold))
                                             .foregroundStyle(AppColors.gold)
                                             .kerning(1)
-                                        Text(item.name)
+                                        Text(item.product.name)
                                             .font(AppFonts.sansSerif(size: 12, weight: .medium))
                                             .foregroundStyle(.white)
-                                        Text(viewModel.formatCurrency(item.price))
+                                        Text(viewModel.formatCurrency(Int(item.product.amount)))
                                             .font(AppFonts.serif(size: 15, weight: .semibold))
                                             .foregroundStyle(AppColors.gold)
                                     }
@@ -89,21 +149,25 @@ struct POSView: View {
                                     Spacer()
                                     
                                     HStack(spacing: 8) {
-                                        Circle()
-                                            .stroke(AppColors.gold15, lineWidth: 0.5)
-                                            .background(AppColors.surface2)
-                                            .frame(width: 26, height: 26)
-                                            .overlay(Text("−").font(.system(size: 14)).foregroundStyle(AppColors.secondary))
+                                        Button(action: { viewModel.decreaseQty(of: item.id) }) {
+                                            Circle()
+                                                .stroke(AppColors.gold15, lineWidth: 0.5)
+                                                .background(AppColors.surface2)
+                                                .frame(width: 26, height: 26)
+                                                .overlay(Text("−").font(.system(size: 14)).foregroundStyle(AppColors.secondary))
+                                        }
                                         
                                         Text("\(item.qty)")
                                             .font(AppFonts.serif(size: 16, weight: .medium))
                                             .foregroundStyle(.white)
                                         
-                                        Circle()
-                                            .stroke(AppColors.gold15, lineWidth: 0.5)
-                                            .background(AppColors.surface2)
-                                            .frame(width: 26, height: 26)
-                                            .overlay(Text("+").font(.system(size: 14)).foregroundStyle(AppColors.secondary))
+                                        Button(action: { viewModel.increaseQty(of: item.id) }) {
+                                            Circle()
+                                                .stroke(AppColors.gold15, lineWidth: 0.5)
+                                                .background(AppColors.surface2)
+                                                .frame(width: 26, height: 26)
+                                                .overlay(Text("+").font(.system(size: 14)).foregroundStyle(AppColors.secondary))
+                                        }
                                     }
                                 }
                                 .padding(.horizontal, 14)
@@ -207,7 +271,7 @@ struct POSView: View {
                               let rootVC = scene.windows.first?.rootViewController else { return }
                         
                         Task {
-                            let success = await viewModel.processPayment(presentingViewController: rootVC)
+                            let success = await viewModel.processPayment(presentingViewController: rootVC, staffId: UUID(), boutiqueId: UUID())
                             if success {
                                 router.push(SARoute.payment)
                             }
@@ -236,6 +300,14 @@ struct POSView: View {
                     .padding(.bottom, 40)
                 }
                 .background(AppColors.background)
+            }
+        }
+        .onAppear {
+            viewModel.fetchProducts()
+        }
+        .sheet(isPresented: $showClientSheet) {
+            ClientSelectionSheet { client in
+                viewModel.attachClient(client)
             }
         }
         .toolbar(.hidden, for: .navigationBar)
