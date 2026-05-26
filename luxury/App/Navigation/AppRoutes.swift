@@ -47,6 +47,7 @@ enum ICRoute: Hashable {
     case serialCertificate
     case sfsOrders
     case sfsVerification(PurchasedItemEntity)
+    case catalogDetail(CatalogEntity, Int)
 }
 
 enum CARoute: Hashable {

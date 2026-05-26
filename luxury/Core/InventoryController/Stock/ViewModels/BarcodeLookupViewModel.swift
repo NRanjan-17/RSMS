@@ -1,8 +1,3 @@
-//
-//  BarcodeLookupViewModel.swift
-//  luxury
-//
-
 import SwiftUI
 import Observation
 import Supabase
@@ -13,6 +8,8 @@ final class BarcodeLookupViewModel {
     var errorMessage: String?
     var scannedItem: CatalogEntity?
     var liveStockCount: Int = 0
+    
+    private let profileService = ProfileService()
     
     func lookupItem(by code: String) {
         let trimmed = code.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -25,22 +22,50 @@ final class BarcodeLookupViewModel {
         
         Task {
             do {
-                // Fetch catalog item by UPC/Barcode
-                let item: CatalogEntity = try await SupabaseManager.shared.client
-                    .from("catalogs")
-                    .select()
-                    .eq("bar_code", value: trimmed)
-                    .single()
-                    .execute()
-                    .value
+                // Fetch catalog item by UPC/Barcode or Catalog ID (Case Insensitive)
+                let item: CatalogEntity
+                do {
+                    item = try await SupabaseManager.shared.client
+                        .from("catalogs")
+                        .select()
+                        .ilike("bar_code", value: trimmed)
+                        .single()
+                        .execute()
+                        .value
+                } catch {
+                    item = try await SupabaseManager.shared.client
+                        .from("catalogs")
+                        .select()
+                        .ilike("catalog_id", value: trimmed)
+                        .single()
+                        .execute()
+                        .value
+                }
+                
+                // Get current store ID from user profile
+                var boutiqueId: UUID? = nil
+                if let profileTuple = try? await profileService.fetchCurrentProfile(),
+                   let staff = profileTuple.1 as? StaffModel {
+                    boutiqueId = staff.boutiqueId
+                }
+                
+                // Fetch localized inventory for this store
+                var localizedStockCount = 0
+                if let storeId = boutiqueId {
+                    if let inventory: [InventoryItem] = try? await SupabaseManager.shared.client
+                        .from("inventory")
+                        .select()
+                        .eq("sku_id", value: item.id)
+                        .eq("store_id", value: storeId)
+                        .execute()
+                        .value, let firstItem = inventory.first {
+                        localizedStockCount = firstItem.quantity
+                    }
+                }
                 
                 await MainActor.run {
                     self.scannedItem = item
-                    
-                    let totalProductIds = item.productIds?.count ?? 0
-                    let reservedCount = item.reserved?.count ?? 0
-                    self.liveStockCount = max(0, totalProductIds - reservedCount)
-                    
+                    self.liveStockCount = localizedStockCount
                     self.isLoading = false
                 }
             } catch {
