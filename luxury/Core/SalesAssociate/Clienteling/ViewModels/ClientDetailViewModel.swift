@@ -110,7 +110,10 @@ final class ClientDetailViewModel {
             initial: client.initial,
             isHot: client.isHot,
             phone: client.phone,
-            email: client.email
+            email: client.email,
+            dob: client.dob,
+            maritalStatus: client.maritalStatus,
+            dateOfAnniversary: client.dateOfAnniversary
         )
         self.client = updatedClient
         

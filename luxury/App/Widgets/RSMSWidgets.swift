@@ -315,3 +315,146 @@ struct RequestDetailSheet: View {
         .presentationDetents([.medium, .large])
     }
 }
+
+struct RSMSDatePicker: View {
+    let label: String
+    @Binding var date: Date
+    @Binding var isSet: Bool
+    
+    @State private var showCalendarSheet = false
+    @State private var tempDate = Date()
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(label)
+                .font(AppFonts.sansSerif(size: 10))
+                .foregroundStyle(AppColors.secondary)
+                .kerning(0.8)
+                .textCase(.uppercase)
+            
+            Button(action: {
+                tempDate = isSet ? date : Date()
+                showCalendarSheet = true
+            }) {
+                HStack {
+                    if isSet {
+                        Text(formatDate(date))
+                            .font(AppFonts.sansSerif(size: 14))
+                            .foregroundStyle(.white)
+                    } else {
+                        Text("Not Set")
+                            .font(AppFonts.sansSerif(size: 14))
+                            .foregroundStyle(AppColors.tertiary)
+                    }
+                    
+                    Spacer()
+                    
+                    if isSet {
+                        Button(action: {
+                            isSet = false
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(AppColors.secondary)
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        Image(systemName: "calendar")
+                            .foregroundStyle(AppColors.gold)
+                    }
+                }
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 14)
+            .frame(height: 46)
+            .background(AppColors.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+        }
+        .sheet(isPresented: $showCalendarSheet) {
+            CalendarPickerSheet(label: label, selectedDate: $tempDate, onSave: {
+                date = tempDate
+                isSet = true
+                showCalendarSheet = false
+            }, onDismiss: {
+                showCalendarSheet = false
+            })
+        }
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd MMM yyyy"
+        return formatter.string(from: date)
+    }
+}
+
+struct CalendarPickerSheet: View {
+    let label: String
+    @Binding var selectedDate: Date
+    var onSave: () -> Void
+    var onDismiss: () -> Void
+    
+    var body: some View {
+        ZStack {
+            AppColors.background.ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                // Header
+                HStack {
+                    Button("Cancel") {
+                        onDismiss()
+                    }
+                    .font(AppFonts.sansSerif(size: 14))
+                    .foregroundStyle(AppColors.gold)
+                    
+                    Spacer()
+                    
+                    Text(label)
+                        .font(AppFonts.sansSerif(size: 16, weight: .semibold))
+                        .foregroundStyle(AppColors.text)
+                    
+                    Spacer()
+                    
+                    // Invisible button to center title
+                    Button("Cancel") {}
+                        .font(AppFonts.sansSerif(size: 14))
+                        .foregroundStyle(.clear)
+                        .disabled(true)
+                }
+                .padding(.horizontal, 24)
+                .padding(.vertical, 16)
+                
+                DatePicker(
+                    "",
+                    selection: $selectedDate,
+                    displayedComponents: .date
+                )
+                .datePickerStyle(.graphical)
+                .colorScheme(.dark)
+                .tint(AppColors.gold)
+                .padding(12)
+                .background(AppColors.surface)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
+                .padding(.horizontal, 24)
+                
+                Spacer()
+                
+                Button(action: onSave) {
+                    Text("Select Date")
+                        .font(AppFonts.sansSerif(size: 15, weight: .bold))
+                        .foregroundStyle(AppColors.background)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 50)
+                        .background(AppColors.gold)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 34)
+            }
+        }
+        .preferredColorScheme(.dark)
+        .presentationDetents([.height(520)])
+    }
+}
+

@@ -115,6 +115,9 @@ struct Client: Identifiable, Hashable {
     let isHot: Bool
     let phone: String?
     let email: String?
+    var dob: String?
+    var maritalStatus: String?
+    var dateOfAnniversary: String?
     
     // Stable Mock IDs
     static let mockRahulId = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
@@ -128,7 +131,7 @@ struct Client: Identifiable, Hashable {
         mockRahulId, mockPriyaId, mockDeepaId, mockAnanyaId, mockVikramId, mockRohitId
     ]
     
-    init(id: UUID = UUID(), name: String, tier: ClientTier, lastVisit: String, ltv: String, initial: String, isHot: Bool = false, phone: String? = nil, email: String? = nil) {
+    init(id: UUID = UUID(), name: String, tier: ClientTier, lastVisit: String, ltv: String, initial: String, isHot: Bool = false, phone: String? = nil, email: String? = nil, dob: String? = nil, maritalStatus: String? = nil, dateOfAnniversary: String? = nil) {
         self.id = id
         self.name = name
         self.tier = tier
@@ -142,6 +145,9 @@ struct Client: Identifiable, Hashable {
         self.isHot = isHot
         self.phone = phone
         self.email = email
+        self.dob = dob
+        self.maritalStatus = maritalStatus
+        self.dateOfAnniversary = dateOfAnniversary
     }
 }
 
@@ -180,6 +186,9 @@ extension Client {
         self.isHot = (clientTier == .uhnw && hasPurchases)
         self.phone = entity.phone
         self.email = entity.email
+        self.dob = entity.dob
+        self.maritalStatus = entity.maritalStatus
+        self.dateOfAnniversary = entity.dateOfAnniversary
     }
 }
 

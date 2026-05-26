@@ -245,6 +245,68 @@ private struct ClientOverviewTab: View {
                 }
             }
             
+            let client = viewModel.client
+            let hasAdditionalInfo = (client.dob != nil && !client.dob!.isEmpty) || 
+                                    (client.maritalStatus != nil && !client.maritalStatus!.isEmpty) || 
+                                    (client.dateOfAnniversary != nil && !client.dateOfAnniversary!.isEmpty)
+            
+            if hasAdditionalInfo {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("ADDITIONAL DETAILS")
+                        .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                        .foregroundStyle(AppColors.secondary)
+                        .kerning(1.5)
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        if let dob = client.dob, !dob.isEmpty {
+                            HStack {
+                                Text("Date of Birth")
+                                    .font(AppFonts.sansSerif(size: 12))
+                                    .foregroundStyle(AppColors.secondary)
+                                Spacer()
+                                Text(dob)
+                                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                    .foregroundStyle(.white)
+                            }
+                            if (client.maritalStatus != nil && !client.maritalStatus!.isEmpty) || (client.dateOfAnniversary != nil && !client.dateOfAnniversary!.isEmpty) {
+                                Divider().background(AppColors.border)
+                            }
+                        }
+                        
+                        if let maritalStatus = client.maritalStatus, !maritalStatus.isEmpty {
+                            HStack {
+                                Text("Marital Status")
+                                    .font(AppFonts.sansSerif(size: 12))
+                                    .foregroundStyle(AppColors.secondary)
+                                Spacer()
+                                Text(maritalStatus)
+                                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                    .foregroundStyle(.white)
+                            }
+                            if client.dateOfAnniversary != nil && !client.dateOfAnniversary!.isEmpty {
+                                Divider().background(AppColors.border)
+                            }
+                        }
+                        
+                        if let anniversary = client.dateOfAnniversary, !anniversary.isEmpty {
+                            HStack {
+                                Text("Anniversary Date")
+                                    .font(AppFonts.sansSerif(size: 12))
+                                    .foregroundStyle(AppColors.secondary)
+                                Spacer()
+                                Text(anniversary)
+                                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                    .foregroundStyle(.white)
+                            }
+                        }
+                    }
+                    .padding(16)
+                    .background(AppColors.surface)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                }
+            }
+            
             VStack(alignment: .leading, spacing: 12) {
                 Text("TICKET TRACKING")
                     .font(AppFonts.sansSerif(size: 10, weight: .bold))
