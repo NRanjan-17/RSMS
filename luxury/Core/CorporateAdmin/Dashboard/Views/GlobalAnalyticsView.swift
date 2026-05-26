@@ -37,7 +37,7 @@ struct GlobalAnalyticsView: View {
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 28) {
-                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                        LazyVGrid(columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible())], spacing: 16) {
                             ForEach(viewModel.kpis) { kpi in
                                 if kpi.label == "Total Staff" {
                                     GlobalMetricCard(kpi: kpi)
