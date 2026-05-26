@@ -9,6 +9,7 @@ import Foundation
 import PhotosUI
 import SwiftUI
 import UniformTypeIdentifiers
+import UIKit
 
 struct PickedImageAsset: Equatable {
     let data: Data
@@ -20,6 +21,7 @@ enum ImagePickerServiceError: LocalizedError {
     case noSelection
     case unsupportedType
     case emptyData
+    case invalidImageData
 
     var errorDescription: String? {
         switch self {
@@ -29,6 +31,8 @@ enum ImagePickerServiceError: LocalizedError {
             return "Selected file is not a supported image."
         case .emptyData:
             return "Selected image could not be loaded."
+        case .invalidImageData:
+            return "Captured image could not be processed."
         }
     }
 }
@@ -51,6 +55,18 @@ final class ImagePickerService {
             data: data,
             fileExtension: type.preferredFilenameExtension ?? "jpg",
             contentType: type.preferredMIMEType ?? "image/jpeg"
+        )
+    }
+
+    func loadImage(from image: UIImage) throws -> PickedImageAsset {
+        guard let data = image.jpegData(compressionQuality: 0.9), !data.isEmpty else {
+            throw ImagePickerServiceError.invalidImageData
+        }
+
+        return PickedImageAsset(
+            data: data,
+            fileExtension: "jpg",
+            contentType: "image/jpeg"
         )
     }
 }
