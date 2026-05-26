@@ -7,6 +7,7 @@
 
 import Foundation
 import Observation
+import SwiftUI
 
 @Observable
 final class ClientDetailViewModel {
@@ -14,31 +15,25 @@ final class ClientDetailViewModel {
     
     var client: Client {
         didSet {
-            refreshWishlist()
-            refreshSizes()
-            refreshPurchases()
+            refreshAll()
+            syncAll()
         }
     }
+    
     var selectedTab: String = "overview"
     let tabs = [("overview", "Overview"), ("history", "History"), ("wishlist", "Wishlist"), ("notes", "Notes")]
     
     var wishlistItems: [ClientWishlistItem] = []
     var sizes: ClientSizePreference = ClientSizePreference()
     var purchases: [ClientPurchase] = []
-    
-    var hasMockData: Bool {
-        return Client.mockIds.contains(client.id)
-    }
+    var notes: [ClientNote] = []
+    var tickets: [ClientTicket] = []
     
     var joinedDateText: String {
-        if hasMockData {
-            return "Maison Mumbai · Since Nov 2019"
-        } else {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "MMM yyyy"
-            let dateStr = formatter.string(from: Date())
-            return "Maison Mumbai · Since \(dateStr)"
-        }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM yyyy"
+        let dateStr = formatter.string(from: Date())
+        return "Maison Mumbai · Since \(dateStr)"
     }
     
     var stats: [(String, String)] {
@@ -53,9 +48,40 @@ final class ClientDetailViewModel {
     
     init(client: Client = ClientDetailViewModel.defaultClient) {
         self.client = client
+        refreshAll()
+        syncAll()
+    }
+    
+    func refreshAll() {
         refreshWishlist()
         refreshSizes()
         refreshPurchases()
+        refreshNotes()
+        refreshTickets()
+    }
+    
+    func syncAll() {
+        let clientId = client.id
+        Task {
+            await WishlistService.shared.syncWishlist(clientId: clientId)
+            await MainActor.run { refreshWishlist() }
+        }
+        Task {
+            await PurchaseHistoryService.shared.syncPurchases(clientId: clientId)
+            await MainActor.run { refreshPurchases() }
+        }
+        Task {
+            await SizePreferenceService.shared.syncSizePreference(clientId: clientId)
+            await MainActor.run { refreshSizes() }
+        }
+        Task {
+            await NotesService.shared.syncNotes(clientId: clientId)
+            await MainActor.run { refreshNotes() }
+        }
+        Task {
+            await TicketsService.shared.syncTickets(clientId: clientId)
+            await MainActor.run { refreshTickets() }
+        }
     }
     
     func refreshWishlist() {
@@ -68,6 +94,14 @@ final class ClientDetailViewModel {
     
     func refreshPurchases() {
         self.purchases = PurchaseHistoryService.shared.fetchPurchases(clientId: client.id)
+    }
+    
+    func refreshNotes() {
+        self.notes = NotesService.shared.fetchNotes(clientId: client.id)
+    }
+    
+    func refreshTickets() {
+        self.tickets = TicketsService.shared.fetchTickets(clientId: client.id)
     }
     
     func saveSizes(_ newSizes: ClientSizePreference) {
@@ -135,15 +169,25 @@ final class ClientDetailViewModel {
         }
     }
     
-    var preferences: [String] {
-        if hasMockData {
-            return ["Rolex", "Patek Philippe", "AP", "Dark Leather", "Slim Watches", "Navy"]
-        } else {
-            return []
+    func addNote(_ noteText: String) async {
+        await NotesService.shared.addNote(clientId: client.id, noteText: noteText)
+        await MainActor.run {
+            self.refreshNotes()
         }
     }
     
-    // purchases is now stored and updated dynamically in the purchases array property
+    func deleteNote(noteId: UUID) async {
+        await NotesService.shared.deleteNote(clientId: client.id, noteId: noteId)
+        await MainActor.run {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                self.refreshNotes()
+            }
+        }
+    }
+    
+    var preferences: [String] {
+        return []
+    }
     
     var wishlist: [GroupedWishlistItem] {
         var groups: [String: [ClientWishlistItem]] = [:]
@@ -168,29 +212,6 @@ final class ClientDetailViewModel {
                 quantity: items.count,
                 originalItems: items
             )
-        }
-    }
-    
-    var notes: [ClientNote] {
-        if hasMockData {
-            return [
-                ClientNote(note: "Prefers unhurried appointments — always allocate 90 min minimum. Deep interest in movement mechanics.", date: "May 10", author: "Arjun Singh"),
-                ClientNote(note: "Wife's birthday June 28. Currently scouting Cartier Love bracelet and Van Cleef Alhambra.", date: "Apr 22", author: "Arjun Singh")
-            ]
-        } else {
-            return []
-        }
-    }
-    
-    var tickets: [ClientTicket] {
-        if hasMockData {
-            return [
-                ClientTicket(title: "Watch Servicing - Rolex Daytona", status: "Active", date: "May 12", isActive: true),
-                ClientTicket(title: "Jewelry Repair - Diamond Ring", status: "Completed", date: "Apr 05", isActive: false),
-                ClientTicket(title: "Polishing - AP Royal Oak", status: "Active", date: "May 15", isActive: true)
-            ]
-        } else {
-            return []
         }
     }
 }
