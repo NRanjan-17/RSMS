@@ -17,6 +17,12 @@ struct EditClientView: View {
     @State private var email: String = ""
     @State private var selectedTier: String = ""
     
+    @State private var dobDate: Date = Date()
+    @State private var hasDobSet: Bool = false
+    @State private var maritalStatus: String = "Single"
+    @State private var anniversaryDate: Date = Date()
+    @State private var hasAnniversarySet: Bool = false
+    
     @State private var ringSize: String = ""
     @State private var wristSize: String = ""
     @State private var apparelSize: String = ""
@@ -57,6 +63,29 @@ struct EditClientView: View {
             _mobile = State(initialValue: clientPhone)
         } else {
             _mobile = State(initialValue: "+91 98210 54321")
+        }
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+        
+        if let dobStr = client.dob, let date = dateFormatter.date(from: dobStr) {
+            _dobDate = State(initialValue: date)
+            _hasDobSet = State(initialValue: true)
+        } else {
+            _dobDate = State(initialValue: Date())
+            _hasDobSet = State(initialValue: false)
+        }
+        
+        _maritalStatus = State(initialValue: client.maritalStatus ?? "Single")
+        
+        if let annivStr = client.dateOfAnniversary, let date = dateFormatter.date(from: annivStr) {
+            _anniversaryDate = State(initialValue: date)
+            _hasAnniversarySet = State(initialValue: true)
+        } else {
+            _anniversaryDate = State(initialValue: Date())
+            _hasAnniversarySet = State(initialValue: false)
         }
     }
     
@@ -108,6 +137,46 @@ struct EditClientView: View {
                             
                             RSMSField(label: "Mobile", placeholder: "+91 98XXX XXXXX", text: $mobile)
                             RSMSField(label: "Email", placeholder: "client@email.com", text: $email)
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 16)
+                        
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("ADDITIONAL PROFILE INFO")
+                                .font(AppFonts.sansSerif(size: 10))
+                                .foregroundStyle(AppColors.gold)
+                                .kerning(2)
+                                .padding(.top, 4)
+                            
+                            RSMSDatePicker(label: "Date of Birth", date: $dobDate, isSet: $hasDobSet)
+                            
+                            Text("MARITAL STATUS")
+                                .font(AppFonts.sansSerif(size: 10))
+                                .foregroundStyle(AppColors.gold)
+                                .kerning(2)
+                                .padding(.top, 4)
+                            
+                            HStack(spacing: 8) {
+                                let statuses = ["Single", "Married", "Other"]
+                                ForEach(statuses, id: \.self) { s in
+                                    let isSelected = maritalStatus == s
+                                    Text(s)
+                                        .font(AppFonts.sansSerif(size: 13, weight: isSelected ? .medium : .light))
+                                        .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 40)
+                                        .background(isSelected ? AppColors.gold : Color.clear)
+                                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(isSelected ? Color.clear : AppColors.gold15, lineWidth: 0.5))
+                                        .onTapGesture {
+                                            withAnimation { maritalStatus = s }
+                                        }
+                                }
+                            }
+                            
+                            if maritalStatus == "Married" {
+                                RSMSDatePicker(label: "Anniversary Date", date: $anniversaryDate, isSet: $hasAnniversarySet)
+                            }
                         }
                         .padding(.horizontal, 24)
                         .padding(.bottom, 16)
@@ -245,6 +314,28 @@ struct EditClientView: View {
                 self.email = entity.email
                 self.mobile = entity.phone ?? ""
                 self.selectedTier = entity.tier ?? "Standard"
+                
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd"
+                dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+                dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+                
+                if let dobStr = entity.dob, let date = dateFormatter.date(from: dobStr) {
+                    self.dobDate = date
+                    self.hasDobSet = true
+                } else {
+                    self.hasDobSet = false
+                }
+                
+                self.maritalStatus = entity.maritalStatus ?? "Single"
+                
+                if let annivStr = entity.dateOfAnniversary, let date = dateFormatter.date(from: annivStr) {
+                    self.anniversaryDate = date
+                    self.hasAnniversarySet = true
+                } else {
+                    self.hasAnniversarySet = false
+                }
+                
                 let localSizes = SizePreferenceService.shared.fetchSizePreference(clientId: client.id)
                 self.ringSize = localSizes.ringSize
                 self.wristSize = localSizes.wristSize
@@ -280,16 +371,26 @@ struct EditClientView: View {
         
         let fullName = trimmedLast.isEmpty ? trimmedFirst : "\(trimmedFirst) \(trimmedLast)"
         
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+        
+        let dobStr = hasDobSet ? dateFormatter.string(from: dobDate) : nil
+        let anniversaryStr = (maritalStatus == "Married" && hasAnniversarySet) ? dateFormatter.string(from: anniversaryDate) : nil
+        
         let updatedEntity = ClientEntity(
             id: client.id,
             name: fullName,
             email: trimmedEmail,
             phone: trimmedMobile.isEmpty ? nil : trimmedMobile,
-            dob: clientEntity?.dob,
+            dob: dobStr,
             tier: selectedTier,
             productsPurchased: clientEntity?.productsPurchased ?? [],
             createdAt: clientEntity?.createdAt ?? Date(),
-            updatedAt: Date()
+            updatedAt: Date(),
+            maritalStatus: maritalStatus,
+            dateOfAnniversary: anniversaryStr
         )
         
         // Save size preferences locally
