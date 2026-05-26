@@ -61,9 +61,15 @@ struct StockView: View {
                         }
                         .padding(.horizontal, 20)
                         
-                        CustomOutlineButton(title: "Serialization & CoA", icon: AnyView(Image(systemName: "doc.badge.gearshape")), action: {
-                            router.push(ICRoute.serialCertificate)
-                        })
+                        HStack(spacing: 12) {
+                            CustomOutlineButton(title: "Serialization", icon: AnyView(Image(systemName: "doc.badge.gearshape")), action: {
+                                router.push(ICRoute.serialCertificate)
+                            })
+                            
+                            CustomOutlineButton(title: "Endless Aisle", icon: AnyView(Image(systemName: "square.grid.3x3.fill")), action: {
+                                router.push(ICRoute.endlessAisleSelection)
+                            })
+                        }
                         .padding(.horizontal, 20)
                         
                         VStack(alignment: .leading, spacing: 16) {

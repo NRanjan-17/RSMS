@@ -166,8 +166,8 @@ struct InventoryControllerCanvas: View {
             FulfillmentView()
         case .sfsVerification(let order):
             SFSVerificationView(order: order)
-        case .catalogDetail(let item, let stock):
-            ICCatalogDetailView(catalog: item, stockCount: stock)
+        case .endlessAisleSelection:
+            EndlessAisleWorkflowView()
         }
     }
 }

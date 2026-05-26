@@ -48,6 +48,26 @@ struct StoreView: View {
                                 }
                                 .buttonStyle(.plain)
                                 
+                                Button(action: { router.push(BMRoute.endlessAisleRequests) }) {
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text("Endless Aisle Requests")
+                                                .font(AppFonts.serif(size: 18, weight: .medium))
+                                                .foregroundStyle(.white)
+                                            Text("Review and authorize boutique transfers")
+                                                .font(AppFonts.sansSerif(size: 12))
+                                                .foregroundStyle(AppColors.secondary)
+                                        }
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .foregroundStyle(AppColors.gold)
+                                    }
+                                    .padding(20)
+                                    .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                }
+                                .buttonStyle(.plain)
+                                
                                 Button(action: { router.presentFullScreen(BMRoute.cycleCountSignoff) }) {
                                     HStack {
                                         VStack(alignment: .leading, spacing: 4) {

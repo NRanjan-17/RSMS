@@ -105,6 +105,8 @@ struct BoutiqueManagerCanvas: View {
             RefundApprovalView()
         case .writeOffApproval:
             WriteOffApprovalView()
+        case .endlessAisleRequests:
+            BMEndlessAisleRequestsView()
         case .staffRequestDetail(let staff):
             RequestDetailSheet(
                 title: staff.name,
