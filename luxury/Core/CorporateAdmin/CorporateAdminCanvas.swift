@@ -121,8 +121,12 @@ struct CorporateAdminCanvas: View {
             BoutiqueDetailView(boutique: boutique, viewModel: userManagementViewModel)
         case .inventoryDetail(let summary):
             ProductStockDetailView(summary: summary)
+        case .storePerformance:
+            StorePerformanceView()
+        @unknown default:
+            // Fallback to a neutral view to satisfy exhaustiveness and aid forward-compatibility
+            EmptyView()
         }
     }
 }
-
 
