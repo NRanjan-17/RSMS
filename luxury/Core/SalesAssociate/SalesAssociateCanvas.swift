@@ -110,14 +110,16 @@ struct SalesAssociateCanvas: View {
             CreateAppointmentView()
         case .returns:
             ReturnsView()
-        case .afterSalesIntake:
-            AfterSalesIntakeView()
+        case .afterSalesIntake(let clientName, let serialNumber, let isWarrantyActive):
+            AfterSalesIntakeView(clientName: clientName, serialNumber: serialNumber, isWarrantyActive: isWarrantyActive)
         case .afterSalesTracking:
             AfterSalesTrackingView()
         case .lookBuilder:
             LookBuilderView()
         case .remoteSelling:
             RemoteSellingView()
+        case .purchaseDetails(let client, let purchase):
+            PurchaseDetailsView(client: client, purchase: purchase)
         }
     }
 }
