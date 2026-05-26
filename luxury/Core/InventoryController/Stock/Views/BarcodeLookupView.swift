@@ -76,68 +76,6 @@ struct BarcodeLookupView: View {
                                     .foregroundStyle(AppColors.secondary)
                             }
                             .padding(.top, 40)
-                        } else if let item = viewModel.scannedItem {
-                            // Results View
-                            VStack(spacing: 20) {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(item.brand)
-                                            .font(AppFonts.sansSerif(size: 12, weight: .bold))
-                                            .foregroundStyle(AppColors.gold)
-                                            .kerning(1.5)
-                                            .textCase(.uppercase)
-                                        
-                                        Text(item.name)
-                                            .font(AppFonts.serif(size: 22, weight: .medium))
-                                            .foregroundStyle(AppColors.text)
-                                        
-                                        Text("UPC: \(item.barCode)")
-                                            .font(AppFonts.sansSerif(size: 12))
-                                            .foregroundStyle(AppColors.tertiary)
-                                    }
-                                    Spacer()
-                                    
-                                    VStack(alignment: .trailing, spacing: 4) {
-                                        Text("\(viewModel.liveStockCount)")
-                                            .font(AppFonts.serif(size: 36, weight: .bold))
-                                            .foregroundStyle(viewModel.liveStockCount > 0 ? AppColors.success : AppColors.error)
-                                        Text("In Stock")
-                                            .font(AppFonts.sansSerif(size: 12))
-                                            .foregroundStyle(AppColors.secondary)
-                                    }
-                                }
-                                
-                                Divider().background(AppColors.surface)
-                                
-                                HStack {
-                                    Text("Category")
-                                        .font(AppFonts.sansSerif(size: 14))
-                                        .foregroundStyle(AppColors.secondary)
-                                    Spacer()
-                                    Text(item.category.rawValue.capitalized)
-                                        .font(AppFonts.sansSerif(size: 14, weight: .semibold))
-                                        .foregroundStyle(AppColors.text)
-                                }
-                                
-                                HStack {
-                                    Text("Price")
-                                        .font(AppFonts.sansSerif(size: 14))
-                                        .foregroundStyle(AppColors.secondary)
-                                    Spacer()
-                                    Text("\(CurrencyManager.shared.symbol)\(String(format: "%.2f", item.amount))")
-                                        .font(AppFonts.sansSerif(size: 14, weight: .semibold))
-                                        .foregroundStyle(AppColors.text)
-                                }
-                            }
-                            .padding(20)
-                            .background(AppColors.surface)
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .stroke(AppColors.surface2, lineWidth: 1)
-                            )
-                            .padding(.horizontal, 24)
-                            .padding(.top, 10)
                         } else {
                             // Initial State
                             VStack(spacing: 12) {
@@ -156,9 +94,15 @@ struct BarcodeLookupView: View {
         }
         .toolbar(.hidden, for: .navigationBar)
         .onAppear {
+            viewModel.scannedItem = nil
             scannerService.onScannedCode = { code in
                 scannerService.playSuccessFeedback()
                 viewModel.lookupItem(by: code)
+            }
+        }
+        .onChange(of: viewModel.scannedItem) { old, newItem in
+            if let item = newItem {
+                router.push(ICRoute.catalogDetail(item, viewModel.liveStockCount))
             }
         }
     }
