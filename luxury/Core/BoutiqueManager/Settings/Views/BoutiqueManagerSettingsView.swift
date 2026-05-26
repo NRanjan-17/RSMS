@@ -15,6 +15,7 @@ struct BoutiqueManagerSettingsView: View {
     @State private var isLoadingBoutique = false
     @State private var showEditBoutique = false
     @State private var boutiqueToEdit: CorporateBoutique?
+    @State private var showLogoutAlert = false
     
     private var currentTarget: Double {
         UserDefaults.standard.double(forKey: "bm_daily_sales_target")
@@ -219,12 +220,20 @@ struct BoutiqueManagerSettingsView: View {
                                 .padding(.horizontal, 24)
                             }
                             
-                            CustomButton(title: "Logout", action: { coordinator.logout() })
+                            CustomButton(title: "Logout", action: { showLogoutAlert = true })
                                 .padding(.horizontal, 24)
                         }
                         .padding(.top, 24)
                     }
                 }
+            }
+            .alert("Logout", isPresented: $showLogoutAlert) {
+                Button("Logout", role: .destructive) {
+                    coordinator.logout()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Are you sure you want to logout?")
             }
         }
         .sheet(isPresented: $showEditBoutique) {

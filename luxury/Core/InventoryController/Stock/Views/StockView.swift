@@ -11,6 +11,7 @@ struct StockView: View {
     @Environment(Router.self) private var router
     @Environment(AppCoordinator.self) private var coordinator
     @State private var viewModel = StockViewModel()
+    @State private var showLogoutAlert = false
     
     var body: some View {
         ZStack {
@@ -22,7 +23,7 @@ struct StockView: View {
                         .font(AppFonts.serif(size: 28, weight: .semibold))
                         .foregroundStyle(.white)
                     Spacer()
-                    Button(action: { coordinator.logout() }) {
+                    Button(action: { showLogoutAlert = true }) {
                         Image(systemName: "rectangle.portrait.and.arrow.right")
                             .font(.system(size: 20))
                             .foregroundStyle(AppColors.gold)
@@ -118,6 +119,14 @@ struct StockView: View {
         .onAppear {
             viewModel.fetchInventoryStats()
             viewModel.fetchSFSCount()
+        }
+        .alert("Logout", isPresented: $showLogoutAlert) {
+            Button("Logout", role: .destructive) {
+                coordinator.logout()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Are you sure you want to logout?")
         }
     }
 }

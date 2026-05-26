@@ -18,6 +18,17 @@ struct CatalogFormView: View {
     @State private var showingScanner = false
     @State private var scannerService = ScannerService()
     
+    @State private var showSaveAlert = false
+    @State private var showDeleteImageAlert = false
+    @State private var showUnsavedChangesAlert = false
+    @State private var pendingImageToDelete: Int? = nil
+    @State private var pendingImageType: ImageType? = nil
+    
+    enum ImageType {
+        case existing
+        case new
+    }
+    
     var body: some View {
         @Bindable var bindableViewModel = viewModel
         
@@ -162,7 +173,9 @@ struct CatalogFormView: View {
                                                     .clipShape(RoundedRectangle(cornerRadius: 8))
                                                     .overlay(alignment: .topTrailing) {
                                                         Button(action: {
-                                                            viewModel.removeExistingImage(at: index)
+                                                            pendingImageToDelete = index
+                                                            pendingImageType = .existing
+                                                            showDeleteImageAlert = true
                                                         }) {
                                                             Image(systemName: "xmark.circle.fill")
                                                                 .font(.system(size: 20))
@@ -189,7 +202,9 @@ struct CatalogFormView: View {
                                                 .clipShape(RoundedRectangle(cornerRadius: 8))
                                                 .overlay(alignment: .topTrailing) {
                                                     Button(action: {
-                                                        viewModel.removeSelectedImage(at: index)
+                                                        pendingImageToDelete = index
+                                                        pendingImageType = .new
+                                                        showDeleteImageAlert = true
                                                     }) {
                                                         Image(systemName: "xmark.circle.fill")
                                                             .font(.system(size: 20))
@@ -222,9 +237,7 @@ struct CatalogFormView: View {
                     // Save Button
                     if let catalog = editCatalog {
                         CustomButton(title: "Save Changes", isLoading: viewModel.isSaving) {
-                            viewModel.updateCatalog(catalog) {
-                                router.pop()
-                            }
+                            showSaveAlert = true
                         }
                     } else {
                         CustomButton(title: "Scan QR & Save", icon: AnyView(Image(systemName: "qrcode.viewfinder")), isLoading: viewModel.isSaving) {
@@ -279,6 +292,56 @@ struct CatalogFormView: View {
             if let errorMessage = viewModel.errorMessage {
                 Text(errorMessage)
             }
+        }
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button(action: {
+                    if viewModel.hasUnsavedChanges(comparedTo: editCatalog) {
+                        showUnsavedChangesAlert = true
+                    } else {
+                        dismiss()
+                    }
+                }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(AppColors.gold)
+                }
+            }
+        }
+        .alert("Unsaved Changes", isPresented: $showUnsavedChangesAlert) {
+            Button("Discard Changes", role: .destructive) {
+                dismiss()
+            }
+            Button("Keep Editing", role: .cancel) {}
+        } message: {
+            Text("You have unsaved changes. Are you sure you want to go back? Your changes will be lost.")
+        }
+        .alert("Save Changes", isPresented: $showSaveAlert) {
+            Button("Save", role: .none) {
+                if let catalog = editCatalog {
+                    viewModel.updateCatalog(catalog) {
+                        router.pop()
+                    }
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Are you sure you want to save these changes?")
+        }
+        .alert("Delete Image", isPresented: $showDeleteImageAlert) {
+            Button("Delete", role: .destructive) {
+                if let index = pendingImageToDelete, let type = pendingImageType {
+                    if type == .existing {
+                        viewModel.removeExistingImage(at: index)
+                    } else {
+                        viewModel.removeSelectedImage(at: index)
+                    }
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Are you sure you want to delete this image?")
         }
     }
 }

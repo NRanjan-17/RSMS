@@ -12,6 +12,7 @@ struct ProfileView: View {
     @Environment(SalesAssociateAppState.self) private var saAppState
     @Environment(Router.self) private var router
     @State private var viewModel = SAProfileViewModel()
+    @State private var showLogoutAlert = false
     
     var body: some View {
         ZStack {
@@ -223,7 +224,7 @@ struct ProfileView: View {
                         }
                         .padding(.top, 18)
                         
-                        CustomButton(title: "Logout", action: { coordinator.logout() })
+                        CustomButton(title: "Logout", action: { showLogoutAlert = true })
                             .padding(.horizontal, 24)
                             .padding(.top, 30)
                             .padding(.bottom, 60)
@@ -232,6 +233,14 @@ struct ProfileView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .alert("Logout", isPresented: $showLogoutAlert) {
+            Button("Logout", role: .destructive) {
+                coordinator.logout()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Are you sure you want to logout?")
+        }
     }
 }
 
