@@ -34,6 +34,7 @@ enum BMRoute: Hashable {
     case staffRequestDetail(StaffModel)
     case pendingStaff
     case staffDetail(StaffModel)
+    case endlessAisleRequests
 }
 
 enum ICRoute: Hashable {
@@ -48,7 +49,7 @@ enum ICRoute: Hashable {
     case serialCertificate
     case sfsOrders
     case sfsVerification(PurchasedItemEntity)
-    case catalogDetail(CatalogEntity, Int)
+    case endlessAisleSelection
 }
 
 enum CARoute: Hashable {
