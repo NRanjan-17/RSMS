@@ -9,12 +9,12 @@ import SwiftUI
 
 struct RFIDView: View {
     @Environment(Router.self) private var router
-    @Environment(\.scenePhase) private var scenePhase
     @State private var viewModel = RFIDViewModel()
     @State private var showingProductSelection = false
     @State private var showingScanner = false
     @State private var selectedCatalog: CatalogEntity?
     @State private var scannedSerials: [String] = []
+    @State private var damagedItems: [DamagedDeliveryItemDraft] = []
     
     @AppStorage("saved_scanned_serials") private var savedScannedSerialsRaw: String = ""
     
@@ -107,18 +107,30 @@ struct RFIDView: View {
         .sheet(isPresented: $showingProductSelection) {
             ProductSelectionSheet(viewModel: viewModel) { catalog in
                 selectedCatalog = catalog
+                damagedItems = []
                 showingScanner = true
             }
         }
         .fullScreenCover(isPresented: $showingScanner) {
-            BatchScannerSheet(scannedSerials: $scannedSerials, existingSerials: selectedCatalog?.productIds ?? []) {
+            BatchScannerSheet(
+                scannedSerials: $scannedSerials,
+                existingSerials: selectedCatalog?.productIds ?? [],
+                allowsDamageReporting: true,
+                damagedItems: $damagedItems,
+                productName: selectedCatalog?.name ?? ""
+            ) {
                 showingScanner = false
-                if let catalog = selectedCatalog, !scannedSerials.isEmpty {
-                    viewModel.saveScannedItems(to: catalog, serials: scannedSerials) {
+                if let catalog = selectedCatalog, (!scannedSerials.isEmpty || !damagedItems.isEmpty) {
+                    let damagedSerials = Set(damagedItems.map(\.serial))
+                    let acceptedSerials = scannedSerials.filter { !damagedSerials.contains($0) }
+                    viewModel.saveDeliveryItems(to: catalog, acceptedSerials: acceptedSerials, damagedItems: damagedItems) {
                         scannedSerials.removeAll()
+                        damagedItems.removeAll()
                         selectedCatalog = nil
                     }
                 } else {
+                    scannedSerials.removeAll()
+                    damagedItems.removeAll()
                     selectedCatalog = nil
                 }
             }
