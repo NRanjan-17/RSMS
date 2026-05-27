@@ -16,6 +16,7 @@ enum SARoute: Hashable {
     case remoteSelling
     case purchaseDetails(client: Client, purchase: ClientPurchase)
     case exchangePolicy
+    case transactionList([SATransactionEntity])
 }
 
 

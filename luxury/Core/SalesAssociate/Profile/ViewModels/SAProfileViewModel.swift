@@ -26,6 +26,7 @@ final class SAProfileViewModel {
     var appointments: [AppointmentEntity] = []
     
     var recentClients: [SADashClient] = []
+    var recentTransactions: [SATransactionEntity] = []
     
     func fetchAppointments() async {
         do {
@@ -53,25 +54,45 @@ final class SAProfileViewModel {
     
     private func fetchStats(staffId: UUID) async {
         do {
-            let orders: [OrderEntity] = try await SupabaseManager.shared.client
-                .from("order")
-                .select()
-                .eq("rsms_user_id", value: staffId)
+            let txs: [SATransactionEntity] = try await SupabaseManager.shared.client
+                .from("transaction")
+                .select("*, client:client_id(*)")
+                .eq("staff_id", value: staffId)
+                .order("date_of_transaction", ascending: false)
                 .execute()
                 .value
             
-            let totalRevenue = orders.reduce(0.0) { $0 + $1.totalPrice }
+            let totalRevenue = txs.reduce(0.0) { $0 + $1.transactionAmount }
             
-            let clients: [ClientEntity] = try await SupabaseManager.shared.client
-                .from("client")
-                .select()
-                .execute()
-                .value
+            // Extract unique clients
+            var seenClients = Set<UUID>()
+            var mappedClients: [SADashClient] = []
+            let formatter = DateFormatter()
+            formatter.dateFormat = "d MMM"
+            
+            for tx in txs {
+                guard let client = tx.client else { continue }
+                if !seenClients.contains(client.id) {
+                    seenClients.insert(client.id)
+                    let visitStr = tx.dateOfTransaction.map { formatter.string(from: $0) } ?? "Unknown"
+                    let initial = String(client.name.prefix(1)).uppercased()
+                    let dashClient = SADashClient(
+                        name: client.name,
+                        tier: client.tier ?? "Standard",
+                        lastVisit: visitStr,
+                        ltv: totalRevenue, // simplified, ideally from client LTV
+                        initial: initial.isEmpty ? "U" : initial
+                    )
+                    mappedClients.append(dashClient)
+                }
+            }
             
             await MainActor.run {
                 self.revenue = totalRevenue
-                self.statTransactions = "\(orders.count)"
-                self.statClients = "\(clients.count)"
+                self.statTransactions = "\(txs.count)"
+                self.statClients = "\(mappedClients.count)"
+                self.recentClients = mappedClients
+                self.recentTransactions = txs
             }
         } catch {
             print("Failed to fetch stats: \(error)")

@@ -75,7 +75,12 @@ struct ProfileView: View {
                         
                         HStack(spacing: 10) {
                             StatChip(value: viewModel.statClients, label: "Clients")
-                            StatChip(value: viewModel.statTransactions, label: "Transactions")
+                            Button(action: {
+                                router.push(SARoute.transactionList(viewModel.recentTransactions))
+                            }) {
+                                StatChip(value: viewModel.statTransactions, label: "Transactions")
+                            }
+                            .buttonStyle(.plain)
                             StatChip(value: viewModel.statAppts, label: "Appts")
                         }
                         .padding(.horizontal, 24)
