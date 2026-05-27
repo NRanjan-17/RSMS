@@ -6,6 +6,42 @@
 //
 
 import SwiftUI
+import Supabase
+
+struct PurchasedItemDetails: Codable {
+    let id: UUID
+    let uid: UUID
+    let clientId: UUID?
+    let productId: UUID
+    let transactionId: String
+    let status: String
+    let reservedDate: Date?
+    let deliveryDate: Date?
+    let boutiqueId: UUID?
+    let staffId: UUID?
+    let catalogs: CatalogEntity?
+    let staff: StaffDetails?
+    
+    struct StaffDetails: Codable {
+        let id: UUID
+        let name: String
+        let email: String
+        let role: String
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case id, uid, status
+        case clientId = "client_id"
+        case productId = "product_id"
+        case transactionId = "transaction_id"
+        case reservedDate = "reserved_date"
+        case deliveryDate = "delivery_date"
+        case boutiqueId = "boutique_id"
+        case staffId = "staff_id"
+        case catalogs
+        case staff
+    }
+}
 
 struct PurchaseDetailsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -14,9 +50,7 @@ struct PurchaseDetailsView: View {
     let client: Client
     let purchase: ClientPurchase
     
-    private var warrantyInfo: (isActive: Bool, expirationText: String) {
-        return (isActive: true, expirationText: "Valid until 24 nov 2026")
-    }
+    @State private var details: PurchasedItemDetails? = nil
     
     private var category: String {
         let lower = purchase.name.lowercased()
@@ -29,10 +63,6 @@ struct PurchaseDetailsView: View {
         } else {
             return "Accessories"
         }
-    }
-    
-    private var productId: String {
-        return "PRD-" + String(purchase.id.uuidString.prefix(8).uppercased())
     }
     
     private var brand: String {
@@ -49,6 +79,38 @@ struct PurchaseDetailsView: View {
             return parts.dropFirst().joined(separator: " ")
         }
         return purchase.name
+    }
+    
+    private var displayProductId: String {
+        return details?.catalogs?.id.uuidString ?? purchase.id.uuidString
+    }
+    
+    private var displayProductSerial: String {
+        return details?.catalogs?.catalogId ?? ("PRD-" + String(purchase.id.uuidString.prefix(8).uppercased()))
+    }
+    
+    private var displayBrand: String {
+        return details?.catalogs?.brand ?? brand
+    }
+    
+    private var displayProductName: String {
+        return details?.catalogs?.name ?? productNameOnly
+    }
+    
+    private var displayCategory: String {
+        return details?.catalogs?.category.rawValue ?? category
+    }
+    
+    private var displayTransactionId: String {
+        return details?.transactionId ?? "TX-90428-RB"
+    }
+    
+    private var displayAdvisorName: String {
+        return details?.staff?.name ?? "Arjun Singh"
+    }
+    
+    private var displayAdvisorId: String {
+        return details?.staff?.id.uuidString ?? "Advisor-ID-Mock"
     }
     
     var body: some View {
@@ -84,7 +146,18 @@ struct PurchaseDetailsView: View {
                                     .font(AppFonts.sansSerif(size: 12))
                                     .foregroundStyle(AppColors.secondary)
                                 Spacer()
-                                Text(productId)
+                                Text(displayProductId)
+                                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                    .foregroundStyle(.white)
+                            }
+                            Divider().background(AppColors.border)
+                            
+                            HStack {
+                                Text("Product Serial Number")
+                                    .font(AppFonts.sansSerif(size: 12))
+                                    .foregroundStyle(AppColors.secondary)
+                                Spacer()
+                                Text(displayProductSerial)
                                     .font(AppFonts.sansSerif(size: 13, weight: .medium))
                                     .foregroundStyle(.white)
                             }
@@ -95,7 +168,7 @@ struct PurchaseDetailsView: View {
                                     .font(AppFonts.sansSerif(size: 12))
                                     .foregroundStyle(AppColors.secondary)
                                 Spacer()
-                                Text(brand)
+                                Text(displayBrand)
                                     .font(AppFonts.sansSerif(size: 13, weight: .medium))
                                     .foregroundStyle(.white)
                             }
@@ -106,7 +179,7 @@ struct PurchaseDetailsView: View {
                                     .font(AppFonts.sansSerif(size: 12))
                                     .foregroundStyle(AppColors.secondary)
                                 Spacer()
-                                Text(productNameOnly)
+                                Text(displayProductName)
                                     .font(AppFonts.sansSerif(size: 13, weight: .medium))
                                     .foregroundStyle(.white)
                             }
@@ -117,7 +190,7 @@ struct PurchaseDetailsView: View {
                                     .font(AppFonts.sansSerif(size: 12))
                                     .foregroundStyle(AppColors.secondary)
                                 Spacer()
-                                Text(category)
+                                Text(displayCategory)
                                     .font(AppFonts.sansSerif(size: 13, weight: .medium))
                                     .foregroundStyle(.white)
                             }
@@ -190,6 +263,46 @@ struct PurchaseDetailsView: View {
                                 .offset(x: 16, y: -8)
                         }
                         
+                        // STAFF / ADVISOR Section enclosed card
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Text("Served By")
+                                    .font(AppFonts.sansSerif(size: 12))
+                                    .foregroundStyle(AppColors.secondary)
+                                Spacer()
+                                Text(displayAdvisorName)
+                                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                    .foregroundStyle(.white)
+                            }
+                            Divider().background(AppColors.border)
+                            
+                            HStack {
+                                Text("Advisor ID")
+                                    .font(AppFonts.sansSerif(size: 12))
+                                    .foregroundStyle(AppColors.secondary)
+                                Spacer()
+                                Text(displayAdvisorId)
+                                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                    .foregroundStyle(.white)
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 20)
+                        .background(AppColors.surface)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(AppColors.gold.opacity(0.3), lineWidth: 1)
+                        )
+                        .overlay(alignment: .topLeading) {
+                            Text("STAFF / ADVISOR")
+                                .font(AppFonts.serif(size: 13, weight: .bold))
+                                .foregroundStyle(AppColors.gold)
+                                .padding(.horizontal, 8)
+                                .background(AppColors.surface)
+                                .offset(x: 16, y: -8)
+                        }
+                        
                         // ORDER DETAILS enclosed card
                         VStack(alignment: .leading, spacing: 12) {
                             HStack {
@@ -212,6 +325,17 @@ struct PurchaseDetailsView: View {
                                     .font(AppFonts.serif(size: 13, weight: .semibold))
                                     .foregroundStyle(AppColors.gold)
                             }
+                            Divider().background(AppColors.border)
+                            
+                            HStack {
+                                Text("Transaction ID")
+                                    .font(AppFonts.sansSerif(size: 12))
+                                    .foregroundStyle(AppColors.secondary)
+                                Spacer()
+                                Text(displayTransactionId)
+                                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                    .foregroundStyle(.white)
+                            }
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 20)
@@ -230,104 +354,38 @@ struct PurchaseDetailsView: View {
                                 .offset(x: 16, y: -8)
                         }
                         
-                        // Glassmorphic Warranty status card
-                        let wInfo = warrantyInfo
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("WARRANTY")
-                                .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                                .foregroundStyle(Color(hex: 0xA3E4D7))
-                                .kerning(1.5)
-                            
-                            HStack(spacing: 8) {
-                                Text("ACTIVE")
-                                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                                    .foregroundStyle(.white)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 6)
-                                            .fill(Color(hex: 0x3D9E6A).opacity(0.6))
-                                    )
-                                
-                                Text(wInfo.expirationText.uppercased())
-                                    .font(AppFonts.sansSerif(size: 12, weight: .semibold))
-                                    .foregroundStyle(.white.opacity(0.9))
-                            }
-                        }
-                        .padding(16)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(
-                            ZStack {
-                                Color(hex: 0x3D9E6A).opacity(0.12)
-                                Color.clear.background(.ultraThinMaterial)
-                                LinearGradient(
-                                    colors: [.white.opacity(0.18), .white.opacity(0.02), .clear],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            }
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14)
-                                .strokeBorder(
-                                    LinearGradient(
-                                        colors: [
-                                            Color(hex: 0x3D9E6A).opacity(0.8),
-                                            Color(hex: 0x3D9E6A).opacity(0.2)
-                                        ],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ),
-                                    lineWidth: 1.5
-                                )
-                        )
-                        .shadow(
-                            color: Color(hex: 0x3D9E6A).opacity(0.25),
-                            radius: 8,
-                            x: 0,
-                            y: 4
-                        )
-                        
-                        Spacer().frame(height: 10)
-                        
-                        // Bottom conditional Action Button
-                        if wInfo.isActive {
-                            Button(action: {
-                                // Navigate to after-sales intake pre-filled
-                                router.push(SARoute.afterSalesIntake(client: client, serialNumber: productId, isWarrantyActive: wInfo.isActive))
-                            }) {
-                                HStack(spacing: 10) {
-                                    Image(systemName: "wrench.and.screwdriver")
-                                    Text("Create Ticket")
-                                }
-                                .font(AppFonts.sansSerif(size: 15, weight: .bold))
-                                .foregroundStyle(AppColors.background)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 56)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 14)
-                                        .fill(AppColors.gold)
-                                )
-                            }
-                            .buttonStyle(.plain)
-                        } else {
-                            Text("Warranty Expired - Ticket Cannot Be Created")
-                                .font(AppFonts.sansSerif(size: 14, weight: .semibold))
-                                .foregroundStyle(AppColors.secondary)
-                                .frame(maxWidth: .infinity, alignment: .center)
-                                .padding(.vertical, 16)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 14)
-                                        .fill(Color.white.opacity(0.05))
-                                )
-                        }
+
                     }
                     .padding(.horizontal, 24)
-                    .padding(.vertical, 20)
+                    .padding(.top, 20)
+                    .padding(.bottom, 32)
                 }
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .onAppear {
+            loadDetails()
+        }
+    }
+    
+    private func loadDetails() {
+        Task {
+            do {
+                let fetched: [PurchasedItemDetails] = try await SupabaseManager.shared.client
+                    .from("purchased_items")
+                    .select("*, catalogs(*), staff(*)")
+                    .eq("id", value: purchase.id.uuidString)
+                    .execute()
+                    .value
+                
+                if let first = fetched.first {
+                    await MainActor.run {
+                        self.details = first
+                    }
+                }
+            } catch {
+                print("Supabase fetch purchased item detail warning: \(error)")
+            }
+        }
     }
 }
