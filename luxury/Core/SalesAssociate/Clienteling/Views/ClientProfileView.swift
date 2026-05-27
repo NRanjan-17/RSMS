@@ -961,7 +961,11 @@ struct SwipeToDeleteNote: View {
         .alert("Delete Note?", isPresented: $showDeleteAlert) {
             Button("Delete", role: .destructive) {
                 withAnimation(.easeInOut(duration: 0.25)) {
-                    offset = -UIScreen.main.bounds.width
+                    if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                        offset = -windowScene.screen.bounds.width
+                    } else {
+                        offset = -2000
+                    }
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                     onDelete()
