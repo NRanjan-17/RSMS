@@ -9,6 +9,7 @@ import SwiftUI
 
 struct POSView: View {
     @Environment(Router.self) private var router
+    @Environment(SalesAssociateAppState.self) private var saAppState
     @State private var viewModel = POSViewModel.shared
     @State private var showClientSheet = false
     @State private var showCourtesySheet = false
@@ -73,9 +74,39 @@ struct POSView: View {
                             }
                         }
                         
-
+                        HStack {
+                            Text("ITEMS")
+                                .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                                .foregroundStyle(AppColors.secondary)
+                                .kerning(1.8)
+                            Spacer()
+                            Button(action: {
+                                saAppState.selectedTab = .selling
+                            }) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "plus")
+                                    Text("Add Product")
+                                }
+                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                .foregroundStyle(AppColors.gold)
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 32)
                         
-                        VStack(spacing: 10) {
+                        if viewModel.cartItems.isEmpty {
+                            VStack(spacing: 12) {
+                                Image(systemName: "cart")
+                                    .font(.system(size: 32))
+                                    .foregroundStyle(AppColors.gold.opacity(0.5))
+                                Text("Your cart is empty")
+                                    .font(AppFonts.sansSerif(size: 14))
+                                    .foregroundStyle(AppColors.secondary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 40)
+                        } else {
+                            VStack(spacing: 10) {
                             ForEach(viewModel.cartItems) { item in
                                 HStack(spacing: 12) {
                                     ZStack {
@@ -134,6 +165,7 @@ struct POSView: View {
                         }
                         .padding(.horizontal, 24)
                         .padding(.bottom, 16)
+                        }
                         
                         VStack(alignment: .leading, spacing: 12) {
                             HStack {
