@@ -74,7 +74,7 @@ final class ActiveAuditViewModel {
             let staff = profileTuple?.1 as? StaffModel
             let storeId = staff?.boutiqueId ?? UUID()
             
-            let boutiques = try await fetchBoutiquesHandler()
+            let _ = try await fetchBoutiquesHandler()
             
             let catalogsResponse = try await fetchCatalogsHandler()
             let inventoryResponse = try await fetchInventoryHandler(storeId)
