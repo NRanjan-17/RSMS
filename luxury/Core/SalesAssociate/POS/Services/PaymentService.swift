@@ -59,24 +59,8 @@ class PaymentService: NSObject {
         // Fallback if SDK is not yet linked
         print("Razorpay SDK not found. Simulating payment success.")
         try await Task.sleep(nanoseconds: 2_000_000_000)
-        return try await saveTransactionToDatabase(amount: amount, paymentId: "pay_dummy_simulated")
+        return "pay_dummy_simulated"
         #endif
-    }
-    
-    /// Saves the successful transaction to Supabase
-    private func saveTransactionToDatabase(amount: Double, paymentId: String) async throws -> String {
-        let payload = TransactionPayload(transaction_amount: amount, purpose: "checkout")
-        
-        do {
-            try await SupabaseManager.shared.client
-                .from("transaction")
-                .insert(payload)
-                .execute()
-            
-            return paymentId
-        } catch {
-            throw PaymentError.databaseError("Failed to save transaction: \(error.localizedDescription)")
-        }
     }
 }
 
@@ -96,15 +80,7 @@ extension PaymentService: RazorpayPaymentCompletionProtocolWithData {
     
     func onPaymentSuccess(_ payment_id: String, andData response: [AnyHashable : Any]?) {
         if let continuation = currentContinuation {
-            let amountToSave = self.pendingAmount
-            Task {
-                do {
-                    let finalId = try await self.saveTransactionToDatabase(amount: amountToSave, paymentId: payment_id)
-                    continuation.resume(returning: finalId)
-                } catch {
-                    continuation.resume(throwing: error)
-                }
-            }
+            continuation.resume(returning: payment_id)
             currentContinuation = nil
         }
         razorpay = nil

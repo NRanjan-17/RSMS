@@ -4,6 +4,15 @@ struct ClientSelectionSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var clients: [StoreClient] = []
     @State private var isLoading = true
+    @State private var searchText = ""
+    
+    var filteredClients: [StoreClient] {
+        if searchText.isEmpty {
+            return clients
+        } else {
+            return clients.filter { $0.name.localizedCaseInsensitiveContains(searchText) || $0.email.localizedCaseInsensitiveContains(searchText) }
+        }
+    }
     
     var onSelect: (StoreClient) -> Void
     
@@ -21,10 +30,14 @@ struct ClientSelectionSheet: View {
                         Text("No clients found.")
                             .font(AppFonts.sansSerif(size: 14))
                             .foregroundStyle(AppColors.secondary)
+                    } else if filteredClients.isEmpty {
+                        Text("No matching clients.")
+                            .font(AppFonts.sansSerif(size: 14))
+                            .foregroundStyle(AppColors.secondary)
                     } else {
                         ScrollView {
                             LazyVStack(spacing: 12) {
-                                ForEach(clients) { client in
+                                ForEach(filteredClients) { client in
                                     Button(action: {
                                         onSelect(client)
                                         dismiss()
@@ -62,6 +75,7 @@ struct ClientSelectionSheet: View {
             .toolbarBackground(AppColors.background, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarColorScheme(.dark, for: .navigationBar)
+            .searchable(text: $searchText, prompt: "Search clients")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }

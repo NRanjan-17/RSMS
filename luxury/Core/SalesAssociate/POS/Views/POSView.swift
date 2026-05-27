@@ -223,7 +223,7 @@ struct POSView: View {
                               let rootVC = scene.windows.first?.rootViewController else { return }
                         
                         Task {
-                            let success = await viewModel.processPayment(presentingViewController: rootVC, staffId: UUID(), boutiqueId: UUID())
+                            let success = await viewModel.processPayment(presentingViewController: rootVC)
                             if success {
                                 router.push(SARoute.payment)
                             }

@@ -9,8 +9,8 @@ import Foundation
 import Observation
 import UIKit
 
-struct POSCartRow: Identifiable {
-    let id = UUID()
+struct POSCartRow: Identifiable, Codable {
+    var id = UUID()
     let product: CatalogItem
     var qty: Int
 }
@@ -21,8 +21,12 @@ final class POSViewModel {
     
     var availableProducts: [CatalogItem] = []
     
-    var clientCarts: [UUID: [POSCartRow]] = [:]
-    var guestCart: [POSCartRow] = []
+    var clientCarts: [UUID: [POSCartRow]] = [:] {
+        didSet { saveCarts() }
+    }
+    var guestCart: [POSCartRow] = [] {
+        didSet { saveCarts() }
+    }
     
     var cartItems: [POSCartRow] {
         get {
@@ -43,7 +47,29 @@ final class POSViewModel {
     
     var selectedClient: StoreClient? = nil
     
-    private init() {}
+    private init() {
+        loadCarts()
+    }
+    
+    private func saveCarts() {
+        if let encoded = try? JSONEncoder().encode(clientCarts) {
+            UserDefaults.standard.set(encoded, forKey: "savedClientCarts")
+        }
+        if let encoded = try? JSONEncoder().encode(guestCart) {
+            UserDefaults.standard.set(encoded, forKey: "savedGuestCart")
+        }
+    }
+
+    private func loadCarts() {
+        if let savedClientCartsData = UserDefaults.standard.data(forKey: "savedClientCarts"),
+           let decoded = try? JSONDecoder().decode([UUID: [POSCartRow]].self, from: savedClientCartsData) {
+            self.clientCarts = decoded
+        }
+        if let savedGuestCartData = UserDefaults.standard.data(forKey: "savedGuestCart"),
+           let decoded = try? JSONDecoder().decode([POSCartRow].self, from: savedGuestCartData) {
+            self.guestCart = decoded
+        }
+    }
     
     var courtesyRate: Double = 0.0
     var taxFree: Bool = false
@@ -141,11 +167,37 @@ final class POSViewModel {
     }
     
     @MainActor
-    func processPayment(presentingViewController: UIViewController, staffId: UUID, boutiqueId: UUID) async -> Bool {
+    func processPayment(presentingViewController: UIViewController) async -> Bool {
+        guard let client = selectedClient else {
+            self.paymentError = "A client must be attached to the cart before processing payment."
+            return false
+        }
+        
         isProcessingPayment = true
         paymentError = nil
         
         do {
+            guard let result = try await ProfileService().fetchCurrentProfile() else {
+                self.paymentError = "Could not find your user profile in the system."
+                self.isProcessingPayment = false
+                return false
+            }
+            
+            guard let staff = result.1 as? StaffModel else {
+                self.paymentError = "Only Sales Associates can process checkouts."
+                self.isProcessingPayment = false
+                return false
+            }
+            
+            guard let validBoutiqueId = staff.boutiqueId else {
+                self.paymentError = "You are not assigned to a boutique yet."
+                self.isProcessingPayment = false
+                return false
+            }
+            
+            let staffId = staff.id
+            let boutiqueId = validBoutiqueId
+            
             // 1. Process payment gateway
             let transactionIdStr = try await PaymentService.shared.processPayment(
                 amount: Double(total),
@@ -153,8 +205,14 @@ final class POSViewModel {
                 presentingViewController: presentingViewController
             )
             
-            // Generate mock transaction UUID since Razorpay returns a string ID like "pay_..."
-            let transactionId = UUID() 
+            // 2. Create Transaction in DB
+            let transaction = try await POSDataService.shared.createTransaction(
+                amount: Double(total),
+                purpose: TransactionPurpose.purchase.rawValue,
+                clientId: selectedClient?.id,
+                boutiqueId: boutiqueId,
+                staffId: staffId
+            )
             
             // Extract product IDs multiplied by qty
             var productIds: [UUID] = []
@@ -164,7 +222,7 @@ final class POSViewModel {
                 }
             }
             
-            // 2. Create Cart in DB
+            // 3. Create Cart in DB
             let cart = try await POSDataService.shared.createCart(
                 clientId: selectedClient?.id,
                 boutiqueId: boutiqueId,
@@ -172,11 +230,12 @@ final class POSViewModel {
                 productIds: productIds
             )
             
-            // 3. Complete Checkout in DB
+            // 4. Complete Checkout in DB
             try await POSDataService.shared.checkout(
                 cartId: cart.id,
-                transactionId: transactionId,
+                transactionId: transaction.id,
                 staffId: staffId,
+                boutiqueId: boutiqueId,
                 total: Double(total),
                 productIds: productIds,
                 clientId: selectedClient?.id
