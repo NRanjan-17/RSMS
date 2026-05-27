@@ -15,7 +15,7 @@ struct RefundApprovalView: View {
         ManagerDecisionView(
             title:   "Refund Approval",
             heading: "Refund \(CurrencyManager.shared.symbol)2,45,000",
-            detail:  "Rahul Bajaj · Bottega Veneta The Jodie · Receipt verified · Tax-free documents attached",
+            detail:  "Unknown Client · Bottega Veneta The Jodie · Receipt verified · Tax-free documents attached",
             state:   $state,
             dismiss: dismiss
         )

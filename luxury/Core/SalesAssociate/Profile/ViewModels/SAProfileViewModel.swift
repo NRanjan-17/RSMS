@@ -11,12 +11,12 @@ import Supabase
 
 @Observable
 final class SAProfileViewModel {
-    var store: String = "Maison Mumbai"
-    var greeting: String = "Good morning,"
-    var name: String = "Arjun Singh."
+    var store: String = ""
+    var greeting: String = ""
+    var name: String = ""
     
     var revenue: Double = 0.0
-    var target: Double = 400000.0
+    var target: Double = 0.0
     var progress: Double { target > 0 ? revenue / target : 0 }
     
     var statClients: String = "0"
@@ -35,7 +35,7 @@ final class SAProfileViewModel {
                 
                 let fetched: [AppointmentEntity] = try await SupabaseManager.shared.client
                     .from("appointment")
-                    .select()
+                    .select("*, client:client_id(*)")
                     .eq("assigned_to", value: staff.id)
                     .order("timestamp", ascending: false)
                     .execute()
@@ -43,6 +43,18 @@ final class SAProfileViewModel {
                 
                 await MainActor.run {
                     self.appointments = fetched
+                    self.name = staff.name
+                    
+                    let hour = Calendar.current.component(.hour, from: Date())
+                    if hour < 12 {
+                        self.greeting = "Good morning,"
+                    } else if hour < 17 {
+                        self.greeting = "Good afternoon,"
+                    } else {
+                        self.greeting = "Good evening,"
+                    }
+                    
+                    
                 }
                 
                 await fetchStats(staffId: staff.id)

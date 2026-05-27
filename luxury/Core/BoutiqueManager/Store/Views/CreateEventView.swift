@@ -272,20 +272,6 @@ struct CreateEventView: View {
                         var windowHoursVal: Int? = nil
                         
                         if selectedType == "VIP Preview" || selectedType == "Trunk Show" || selectedType == "Product Launch" {
-                            let mockRahulId = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
-                            let mockPriyaId = UUID(uuidString: "00000000-0000-0000-0000-000000000002")!
-                            let mockDeepaId = UUID(uuidString: "00000000-0000-0000-0000-000000000003")!
-                            let mockAnanyaId = UUID(uuidString: "00000000-0000-0000-0000-000000000004")!
-                            let mockVikramId = UUID(uuidString: "00000000-0000-0000-0000-000000000005")!
-                            
-                            guestsList = [
-                                VIPGuest(id: mockRahulId, name: "Rahul Bajaj", tier: "UHNW", status: "No Response", reminderSent: false),
-                                VIPGuest(id: mockPriyaId, name: "Priya Shah", tier: "UHNW", status: "No Response", reminderSent: false),
-                                VIPGuest(id: mockDeepaId, name: "Deepa Srinivas", tier: "VIP", status: "No Response", reminderSent: false),
-                                VIPGuest(id: mockAnanyaId, name: "Ananya Kapoor", tier: "VIP", status: "No Response", reminderSent: false),
-                                VIPGuest(id: mockVikramId, name: "Vikram Nair", tier: "VIP", status: "No Response", reminderSent: false)
-                            ]
-                            
                             featured = featuredCollection.isEmpty ? (selectedType == "Trunk Show" ? "Exclusive Seasonal Collection" : (selectedType == "Product Launch" ? "Exclusive Product Launch" : "Exclusive Winter Preview")) : featuredCollection
                             vVenue = venue
                             assignedHost = hostAssociate

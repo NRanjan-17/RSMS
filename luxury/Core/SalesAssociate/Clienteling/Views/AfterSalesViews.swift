@@ -586,7 +586,7 @@ struct ASTDetails: Codable {
 struct AfterSalesTrackingView: View {
     @Environment(\.dismiss) private var dismiss
     
-    private let ticket = AfterSalesTicket(client: "Rahul Bajaj", item: "Rolex Submariner Date", serial: "RLX-126610LN-8M2", issue: "Bracelet sizing", stage: .inspection, photoRequired: false)
+    private let ticket = AfterSalesTicket(client: "Unknown Client", item: "Rolex Submariner Date", serial: "RLX-126610LN-8M2", issue: "Bracelet sizing", stage: .inspection, photoRequired: false)
     
     @State private var astStatus: String = "inspection"
     @State private var fetchedAST: ASTDetails? = nil
@@ -687,7 +687,7 @@ struct AfterSalesTrackingView: View {
                             Text(fetchedAST?.catalogs?.name ?? "Rolex Datejust")
                                 .font(AppFonts.serif(size: 22, weight: .medium))
                                 .foregroundStyle(.white)
-                            Text("\(fetchedAST?.client?.name ?? "Rahul Bajaj") · \(fetchedAST?.catalogs?.catalogId ?? ticket.serial)")
+                            Text("\(fetchedAST?.client?.name ?? "Unknown Client") · \(fetchedAST?.catalogs?.catalogId ?? ticket.serial)")
                                 .font(AppFonts.sansSerif(size: 12))
                                 .foregroundStyle(AppColors.secondary)
                             StatusBadge(text: displayStatusText, status: badgeStatus)

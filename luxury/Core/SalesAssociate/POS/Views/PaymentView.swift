@@ -51,7 +51,7 @@ struct PaymentView: View {
                                 .kerning(-1)
                             
                             HStack(spacing: 7) {
-                                Text("Rahul Bajaj")
+                                Text("Unknown Client")
                                     .font(AppFonts.sansSerif(size: 11, weight: .medium))
                                     .foregroundStyle(AppColors.secondary)
                                 StatusBadge(text: "UHNW", status: .success)
@@ -211,7 +211,7 @@ struct PaymentView: View {
                         Image(systemName: "lock.fill")
                             .font(.system(size: 10))
                             .foregroundStyle(AppColors.tertiary)
-                        Text("Mock payment authorization · PCI-DSS ready")
+                        Text("Secure payment authorization · PCI-DSS ready")
                             .font(AppFonts.sansSerif(size: 11))
                             .foregroundStyle(AppColors.tertiary)
                     }

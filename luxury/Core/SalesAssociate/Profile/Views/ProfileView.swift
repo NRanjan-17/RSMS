@@ -48,7 +48,7 @@ struct ProfileView: View {
                                         .font(AppFonts.serif(size: 36, weight: .medium))
                                         .foregroundStyle(AppColors.gold)
                                         .kerning(-0.5)
-                                    Text("of \\(CurrencyManager.shared.format(amount: viewModel.target)) target")
+                                    Text("of \(CurrencyManager.shared.format(amount: viewModel.target)) target")
                                         .font(AppFonts.sansSerif(size: 11))
                                         .foregroundStyle(AppColors.secondary)
                                         .padding(.top, 2)
@@ -75,12 +75,10 @@ struct ProfileView: View {
                         
                         HStack(spacing: 10) {
                             StatChip(value: viewModel.statClients, label: "Clients")
-                            Button(action: {
-                                router.push(SARoute.transactionList(viewModel.recentTransactions))
-                            }) {
-                                StatChip(value: viewModel.statTransactions, label: "Transactions")
-                            }
-                            .buttonStyle(.plain)
+                            StatChip(value: viewModel.statTransactions, label: "Transactions")
+                                .onTapGesture {
+                                    router.push(SARoute.transactionList(viewModel.recentTransactions))
+                                }
                             StatChip(value: viewModel.statAppts, label: "Appts")
                         }
                         .padding(.horizontal, 24)
@@ -96,7 +94,7 @@ struct ProfileView: View {
                                 Button(action: {
                                     router.push(SARoute.appointmentList)
                                 }) {
-                                    Text("3 remaining")
+                                    Text("\(viewModel.appointments.count) remaining")
                                         .font(AppFonts.sansSerif(size: 11))
                                         .foregroundStyle(AppColors.gold)
                                 }

@@ -10,10 +10,7 @@ import SwiftUI
 struct ReturnsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedResolution: ReturnResolution = .exchange
-    @State private var cases: [ReturnCase] = [
-        ReturnCase(receipt: "RSMS-2026-0418", client: "Rahul Bajaj", item: "Bottega Veneta The Jodie", amount: 245000.0, resolution: .exchange),
-        ReturnCase(receipt: "RSMS-2026-0392", client: "Ananya Kapoor", item: "Cartier Love Bracelet", amount: 580000.0, resolution: .refund)
-    ]
+    @State private var cases: [ReturnCase] = []
     
     var body: some View {
         ZStack {
@@ -46,7 +43,7 @@ struct ReturnsView: View {
                             Text("Receipt RSMS-2026-0418")
                                 .font(AppFonts.serif(size: 18, weight: .medium))
                                 .foregroundStyle(.white)
-                            Text("Bottega Veneta The Jodie · Rahul Bajaj · Within exchange window")
+                            Text("Bottega Veneta The Jodie · Unknown Client · Within exchange window")
                                 .font(AppFonts.sansSerif(size: 12))
                                 .foregroundStyle(AppColors.secondary)
                             
@@ -63,7 +60,7 @@ struct ReturnsView: View {
                             }
                             
                             CustomButton(title: "Create \(selectedResolution.rawValue) Case", icon: AnyView(Image(systemName: "checkmark.seal")), action: {
-                                cases.insert(ReturnCase(receipt: "RSMS-2026-0425", client: "Rahul Bajaj", item: "Rolex Submariner Date", amount: 1450000.0, resolution: selectedResolution), at: 0)
+                                cases.insert(ReturnCase(receipt: "RSMS-2026-0425", client: "Unknown Client", item: "Rolex Submariner Date", amount: 1450000.0, resolution: selectedResolution), at: 0)
                             })
                         }
                         .padding(16)

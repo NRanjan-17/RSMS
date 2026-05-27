@@ -34,65 +34,8 @@ final class StoreViewModel {
             }
         }
         
-        // If empty, generate defaults
-        let mockRahulId = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
-        let mockPriyaId = UUID(uuidString: "00000000-0000-0000-0000-000000000002")!
-        let mockDeepaId = UUID(uuidString: "00000000-0000-0000-0000-000000000003")!
-        let mockAnanyaId = UUID(uuidString: "00000000-0000-0000-0000-000000000004")!
-        let mockVikramId = UUID(uuidString: "00000000-0000-0000-0000-000000000005")!
-        
-        let defaultGuests = [
-            VIPGuest(id: mockRahulId, name: "Rahul Bajaj", tier: "UHNW", status: "Confirmed", reminderSent: false),
-            VIPGuest(id: mockPriyaId, name: "Priya Shah", tier: "UHNW", status: "No Response", reminderSent: false),
-            VIPGuest(id: mockDeepaId, name: "Deepa Srinivas", tier: "VIP", status: "Confirmed", reminderSent: false),
-            VIPGuest(id: mockAnanyaId, name: "Ananya Kapoor", tier: "VIP", status: "No Response", reminderSent: false),
-            VIPGuest(id: mockVikramId, name: "Vikram Nair", tier: "VIP", status: "Declined", reminderSent: false)
-        ]
-        
-        // Default deadline: 2 days from now (approaching soon)
-        let deadlineDate = Calendar.current.date(byAdding: .day, value: 2, to: Date()) ?? Date()
-        
-        self.events = [
-            StoreEvent(
-                title: "VIP Winter Preview",
-                date: "30 May 2026",
-                rsvpCount: 2,
-                type: "VIP PREVIEW",
-                featuredCollection: "Winter High Jewelry Collection",
-                venue: "VIP Salon",
-                hostAssociate: "Sarah Connor",
-                guests: defaultGuests,
-                deadline: deadlineDate,
-                reminderWindowHours: 48,
-                remindersSent: false
-            ),
-            StoreEvent(
-                title: "Rolex Heritage Launch",
-                date: "05 June 2026",
-                rsvpCount: 2,
-                type: "PRODUCT LAUNCH",
-                featuredCollection: "Rolex Heritage Chronograph Collection",
-                venue: "Main Showroom",
-                hostAssociate: "Sarah Connor",
-                guests: defaultGuests,
-                deadline: deadlineDate,
-                reminderWindowHours: 24,
-                remindersSent: false
-            ),
-            StoreEvent(
-                title: "Chanel Cruise Trunk Show",
-                date: "12 June 2026",
-                rsvpCount: 2,
-                type: "TRUNK SHOW",
-                featuredCollection: "Chanel Cruise Collection",
-                venue: "Garden Terrace",
-                hostAssociate: "Sarah Connor",
-                guests: defaultGuests,
-                deadline: deadlineDate,
-                reminderWindowHours: 24,
-                remindersSent: false
-            )
-        ]
+        // No local events found
+        self.events = []
         saveLocalEvents()
     }
     

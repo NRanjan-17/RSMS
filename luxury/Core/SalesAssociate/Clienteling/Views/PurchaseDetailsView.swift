@@ -110,7 +110,7 @@ struct PurchaseDetailsView: View {
     }
     
     private var displayAdvisorId: String {
-        return details?.staff?.id.uuidString ?? "Advisor-ID-Mock"
+        return details?.staff?.id.uuidString ?? "Unknown Advisor"
     }
     
     var body: some View {

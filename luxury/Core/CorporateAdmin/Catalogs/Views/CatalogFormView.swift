@@ -235,7 +235,7 @@ struct CatalogFormView: View {
                     .padding(.bottom, 32)
                     
                     // Save Button
-                    if let catalog = editCatalog {
+                    if editCatalog != nil {
                         CustomButton(title: "Save Changes", isLoading: viewModel.isSaving) {
                             showSaveAlert = true
                         }

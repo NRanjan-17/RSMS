@@ -84,7 +84,7 @@ final class StorePerformanceViewModel {
                 totalTransactions: 52,
                 associates: [
                     AssociatePerformance(id: UUID(), name: "Neha Kapoor",   totalSales: 3_40_000, transactions: 26, walkIns: 48, converted: 28),
-                    AssociatePerformance(id: UUID(), name: "Vikram Nair",   totalSales: 2_20_000, transactions: 16, walkIns: 30, converted: 16),
+                    AssociatePerformance(id: UUID(), name: "Unknown Client",   totalSales: 2_20_000, transactions: 16, walkIns: 30, converted: 16),
                     AssociatePerformance(id: UUID(), name: "Aditi Rao",     totalSales: 1_20_000, transactions: 10, walkIns: 17, converted: 8)
                 ]
             ),

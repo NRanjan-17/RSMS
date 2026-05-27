@@ -151,7 +151,7 @@ struct AppointmentListView: View {
                                     
                                     VStack(alignment: .leading, spacing: 2) {
                                         HStack(spacing: 6) {
-                                            Text("Priya Shah")
+                                            Text("Unknown Client")
                                                 .font(AppFonts.sansSerif(size: 13, weight: .medium))
                                                 .foregroundStyle(AppColors.text)
                                             StatusBadge(text: "UHNW", status: .success)

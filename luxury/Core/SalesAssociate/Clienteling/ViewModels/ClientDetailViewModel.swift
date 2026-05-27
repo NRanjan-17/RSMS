@@ -12,7 +12,7 @@ import PostgREST
 
 @Observable
 final class ClientDetailViewModel {
-    static let defaultClient = Client(name: "Rahul Bajaj", tier: .uhnw, lastVisit: "Today", ltv: 12450000.0, initial: "RB", isHot: true)
+    static let defaultClient = Client(name: "Unknown", tier: .standard, lastVisit: "Unknown", ltv: 0.0, initial: "U", isHot: false)
     
     var client: Client {
         didSet {

@@ -35,7 +35,7 @@ struct RemoteSellingView: View {
                         .background(AppColors.surface)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         
-                        Toggle("Link to Rahul Bajaj 2:30 PM appointment", isOn: $appointmentLinked)
+                        Toggle("Link to Unknown Client 2:30 PM appointment", isOn: $appointmentLinked)
                             .font(AppFonts.sansSerif(size: 13))
                             .foregroundStyle(AppColors.text)
                             .toggleStyle(LuxuryToggleStyle())
