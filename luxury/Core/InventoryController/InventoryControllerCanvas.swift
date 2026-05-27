@@ -158,8 +158,10 @@ struct InventoryControllerCanvas: View {
             NewTransferView()
         case .auditDetail(let audit):
             AuditDetailView(audit: audit)
-        case .activeAudit:
-            ActiveAuditView()
+        case .activeAudit(let audit):
+            ActiveAuditView(audit: audit)
+        case .varianceReport(let audit):
+            VarianceReportView(audit: audit)
         case .serialCertificate:
             SerializationView()
         case .sfsOrders:

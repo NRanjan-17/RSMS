@@ -200,6 +200,51 @@ struct DashboardView: View {
                             }
                             .padding(.horizontal, 24)
                         }
+
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("SFS FULFILLMENT STATUS")
+                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                .foregroundStyle(AppColors.secondary)
+                                .kerning(1.5)
+                                .padding(.horizontal, 24)
+
+                            if viewModel.sfsFulfillments.isEmpty {
+                                Text("No SFS fulfillments active")
+                                    .font(AppFonts.sansSerif(size: 13))
+                                    .foregroundStyle(AppColors.secondary)
+                                    .padding(.horizontal, 24)
+                            } else {
+                                VStack(spacing: 12) {
+                                    ForEach(viewModel.sfsFulfillments) { item in
+                                        HStack {
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                Text(item.productName ?? "Premium Timepiece")
+                                                    .font(AppFonts.serif(size: 17, weight: .medium))
+                                                    .foregroundStyle(.white)
+                                                Text("Order ID: \(item.id.uuidString.prefix(8).uppercased())")
+                                                    .font(AppFonts.sansSerif(size: 12))
+                                                    .foregroundStyle(AppColors.secondary)
+                                            }
+                                            Spacer()
+
+                                            let displayStatus = item.status.lowercased() == "ready to pick" ? "Ready" : item.status.capitalized
+                                            let statusType: BadgeStatus = item.status.lowercased() == "ready to pick" ? .success :
+                                                                          item.status.lowercased() == "secured" ? .neutral : .warning
+
+                                            StatusBadge(text: displayStatus, status: statusType)
+                                        }
+                                        .padding(20)
+                                        .background(AppColors.surface)
+                                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 16)
+                                                .stroke(AppColors.gold15, lineWidth: 0.5)
+                                        )
+                                    }
+                                }
+                                .padding(.horizontal, 24)
+                            }
+                        }
                     }
                     .padding(.top, 20)
                 }

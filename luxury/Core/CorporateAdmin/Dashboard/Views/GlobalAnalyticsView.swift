@@ -125,6 +125,46 @@ struct GlobalAnalyticsView: View {
                             }
                         }
                         .padding(.horizontal, 24)
+
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("SFS FULFILLMENT STATUS")
+                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                .foregroundStyle(AppColors.secondary)
+                                .kerning(1.5)
+
+                            if viewModel.sfsFulfillments.isEmpty {
+                                Text("No SFS fulfillments active")
+                                    .font(AppFonts.sansSerif(size: 13))
+                                    .foregroundStyle(AppColors.secondary)
+                            } else {
+                                VStack(spacing: 12) {
+                                    ForEach(viewModel.sfsFulfillments) { item in
+                                        HStack {
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                Text(item.productName ?? "Premium Timepiece")
+                                                    .font(AppFonts.serif(size: 17, weight: .medium))
+                                                    .foregroundStyle(.white)
+                                                Text("Order ID: \(item.id.uuidString.prefix(8).uppercased())")
+                                                    .font(AppFonts.sansSerif(size: 12))
+                                                    .foregroundStyle(AppColors.secondary)
+                                            }
+                                            Spacer()
+
+                                            let displayStatus = item.status.lowercased() == "ready to pick" ? "Ready" : item.status.capitalized
+                                            let statusType: BadgeStatus = item.status.lowercased() == "ready to pick" ? .success :
+                                                                          item.status.lowercased() == "secured" ? .neutral : .warning
+
+                                            StatusBadge(text: displayStatus, status: statusType)
+                                        }
+                                        .padding(18)
+                                        .background(AppColors.surface)
+                                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                    }
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 24)
                         .padding(.bottom, 60)
                     }
                     .padding(.top, 20)
@@ -136,6 +176,10 @@ struct GlobalAnalyticsView: View {
         }
         .onAppear {
             viewModel.fetchData()
+            viewModel.startFulfillmentPolling()
+        }
+        .onDisappear {
+            viewModel.stopFulfillmentPolling()
         }
         .sheet(isPresented: $showingSettings) {
             CorporateAdminSettingsView()

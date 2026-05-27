@@ -23,6 +23,10 @@ struct SFSVerificationView: View {
     @State private var isUpdating: Bool = false
     @State private var laserOffset: CGFloat = -110
     
+    @State private var showAlert = false
+    @State private var alertMessage = ""
+    @State private var userRole: UserRole? = nil
+    
     private var allChecked: Bool {
         check1 && check2 && check3
     }
@@ -89,12 +93,52 @@ struct SFSVerificationView: View {
                                         .font(AppFonts.sansSerif(size: 14, weight: .semibold))
                                         .foregroundStyle(AppColors.gold)
                                 }
+                                
+                                Divider().background(AppColors.border)
+                                
+                                HStack {
+                                    Text("Store Location")
+                                        .font(AppFonts.sansSerif(size: 13))
+                                        .foregroundStyle(AppColors.secondary)
+                                    Spacer()
+                                    Text(order.storeLocation ?? "Vault - Aisle A, Shelf 1")
+                                        .font(AppFonts.sansSerif(size: 14, weight: .semibold))
+                                        .foregroundStyle(.white)
+                                }
                             }
                             .padding(20)
                             .background(AppColors.surface)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                             .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
                         }
+                        .padding(.horizontal, 24)
+                        
+                        Button(action: {
+                            isUpdating = true
+                            Task {
+                                let success = await viewModel.flagItemAsMissing(orderId: order.id)
+                                if success {
+                                    router.pop()
+                                } else {
+                                    await MainActor.run {
+                                        alertMessage = viewModel.errorMessage ?? "Failed to flag item as missing."
+                                        showAlert = true
+                                    }
+                                }
+                                isUpdating = false
+                            }
+                        }) {
+                            Text("Flag Item as Missing")
+                                .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(AppColors.error.opacity(0.8))
+                                )
+                        }
+                        .disabled(isUpdating)
                         .padding(.horizontal, 24)
                         
                         VStack(alignment: .leading, spacing: 12) {
@@ -162,9 +206,17 @@ struct SFSVerificationView: View {
                                         }
                                         
                                         Button(action: {
-                                            withAnimation {
-                                                isVerified = true
-                                                scanError = nil
+                                            let result = viewModel.verifyScannedSku(orderSku: order.productSku, scannedCode: order.productSku ?? "")
+                                            switch result {
+                                            case .success:
+                                                withAnimation {
+                                                    isVerified = true
+                                                    scanError = nil
+                                                }
+                                            case .failure(let error):
+                                                withAnimation {
+                                                    scanError = error.localizedDescription
+                                                }
                                             }
                                         }) {
                                             Text("Simulate Barcode Scan")
@@ -204,13 +256,17 @@ struct SFSVerificationView: View {
                                         .textInputAutocapitalization(.characters)
                                     
                                     Button(action: {
-                                        if inputSku.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == (order.productSku ?? "").lowercased() {
+                                        let result = viewModel.verifyScannedSku(orderSku: order.productSku, scannedCode: inputSku)
+                                        switch result {
+                                        case .success:
                                             withAnimation {
                                                 isVerified = true
                                                 scanError = nil
                                             }
-                                        } else {
-                                            scanError = "SKU mismatch. Please try again."
+                                        case .failure(let error):
+                                            withAnimation {
+                                                scanError = error.localizedDescription
+                                            }
                                         }
                                     }) {
                                         Text("Verify")
@@ -262,37 +318,49 @@ struct SFSVerificationView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
                                 .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
                                 
-                                Button(action: {
-                                    isUpdating = true
-                                    Task {
-                                        let success = await viewModel.updateStatusToSecured(orderId: order.id)
-                                        if success {
-                                            router.pop()
+                                if userRole == .inventoryController {
+                                    Button(action: {
+                                        guard userRole == .inventoryController else {
+                                            alertMessage = "Unauthorized: Action is restricted to Inventory Controllers."
+                                            showAlert = true
+                                            return
                                         }
-                                        isUpdating = false
-                                    }
-                                }) {
-                                    HStack {
-                                        if isUpdating {
-                                            ProgressView()
-                                                .tint(AppColors.background)
-                                                .controlSize(.small)
-                                        } else {
-                                            Text("Update Status to Secured")
+                                        isUpdating = true
+                                        Task {
+                                            let success = await viewModel.updateStatusToSecured(orderId: order.id)
+                                            if success {
+                                                router.pop()
+                                            } else {
+                                                await MainActor.run {
+                                                    alertMessage = viewModel.errorMessage ?? "An unknown conflict occurred."
+                                                    showAlert = true
+                                                }
+                                            }
+                                            isUpdating = false
                                         }
+                                    }) {
+                                        HStack {
+                                            if isUpdating {
+                                                ProgressView()
+                                                    .tint(AppColors.background)
+                                                    .controlSize(.small)
+                                            } else {
+                                                Text("Mark as Secured")
+                                            }
+                                        }
+                                        .font(AppFonts.sansSerif(size: 15, weight: .bold))
+                                        .foregroundStyle(AppColors.background)
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 56)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 14)
+                                                .fill(AppColors.gold)
+                                        )
+                                        .opacity(allChecked && !isUpdating ? 1.0 : 0.5)
                                     }
-                                    .font(AppFonts.sansSerif(size: 15, weight: .bold))
-                                    .foregroundStyle(AppColors.background)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 56)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 14)
-                                            .fill(AppColors.gold)
-                                    )
-                                    .opacity(allChecked && !isUpdating ? 1.0 : 0.5)
+                                    .disabled(!allChecked || isUpdating)
+                                    .padding(.top, 8)
                                 }
-                                .disabled(!allChecked || isUpdating)
-                                .padding(.top, 8)
                             }
                             .padding(.horizontal, 24)
                         }
@@ -302,5 +370,17 @@ struct SFSVerificationView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .alert(isPresented: $showAlert) {
+            Alert(
+                title: Text("Fulfillment Alert"),
+                message: Text(alertMessage),
+                dismissButton: .default(Text("OK"))
+            )
+        }
+        .task {
+            if let profile = try? await ProfileService().fetchCurrentProfile() {
+                userRole = profile.0
+            }
+        }
     }
 }

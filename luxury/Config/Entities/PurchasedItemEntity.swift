@@ -21,6 +21,7 @@ struct PurchasedItemEntity: Identifiable, Codable, Hashable, Equatable {
     var productBrand: String?
     var productSku: String?
     var productImages: [String]?
+    var storeLocation: String?
     
     enum CodingKeys: String, CodingKey {
         case id, uid, status

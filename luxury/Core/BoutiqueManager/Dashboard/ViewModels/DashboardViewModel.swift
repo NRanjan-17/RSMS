@@ -34,6 +34,9 @@ final class DashboardViewModel {
     private let storeCloseHour: Double = 20
     private var updateTask:  Task<Void, Never>?
     private var monitorTask: Task<Void, Never>?
+    private var sfsPollingTask: Task<Void, Never>?
+    var sfsFulfillments: [PurchasedItemEntity] = []
+
 
     var salesTargetRaw: Double {
         get { UserDefaults.standard.double(forKey: "bm_daily_sales_target") }
@@ -92,6 +95,7 @@ final class DashboardViewModel {
         fetchAvailableStaff()
         startSalesPolling()
         startNetworkMonitoring()
+        startFulfillmentPolling()
     }
 
     func stopRealTimeUpdates() {
@@ -99,6 +103,8 @@ final class DashboardViewModel {
         updateTask = nil
         monitorTask?.cancel()
         monitorTask = nil
+        sfsPollingTask?.cancel()
+        sfsPollingTask = nil
     }
 
     func approve(_ request: ApprovalRequest) {
@@ -195,6 +201,50 @@ final class DashboardViewModel {
                 }
             } catch {
                 print("Failed to fetch boutique name: \(error)")
+            }
+        }
+    }
+
+    func fetchSFSFulfillments() async {
+        do {
+            let items: [PurchasedItemEntity] = try await SupabaseManager.shared.client
+                .from("purchased_items")
+                .select()
+                .execute()
+                .value
+            
+            let products: [CatalogEntity] = try await SupabaseManager.shared.client
+                .from("catalogs")
+                .select()
+                .execute()
+                .value
+            
+            var resolved: [PurchasedItemEntity] = []
+            for var item in items {
+                if let product = products.first(where: { $0.id == item.productId }) {
+                    item.productName = product.name
+                    item.productBrand = product.brand
+                    item.productSku = product.catalogId
+                }
+                resolved.append(item)
+            }
+            
+            let sorted = resolved.sorted(by: { $0.reservedDate > $1.reservedDate })
+            
+            await MainActor.run {
+                self.sfsFulfillments = sorted
+            }
+        } catch {
+            print("Failed to fetch SFS fulfillments: \(error)")
+        }
+    }
+
+    // TODO: upgrade to WebSocket/SSE
+    private func startFulfillmentPolling() {
+        sfsPollingTask = Task { @MainActor [weak self] in
+            while !Task.isCancelled {
+                await self?.fetchSFSFulfillments()
+                try? await Task.sleep(for: .seconds(5))
             }
         }
     }
