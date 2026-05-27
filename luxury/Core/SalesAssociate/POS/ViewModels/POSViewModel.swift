@@ -147,6 +147,18 @@ final class POSViewModel {
     }
     
     func attachClient(_ client: StoreClient) {
+        if !guestCart.isEmpty {
+            var currentClientCart = clientCarts[client.id] ?? []
+            for item in guestCart {
+                if let index = currentClientCart.firstIndex(where: { $0.id == item.id }) {
+                    currentClientCart[index].qty += item.qty
+                } else {
+                    currentClientCart.append(item)
+                }
+            }
+            clientCarts[client.id] = currentClientCart
+            guestCart.removeAll()
+        }
         self.selectedClient = client
     }
     
