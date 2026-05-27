@@ -68,7 +68,7 @@ final class WishlistService {
                     let dbCatalogs: [CatalogEntity] = try await client
                         .from("catalogs")
                         .select()
-                        .in("id", value: productIds.map { $0.uuidString })
+                        .in("id", values: productIds.map { $0.uuidString })
                         .execute()
                         .value
                     
