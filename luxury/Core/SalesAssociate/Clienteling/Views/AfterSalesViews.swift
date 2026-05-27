@@ -579,7 +579,7 @@ struct ASTDetails: Codable {
     let status: String
     let description: String?
     let remark: String?
-    var catalogs: CatalogEntity?
+    let catalogs: CatalogEntity?
     let client: ClientEntity?
 }
 
@@ -767,14 +767,13 @@ struct AfterSalesTrackingView: View {
                 if let firstCatalog = catalogs.first {
                     let astList: [ASTDetails] = try await SupabaseManager.shared.client
                         .from("ast")
-                        .select("*, client(*)")
+                        .select("*, catalogs(*), client(*)")
                         .eq("product_id", value: firstCatalog.id.uuidString)
                         .order("id", ascending: false)
                         .execute()
                         .value
                     
-                    if var firstAST = astList.first {
-                        firstAST.catalogs = firstCatalog
+                    if let firstAST = astList.first {
                         await MainActor.run {
                             self.fetchedAST = firstAST
                             self.astStatus = firstAST.status
@@ -783,7 +782,7 @@ struct AfterSalesTrackingView: View {
                 } else {
                     let allASTs: [ASTDetails] = try await SupabaseManager.shared.client
                         .from("ast")
-                        .select("*, client(*)")
+                        .select("*, catalogs(*), client(*)")
                         .order("id", ascending: false)
                         .limit(1)
                         .execute()
