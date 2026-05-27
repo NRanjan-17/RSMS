@@ -25,6 +25,7 @@ struct SFSVerificationView: View {
     
     @State private var showAlert = false
     @State private var alertMessage = ""
+    @State private var userRole: UserRole? = nil
     
     private var allChecked: Bool {
         check1 && check2 && check3
@@ -317,42 +318,49 @@ struct SFSVerificationView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
                                 .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
                                 
-                                Button(action: {
-                                    isUpdating = true
-                                    Task {
-                                        let success = await viewModel.updateStatusToSecured(orderId: order.id)
-                                        if success {
-                                            router.pop()
-                                        } else {
-                                            await MainActor.run {
-                                                alertMessage = viewModel.errorMessage ?? "An unknown conflict occurred."
-                                                showAlert = true
+                                if userRole == .inventoryController {
+                                    Button(action: {
+                                        guard userRole == .inventoryController else {
+                                            alertMessage = "Unauthorized: Action is restricted to Inventory Controllers."
+                                            showAlert = true
+                                            return
+                                        }
+                                        isUpdating = true
+                                        Task {
+                                            let success = await viewModel.updateStatusToSecured(orderId: order.id)
+                                            if success {
+                                                router.pop()
+                                            } else {
+                                                await MainActor.run {
+                                                    alertMessage = viewModel.errorMessage ?? "An unknown conflict occurred."
+                                                    showAlert = true
+                                                }
+                                            }
+                                            isUpdating = false
+                                        }
+                                    }) {
+                                        HStack {
+                                            if isUpdating {
+                                                ProgressView()
+                                                    .tint(AppColors.background)
+                                                    .controlSize(.small)
+                                            } else {
+                                                Text("Mark as Secured")
                                             }
                                         }
-                                        isUpdating = false
+                                        .font(AppFonts.sansSerif(size: 15, weight: .bold))
+                                        .foregroundStyle(AppColors.background)
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 56)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 14)
+                                                .fill(AppColors.gold)
+                                        )
+                                        .opacity(allChecked && !isUpdating ? 1.0 : 0.5)
                                     }
-                                }) {
-                                    HStack {
-                                        if isUpdating {
-                                            ProgressView()
-                                                .tint(AppColors.background)
-                                                .controlSize(.small)
-                                        } else {
-                                            Text("Update Status to Secured")
-                                        }
-                                    }
-                                    .font(AppFonts.sansSerif(size: 15, weight: .bold))
-                                    .foregroundStyle(AppColors.background)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 56)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 14)
-                                            .fill(AppColors.gold)
-                                    )
-                                    .opacity(allChecked && !isUpdating ? 1.0 : 0.5)
+                                    .disabled(!allChecked || isUpdating)
+                                    .padding(.top, 8)
                                 }
-                                .disabled(!allChecked || isUpdating)
-                                .padding(.top, 8)
                             }
                             .padding(.horizontal, 24)
                         }
@@ -368,6 +376,11 @@ struct SFSVerificationView: View {
                 message: Text(alertMessage),
                 dismissButton: .default(Text("OK"))
             )
+        }
+        .task {
+            if let profile = try? await ProfileService().fetchCurrentProfile() {
+                userRole = profile.0
+            }
         }
     }
 }

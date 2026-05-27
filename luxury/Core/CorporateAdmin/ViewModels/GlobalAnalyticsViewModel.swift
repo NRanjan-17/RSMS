@@ -19,6 +19,8 @@ final class GlobalAnalyticsViewModel {
     var revenueChartData: [RevenueData] = []
     
     var boutiquePerformance: [CorporateBoutique] = []
+    var sfsFulfillments: [PurchasedItemEntity] = []
+    private var sfsPollingTask: Task<Void, Never>?
     
     private let client = SupabaseManager.shared.client
     
@@ -170,5 +172,54 @@ final class GlobalAnalyticsViewModel {
                 self.isLoading = false
             }
         }
+    }
+
+    func fetchSFSFulfillments() async {
+        do {
+            let items: [PurchasedItemEntity] = try await client
+                .from("purchased_items")
+                .select()
+                .execute()
+                .value
+            
+            let products: [CatalogEntity] = try await client
+                .from("catalogs")
+                .select()
+                .execute()
+                .value
+            
+            var resolved: [PurchasedItemEntity] = []
+            for var item in items {
+                if let product = products.first(where: { $0.id == item.productId }) {
+                    item.productName = product.name
+                    item.productBrand = product.brand
+                    item.productSku = product.catalogId
+                }
+                resolved.append(item)
+            }
+            
+            let sorted = resolved.sorted(by: { $0.reservedDate > $1.reservedDate })
+            
+            await MainActor.run {
+                self.sfsFulfillments = sorted
+            }
+        } catch {
+            print("Failed to fetch SFS fulfillments: \(error)")
+        }
+    }
+
+    // TODO: upgrade to WebSocket/SSE
+    func startFulfillmentPolling() {
+        sfsPollingTask = Task { @MainActor [weak self] in
+            while !Task.isCancelled {
+                await self?.fetchSFSFulfillments()
+                try? await Task.sleep(for: .seconds(5))
+            }
+        }
+    }
+
+    func stopFulfillmentPolling() {
+        sfsPollingTask?.cancel()
+        sfsPollingTask = nil
     }
 }

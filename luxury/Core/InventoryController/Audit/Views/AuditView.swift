@@ -25,7 +25,9 @@ struct AuditView: View {
                         ForEach(counts, id: \.id) { count in
                             Button(action: {
                                 if count.status == "Due" {
-                                    router.presentFullScreen(ICRoute.activeAudit)
+                                    router.presentFullScreen(ICRoute.activeAudit(count))
+                                } else if count.status == "Signed Off" || count.status == "Submitted" {
+                                    router.push(ICRoute.varianceReport(count))
                                 } else {
                                     router.presentFullScreen(ICRoute.auditDetail(count))
                                 }
@@ -58,7 +60,7 @@ struct AuditView: View {
                     Section {
                         let audits = viewModel.recentAudits
                         ForEach(audits, id: \.id) { count in
-                            Button(action: { router.presentFullScreen(ICRoute.auditDetail(count)) }) {
+                            Button(action: { router.push(ICRoute.varianceReport(count)) }) {
                                 HStack {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(count.title)

@@ -148,7 +148,13 @@ final class FulfillmentViewModel {
     func secureItem(orderId: UUID) async -> Result<Void, Error> {
         do {
             let profileTuple = try? await fetchProfileHandler()
-            guard let staff = profileTuple?.1 as? StaffModel, let storeId = staff.boutiqueId else {
+            guard let profile = profileTuple else {
+                return .failure(NSError(domain: "Fulfillment", code: 3, userInfo: [NSLocalizedDescriptionKey: "User profile not found."]))
+            }
+            guard profile.0 == .inventoryController else {
+                return .failure(NSError(domain: "Fulfillment", code: 3, userInfo: [NSLocalizedDescriptionKey: "Unauthorized: Action is restricted to Inventory Controllers."]))
+            }
+            guard let staff = profile.1 as? StaffModel, let storeId = staff.boutiqueId else {
                 return .failure(NSError(domain: "Fulfillment", code: 3, userInfo: [NSLocalizedDescriptionKey: "Boutique association not found for user profile."]))
             }
             
@@ -163,26 +169,85 @@ final class FulfillmentViewModel {
                 item = found
             }
             
-            if item.status.lowercased() == "secured" || item.status.lowercased() == "ready to pick" {
-                return .failure(NSError(domain: "Fulfillment", code: 4, userInfo: [NSLocalizedDescriptionKey: "Conflict: This item has already been secured for another order."]))
+            if item.status.lowercased() == "ready to pick" {
+                return .failure(NSError(domain: "Fulfillment", code: 4, userInfo: [NSLocalizedDescriptionKey: "Conflict: This item has already been marked as Ready."]))
             }
             
-            let inventoryList = try await fetchInventoryHandler(item.productId, storeId)
-            
-            guard let inventoryItem = inventoryList.first else {
-                return .failure(NSError(domain: "Fulfillment", code: 5, userInfo: [NSLocalizedDescriptionKey: "Error: No inventory record found for this product in your store."]))
+            let allPurchasedItems = try await fetchPurchasedItemsHandler()
+            let conflictingItem = allPurchasedItems.first { otherItem in
+                otherItem.productId == item.productId &&
+                otherItem.id != orderId &&
+                (otherItem.status.lowercased() == "secured" || otherItem.status.lowercased() == "ready to pick")
             }
             
-            if inventoryItem.quantity <= 0 {
-                return .failure(NSError(domain: "Fulfillment", code: 6, userInfo: [NSLocalizedDescriptionKey: "Conflict: The item is already reserved or out of stock at this boutique."]))
+            if let conflict = conflictingItem {
+                var orderIdString = String(conflict.transactionId.prefix(8)).uppercased()
+                do {
+                    let conflictingOrders: [OrderEntity] = try await SupabaseManager.shared.client
+                        .from("order")
+                        .select()
+                        .eq("transaction_id", value: conflict.transactionId)
+                        .execute()
+                        .value
+                    if let firstOrder = conflictingOrders.first {
+                        orderIdString = String(firstOrder.id.uuidString.prefix(8)).uppercased()
+                    }
+                } catch {}
+                return .failure(NSError(domain: "Fulfillment", code: 8, userInfo: [NSLocalizedDescriptionKey: "Item already reserved for Order #\(orderIdString) — please verify."]))
             }
             
-            try await updateInventoryHandler(inventoryItem.id, inventoryItem.quantity - 1, inventoryItem.quantity)
-            try await updatePurchasedItemHandler(orderId, "Secured", Date())
+            if item.status.lowercased() == "pending" {
+                let inventoryList = try await fetchInventoryHandler(item.productId, storeId)
+                guard let inventoryItem = inventoryList.first else {
+                    return .failure(NSError(domain: "Fulfillment", code: 5, userInfo: [NSLocalizedDescriptionKey: "Error: No inventory record found for this product in your store."]))
+                }
+                if inventoryItem.quantity <= 0 {
+                    return .failure(NSError(domain: "Fulfillment", code: 6, userInfo: [NSLocalizedDescriptionKey: "Conflict: The item is already reserved or out of stock at this boutique."]))
+                }
+                try await updateInventoryHandler(inventoryItem.id, inventoryItem.quantity - 1, inventoryItem.quantity)
+            }
+            
+            let updatedItems: [PurchasedItemEntity] = try await SupabaseManager.shared.client
+                .from("purchased_items")
+                .update(["status": "Ready to Pick", "delivery_date": ISO8601DateFormatter().string(from: Date())])
+                .eq("id", value: orderId.uuidString)
+                .eq("status", value: item.status)
+                .select()
+                .execute()
+                .value
+            
+            guard !updatedItems.isEmpty else {
+                return .failure(NSError(domain: "Fulfillment", code: 9, userInfo: [NSLocalizedDescriptionKey: "Conflict: The item status has been modified by another process. Please retry."]))
+            }
+            
+            Task {
+                do {
+                    let ordersRes: [OrderEntity] = try await SupabaseManager.shared.client
+                        .from("order")
+                        .select()
+                        .eq("transaction_id", value: item.transactionId)
+                        .execute()
+                        .value
+                    
+                    if let firstOrder = ordersRes.first {
+                        NotificationCenter.default.post(
+                            name: NSNotification.Name("SalesAssociateNotification"),
+                            object: nil,
+                            userInfo: [
+                                "salesAssociateId": firstOrder.rsmsUserId.uuidString,
+                                "orderId": orderId.uuidString,
+                                "status": "Ready to Pick"
+                            ]
+                        )
+                    }
+                } catch {
+                    print("Sales Associate notification failed: \(error.localizedDescription)")
+                }
+            }
             
             await MainActor.run {
                 if let index = self.orders.firstIndex(where: { $0.id == orderId }) {
-                    self.orders[index].status = "Secured"
+                    self.orders[index].status = "Ready to Pick"
                     self.orders[index].deliveryDate = Date()
                 }
             }
@@ -267,7 +332,43 @@ final class FulfillmentViewModel {
     
     func updateStatusToReadyToPick(orderId: UUID) async -> Bool {
         do {
+            let item: PurchasedItemEntity
+            if let existing = orders.first(where: { $0.id == orderId }) {
+                item = existing
+            } else {
+                let items = try await fetchPurchasedItemsHandler()
+                guard let found = items.first(where: { $0.id == orderId }) else {
+                    return false
+                }
+                item = found
+            }
+            
             try await updatePurchasedItemHandler(orderId, "Ready to Pick", nil)
+            
+            Task {
+                do {
+                    let ordersRes: [OrderEntity] = try await SupabaseManager.shared.client
+                        .from("order")
+                        .select()
+                        .eq("transaction_id", value: item.transactionId)
+                        .execute()
+                        .value
+                    
+                    if let firstOrder = ordersRes.first {
+                        NotificationCenter.default.post(
+                            name: NSNotification.Name("SalesAssociateNotification"),
+                            object: nil,
+                            userInfo: [
+                                "salesAssociateId": firstOrder.rsmsUserId.uuidString,
+                                "orderId": orderId.uuidString,
+                                "status": "Ready to Pick"
+                            ]
+                        )
+                    }
+                } catch {
+                    print("Sales Associate notification failed: \(error.localizedDescription)")
+                }
+            }
             
             await MainActor.run {
                 if let index = self.orders.firstIndex(where: { $0.id == orderId }) {

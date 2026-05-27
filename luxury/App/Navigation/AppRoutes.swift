@@ -45,7 +45,8 @@ enum ICRoute: Hashable {
     case transferDetail(TransferRequest)
     case newTransfer
     case auditDetail(RSMSCycleCount)
-    case activeAudit
+    case activeAudit(RSMSCycleCount)
+    case varianceReport(RSMSCycleCount)
     case serialCertificate
     case sfsOrders
     case sfsVerification(PurchasedItemEntity)

@@ -42,13 +42,13 @@ struct RSMSVarianceItem: Identifiable, Hashable {
     }
 }
 
-struct RSMSCycleCount: Identifiable, Hashable {
+struct RSMSCycleCount: Identifiable, Hashable, Codable {
     let id: UUID
     let title: String
     let date: String
     let scope: String
-    let status: String
-    let badgeStatus: BadgeStatus
+    var status: String
+    var badgeStatus: BadgeStatus
     
     init(id: UUID = UUID(), title: String, date: String, scope: String, status: String, badgeStatus: BadgeStatus) {
         self.id = id
@@ -604,4 +604,47 @@ struct CertificateRecord: Identifiable, Hashable {
     let serial: String
     let certificate: String
     let status: String
+}
+
+struct VarianceReportItem: Identifiable, Hashable, Codable {
+    let id: UUID
+    let productName: String
+    let sku: String
+    let expectedQty: Int
+    let countedQty: Int
+    let variance: Int
+    let isArchivedProduct: Bool
+}
+
+struct VarianceReport: Identifiable, Hashable, Codable {
+    let id: UUID
+    let boutiqueName: String
+    let date: Date
+    let controllerName: String
+    let items: [VarianceReportItem]
+}
+
+struct AuditSession: Identifiable, Hashable, Codable {
+    let id: UUID
+    let title: String
+    let date: String
+    let scope: String
+    var status: String
+    var badgeStatus: BadgeStatus
+    var storeName: String
+    var controllerName: String
+    var isSubmitted: Bool
+    var expectedItems: [AuditCountItem]
+    var varianceReport: VarianceReport?
+}
+
+struct AuditCountItem: Identifiable, Hashable, Codable {
+    var id: UUID { productId }
+    let productId: UUID
+    let name: String
+    let sku: String
+    let barcode: String
+    let expectedQty: Int
+    var countedQty: Int
+    var isArchivedProduct: Bool
 }
