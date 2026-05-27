@@ -13,9 +13,9 @@ enum SARoute: Hashable {
     case returns
     case afterSalesIntake(clientName: String?, serialNumber: String?, isWarrantyActive: Bool)
     case afterSalesTracking
-    case lookBuilder
     case remoteSelling
     case purchaseDetails(client: Client, purchase: ClientPurchase)
+    case exchangePolicy
 }
 
 

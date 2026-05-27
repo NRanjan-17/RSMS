@@ -56,6 +56,24 @@ final class WishlistService {
         return []
     }
     
+    func syncWishlist(clientId: UUID) async {
+        do {
+            let dbItems: [DBWishlistItem] = try await client
+                .from("wishlist")
+                .select()
+                .eq("client_id", value: clientId.uuidString)
+                .execute()
+                .value
+            
+            let items = dbItems.map {
+                ClientWishlistItem(id: $0.id, brand: $0.brand, name: $0.name, price: $0.price)
+            }
+            saveLocalWishlist(items, for: clientId)
+        } catch {
+            print("Supabase fetch wishlist warning: \(error.localizedDescription)")
+        }
+    }
+    
     func saveLocalWishlist(_ items: [ClientWishlistItem], for clientId: UUID) {
         let key = localKey(for: clientId)
         do {

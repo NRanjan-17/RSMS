@@ -114,12 +114,12 @@ struct SalesAssociateCanvas: View {
             AfterSalesIntakeView(clientName: clientName, serialNumber: serialNumber, isWarrantyActive: isWarrantyActive)
         case .afterSalesTracking:
             AfterSalesTrackingView()
-        case .lookBuilder:
-            LookBuilderView()
         case .remoteSelling:
             RemoteSellingView()
         case .purchaseDetails(let client, let purchase):
             PurchaseDetailsView(client: client, purchase: purchase)
+        case .exchangePolicy:
+            ExchangePolicyView()
         }
     }
 }

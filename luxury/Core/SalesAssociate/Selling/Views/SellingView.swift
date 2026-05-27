@@ -30,19 +30,6 @@ struct SellingView: View {
                 .font(AppFonts.serif(size: 32, weight: .semibold))
                 .foregroundStyle(.white)
             Spacer()
-            ZStack {
-                RoundedRectangle(cornerRadius: 11)
-                    .fill(AppColors.surface)
-                    .frame(width: 40, height: 40)
-                    .overlay(RoundedRectangle(cornerRadius: 11).stroke(AppColors.gold15, lineWidth: 0.5))
-                HStack(spacing: 2) {
-                    ForEach(0..<4) { i in
-                        Rectangle()
-                            .fill(AppColors.gold.opacity(0.6))
-                            .frame(width: i == 1 || i == 3 ? 1.5 : 3, height: 14)
-                    }
-                }
-            }
         }
         .padding(.horizontal, 24)
         .padding(.top, 14)
@@ -83,9 +70,6 @@ struct SellingView: View {
             .padding(.bottom, 4)
 
             HStack(spacing: 10) {
-                CustomOutlineButton(title: "Look Builder", icon: AnyView(Image(systemName: "sparkles"))) {
-                    router.push(SARoute.lookBuilder)
-                }
                 CustomOutlineButton(title: "Remote", icon: AnyView(Image(systemName: "video.fill"))) {
                     router.push(SARoute.remoteSelling)
                 }

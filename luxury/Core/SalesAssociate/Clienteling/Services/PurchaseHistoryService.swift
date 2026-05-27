@@ -6,9 +6,27 @@
 //
 
 import Foundation
+import Supabase
+
+struct DBPurchaseItem: Codable {
+    let id: UUID
+    let clientId: UUID
+    let name: String
+    let price: String
+    let date: String
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case clientId = "client_id"
+        case name
+        case price
+        case date
+    }
+}
 
 final class PurchaseHistoryService {
     static let shared = PurchaseHistoryService()
+    private let client = SupabaseManager.shared.client
     
     private init() {}
     
@@ -40,7 +58,25 @@ final class PurchaseHistoryService {
         }
     }
     
-    func addPurchase(clientId: UUID, name: String, price: Double, date: String = "") {
+    func syncPurchases(clientId: UUID) async {
+        do {
+            let dbItems: [DBPurchaseItem] = try await client
+                .from("purchases")
+                .select()
+                .eq("client_id", value: clientId.uuidString)
+                .execute()
+                .value
+            
+            let purchases = dbItems.map {
+                ClientPurchase(id: $0.id, name: $0.name, price: $0.price, date: $0.date)
+            }
+            savePurchases(purchases, for: clientId)
+        } catch {
+            print("Supabase fetch purchases warning: \(error.localizedDescription)")
+        }
+    }
+    
+    func addPurchase(clientId: UUID, name: String, price: String, date: String = "") {
         var current = fetchPurchases(clientId: clientId)
         
         let displayDate: String
@@ -55,5 +91,25 @@ final class PurchaseHistoryService {
         let newPurchase = ClientPurchase(name: name, price: price, date: displayDate)
         current.insert(newPurchase, at: 0) // Prepend newest purchase
         savePurchases(current, for: clientId)
+        
+        // Sync to Supabase in background
+        Task {
+            do {
+                let dbItem = DBPurchaseItem(
+                    id: newPurchase.id,
+                    clientId: clientId,
+                    name: newPurchase.name,
+                    price: newPurchase.price,
+                    date: newPurchase.date
+                )
+                try await client
+                    .from("purchases")
+                    .insert(dbItem)
+                    .execute()
+                print("Successfully synced purchase to Supabase.")
+            } catch {
+                print("Supabase purchase sync warning: \(error.localizedDescription)")
+            }
+        }
     }
 }
