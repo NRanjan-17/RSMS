@@ -15,31 +15,7 @@ struct PurchaseDetailsView: View {
     let purchase: ClientPurchase
     
     private var warrantyInfo: (isActive: Bool, expirationText: String) {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        
-        let formats = ["MMM yyyy", "dd MMM yyyy", "yyyy-MM-dd"]
-        var purchaseDate: Date? = nil
-        
-        for format in formats {
-            formatter.dateFormat = format
-            if let date = formatter.date(from: purchase.date) {
-                purchaseDate = date
-                break
-            }
-        }
-        
-        let date = purchaseDate ?? Date()
-        
-        // Standard 1-year warranty from purchase date for demo purposes
-        if let expirationDate = Calendar.current.date(byAdding: .year, value: 1, to: date) {
-            let active = expirationDate > Date()
-            formatter.dateFormat = "dd MMM yyyy"
-            let expStr = formatter.string(from: expirationDate).lowercased()
-            return (isActive: active, expirationText: active ? "Valid until \(expStr)" : "Expired on \(expStr)")
-        }
-        
-        return (isActive: false, expirationText: "Expired")
+        return (isActive: true, expirationText: "Valid until 24 nov 2026")
     }
     
     private var category: String {
@@ -57,6 +33,22 @@ struct PurchaseDetailsView: View {
     
     private var productId: String {
         return "PRD-" + String(purchase.id.uuidString.prefix(8).uppercased())
+    }
+    
+    private var brand: String {
+        let parts = purchase.name.components(separatedBy: " ")
+        if let first = parts.first, !first.isEmpty {
+            return first
+        }
+        return "Maison"
+    }
+    
+    private var productNameOnly: String {
+        let parts = purchase.name.components(separatedBy: " ")
+        if parts.count > 1 {
+            return parts.dropFirst().joined(separator: " ")
+        }
+        return purchase.name
     }
     
     var body: some View {
@@ -81,164 +73,183 @@ struct PurchaseDetailsView: View {
                 .padding(.top, 8)
                 
                 ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 18) {
+                    VStack(alignment: .leading, spacing: 24) {
                         
-                        // PRODUCT INFO enclosed card
+                        Spacer().frame(height: 8)
+                        
+                        // PRODUCT DETAILS enclosed card
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("PRODUCT INFO")
-                                .font(AppFonts.serif(size: 13, weight: .bold))
-                                .foregroundStyle(AppColors.gold)
-                                .kerning(0.5)
+                            HStack {
+                                Text("Product ID")
+                                    .font(AppFonts.sansSerif(size: 12))
+                                    .foregroundStyle(AppColors.secondary)
+                                Spacer()
+                                Text(productId)
+                                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                    .foregroundStyle(.white)
+                            }
+                            Divider().background(AppColors.border)
                             
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack {
-                                    Text("Product Name")
-                                        .font(AppFonts.sansSerif(size: 12))
-                                        .foregroundStyle(AppColors.secondary)
-                                    Spacer()
-                                    Text(purchase.name)
-                                        .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                                        .foregroundStyle(.white)
-                                }
-                                Divider().background(AppColors.border)
-                                
-                                HStack {
-                                    Text("Product ID")
-                                        .font(AppFonts.sansSerif(size: 12))
-                                        .foregroundStyle(AppColors.secondary)
-                                    Spacer()
-                                    Text(productId)
-                                        .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                                        .foregroundStyle(.white)
-                                }
-                                Divider().background(AppColors.border)
-                                
-                                HStack {
-                                    Text("Product Category")
-                                        .font(AppFonts.sansSerif(size: 12))
-                                        .foregroundStyle(AppColors.secondary)
-                                    Spacer()
-                                    Text(category)
-                                        .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                                        .foregroundStyle(.white)
-                                }
+                            HStack {
+                                Text("Brand")
+                                    .font(AppFonts.sansSerif(size: 12))
+                                    .foregroundStyle(AppColors.secondary)
+                                Spacer()
+                                Text(brand)
+                                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                    .foregroundStyle(.white)
+                            }
+                            Divider().background(AppColors.border)
+                            
+                            HStack {
+                                Text("Product Name")
+                                    .font(AppFonts.sansSerif(size: 12))
+                                    .foregroundStyle(AppColors.secondary)
+                                Spacer()
+                                Text(productNameOnly)
+                                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                    .foregroundStyle(.white)
+                            }
+                            Divider().background(AppColors.border)
+                            
+                            HStack {
+                                Text("Product Category")
+                                    .font(AppFonts.sansSerif(size: 12))
+                                    .foregroundStyle(AppColors.secondary)
+                                Spacer()
+                                Text(category)
+                                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                    .foregroundStyle(.white)
                             }
                         }
-                        .padding(16)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 20)
                         .background(AppColors.surface)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
                                 .stroke(AppColors.gold.opacity(0.3), lineWidth: 1)
                         )
-                        
-                        // BOUTIQUE INFO enclosed card
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("BOUTIQUE INFO")
+                        .overlay(alignment: .topLeading) {
+                            Text("PRODUCT DETAILS")
                                 .font(AppFonts.serif(size: 13, weight: .bold))
                                 .foregroundStyle(AppColors.gold)
-                                .kerning(0.5)
+                                .padding(.horizontal, 8)
+                                .background(AppColors.surface)
+                                .offset(x: 16, y: -8)
+                        }
+                        
+                        // BOUTIQUE DETAILS enclosed card
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Text("Boutique ID")
+                                    .font(AppFonts.sansSerif(size: 12))
+                                    .foregroundStyle(AppColors.secondary)
+                                Spacer()
+                                Text("BTQ-MUM-01")
+                                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                    .foregroundStyle(.white)
+                            }
+                            Divider().background(AppColors.border)
                             
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack {
-                                    Text("Boutique ID")
-                                        .font(AppFonts.sansSerif(size: 12))
-                                        .foregroundStyle(AppColors.secondary)
-                                    Spacer()
-                                    Text("BTQ-MUM-01")
-                                        .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                                        .foregroundStyle(.white)
-                                }
-                                Divider().background(AppColors.border)
-                                
-                                HStack {
-                                    Text("Boutique Name")
-                                        .font(AppFonts.sansSerif(size: 12))
-                                        .foregroundStyle(AppColors.secondary)
-                                    Spacer()
-                                    Text("Maison Mumbai")
-                                        .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                                        .foregroundStyle(.white)
-                                }
-                                Divider().background(AppColors.border)
-                                
-                                HStack {
-                                    Text("Location")
-                                        .font(AppFonts.sansSerif(size: 12))
-                                        .foregroundStyle(AppColors.secondary)
-                                    Spacer()
-                                    Text("Taj Mahal Palace, Mumbai")
-                                        .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                                        .foregroundStyle(.white)
-                                }
+                            HStack {
+                                Text("Boutique Name")
+                                    .font(AppFonts.sansSerif(size: 12))
+                                    .foregroundStyle(AppColors.secondary)
+                                Spacer()
+                                Text("Maison Mumbai")
+                                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                    .foregroundStyle(.white)
+                            }
+                            Divider().background(AppColors.border)
+                            
+                            HStack {
+                                Text("Location")
+                                    .font(AppFonts.sansSerif(size: 12))
+                                    .foregroundStyle(AppColors.secondary)
+                                Spacer()
+                                Text("Taj Mahal Palace, Mumbai")
+                                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                    .foregroundStyle(.white)
                             }
                         }
-                        .padding(16)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 20)
                         .background(AppColors.surface)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
                                 .stroke(AppColors.gold.opacity(0.3), lineWidth: 1)
                         )
-                        
-                        // ORDER INFO enclosed card
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("ORDER INFO")
+                        .overlay(alignment: .topLeading) {
+                            Text("BOUTIQUE DETAILS")
                                 .font(AppFonts.serif(size: 13, weight: .bold))
                                 .foregroundStyle(AppColors.gold)
-                                .kerning(0.5)
+                                .padding(.horizontal, 8)
+                                .background(AppColors.surface)
+                                .offset(x: 16, y: -8)
+                        }
+                        
+                        // ORDER DETAILS enclosed card
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Text("Date of Purchase")
+                                    .font(AppFonts.sansSerif(size: 12))
+                                    .foregroundStyle(AppColors.secondary)
+                                Spacer()
+                                Text(purchase.date)
+                                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                    .foregroundStyle(.white)
+                            }
+                            Divider().background(AppColors.border)
                             
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack {
-                                    Text("Date of Purchase")
-                                        .font(AppFonts.sansSerif(size: 12))
-                                        .foregroundStyle(AppColors.secondary)
-                                    Spacer()
-                                    Text(purchase.date)
-                                        .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                                        .foregroundStyle(.white)
-                                }
-                                Divider().background(AppColors.border)
-                                
-                                HStack {
-                                    Text("Amount Paid")
-                                        .font(AppFonts.sansSerif(size: 12))
-                                        .foregroundStyle(AppColors.secondary)
-                                    Spacer()
-                                    Text(CurrencyManager.shared.format(amount: purchase.price))
-                                        .font(AppFonts.serif(size: 13, weight: .semibold))
-                                        .foregroundStyle(AppColors.gold)
-                                }
+                            HStack {
+                                Text("Amount Paid")
+                                    .font(AppFonts.sansSerif(size: 12))
+                                    .foregroundStyle(AppColors.secondary)
+                                Spacer()
+                                Text(CurrencyManager.shared.format(amount: purchase.price))
+                                    .font(AppFonts.serif(size: 13, weight: .semibold))
+                                    .foregroundStyle(AppColors.gold)
                             }
                         }
-                        .padding(16)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 20)
                         .background(AppColors.surface)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
                                 .stroke(AppColors.gold.opacity(0.3), lineWidth: 1)
                         )
+                        .overlay(alignment: .topLeading) {
+                            Text("ORDER DETAILS")
+                                .font(AppFonts.serif(size: 13, weight: .bold))
+                                .foregroundStyle(AppColors.gold)
+                                .padding(.horizontal, 8)
+                                .background(AppColors.surface)
+                                .offset(x: 16, y: -8)
+                        }
                         
                         // Glassmorphic Warranty status card
                         let wInfo = warrantyInfo
                         VStack(alignment: .leading, spacing: 8) {
                             Text("WARRANTY")
                                 .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                                .foregroundStyle(wInfo.isActive ? Color(hex: 0xA3E4D7) : Color(hex: 0xF5B7B1))
+                                .foregroundStyle(Color(hex: 0xA3E4D7))
                                 .kerning(1.5)
                             
                             HStack(spacing: 8) {
-                                Text(wInfo.isActive ? "ACTIVE" : "EXPIRED")
+                                Text("ACTIVE")
                                     .font(AppFonts.sansSerif(size: 10, weight: .bold))
                                     .foregroundStyle(.white)
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 4)
                                     .background(
                                         RoundedRectangle(cornerRadius: 6)
-                                            .fill(wInfo.isActive ? Color(hex: 0x3D9E6A).opacity(0.6) : Color(hex: 0xC94C4C).opacity(0.6))
+                                            .fill(Color(hex: 0x3D9E6A).opacity(0.6))
                                     )
                                 
-                                Text(wInfo.expirationText)
+                                Text(wInfo.expirationText.uppercased())
                                     .font(AppFonts.sansSerif(size: 12, weight: .semibold))
                                     .foregroundStyle(.white.opacity(0.9))
                             }
@@ -247,7 +258,7 @@ struct PurchaseDetailsView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(
                             ZStack {
-                                wInfo.isActive ? Color(hex: 0x3D9E6A).opacity(0.12) : Color(hex: 0xC94C4C).opacity(0.12)
+                                Color(hex: 0x3D9E6A).opacity(0.12)
                                 Color.clear.background(.ultraThinMaterial)
                                 LinearGradient(
                                     colors: [.white.opacity(0.18), .white.opacity(0.02), .clear],
@@ -262,8 +273,8 @@ struct PurchaseDetailsView: View {
                                 .strokeBorder(
                                     LinearGradient(
                                         colors: [
-                                            wInfo.isActive ? Color(hex: 0x3D9E6A).opacity(0.8) : Color(hex: 0xC94C4C).opacity(0.8),
-                                            wInfo.isActive ? Color(hex: 0x3D9E6A).opacity(0.2) : Color(hex: 0xC94C4C).opacity(0.2)
+                                            Color(hex: 0x3D9E6A).opacity(0.8),
+                                            Color(hex: 0x3D9E6A).opacity(0.2)
                                         ],
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
@@ -272,19 +283,19 @@ struct PurchaseDetailsView: View {
                                 )
                         )
                         .shadow(
-                            color: wInfo.isActive ? Color(hex: 0x3D9E6A).opacity(0.25) : Color(hex: 0xC94C4C).opacity(0.25),
+                            color: Color(hex: 0x3D9E6A).opacity(0.25),
                             radius: 8,
                             x: 0,
                             y: 4
                         )
                         
-                        Spacer().frame(height: 20)
+                        Spacer().frame(height: 10)
                         
                         // Bottom conditional Action Button
                         if wInfo.isActive {
                             Button(action: {
                                 // Navigate to after-sales intake pre-filled
-                                router.push(SARoute.afterSalesIntake(clientName: client.name, serialNumber: productId, isWarrantyActive: wInfo.isActive))
+                                router.push(SARoute.afterSalesIntake(client: client, serialNumber: productId, isWarrantyActive: wInfo.isActive))
                             }) {
                                 HStack(spacing: 10) {
                                     Image(systemName: "wrench.and.screwdriver")

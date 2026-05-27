@@ -110,8 +110,8 @@ struct SalesAssociateCanvas: View {
             CreateAppointmentView()
         case .returns:
             ReturnsView()
-        case .afterSalesIntake(let clientName, let serialNumber, let isWarrantyActive):
-            AfterSalesIntakeView(clientName: clientName, serialNumber: serialNumber, isWarrantyActive: isWarrantyActive)
+        case .afterSalesIntake(let client, let serialNumber, let isWarrantyActive):
+            AfterSalesIntakeView(client: client, serialNumber: serialNumber, isWarrantyActive: isWarrantyActive)
         case .afterSalesTracking:
             AfterSalesTrackingView()
         case .remoteSelling:

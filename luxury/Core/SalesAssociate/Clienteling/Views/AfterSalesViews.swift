@@ -11,12 +11,12 @@ import PhotosUI
 struct AfterSalesIntakeView: View {
     @Environment(\.dismiss) private var dismiss
     
-    let clientName: String?
+    let client: Client
     let serialNumber: String?
     let isWarrantyActive: Bool
     
     @State private var serial: String
-    @State private var issue = "Bracelet sizing and clasp stiffness"
+    @State private var issue = ""
     @State private var created = false
     
     @State private var showCamera = false
@@ -26,11 +26,81 @@ struct AfterSalesIntakeView: View {
     @State private var selectedItems: [PhotosPickerItem] = []
     @State private var uploadedImages: [UIImage] = []
     
-    init(clientName: String? = nil, serialNumber: String? = nil, isWarrantyActive: Bool = true) {
-        self.clientName = clientName
+    @State private var isDropdownOpen = false
+    @State private var selectedPurchase: ClientPurchase? = nil
+    @State private var clientPurchases: [ClientPurchase] = []
+    
+    @State private var dynamicIsWarrantyActive: Bool = true
+    @State private var dynamicWarrantyText: String? = nil
+    
+    private var isReadOnly: Bool {
+        return serialNumber != nil
+    }
+    
+    init(client: Client, serialNumber: String? = nil, isWarrantyActive: Bool = true) {
+        self.client = client
         self.serialNumber = serialNumber
         self.isWarrantyActive = isWarrantyActive
-        self._serial = State(initialValue: serialNumber ?? "RLX-126610LN-8M2")
+        
+        let localPurchases = PurchaseHistoryService.shared.fetchPurchases(clientId: client.id)
+        self._clientPurchases = State(initialValue: localPurchases)
+        
+        if let sn = serialNumber {
+            self._serial = State(initialValue: sn)
+            // Look up corresponding purchase
+            let matchingPurchase = localPurchases.first { p in
+                let prodId = "PRD-" + String(p.id.uuidString.prefix(8).uppercased())
+                return prodId == sn
+            }
+            if let purchase = matchingPurchase {
+                let wInfo = Self.checkWarrantyStatus(purchaseDateStr: purchase.date)
+                self._dynamicIsWarrantyActive = State(initialValue: wInfo.isActive)
+                self._dynamicWarrantyText = State(initialValue: wInfo.expirationText)
+                self._selectedPurchase = State(initialValue: purchase)
+            } else {
+                let wText = isWarrantyActive ? "Valid until 24 nov 2026" : "Expired on 24 nov 2026"
+                self._dynamicIsWarrantyActive = State(initialValue: isWarrantyActive)
+                self._dynamicWarrantyText = State(initialValue: wText)
+            }
+        } else {
+            self._serial = State(initialValue: "")
+            self._dynamicIsWarrantyActive = State(initialValue: true)
+            self._dynamicWarrantyText = State(initialValue: nil)
+        }
+    }
+    
+    private static func checkWarrantyStatus(purchaseDateStr: String) -> (isActive: Bool, expirationText: String) {
+        let formatters = [
+            "MMM yyyy",
+            "dd MMM yyyy",
+            "yyyy-MM-dd",
+            "d MMM yyyy",
+            "MMM dd, yyyy"
+        ]
+        let df = DateFormatter()
+        df.locale = Locale(identifier: "en_US_POSIX")
+        var parsedDate: Date? = nil
+        for format in formatters {
+            df.dateFormat = format
+            if let parsed = df.date(from: purchaseDateStr) {
+                parsedDate = parsed
+                break
+            }
+        }
+        
+        guard let pDate = parsedDate else {
+            return (isActive: true, expirationText: "Valid until 24 nov 2026")
+        }
+        
+        if let futureDate = Calendar.current.date(byAdding: .year, value: 2, to: pDate) {
+            let isActive = futureDate > Date()
+            df.dateFormat = "d MMM yyyy"
+            let dateStr = df.string(from: futureDate).lowercased()
+            let text = isActive ? "Valid until \(dateStr)" : "Expired on \(dateStr)"
+            return (isActive: isActive, expirationText: text)
+        }
+        
+        return (isActive: true, expirationText: "Valid until 24 nov 2026")
     }
     
     var body: some View {
@@ -60,13 +130,13 @@ struct AfterSalesIntakeView: View {
                             status: created ? .success : (uploadedImages.isEmpty ? .warning : .pending)
                         )
                         
-                        // Client enclosed card
+                        // Client card (read-only)
                         VStack(alignment: .leading, spacing: 6) {
                             Text("Client")
                                 .font(AppFonts.serif(size: 13, weight: .bold))
                                 .foregroundStyle(AppColors.gold)
                                 .kerning(0.5)
-                            Text(clientName != nil ? "\(clientName!) · UHNW · Appointment linked" : "Rahul Bajaj · UHNW · Appointment linked")
+                            Text("\(client.name) · \(client.tier.rawValue.uppercased()) · Appointment linked")
                                 .font(AppFonts.sansSerif(size: 14, weight: .medium))
                                 .foregroundStyle(.white)
                         }
@@ -79,16 +149,104 @@ struct AfterSalesIntakeView: View {
                                 .stroke(AppColors.gold.opacity(0.3), lineWidth: 1)
                         )
                         
-                        // Serial Number enclosed card
-                        VStack(alignment: .leading, spacing: 6) {
+                        // Serial Number / Selection card
+                        VStack(alignment: .leading, spacing: 8) {
                             Text("Serial Number")
                                 .font(AppFonts.serif(size: 13, weight: .bold))
                                 .foregroundStyle(AppColors.gold)
                                 .kerning(0.5)
-                            TextField("Serial or manual item entry", text: $serial)
-                                .font(AppFonts.sansSerif(size: 14))
-                                .foregroundStyle(AppColors.text)
-                                .textFieldStyle(.plain)
+                            
+                            if isReadOnly {
+                                Text(serial)
+                                    .font(AppFonts.sansSerif(size: 14, weight: .medium))
+                                    .foregroundStyle(.white)
+                            } else {
+                                Button(action: {
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        isDropdownOpen.toggle()
+                                    }
+                                }) {
+                                    HStack {
+                                        Text(selectedPurchase?.name ?? "Select Product from History")
+                                            .font(AppFonts.sansSerif(size: 14, weight: .medium))
+                                            .foregroundStyle(selectedPurchase == nil ? AppColors.secondary : .white)
+                                        Spacer()
+                                        Image(systemName: isDropdownOpen ? "chevron.up" : "chevron.down")
+                                            .font(.system(size: 12, weight: .bold))
+                                            .foregroundStyle(AppColors.gold)
+                                    }
+                                }
+                                .buttonStyle(.plain)
+                                
+                                if isDropdownOpen {
+                                    VStack(spacing: 8) {
+                                        Divider().background(AppColors.gold.opacity(0.2))
+                                        
+                                        if clientPurchases.isEmpty {
+                                            Text("No purchases found for this client")
+                                                .font(AppFonts.sansSerif(size: 12))
+                                                .foregroundStyle(AppColors.secondary)
+                                                .padding(.vertical, 8)
+                                        } else {
+                                            ForEach(clientPurchases) { p in
+                                                let prodId = "PRD-" + String(p.id.uuidString.prefix(8).uppercased())
+                                                Button(action: {
+                                                    selectedPurchase = p
+                                                    serial = prodId
+                                                    
+                                                    let wInfo = Self.checkWarrantyStatus(purchaseDateStr: p.date)
+                                                    dynamicIsWarrantyActive = wInfo.isActive
+                                                    dynamicWarrantyText = wInfo.expirationText
+                                                    
+                                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                                        isDropdownOpen = false
+                                                    }
+                                                }) {
+                                                    HStack {
+                                                        VStack(alignment: .leading, spacing: 2) {
+                                                            Text(p.name)
+                                                                .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                                                .foregroundStyle(.white)
+                                                            Text("SN: \(prodId) · \(p.date)")
+                                                                .font(AppFonts.sansSerif(size: 11))
+                                                                .foregroundStyle(AppColors.secondary)
+                                                        }
+                                                        Spacer()
+                                                        if selectedPurchase?.id == p.id {
+                                                            Image(systemName: "checkmark")
+                                                                .font(.system(size: 12, weight: .bold))
+                                                                .foregroundStyle(AppColors.gold)
+                                                        }
+                                                    }
+                                                    .padding(.vertical, 6)
+                                                    .contentShape(Rectangle())
+                                                }
+                                                .buttonStyle(.plain)
+                                                
+                                                if p.id != clientPurchases.last?.id {
+                                                    Divider().background(AppColors.gold.opacity(0.1))
+                                                }
+                                            }
+                                        }
+                                    }
+                                    .padding(.top, 4)
+                                }
+                                
+                                if selectedPurchase != nil {
+                                    Divider().background(AppColors.gold.opacity(0.2))
+                                        .padding(.top, 4)
+                                    
+                                    HStack {
+                                        Text("Serial:")
+                                            .font(AppFonts.sansSerif(size: 11))
+                                            .foregroundStyle(AppColors.secondary)
+                                        Text(serial)
+                                            .font(AppFonts.sansSerif(size: 12, weight: .semibold))
+                                            .foregroundStyle(AppColors.gold)
+                                    }
+                                    .padding(.top, 4)
+                                }
+                            }
                         }
                         .padding(16)
                         .background(AppColors.surface)
@@ -98,7 +256,7 @@ struct AfterSalesIntakeView: View {
                                 .stroke(AppColors.gold.opacity(0.3), lineWidth: 1)
                         )
                         
-                        // Service Details enclosed card
+                        // Service Details card
                         VStack(alignment: .leading, spacing: 6) {
                             Text("Service Details")
                                 .font(AppFonts.serif(size: 13, weight: .bold))
@@ -117,7 +275,7 @@ struct AfterSalesIntakeView: View {
                                 .stroke(AppColors.gold.opacity(0.3), lineWidth: 1)
                         )
                         
-                        // Condition Photos enclosed card
+                        // Condition Photos card
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Condition Photos")
                                 .font(AppFonts.serif(size: 13, weight: .bold))
@@ -185,67 +343,65 @@ struct AfterSalesIntakeView: View {
                         )
                         
                         // Glassmorphic Warranty card
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("WARRANTY")
-                                .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                                .foregroundStyle(isWarrantyActive ? Color(hex: 0xA3E4D7) : Color(hex: 0xF5B7B1))
-                                .kerning(1.5)
-                            
-                            HStack(spacing: 8) {
-                                Text(isWarrantyActive ? "ACTIVE" : "EXPIRED")
+                        if let wText = dynamicWarrantyText {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("WARRANTY")
                                     .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                                    .foregroundStyle(.white)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 6)
-                                            .fill(isWarrantyActive ? Color(hex: 0x3D9E6A).opacity(0.6) : Color(hex: 0xC94C4C).opacity(0.6))
-                                    )
+                                    .foregroundStyle(dynamicIsWarrantyActive ? Color(hex: 0xA3E4D7) : Color(hex: 0xF5B7B1))
+                                    .kerning(1.5)
                                 
-                                Text(isWarrantyActive ? "Valid until 24 nov 2026" : "Expired on 24 nov 2026")
-                                    .font(AppFonts.sansSerif(size: 12, weight: .semibold))
-                                    .foregroundStyle(.white.opacity(0.9))
+                                HStack(spacing: 8) {
+                                    Text(dynamicIsWarrantyActive ? "ACTIVE" : "EXPIRED")
+                                        .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                                        .foregroundStyle(.white)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 6)
+                                                .fill(dynamicIsWarrantyActive ? Color(hex: 0x3D9E6A).opacity(0.6) : Color(hex: 0xC94C4C).opacity(0.6))
+                                        )
+                                    
+                                    Text(wText)
+                                        .font(AppFonts.sansSerif(size: 12, weight: .semibold))
+                                        .foregroundStyle(.white.opacity(0.9))
+                                }
                             }
-                        }
-                        .padding(16)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(
-                            ZStack {
-                                // Translucent base
-                                isWarrantyActive ? Color(hex: 0x3D9E6A).opacity(0.12) : Color(hex: 0xC94C4C).opacity(0.12)
-                                
-                                // Blur
-                                Color.clear.background(.ultraThinMaterial)
-                                
-                                // Highlight reflection
-                                LinearGradient(
-                                    colors: [.white.opacity(0.18), .white.opacity(0.02), .clear],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            }
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14)
-                                .strokeBorder(
+                            .padding(16)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(
+                                ZStack {
+                                    dynamicIsWarrantyActive ? Color(hex: 0x3D9E6A).opacity(0.12) : Color(hex: 0xC94C4C).opacity(0.12)
+                                    Color.clear.background(.ultraThinMaterial)
                                     LinearGradient(
-                                        colors: [
-                                            isWarrantyActive ? Color(hex: 0x3D9E6A).opacity(0.8) : Color(hex: 0xC94C4C).opacity(0.8),
-                                            isWarrantyActive ? Color(hex: 0x3D9E6A).opacity(0.2) : Color(hex: 0xC94C4C).opacity(0.2)
-                                        ],
+                                        colors: [.white.opacity(0.18), .white.opacity(0.02), .clear],
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
-                                    ),
-                                    lineWidth: 1.5
-                                )
-                        )
-                        .shadow(
-                            color: isWarrantyActive ? Color(hex: 0x3D9E6A).opacity(0.25) : Color(hex: 0xC94C4C).opacity(0.25),
-                            radius: 8,
-                            x: 0,
-                            y: 4
-                        )
+                                    )
+                                }
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .strokeBorder(
+                                        LinearGradient(
+                                            colors: [
+                                                dynamicIsWarrantyActive ? Color(hex: 0x3D9E6A).opacity(0.8) : Color(hex: 0xC94C4C).opacity(0.8),
+                                                dynamicIsWarrantyActive ? Color(hex: 0x3D9E6A).opacity(0.2) : Color(hex: 0xC94C4C).opacity(0.2)
+                                            ],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        ),
+                                        lineWidth: 1.5
+                                    )
+                            )
+                            .shadow(
+                                color: dynamicIsWarrantyActive ? Color(hex: 0x3D9E6A).opacity(0.25) : Color(hex: 0xC94C4C).opacity(0.25),
+                                radius: 8,
+                                x: 0,
+                                y: 4
+                            )
+                            .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                        }
                         
                         // Action Button
                         Button(action: {
@@ -256,15 +412,15 @@ struct AfterSalesIntakeView: View {
                                 Text(created ? "Ticket RSMS-AS-1042 Created" : "Create Service Ticket")
                             }
                             .font(AppFonts.sansSerif(size: 15, weight: .bold))
-                            .foregroundStyle(uploadedImages.isEmpty ? Color.white.opacity(0.3) : AppColors.background)
+                            .foregroundStyle(uploadedImages.isEmpty || serial.isEmpty ? Color.white.opacity(0.3) : AppColors.background)
                             .frame(maxWidth: .infinity)
                             .frame(height: 56)
                             .background(
                                 RoundedRectangle(cornerRadius: 14)
-                                    .fill(uploadedImages.isEmpty ? Color.white.opacity(0.1) : AppColors.gold)
+                                    .fill(uploadedImages.isEmpty || serial.isEmpty ? Color.white.opacity(0.1) : AppColors.gold)
                             )
                         }
-                        .disabled(uploadedImages.isEmpty)
+                        .disabled(uploadedImages.isEmpty || serial.isEmpty)
                     }
                     .padding(.horizontal, 24)
                     .padding(.vertical, 20)
@@ -282,7 +438,6 @@ struct AfterSalesIntakeView: View {
                     }
                     .transition(.opacity)
                 
-                // Centered Floating Popup Card
                 VStack(alignment: .leading, spacing: 0) {
                     Text("Select Media Source")
                         .font(AppFonts.serif(size: 15, weight: .bold))

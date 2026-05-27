@@ -8,22 +8,6 @@
 import Foundation
 import Supabase
 
-struct DBPurchaseItem: Codable {
-    let id: UUID
-    let clientId: UUID
-    let name: String
-    let price: String
-    let date: String
-    
-    enum CodingKeys: String, CodingKey {
-        case id
-        case clientId = "client_id"
-        case name
-        case price
-        case date
-    }
-}
-
 final class PurchaseHistoryService {
     static let shared = PurchaseHistoryService()
     private let client = SupabaseManager.shared.client
@@ -60,19 +44,39 @@ final class PurchaseHistoryService {
     
     func syncPurchases(clientId: UUID) async {
         do {
-            let dbItems: [DBPurchaseItem] = try await client
-                .from("purchases")
+            let dbItems: [PurchasedItem] = try await client
+                .from("purchased_items")
                 .select()
-                .eq("client_id", value: clientId.uuidString)
+                .eq("uid", value: clientId.uuidString)
                 .execute()
                 .value
             
-            let purchases = dbItems.map {
-                ClientPurchase(id: $0.id, name: $0.name, price: Double($0.price) ?? 0.0, date: $0.date)
+            if !dbItems.isEmpty {
+                let productIds = dbItems.map { $0.productId }
+                let dbCatalogs: [CatalogEntity] = try await client
+                    .from("catalogs")
+                    .select()
+                    .in("id", value: productIds.map { $0.uuidString })
+                    .execute()
+                    .value
+                
+                let formatter = DateFormatter()
+                formatter.dateFormat = "d MMM yyyy"
+                
+                let purchases = dbItems.compactMap { item in
+                    if let cat = dbCatalogs.first(where: { $0.id == item.productId }) {
+                        let itemDate = item.reservedDate ?? item.createdAt ?? Date()
+                        let dateStr = formatter.string(from: itemDate)
+                        return ClientPurchase(id: item.id, name: cat.name, price: cat.amount, date: dateStr)
+                    }
+                    return nil
+                }
+                savePurchases(purchases, for: clientId)
+            } else {
+                // Do not clear local cache if no records exist on Supabase (e.g. mock clients)
             }
-            savePurchases(purchases, for: clientId)
         } catch {
-            print("Supabase fetch purchases warning: \(error.localizedDescription)")
+            print("Supabase fetch purchased_items warning: \(error.localizedDescription)")
         }
     }
     
@@ -89,26 +93,42 @@ final class PurchaseHistoryService {
         }
         
         let newPurchase = ClientPurchase(id: UUID(), name: name, price: price, date: displayDate)
-        current.insert(newPurchase, at: 0) // Prepend newest purchase
+        current.insert(newPurchase, at: 0)
         savePurchases(current, for: clientId)
         
         // Sync to Supabase in background
         Task {
             do {
-                let dbItem = DBPurchaseItem(
-                    id: newPurchase.id,
-                    clientId: clientId,
-                    name: newPurchase.name,
-                    price: String(newPurchase.price),
-                    date: newPurchase.date
-                )
-                try await client
-                    .from("purchases")
-                    .insert(dbItem)
+                let dbCatalogs: [CatalogEntity] = try await client
+                    .from("catalogs")
+                    .select()
                     .execute()
-                print("Successfully synced purchase to Supabase.")
+                    .value
+                
+                let matchingCatalog = dbCatalogs.first { cat in
+                    name.lowercased().contains(cat.name.lowercased()) || cat.name.lowercased().contains(name.lowercased())
+                }
+                
+                guard let targetCatalog = matchingCatalog ?? dbCatalogs.first else {
+                    print("No catalogs available to map purchase.")
+                    return
+                }
+                
+                let piPayload: [String: AnyJSON] = [
+                    "id": .string(newPurchase.id.uuidString),
+                    "uid": .string(clientId.uuidString),
+                    "product_id": .string(targetCatalog.id.uuidString),
+                    "transaction_id": .string(UUID().uuidString),
+                    "status": .string("Completed")
+                ]
+                
+                try await client
+                    .from("purchased_items")
+                    .insert(piPayload)
+                    .execute()
+                print("Successfully synced purchase to purchased_items on Supabase.")
             } catch {
-                print("Supabase purchase sync warning: \(error.localizedDescription)")
+                print("Supabase purchased_items sync warning: \(error.localizedDescription)")
             }
         }
     }
