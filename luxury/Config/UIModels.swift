@@ -431,21 +431,62 @@ struct TransferRequest: Identifiable, Hashable, Codable {
     }
 }
 
-struct StoreEvent: Identifiable, Hashable {
+struct VIPGuest: Identifiable, Codable, Hashable {
+    var id: UUID
+    var name: String
+    var tier: String
+    var status: String // "No Response", "Confirmed", "Declined"
+    var reminderSent: Bool = false
+}
+
+struct StoreEvent: Identifiable, Codable, Hashable {
     let id: UUID
-    let title: String
-    let date: String
-    let rsvpCount: Int
-    let type: String
+    var title: String
+    var date: String
+    var rsvpCount: Int
+    var type: String
     
-    init(id: UUID = UUID(), title: String, date: String, rsvpCount: Int, type: String) {
+    // VIP Preview fields
+    var featuredCollection: String?
+    var venue: String?
+    var hostAssociate: String?
+    var guests: [VIPGuest]?
+    var deadline: Date?
+    var reminderWindowHours: Int? // hours before deadline
+    var remindersSent: Bool?
+    var invitationsSent: Bool?
+    
+    init(
+        id: UUID = UUID(),
+        title: String,
+        date: String,
+        rsvpCount: Int,
+        type: String,
+        featuredCollection: String? = nil,
+        venue: String? = nil,
+        hostAssociate: String? = nil,
+        guests: [VIPGuest]? = nil,
+        deadline: Date? = nil,
+        reminderWindowHours: Int? = nil,
+        remindersSent: Bool? = nil,
+        invitationsSent: Bool? = false
+    ) {
         self.id = id
         self.title = title
         self.date = date
         self.rsvpCount = rsvpCount
         self.type = type
+        self.featuredCollection = featuredCollection
+        self.venue = venue
+        self.hostAssociate = hostAssociate
+        self.guests = guests
+        self.deadline = deadline
+        self.reminderWindowHours = reminderWindowHours
+        self.remindersSent = remindersSent
+        self.invitationsSent = invitationsSent
     }
 }
+
 
 struct ReportItem: Identifiable, Hashable {
     let id: UUID

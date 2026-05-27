@@ -14,7 +14,17 @@ struct CreateEventView: View {
     @State private var selectedType = "Trunk Show"
     @State private var eventDescription: String = ""
     
+    // VIP Preview fields
+    @State private var featuredCollection: String = ""
+    @State private var venue: String = "VIP Salon"
+    @State private var hostAssociate: String = "Sarah Connor"
+    @State private var rsvpDeadline = Date().addingTimeInterval(86400 * 3) // default 3 days out
+    @State private var reminderWindowHours: Int = 24
+    
     let eventTypes = ["Trunk Show", "VIP Preview", "Product Launch", "Private Sale"]
+    let venues = ["VIP Salon", "Milan Suite", "Garden Terrace", "Private Gallery", "Main Showroom"]
+    let hostAssociates = ["Sarah Connor", "Alex Mercer", "Elena Fisher", "James Bond"]
+    let reminderOptions = [12, 24, 48, 72]
     
     var body: some View {
         ZStack {
@@ -69,20 +79,147 @@ struct CreateEventView: View {
                                 HStack(spacing: 10) {
                                     ForEach(eventTypes, id: \.self) { type in
                                         let isSelected = selectedType == type
-                                        Text(type)
-                                            .font(AppFonts.sansSerif(size: 12, weight: isSelected ? .medium : .light))
-                                            .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
-                                            .padding(.horizontal, 16)
-                                            .padding(.vertical, 10)
-                                            .background(isSelected ? AppColors.gold : AppColors.surface)
-                                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                                            .overlay(RoundedRectangle(cornerRadius: 10).stroke(isSelected ? Color.clear : AppColors.gold15, lineWidth: 0.5))
-                                            .onTapGesture { selectedType = type }
+                                        Button(action: {
+                                            selectedType = type
+                                        }) {
+                                            Text(type)
+                                                .font(AppFonts.sansSerif(size: 12, weight: isSelected ? .medium : .light))
+                                                .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
+                                                .padding(.horizontal, 16)
+                                                .padding(.vertical, 10)
+                                                .background(isSelected ? AppColors.gold : AppColors.surface)
+                                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                                .overlay(RoundedRectangle(cornerRadius: 10).stroke(isSelected ? Color.clear : AppColors.gold15, lineWidth: 0.5))
+                                        }
+                                        .buttonStyle(.plain)
                                     }
                                 }
                             }
                         }
                         .padding(.horizontal, 24)
+                        
+                        if selectedType == "VIP Preview" || selectedType == "Trunk Show" || selectedType == "Product Launch" {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("FEATURED COLLECTION")
+                                    .font(AppFonts.sansSerif(size: 10))
+                                    .foregroundStyle(AppColors.gold)
+                                    .kerning(2)
+                                
+                                TextField("e.g. Winter High Jewelry Collection", text: $featuredCollection)
+                                    .font(AppFonts.sansSerif(size: 14))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 16)
+                                    .frame(height: 50)
+                                    .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                            }
+                            .padding(.horizontal, 24)
+                            
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("VENUE")
+                                    .font(AppFonts.sansSerif(size: 10))
+                                    .foregroundStyle(AppColors.gold)
+                                    .kerning(2)
+                                
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 10) {
+                                        ForEach(venues, id: \.self) { item in
+                                            let isSelected = venue == item
+                                            Button(action: {
+                                                venue = item
+                                            }) {
+                                                Text(item)
+                                                    .font(AppFonts.sansSerif(size: 12, weight: isSelected ? .medium : .light))
+                                                    .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
+                                                    .padding(.horizontal, 16)
+                                                    .padding(.vertical, 10)
+                                                    .background(isSelected ? AppColors.gold : AppColors.surface)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(isSelected ? Color.clear : AppColors.gold15, lineWidth: 0.5))
+                                            }
+                                            .buttonStyle(.plain)
+                                        }
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 24)
+                            
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("ASSIGNED HOST ASSOCIATE")
+                                    .font(AppFonts.sansSerif(size: 10))
+                                    .foregroundStyle(AppColors.gold)
+                                    .kerning(2)
+                                
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 10) {
+                                        ForEach(hostAssociates, id: \.self) { item in
+                                            let isSelected = hostAssociate == item
+                                            Button(action: {
+                                                hostAssociate = item
+                                            }) {
+                                                Text(item)
+                                                    .font(AppFonts.sansSerif(size: 12, weight: isSelected ? .medium : .light))
+                                                    .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
+                                                    .padding(.horizontal, 16)
+                                                    .padding(.vertical, 10)
+                                                    .background(isSelected ? AppColors.gold : AppColors.surface)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(isSelected ? Color.clear : AppColors.gold15, lineWidth: 0.5))
+                                            }
+                                            .buttonStyle(.plain)
+                                        }
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 24)
+                            
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("RSVP DEADLINE")
+                                    .font(AppFonts.sansSerif(size: 10))
+                                    .foregroundStyle(AppColors.gold)
+                                    .kerning(2)
+                                
+                                DatePicker("Select Deadline", selection: $rsvpDeadline, in: Date()...)
+                                    .datePickerStyle(.compact)
+                                    .tint(AppColors.gold)
+                                    .padding(.horizontal, 16)
+                                    .frame(height: 50)
+                                    .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                            }
+                            .padding(.horizontal, 24)
+                            
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("AUTOMATIC REMINDER WINDOW")
+                                    .font(AppFonts.sansSerif(size: 10))
+                                    .foregroundStyle(AppColors.gold)
+                                    .kerning(2)
+                                
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 10) {
+                                        ForEach(reminderOptions, id: \.self) { hours in
+                                            let isSelected = reminderWindowHours == hours
+                                            Button(action: {
+                                                reminderWindowHours = hours
+                                            }) {
+                                                Text("\(hours)h before")
+                                                    .font(AppFonts.sansSerif(size: 12, weight: isSelected ? .medium : .light))
+                                                    .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
+                                                    .padding(.horizontal, 16)
+                                                    .padding(.vertical, 10)
+                                                    .background(isSelected ? AppColors.gold : AppColors.surface)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(isSelected ? Color.clear : AppColors.gold15, lineWidth: 0.5))
+                                            }
+                                            .buttonStyle(.plain)
+                                        }
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 24)
+                        }
                         
                         VStack(alignment: .leading, spacing: 12) {
                             Text("DATE & TIME")
@@ -122,9 +259,61 @@ struct CreateEventView: View {
                 }
                 
                 VStack(spacing: 0) {
-                    CustomButton(title: "Launch Event", action: { dismiss() })
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 40)
+                    CustomButton(title: "Launch Event", action: {
+                        let formatter = DateFormatter()
+                        formatter.dateFormat = "dd MMMM yyyy"
+                        let dateString = formatter.string(from: eventDate)
+                        
+                        var guestsList: [VIPGuest]? = nil
+                        var featured: String? = nil
+                        var vVenue: String? = nil
+                        var assignedHost: String? = nil
+                        var deadlineVal: Date? = nil
+                        var windowHoursVal: Int? = nil
+                        
+                        if selectedType == "VIP Preview" || selectedType == "Trunk Show" || selectedType == "Product Launch" {
+                            let mockRahulId = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
+                            let mockPriyaId = UUID(uuidString: "00000000-0000-0000-0000-000000000002")!
+                            let mockDeepaId = UUID(uuidString: "00000000-0000-0000-0000-000000000003")!
+                            let mockAnanyaId = UUID(uuidString: "00000000-0000-0000-0000-000000000004")!
+                            let mockVikramId = UUID(uuidString: "00000000-0000-0000-0000-000000000005")!
+                            
+                            guestsList = [
+                                VIPGuest(id: mockRahulId, name: "Rahul Bajaj", tier: "UHNW", status: "No Response", reminderSent: false),
+                                VIPGuest(id: mockPriyaId, name: "Priya Shah", tier: "UHNW", status: "No Response", reminderSent: false),
+                                VIPGuest(id: mockDeepaId, name: "Deepa Srinivas", tier: "VIP", status: "No Response", reminderSent: false),
+                                VIPGuest(id: mockAnanyaId, name: "Ananya Kapoor", tier: "VIP", status: "No Response", reminderSent: false),
+                                VIPGuest(id: mockVikramId, name: "Vikram Nair", tier: "VIP", status: "No Response", reminderSent: false)
+                            ]
+                            
+                            featured = featuredCollection.isEmpty ? (selectedType == "Trunk Show" ? "Exclusive Seasonal Collection" : (selectedType == "Product Launch" ? "Exclusive Product Launch" : "Exclusive Winter Preview")) : featuredCollection
+                            vVenue = venue
+                            assignedHost = hostAssociate
+                            deadlineVal = rsvpDeadline
+                            windowHoursVal = reminderWindowHours
+                        }
+                        
+                        let newEvent = StoreEvent(
+                            title: eventTitle.isEmpty ? (selectedType == "Trunk Show" ? "New Trunk Show" : (selectedType == "Product Launch" ? "New Product Launch" : "New VIP Preview")) : eventTitle,
+                            date: dateString,
+                            rsvpCount: 0,
+                            type: selectedType == "VIP Preview" ? "VIP PREVIEW" : (selectedType == "Trunk Show" ? "TRUNK SHOW" : (selectedType == "Product Launch" ? "PRODUCT LAUNCH" : selectedType.uppercased())),
+                            featuredCollection: featured,
+                            venue: vVenue,
+                            hostAssociate: assignedHost,
+                            guests: guestsList,
+                            deadline: deadlineVal,
+                            reminderWindowHours: windowHoursVal,
+                            remindersSent: false
+                        )
+                        
+                        let viewModel = StoreViewModel()
+                        viewModel.addEvent(newEvent)
+                        
+                        dismiss()
+                    })
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 40)
                 }
                 .background(AppColors.background)
             }
