@@ -157,3 +157,8 @@ struct ActiveAuditView: View {
         }
     }
 }
+
+#Preview {
+    ActiveAuditView()
+        .environment(InventoryControllerAppState())
+}

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct StockDetailView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(StockViewModel.self) private var viewModel
     let alert: InventoryAlert
     
     var body: some View {
@@ -50,9 +51,10 @@ struct StockDetailView: View {
                         
                         VStack(spacing: 1) {
                             DetailInfoRow(label: "Available", value: "\(alert.currentQty)")
-                            DetailInfoRow(label: "Reserved", value: "2")
-                            DetailInfoRow(label: "In Transit", value: "12")
-                            DetailInfoRow(label: "Last Count", value: "14 May 2026")
+                            DetailInfoRow(label: "Location", value: alert.location)
+                            DetailInfoRow(label: "Alert Type", value: alert.alertType)
+                            DetailInfoRow(label: "Time Raised", value: alert.timeRaised)
+                            DetailInfoRow(label: "Urgency", value: alert.urgency.rawValue)
                         }
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                         .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
@@ -76,6 +78,21 @@ struct StockDetailView: View {
                         }
                     }
                     .padding(.bottom, 40)
+                }
+                
+                if viewModel.alerts.contains(where: { $0.id == alert.id }) {
+                    VStack {
+                        CustomButton(title: "Resolve Alert", icon: AnyView(Image(systemName: "checkmark.circle")), action: {
+                            withAnimation {
+                                viewModel.resolveAlert(alert)
+                            }
+                            dismiss()
+                        })
+                        .padding(.horizontal, 24)
+                    }
+                    .padding(.top, 20)
+                    .padding(.bottom, 40)
+                    .background(AppColors.background)
                 }
             }
         }
@@ -127,4 +144,18 @@ private struct MovementRow: View {
         .padding(.vertical, 16)
         .background(AppColors.surface)
     }
+}
+
+#Preview {
+    StockDetailView(alert: InventoryAlert(
+        itemName: "Rolex Submariner Date 126610LN",
+        sku: "RLX-126610",
+        currentQty: 0,
+        status: .error,
+        location: "Vault Room A",
+        alertType: "Out of Stock",
+        timeRaised: "10 mins ago",
+        urgency: .critical
+    ))
+    .environment(StockViewModel())
 }

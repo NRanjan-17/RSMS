@@ -50,6 +50,7 @@ enum ICRoute: Hashable {
     case sfsOrders
     case sfsVerification(PurchasedItemEntity)
     case endlessAisleSelection
+    case alerts
 }
 
 enum CARoute: Hashable {

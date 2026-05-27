@@ -60,19 +60,55 @@ struct RSMSCycleCount: Identifiable, Hashable {
     }
 }
 
+enum UrgencyLevel: String, Codable, Comparable {
+    case critical = "Critical"
+    case warning = "Warning"
+    case normal = "Normal"
+    
+    var priority: Int {
+        switch self {
+        case .critical: return 0
+        case .warning: return 1
+        case .normal: return 2
+        }
+    }
+    
+    static func < (lhs: UrgencyLevel, rhs: UrgencyLevel) -> Bool {
+        lhs.priority < rhs.priority
+    }
+}
+
 struct InventoryAlert: Identifiable, Hashable {
     let id: UUID
     let itemName: String
     let sku: String
     let currentQty: Int
     let status: BadgeStatus
+    let location: String
+    let alertType: String
+    let timeRaised: String
+    let urgency: UrgencyLevel
     
-    init(id: UUID = UUID(), itemName: String, sku: String, currentQty: Int, status: BadgeStatus) {
+    init(
+        id: UUID = UUID(),
+        itemName: String,
+        sku: String,
+        currentQty: Int,
+        status: BadgeStatus,
+        location: String = "Main Vault",
+        alertType: String = "Stock Issue",
+        timeRaised: String = "Just Now",
+        urgency: UrgencyLevel = .warning
+    ) {
         self.id = id
         self.itemName = itemName
         self.sku = sku
         self.currentQty = currentQty
         self.status = status
+        self.location = location
+        self.alertType = alertType
+        self.timeRaised = timeRaised
+        self.urgency = urgency
     }
 }
 

@@ -48,17 +48,35 @@ final class StockViewModel {
                     
                     if available == 0 {
                         outOfStock += 1
-                        newAlerts.append(InventoryAlert(itemName: catalog.name, sku: catalog.catalogId, currentQty: available, status: .error))
+                        newAlerts.append(InventoryAlert(
+                            itemName: catalog.name,
+                            sku: catalog.catalogId,
+                            currentQty: available,
+                            status: .error,
+                            location: "Vault Room A",
+                            alertType: "Out of Stock",
+                            timeRaised: "10 mins ago",
+                            urgency: .critical
+                        ))
                     } else if available < 3 {
                         lowStock += 1
-                        newAlerts.append(InventoryAlert(itemName: catalog.name, sku: catalog.catalogId, currentQty: available, status: .warning))
+                        newAlerts.append(InventoryAlert(
+                            itemName: catalog.name,
+                            sku: catalog.catalogId,
+                            currentQty: available,
+                            status: .warning,
+                            location: "Showcase C",
+                            alertType: "Low Stock",
+                            timeRaised: "1 hour ago",
+                            urgency: .warning
+                        ))
                     }
                 }
                 
                 let finalTotal = total
                 let finalLowStock = lowStock
                 let finalOutOfStock = outOfStock
-                let finalAlerts = Array(newAlerts.prefix(5))
+                let finalAlerts = newAlerts.sorted(by: { $0.urgency < $1.urgency })
                 
                 await MainActor.run {
                     self.totalItems = "\(finalTotal)"
@@ -70,6 +88,10 @@ final class StockViewModel {
                 print("Failed to fetch inventory stats: \(error)")
             }
         }
+    }
+    
+    func resolveAlert(_ alert: InventoryAlert) {
+        alerts.removeAll { $0.id == alert.id }
     }
     
     func fetchSFSCount() {

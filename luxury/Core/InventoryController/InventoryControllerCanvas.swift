@@ -168,6 +168,8 @@ struct InventoryControllerCanvas: View {
             SFSVerificationView(order: order)
         case .endlessAisleSelection:
             EndlessAisleWorkflowView()
+        case .alerts:
+            AlertsView()
         }
     }
 }

@@ -336,3 +336,11 @@ private struct ReportedSerial: Identifiable {
         value
     }
 }
+
+#Preview {
+    BatchScannerSheet(
+        scannedSerials: .constant([]),
+        existingSerials: [],
+        onDone: {}
+    )
+}

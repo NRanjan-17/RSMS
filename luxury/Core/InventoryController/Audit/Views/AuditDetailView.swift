@@ -139,3 +139,14 @@ private struct ChecklistRow: View {
         .background(AppColors.surface)
     }
 }
+
+#Preview {
+    AuditDetailView(audit: RSMSCycleCount(
+        title: "High Value Zone",
+        date: "Today",
+        scope: "Watches",
+        status: "Due",
+        badgeStatus: .warning
+    ))
+    .environment(Router())
+}

@@ -51,7 +51,12 @@ struct StockView: View {
                             }
                             .buttonStyle(.plain)
                             
-                            MetricCard(title: "Low Stock", value: viewModel.lowStockCount, subtitle: "Action Required", icon: "exclamationmark.triangle")
+                            Button(action: {
+                                router.push(ICRoute.alerts)
+                            }) {
+                                MetricCard(title: "Pending Alerts", value: "\(viewModel.alerts.count)", subtitle: "Action Required", icon: "bell.badge")
+                            }
+                            .buttonStyle(.plain)
                             
                             Button(action: {
                                 router.push(ICRoute.sfsOrders)
@@ -117,6 +122,7 @@ struct StockView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .environment(viewModel)
         .onAppear {
             viewModel.fetchInventoryStats()
             viewModel.fetchSFSCount()
@@ -126,4 +132,10 @@ struct StockView: View {
                 .presentationDragIndicator(.visible)
         }
     }
+}
+
+#Preview {
+    StockView()
+        .environment(Router())
+        .environment(AppCoordinator())
 }
