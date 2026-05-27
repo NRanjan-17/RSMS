@@ -56,19 +56,31 @@ struct ICCatalogDetailView: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
                             ForEach(Array(images.enumerated()), id: \.offset) { _, url in
-                                AsyncImage(url: URL(string: url)) { phase in
-                                    if let image = phase.image {
-                                        image
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fill)
-                                            .frame(width: 100, height: 100)
-                                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                                    } else {
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(AppColors.surface)
-                                            .frame(width: 100, height: 100)
-                                            .overlay(ProgressView())
+                                if let parsedURL = URL(string: url) {
+                                    AsyncImage(url: parsedURL) { phase in
+                                        if let image = phase.image {
+                                            image
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .frame(width: 100, height: 100)
+                                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                        } else if phase.error != nil {
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .fill(AppColors.surface)
+                                                .frame(width: 100, height: 100)
+                                                .overlay(Image(systemName: "photo").foregroundStyle(.gray))
+                                        } else {
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .fill(AppColors.surface)
+                                                .frame(width: 100, height: 100)
+                                                .overlay(ProgressView())
+                                        }
                                     }
+                                } else {
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(AppColors.surface)
+                                        .frame(width: 100, height: 100)
+                                        .overlay(Image(systemName: "photo").foregroundStyle(.gray))
                                 }
                             }
                         }

@@ -133,21 +133,27 @@ private struct CatalogGridCard: View {
             VStack(alignment: .leading, spacing: 0) {
                 ZStack {
                     AppColors.surface2
-                    AsyncImage(url: firstURL) { phase in
-                        switch phase {
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: w, height: imageHeight)
-                                .clipped()
-                        case .empty:
-                            ProgressView().tint(AppColors.gold)
-                        default:
-                            Image(systemName: "photo")
-                                .font(.system(size: 28))
-                                .foregroundStyle(AppColors.gold.opacity(0.35))
+                    if let url = firstURL {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: w, height: imageHeight)
+                                    .clipped()
+                            case .empty:
+                                ProgressView().tint(AppColors.gold)
+                            default:
+                                Image(systemName: "photo")
+                                    .font(.system(size: 28))
+                                    .foregroundStyle(AppColors.gold.opacity(0.35))
+                            }
                         }
+                    } else {
+                        Image(systemName: "photo")
+                            .font(.system(size: 28))
+                            .foregroundStyle(AppColors.gold.opacity(0.35))
                     }
                 }
                 .frame(width: w, height: imageHeight)

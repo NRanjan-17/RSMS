@@ -164,32 +164,44 @@ struct CatalogFormView: View {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 12) {
                                     ForEach(Array(viewModel.existingImageURLs.enumerated()), id: \.offset) { index, url in
-                                        AsyncImage(url: URL(string: url)) { phase in
-                                            if let image = phase.image {
-                                                image
-                                                    .resizable()
-                                                    .aspectRatio(contentMode: .fill)
-                                                    .frame(width: 80, height: 80)
-                                                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                    .overlay(alignment: .topTrailing) {
-                                                        Button(action: {
-                                                            pendingImageToDelete = index
-                                                            pendingImageType = .existing
-                                                            showDeleteImageAlert = true
-                                                        }) {
-                                                            Image(systemName: "xmark.circle.fill")
-                                                                .font(.system(size: 20))
-                                                                .foregroundStyle(AppColors.error)
-                                                                .background(Circle().fill(Color.white).frame(width: 16, height: 16))
-                                                                .padding(4)
+                                        if let parsedURL = URL(string: url) {
+                                            AsyncImage(url: parsedURL) { phase in
+                                                if let image = phase.image {
+                                                    image
+                                                        .resizable()
+                                                        .aspectRatio(contentMode: .fill)
+                                                        .frame(width: 80, height: 80)
+                                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                        .overlay(alignment: .topTrailing) {
+                                                            Button(action: {
+                                                                pendingImageToDelete = index
+                                                                pendingImageType = .existing
+                                                                showDeleteImageAlert = true
+                                                            }) {
+                                                                Image(systemName: "xmark.circle.fill")
+                                                                    .font(.system(size: 20))
+                                                                    .foregroundStyle(AppColors.error)
+                                                                    .background(Circle().fill(Color.white).frame(width: 16, height: 16))
+                                                                    .padding(4)
+                                                            }
                                                         }
-                                                    }
-                                            } else {
-                                                RoundedRectangle(cornerRadius: 8)
-                                                    .fill(AppColors.surface)
-                                                    .frame(width: 80, height: 80)
-                                                    .overlay(ProgressView())
+                                                } else if phase.error != nil {
+                                                    RoundedRectangle(cornerRadius: 8)
+                                                        .fill(AppColors.surface)
+                                                        .frame(width: 80, height: 80)
+                                                        .overlay(Image(systemName: "photo").foregroundStyle(.gray))
+                                                } else {
+                                                    RoundedRectangle(cornerRadius: 8)
+                                                        .fill(AppColors.surface)
+                                                        .frame(width: 80, height: 80)
+                                                        .overlay(ProgressView())
+                                                }
                                             }
+                                        } else {
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .fill(AppColors.surface)
+                                                .frame(width: 80, height: 80)
+                                                .overlay(Image(systemName: "photo").foregroundStyle(.gray))
                                         }
                                     }
                                     
