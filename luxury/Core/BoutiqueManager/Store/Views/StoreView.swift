@@ -108,32 +108,59 @@ struct StoreView: View {
                             
                             VStack(spacing: 12) {
                                 ForEach(viewModel.events) { event in
-                                    HStack {
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text(event.type)
-                                                .font(AppFonts.sansSerif(size: 9, weight: .bold))
-                                                .foregroundStyle(AppColors.gold)
-                                                .kerning(1)
-                                            Text(event.title)
-                                                .font(AppFonts.serif(size: 17, weight: .medium))
-                                                .foregroundStyle(.white)
-                                            Text(event.date)
-                                                .font(AppFonts.sansSerif(size: 12))
-                                                .foregroundStyle(AppColors.secondary)
+                                    let isInteractive = event.type.uppercased() == "VIP PREVIEW" || event.type.uppercased() == "TRUNK SHOW" || event.type.uppercased() == "PRODUCT LAUNCH"
+                                    Button(action: {
+                                        if event.type.uppercased() == "VIP PREVIEW" {
+                                            router.push(BMRoute.vipPreviewDetail(event))
+                                        } else if event.type.uppercased() == "TRUNK SHOW" {
+                                            router.push(BMRoute.trunkShowDetail(event))
+                                        } else if event.type.uppercased() == "PRODUCT LAUNCH" {
+                                            router.push(BMRoute.productLaunchDetail(event))
                                         }
-                                        Spacer()
-                                        VStack(alignment: .trailing, spacing: 4) {
-                                            Text("\(event.rsvpCount)")
-                                                .font(AppFonts.serif(size: 20, weight: .bold))
-                                                .foregroundStyle(.white)
-                                            Text("RSVPs")
-                                                .font(AppFonts.sansSerif(size: 10))
-                                                .foregroundStyle(AppColors.tertiary)
+                                    }) {
+                                        HStack {
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                Text(event.type.uppercased())
+                                                    .font(AppFonts.sansSerif(size: 8, weight: .bold))
+                                                    .foregroundStyle(AppColors.background)
+                                                    .padding(.horizontal, 8)
+                                                    .padding(.vertical, 2)
+                                                    .background(AppColors.gold)
+                                                    .clipShape(Capsule())
+                                                Text(event.title)
+                                                    .font(AppFonts.serif(size: 17, weight: .medium))
+                                                    .foregroundStyle(.white)
+                                                Text(event.date)
+                                                    .font(AppFonts.sansSerif(size: 12))
+                                                    .foregroundStyle(AppColors.secondary)
+                                            }
+                                            Spacer()
+                                            VStack(alignment: .trailing, spacing: 4) {
+                                                Text("\(event.rsvpCount)")
+                                                    .font(AppFonts.serif(size: 20, weight: .bold))
+                                                    .foregroundStyle(.white)
+                                                Text("RSVPs")
+                                                    .font(AppFonts.sansSerif(size: 10))
+                                                    .foregroundStyle(AppColors.tertiary)
+                                            }
+                                            
+                                            if isInteractive {
+                                                Image(systemName: "chevron.right")
+                                                    .font(.system(size: 14, weight: .semibold))
+                                                    .foregroundStyle(AppColors.gold)
+                                                    .padding(.leading, 8)
+                                            }
                                         }
+                                        .padding(20)
+                                        .background(AppColors.surface)
+                                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .stroke(isInteractive ? AppColors.gold.opacity(0.3) : Color.clear, lineWidth: 1)
+                                        )
                                     }
-                                    .padding(20)
-                                    .background(AppColors.surface)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .buttonStyle(.plain)
+                                    .disabled(!isInteractive)
                                 }
                             }
                             .padding(.horizontal, 24)
@@ -142,6 +169,9 @@ struct StoreView: View {
                     .padding(.top, 20)
                 }
             }
+        }
+        .onAppear {
+            viewModel.loadLocalEvents()
         }
         .toolbar(.hidden, for: .navigationBar)
     }

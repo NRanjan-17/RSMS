@@ -125,6 +125,12 @@ struct BoutiqueManagerCanvas: View {
             StaffRequestsView()
         case .staffDetail(let employee):
             EmployeeDetailView(employee: employee)
+        case .vipPreviewDetail(let event):
+            VIPPreviewDetailView(event: event)
+        case .trunkShowDetail(let event):
+            TrunkShowDetailView(event: event)
+        case .productLaunchDetail(let event):
+            ProductLaunchDetailView(event: event)
         }
     }
 }

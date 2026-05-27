@@ -35,6 +35,9 @@ enum BMRoute: Hashable {
     case pendingStaff
     case staffDetail(StaffModel)
     case endlessAisleRequests
+    case vipPreviewDetail(StoreEvent)
+    case trunkShowDetail(StoreEvent)
+    case productLaunchDetail(StoreEvent)
 }
 
 enum ICRoute: Hashable {
