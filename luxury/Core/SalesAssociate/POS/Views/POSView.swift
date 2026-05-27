@@ -225,7 +225,7 @@ struct POSView: View {
                         Task {
                             let success = await viewModel.processPayment(presentingViewController: rootVC)
                             if success {
-                                router.push(SARoute.payment)
+                                router.push(SARoute.receipt)
                             }
                         }
                     }) {

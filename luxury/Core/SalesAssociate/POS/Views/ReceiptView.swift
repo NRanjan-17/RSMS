@@ -45,17 +45,17 @@ struct ReceiptView: View {
                             .font(AppFonts.serif(size: 32, weight: .semibold))
                             .foregroundStyle(.white)
                         
-                        Text("Transaction ID: #TX-PENDING")
+                        Text("Transaction ID: \(POSViewModel.shared.lastTransactionId ?? "#TX-PENDING")")
                             .font(AppFonts.sansSerif(size: 13))
                             .foregroundStyle(AppColors.secondary)
                     }
                     
                     VStack(spacing: 12) {
-                        Text(CurrencyManager.shared.format(amount: 1606179.0))
+                        Text(POSViewModel.shared.formatCurrency(POSViewModel.shared.lastTotalPaid ?? 0))
                             .font(AppFonts.serif(size: 40, weight: .bold))
                             .foregroundStyle(AppColors.gold)
                         
-                        Text("Paid via Credit Card ending in 4242")
+                        Text("Paid securely via Razorpay")
                             .font(AppFonts.sansSerif(size: 12))
                             .foregroundStyle(AppColors.tertiary)
                     }
