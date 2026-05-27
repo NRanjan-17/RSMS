@@ -38,7 +38,29 @@ final class POSDataService {
         return first
     }
     
-    func checkout(cartId: UUID, transactionId: UUID, staffId: UUID, total: Double, productIds: [UUID], clientId: UUID?) async throws {
+    func createTransaction(amount: Double, purpose: String, clientId: UUID?, boutiqueId: UUID, staffId: UUID) async throws -> Transaction {
+        let payload: [String: AnyJSON] = [
+            "transaction_amount": .double(amount),
+            "purpose": .string(purpose),
+            "client_id": clientId.map { .string($0.uuidString) } ?? .null,
+            "boutique_id": .string(boutiqueId.uuidString),
+            "staff_id": .string(staffId.uuidString)
+        ]
+        
+        let txs: [Transaction] = try await client
+            .from("transaction")
+            .insert(payload)
+            .select()
+            .execute()
+            .value
+            
+        guard let first = txs.first else {
+            throw NSError(domain: "POS", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to create transaction"])
+        }
+        return first
+    }
+    
+    func checkout(cartId: UUID, transactionId: UUID, staffId: UUID, boutiqueId: UUID, total: Double, productIds: [UUID], clientId: UUID?) async throws {
         // 1. Create Order
         let orderPayload: [String: AnyJSON] = [
             "cart_id": .string(cartId.uuidString),
@@ -55,24 +77,55 @@ final class POSDataService {
             .value
         
         // 2. Create Purchased Items
+        var itemsPayload: [[String: AnyJSON]] = []
+        for productId in productIds {
+            var piPayload: [String: AnyJSON] = [
+                "product_id": .string(productId.uuidString),
+                "transaction_id": .string(transactionId.uuidString),
+                "boutique_id": .string(boutiqueId.uuidString),
+                "staff_id": .string(staffId.uuidString),
+                "status": .string("Pending")
+            ]
+            
+            if let uid = clientId {
+                piPayload["uid"] = .string(uid.uuidString)
+                piPayload["client_id"] = .string(uid.uuidString)
+            }
+            itemsPayload.append(piPayload)
+        }
+        
+        if !itemsPayload.isEmpty {
+            let _: [[String: AnyJSON]] = try await client
+                .from("purchased_items")
+                .insert(itemsPayload)
+                .select()
+                .execute()
+                .value
+        }
+        
+        // 3. Update Client's products_purchased
         if let uid = clientId {
-            for productId in productIds {
-                let piPayload: [String: AnyJSON] = [
-                    "uid": .string(uid.uuidString),
-                    "product_id": .string(productId.uuidString),
-                    "transaction_id": .string(transactionId.uuidString),
-                    "status": .string("Pending")
-                ]
+            // Fetch current client
+            let clients: [StoreClient] = try await client
+                .from("client")
+                .select()
+                .eq("id", value: uid.uuidString)
+                .execute()
+                .value
+            
+            if let currentClient = clients.first {
+                var currentPurchased = currentClient.productsPurchased ?? []
+                currentPurchased.append(contentsOf: productIds)
                 
+                let updatePayload: [String: AnyJSON] = [
+                    "products_purchased": .array(currentPurchased.map { .string($0.uuidString) })
+                ]
                 try await client
-                    .from("purchased_items")
-                    .insert(piPayload)
+                    .from("client")
+                    .update(updatePayload)
+                    .eq("id", value: uid.uuidString)
                     .execute()
             }
-            
-            // 3. Update Client's products_purchased
-            // We append the new product ids. In Supabase we'd normally do this via an RPC
-            // but for now we can fetch and update or leave it if RPC is preferred.
         }
         
         // 4. Update cart status to 'completed'
