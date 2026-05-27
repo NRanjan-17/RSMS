@@ -309,7 +309,6 @@ struct POSView: View {
             ClientSelectionSheet { client in
                 viewModel.attachClient(client)
             }
-            .presentationDragIndicator(.visible)
         }
         .toolbar(.hidden, for: .navigationBar)
     }

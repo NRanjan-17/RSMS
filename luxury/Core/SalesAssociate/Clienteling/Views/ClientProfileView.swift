@@ -353,42 +353,56 @@ private struct ClientOverviewTab: View {
                 }
             }
             
-            if viewModel.hasMockData {
+            if !viewModel.appointments.isEmpty {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("UPCOMING")
                         .font(AppFonts.sansSerif(size: 10, weight: .bold))
                         .foregroundStyle(AppColors.secondary)
                         .kerning(1.5)
                     
-                    HStack(spacing: 10) {
-                        Text("Today 2:30 PM")
-                            .font(AppFonts.sansSerif(size: 10, weight: .medium))
-                            .foregroundStyle(AppColors.gold)
-                            .padding(.horizontal, 8)
+                    let upcomingAppts = viewModel.appointments.filter { $0.status != "Completed" && $0.status != "Cancelled" }.prefix(2)
+                    
+                    if upcomingAppts.isEmpty {
+                        Text("No upcoming appointments")
+                            .font(AppFonts.sansSerif(size: 12))
+                            .foregroundStyle(AppColors.secondary)
                             .padding(.vertical, 4)
-                            .background(AppColors.gold08)
-                            .clipShape(RoundedRectangle(cornerRadius: 7))
-                        
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Watch Consultation")
-                                .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                                .foregroundStyle(.white)
-                            Text("Arjun Singh · In-Store")
-                                .font(AppFonts.sansSerif(size: 11))
-                                .foregroundStyle(AppColors.secondary)
+                    } else {
+                        ForEach(upcomingAppts) { appt in
+                            HStack(spacing: 10) {
+                                let timePrefix = String(appt.formattedDate.prefix(10))
+                                Text(timePrefix)
+                                    .font(AppFonts.sansSerif(size: 10, weight: .medium))
+                                    .foregroundStyle(AppColors.gold)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(AppColors.gold08)
+                                    .clipShape(RoundedRectangle(cornerRadius: 7))
+                                
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(appt.appointmentType)
+                                        .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                        .foregroundStyle(.white)
+                                    Text("In-Store · \(appt.formattedTime)")
+                                        .font(AppFonts.sansSerif(size: 11))
+                                        .foregroundStyle(AppColors.secondary)
+                                }
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(AppColors.tertiary)
+                            }
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 12)
+                            .background(AppColors.surface)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
                         }
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 12))
-                            .foregroundStyle(AppColors.tertiary)
                     }
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 12)
-                    .background(AppColors.surface)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
                 }
-                
+            }
+            
+            if let lastPurchase = viewModel.purchases.first {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("LAST PURCHASE")
                         .font(AppFonts.sansSerif(size: 10, weight: .bold))
@@ -407,10 +421,10 @@ private struct ClientOverviewTab: View {
                         }
                         
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Patek Philippe Nautilus 5711/1A")
+                            Text(lastPurchase.name)
                                 .font(AppFonts.sansSerif(size: 13, weight: .medium))
                                 .foregroundStyle(.white)
-                            Text("\(CurrencyManager.shared.format(amount: 8200000.0)) · March 2025")
+                            Text("\(CurrencyManager.shared.format(amount: lastPurchase.price)) · \(lastPurchase.date)")
                                 .font(AppFonts.sansSerif(size: 11))
                                 .foregroundStyle(AppColors.gold)
                         }
@@ -421,30 +435,6 @@ private struct ClientOverviewTab: View {
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
                 }
-                
-                HStack(spacing: 10) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(AppColors.gold08)
-                            .frame(width: 36, height: 36)
-                        Text("🎂")
-                            .font(.system(size: 16))
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Birthday in 33 days")
-                            .font(AppFonts.sansSerif(size: 12, weight: .medium))
-                            .foregroundStyle(AppColors.gold)
-                        Text("June 15 · Consider Cartier Love Bracelet")
-                            .font(AppFonts.sansSerif(size: 11))
-                            .foregroundStyle(AppColors.secondary)
-                    }
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 12)
-                .background(AppColors.gold.opacity(0.05))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold50, lineWidth: 0.5))
             }
         }
     }

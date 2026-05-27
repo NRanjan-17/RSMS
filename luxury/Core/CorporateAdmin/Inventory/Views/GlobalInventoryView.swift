@@ -142,6 +142,9 @@ struct GlobalInventoryView: View {
                         .padding(.horizontal, 24)
                         .padding(.bottom, 40)
                     }
+                    .refreshable {
+                        viewModel.fetchData()
+                    }
                 }
             }
         }

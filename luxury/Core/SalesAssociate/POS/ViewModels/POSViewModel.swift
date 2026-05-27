@@ -27,7 +27,7 @@ final class POSViewModel {
     
     var discountRate: Double = 0.08
     var taxFree: Bool = false
-    var approvalState: MockApprovalState = .waiting
+    var approvalState: ApprovalState = .waiting
     var offlineCartQueued: Bool = true
     
     var isProcessingPayment: Bool = false

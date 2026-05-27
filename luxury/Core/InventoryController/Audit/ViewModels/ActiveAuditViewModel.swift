@@ -19,7 +19,7 @@ final class ActiveAuditViewModel {
     
     var totalExpected: Int = 85
     var totalScanned: Int = 42
-    var signoffState: MockApprovalState = .waiting
+    var signoffState: ApprovalState = .waiting
     var varianceReason: String = "Unexpected SKU"
     var progress: Double { Double(totalScanned) / Double(totalExpected) }
     

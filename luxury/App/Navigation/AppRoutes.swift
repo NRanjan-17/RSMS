@@ -20,7 +20,7 @@ enum SARoute: Hashable {
 
 
 enum BMRoute: Hashable {
-    case appointmentDetail(BMAppointment)
+    case appointmentDetail(AppointmentEntity)
     case staffPerformanceDetail(BMStaffMember)
     case createEvent
     case salesAnalytics

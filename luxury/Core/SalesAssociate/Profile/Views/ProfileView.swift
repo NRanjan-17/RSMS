@@ -105,7 +105,7 @@ struct ProfileView: View {
                                         router.push(SARoute.appointmentList)
                                     }) {
                                         HStack(spacing: 12) {
-                                            Text(a.time)
+                                            Text(a.formattedTime)
                                                 .font(AppFonts.sansSerif(size: 10, weight: .medium))
                                                 .foregroundStyle(AppColors.gold)
                                                 .padding(.horizontal, 8)
@@ -114,25 +114,25 @@ struct ProfileView: View {
                                                 .clipShape(RoundedRectangle(cornerRadius: 7))
                                             
                                             ZStack {
-                                                RoundedRectangle(cornerRadius: 10)
-                                                    .fill(AppColors.gold.opacity(0.11))
-                                                    .frame(width: 34, height: 34)
-                                                Text(a.initial)
-                                                    .font(AppFonts.serif(size: 12, weight: .semibold))
+                                                Circle()
+                                                    .fill(AppColors.gold08)
+                                                Text(String(a.client?.name.prefix(1) ?? "U"))
+                                                    .font(AppFonts.serif(size: 16, weight: .bold))
                                                     .foregroundStyle(AppColors.gold)
                                             }
+                                            .frame(width: 40, height: 40)
                                             
-                                            VStack(alignment: .leading, spacing: 3) {
-                                                HStack(spacing: 6) {
-                                                    Text(a.name)
+                                            VStack(alignment: .leading, spacing: 2) {
+                                                HStack {
+                                                    Text(a.client?.name ?? "Unknown Client")
                                                         .font(AppFonts.sansSerif(size: 13, weight: .medium))
                                                         .foregroundStyle(AppColors.text)
-                                                    StatusBadge(text: a.tier, status: a.tier == "UHNW" ? .success : .warning)
                                                 }
-                                                Text(a.type)
+                                                Text(a.appointmentType)
                                                     .font(AppFonts.sansSerif(size: 11))
                                                     .foregroundStyle(AppColors.secondary)
                                             }
+                                            .foregroundStyle(AppColors.secondary)
                                             Spacer()
                                             Image(systemName: "chevron.right")
                                                 .font(.system(size: 12))
@@ -262,6 +262,9 @@ struct ProfileView: View {
                     }
                 }
             }
+        }
+        .task {
+            await viewModel.fetchAppointments()
         }
         .toolbar(.hidden, for: .navigationBar)
         .alert("Logout", isPresented: $showLogoutAlert) {

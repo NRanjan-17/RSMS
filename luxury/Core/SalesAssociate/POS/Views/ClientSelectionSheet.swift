@@ -8,45 +8,64 @@ struct ClientSelectionSheet: View {
     var onSelect: (StoreClient) -> Void
     
     var body: some View {
-        NavigationView {
-            Group {
-                if isLoading {
-                    ProgressView("Loading clients...")
-                } else if clients.isEmpty {
-                    Text("No clients found.")
-                        .font(AppFonts.sansSerif(size: 14))
-                        .foregroundStyle(.secondary)
-                } else {
-                    List(clients) { client in
-                        Button(action: {
-                            onSelect(client)
-                            dismiss()
-                        }) {
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text(client.name)
-                                        .font(AppFonts.sansSerif(size: 16, weight: .semibold))
-                                        .foregroundStyle(.primary) // Native color
-                                    Text(client.email)
-                                        .font(AppFonts.sansSerif(size: 12))
-                                        .foregroundStyle(.secondary)
-                                }
-                                Spacer()
-                                if let tier = client.tier {
-                                    StatusBadge(text: tier, status: .success)
+        NavigationStack {
+            ZStack {
+                AppColors.background.ignoresSafeArea()
+                
+                Group {
+                    if isLoading {
+                        ProgressView("Loading clients...")
+                            .tint(AppColors.gold)
+                            .foregroundStyle(AppColors.secondary)
+                    } else if clients.isEmpty {
+                        Text("No clients found.")
+                            .font(AppFonts.sansSerif(size: 14))
+                            .foregroundStyle(AppColors.secondary)
+                    } else {
+                        ScrollView {
+                            LazyVStack(spacing: 12) {
+                                ForEach(clients) { client in
+                                    Button(action: {
+                                        onSelect(client)
+                                        dismiss()
+                                    }) {
+                                        HStack {
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                Text(client.name)
+                                                    .font(AppFonts.serif(size: 16, weight: .semibold))
+                                                    .foregroundStyle(.white)
+                                                Text(client.email)
+                                                    .font(AppFonts.sansSerif(size: 12))
+                                                    .foregroundStyle(AppColors.secondary)
+                                            }
+                                            Spacer()
+                                            if let tier = client.tier {
+                                                StatusBadge(text: tier, status: .success)
+                                            }
+                                        }
+                                        .padding()
+                                        .background(AppColors.surface)
+                                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                    }
+                                    .buttonStyle(.plain)
                                 }
                             }
-                            .padding(.vertical, 4)
+                            .padding(.horizontal, 24)
+                            .padding(.top, 16)
                         }
-                        .buttonStyle(.plain)
                     }
                 }
             }
             .navigationTitle("Select Client")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(AppColors.background, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
+                        .foregroundStyle(AppColors.gold)
                 }
             }
             .task {

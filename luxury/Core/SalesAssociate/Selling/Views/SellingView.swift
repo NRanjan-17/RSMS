@@ -123,6 +123,9 @@ struct SellingView: View {
             .padding(.horizontal, 24)
             .padding(.bottom, 120)
         }
+        .refreshable {
+            viewModel.fetchData()
+        }
     }
 }
 

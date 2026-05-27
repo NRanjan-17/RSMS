@@ -7,6 +7,8 @@
 
 import Foundation
 import Observation
+import Supabase
+import PostgREST
 
 @Observable
 final class ClientDetailViewModel {
@@ -25,20 +27,16 @@ final class ClientDetailViewModel {
     var wishlistItems: [ClientWishlistItem] = []
     var sizes: ClientSizePreference = ClientSizePreference()
     var purchases: [ClientPurchase] = []
+    var appointments: [AppointmentEntity] = []
     
-    var hasMockData: Bool {
-        return Client.mockIds.contains(client.id)
-    }
+    
     
     var joinedDateText: String {
-        if hasMockData {
-            return "Maison Mumbai · Since Nov 2019"
-        } else {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "MMM yyyy"
-            let dateStr = formatter.string(from: Date())
-            return "Maison Mumbai · Since \(dateStr)"
-        }
+        let dateToUse = client.createdAt ?? Date()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM yyyy"
+        let dateStr = formatter.string(from: dateToUse)
+        return "Maison Mumbai · Since \(dateStr)"
     }
     
     var stats: [(String, String)] {
@@ -56,6 +54,7 @@ final class ClientDetailViewModel {
         refreshWishlist()
         refreshSizes()
         refreshPurchases()
+        refreshAppointments()
     }
     
     func refreshWishlist() {
@@ -68,6 +67,26 @@ final class ClientDetailViewModel {
     
     func refreshPurchases() {
         self.purchases = PurchaseHistoryService.shared.fetchPurchases(clientId: client.id)
+    }
+    
+    func refreshAppointments() {
+        Task {
+            do {
+                let fetched: [AppointmentEntity] = try await SupabaseManager.shared.client
+                    .from("appointment")
+                    .select()
+                    .eq("client_id", value: client.id)
+                    .order("appointment_date", ascending: false)
+                    .execute()
+                    .value
+                
+                await MainActor.run {
+                    self.appointments = fetched
+                }
+            } catch {
+                print("Failed to fetch client appointments: \(error)")
+            }
+        }
     }
     
     func saveSizes(_ newSizes: ClientSizePreference) {
@@ -136,11 +155,7 @@ final class ClientDetailViewModel {
     }
     
     var preferences: [String] {
-        if hasMockData {
-            return ["Rolex", "Patek Philippe", "AP", "Dark Leather", "Slim Watches", "Navy"]
-        } else {
-            return []
-        }
+        return []
     }
     
     // purchases is now stored and updated dynamically in the purchases array property
@@ -172,26 +187,30 @@ final class ClientDetailViewModel {
     }
     
     var notes: [ClientNote] {
-        if hasMockData {
-            return [
-                ClientNote(note: "Prefers unhurried appointments — always allocate 90 min minimum. Deep interest in movement mechanics.", date: "May 10", author: "Arjun Singh"),
-                ClientNote(note: "Wife's birthday June 28. Currently scouting Cartier Love bracelet and Van Cleef Alhambra.", date: "Apr 22", author: "Arjun Singh")
-            ]
-        } else {
-            return []
-        }
+        return []
     }
     
     var tickets: [ClientTicket] {
-        if hasMockData {
-            return [
-                ClientTicket(title: "Watch Servicing - Rolex Daytona", status: "Active", date: "May 12", isActive: true),
-                ClientTicket(title: "Jewelry Repair - Diamond Ring", status: "Completed", date: "Apr 05", isActive: false),
-                ClientTicket(title: "Polishing - AP Royal Oak", status: "Active", date: "May 15", isActive: true)
-            ]
-        } else {
-            return []
+        var generatedTickets: [ClientTicket] = []
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM dd"
+        
+        // Map purchases
+        for purchase in purchases {
+            generatedTickets.append(ClientTicket(title: "Purchase - \(purchase.name)", status: "Completed", date: purchase.date, isActive: false))
         }
+        
+        // Map appointments
+        let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        for appt in appointments {
+            let apptDate = isoFormatter.date(from: appt.formattedDate) ?? Date()
+            let dateStr = formatter.string(from: apptDate)
+            let isActive = appt.status != "Completed" && appt.status != "Cancelled"
+            generatedTickets.append(ClientTicket(title: "Appointment - \(appt.appointmentType)", status: appt.status, date: dateStr, isActive: isActive))
+        }
+        
+        return generatedTickets
     }
 }
 

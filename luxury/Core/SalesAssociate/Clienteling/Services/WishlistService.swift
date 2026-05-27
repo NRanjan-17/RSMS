@@ -53,16 +53,6 @@ final class WishlistService {
             }
         }
         
-        // Fallback for mock clients during demo
-        if Client.mockIds.contains(clientId) {
-            let mockItems = [
-                ClientWishlistItem(brand: "Audemars Piguet", name: "Royal Oak 15500ST", price: 4200000.0),
-                ClientWishlistItem(brand: "Hermès", name: "Kelly 28 Retourné", price: 1280000.0)
-            ]
-            saveLocalWishlist(mockItems, for: clientId)
-            return mockItems
-        }
-        
         return []
     }
     

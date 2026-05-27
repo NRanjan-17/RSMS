@@ -17,7 +17,7 @@ final class NewTransferViewModel {
     var availableBoutiques: [CorporateBoutique] = []
     
     var items: [TransferItem] = []
-    var approvalState: MockApprovalState = .waiting
+    var approvalState: ApprovalState = .waiting
     var packingSlipGenerated: Bool = false
     
     var showAlert: Bool = false

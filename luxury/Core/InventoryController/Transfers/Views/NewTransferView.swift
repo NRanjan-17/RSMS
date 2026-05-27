@@ -185,7 +185,6 @@ struct NewTransferView: View {
                 
                 VStack {
                     HStack(spacing: 10) {
-                        CustomOutlineButton(title: "Approve Mock", action: { viewModel.approve() })
                         CustomButton(title: "Submit Request", action: {
                             viewModel.submit()
                             viewModel.completeSession()
