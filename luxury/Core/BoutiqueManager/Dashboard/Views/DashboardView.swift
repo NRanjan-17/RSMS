@@ -166,7 +166,7 @@ struct DashboardView: View {
                                                 Text(appointment.formattedTime)
                                                     .font(AppFonts.sansSerif(size: 14, weight: .bold))
                                                     .foregroundStyle(AppColors.gold)
-                                                Text(appointment.appointmentType.uppercased())
+                                                Text(appointment.displayAppointmentType.uppercased())
                                                     .font(AppFonts.sansSerif(size: 8, weight: .bold))
                                                     .foregroundStyle(AppColors.tertiary)
                                             }

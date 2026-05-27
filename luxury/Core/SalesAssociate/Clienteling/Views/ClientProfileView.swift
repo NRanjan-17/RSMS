@@ -200,7 +200,6 @@ private struct ClientOverviewTab: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             HStack(spacing: 8) {
-                QuickActionButton(label: "Appt", icon: "calendar", action: onApptTap)
                 QuickActionButton(label: "Note", icon: "square.and.pencil", action: onNoteTap)
             }
             let client = viewModel.client
@@ -266,7 +265,7 @@ private struct ClientOverviewTab: View {
             }
             
             VStack(alignment: .leading, spacing: 12) {
-                Text("TICKET TRACKING")
+                Text("Appointment Tracking")
                     .font(AppFonts.sansSerif(size: 10, weight: .bold))
                     .foregroundStyle(AppColors.secondary)
                     .kerning(1.5)
@@ -311,54 +310,7 @@ private struct ClientOverviewTab: View {
                 }
             }
             
-            if !viewModel.appointments.isEmpty {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("UPCOMING")
-                        .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                        .foregroundStyle(AppColors.secondary)
-                        .kerning(1.5)
-                    
-                    let upcomingAppts = viewModel.appointments.filter { $0.status != "Completed" && $0.status != "Cancelled" }.prefix(2)
-                    
-                    if upcomingAppts.isEmpty {
-                        Text("No upcoming appointments")
-                            .font(AppFonts.sansSerif(size: 12))
-                            .foregroundStyle(AppColors.secondary)
-                            .padding(.vertical, 4)
-                    } else {
-                        ForEach(upcomingAppts) { appt in
-                            HStack(spacing: 10) {
-                                let timePrefix = String(appt.formattedDate.prefix(10))
-                                Text(timePrefix)
-                                    .font(AppFonts.sansSerif(size: 10, weight: .medium))
-                                    .foregroundStyle(AppColors.gold)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(AppColors.gold08)
-                                    .clipShape(RoundedRectangle(cornerRadius: 7))
-                                
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(appt.appointmentType)
-                                        .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                                        .foregroundStyle(.white)
-                                    Text("In-Store · \(appt.formattedTime)")
-                                        .font(AppFonts.sansSerif(size: 11))
-                                        .foregroundStyle(AppColors.secondary)
-                                }
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .font(.system(size: 12))
-                                    .foregroundStyle(AppColors.tertiary)
-                            }
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 12)
-                            .background(AppColors.surface)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
-                        }
-                    }
-                }
-            }
+            // UPCOMING block removed
             
             if let lastPurchase = viewModel.purchases.first {
                 VStack(alignment: .leading, spacing: 12) {

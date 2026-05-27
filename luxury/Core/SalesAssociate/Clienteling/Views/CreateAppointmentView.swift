@@ -11,15 +11,16 @@ import Auth
 
 struct CreateAppointmentView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var clientName: String = ""
-    @State private var selectedDate = Date()
-    @State private var selectedTime = "10:00 AM"
-    @State private var selectedType = "Watch Consultation"
+    @State private var clients: [ClientEntity] = []
+    @State private var selectedClient: ClientEntity? = nil
+    @State private var isLoadingClients = false
+    @State private var selectedDateTime = Date()
+    @State private var selectedType = AppointmentType.inStore
     @State private var isSaving = false
     @State private var errorMessage: String? = nil
     
-    let times = ["10:00 AM", "11:30 AM", "01:00 PM", "02:30 PM", "04:00 PM", "05:30 PM"]
-    let types = ["Watch Consultation", "Jewellery Fitting", "Leather Goods Preview", "Video Consult"]
+    
+    let types = AppointmentType.allCases
     
     var body: some View {
         ZStack {
@@ -56,9 +57,26 @@ struct CreateAppointmentView: View {
                             HStack(spacing: 12) {
                                 Image(systemName: "person.fill")
                                     .foregroundStyle(AppColors.tertiary)
-                                TextField("Search for a client...", text: $clientName)
-                                    .font(AppFonts.sansSerif(size: 14))
-                                    .foregroundStyle(.white)
+                                Menu {
+                                    ForEach(clients, id: \.id) { client in
+                                        Button(action: {
+                                            selectedClient = client
+                                        }) {
+                                            Text(client.name)
+                                        }
+                                    }
+                                } label: {
+                                    HStack {
+                                        Text(selectedClient?.name ?? "Select a client...")
+                                            .font(AppFonts.sansSerif(size: 14))
+                                            .foregroundStyle(selectedClient == nil ? AppColors.tertiary : .white)
+                                        Spacer()
+                                        Image(systemName: "chevron.up.chevron.down")
+                                            .foregroundStyle(AppColors.tertiary)
+                                            .font(.system(size: 12))
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                }
                             }
                             .padding(.horizontal, 16)
                             .frame(height: 50)
@@ -74,30 +92,13 @@ struct CreateAppointmentView: View {
                                 .foregroundStyle(AppColors.gold)
                                 .kerning(2)
                             
-                            DatePicker("Select Date", selection: $selectedDate, displayedComponents: .date)
+                            DatePicker("Select Date & Time", selection: $selectedDateTime, displayedComponents: [.date, .hourAndMinute])
                                 .datePickerStyle(.graphical)
                                 .tint(AppColors.gold)
                                 .padding(10)
                                 .background(AppColors.surface)
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
                                 .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
-                            
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 10) {
-                                    ForEach(times, id: \.self) { time in
-                                        let isSelected = selectedTime == time
-                                        Text(time)
-                                            .font(AppFonts.sansSerif(size: 12, weight: isSelected ? .medium : .light))
-                                            .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
-                                            .padding(.horizontal, 16)
-                                            .padding(.vertical, 10)
-                                            .background(isSelected ? AppColors.gold : AppColors.surface)
-                                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                                            .overlay(RoundedRectangle(cornerRadius: 10).stroke(isSelected ? Color.clear : AppColors.gold15, lineWidth: 0.5))
-                                            .onTapGesture { selectedTime = time }
-                                    }
-                                }
-                            }
                         }
                         .padding(.horizontal, 24)
                         
@@ -111,7 +112,7 @@ struct CreateAppointmentView: View {
                                 ForEach(types, id: \.self) { type in
                                     let isSelected = selectedType == type
                                     HStack {
-                                        Text(type)
+                                        Text(type.displayName)
                                             .font(AppFonts.sansSerif(size: 14))
                                             .foregroundStyle(isSelected ? AppColors.gold : AppColors.text)
                                         Spacer()
@@ -148,7 +149,7 @@ struct CreateAppointmentView: View {
                     }) {
                         ZStack {
                             RoundedRectangle(cornerRadius: 12)
-                                .fill(clientName.isEmpty || isSaving ? AppColors.gold.opacity(0.5) : AppColors.gold)
+                                .fill(selectedClient == nil || isSaving ? AppColors.gold.opacity(0.5) : AppColors.gold)
                                 .frame(height: 52)
                             
                             if isSaving {
@@ -161,14 +162,33 @@ struct CreateAppointmentView: View {
                             }
                         }
                     }
-                    .disabled(clientName.isEmpty || isSaving)
+                    .disabled(selectedClient == nil || isSaving)
                     .padding(.horizontal, 24)
                     .padding(.bottom, 40)
                 }
                 .background(AppColors.background)
             }
         }
+        .task {
+            await fetchClients()
+        }
         .toolbar(.hidden, for: .navigationBar)
+    }
+    
+    private func fetchClients() async {
+        isLoadingClients = true
+        do {
+            let service = ClientService()
+            let fetched = try await service.fetchClients()
+            await MainActor.run {
+                self.clients = fetched
+            }
+        } catch {
+            print("Failed to fetch clients: \(error)")
+        }
+        await MainActor.run {
+            isLoadingClients = false
+        }
     }
     
     private func saveAppointment() async {
@@ -187,32 +207,21 @@ struct CreateAppointmentView: View {
                 throw NSError(domain: "Auth", code: 403, userInfo: [NSLocalizedDescriptionKey: "Staff profile not found"])
             }
             
-            let timeFormatter = DateFormatter()
-            timeFormatter.dateFormat = "HH:mm"
-            let timeDate = timeFormatter.date(from: selectedTime) ?? Date()
-            
-            let calendar = Calendar.current
-            let hour = calendar.component(.hour, from: timeDate)
-            let minute = calendar.component(.minute, from: timeDate)
-            
-            guard let combinedDate = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: selectedDate) else {
-                throw NSError(domain: "Auth", code: 400, userInfo: [NSLocalizedDescriptionKey: "Invalid date/time combination"])
-            }
-            
-            let isoFormatter = ISO8601DateFormatter()
-            let timestampStr = isoFormatter.string(from: combinedDate)
+            let timestampStr = ISO8601DateFormatter().string(from: selectedDateTime)
             
             guard let boutiqueId = staff.boutiqueId else {
                 throw NSError(domain: "Auth", code: 403, userInfo: [NSLocalizedDescriptionKey: "Staff does not have an assigned boutique"])
             }
             
+            let dbAppointmentType = selectedType.rawValue
+            
             let appointment = AppointmentEntity(
                 id: UUID(),
-                clientId: nil,
+                clientId: selectedClient?.id,
                 boutiqueId: boutiqueId,
                 timestamp: timestampStr,
-                appointmentType: selectedType,
-                assignedTo: nil,
+                appointmentType: dbAppointmentType,
+                assignedTo: staff.id,
                 createdBy: staff.id,
                 status: "pending",
                 createdAt: nil

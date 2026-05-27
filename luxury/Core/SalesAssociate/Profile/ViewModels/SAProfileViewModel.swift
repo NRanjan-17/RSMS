@@ -11,9 +11,9 @@ import Supabase
 
 @Observable
 final class SAProfileViewModel {
-    var store: String = "Maison Mumbai"
+    var store: String = "Boutique"
     var greeting: String = "Good morning,"
-    var name: String = "Arjun Singh."
+    var name: String = "Staff Member"
     
     var revenue: Double = 0.0
     var target: Double = 400000.0
@@ -32,9 +32,28 @@ final class SAProfileViewModel {
             if let (_, profile) = try await ProfileService().fetchCurrentProfile(),
                let staff = profile as? StaffModel {
                 
+                await MainActor.run {
+                    self.name = staff.name
+                    self.greeting = self.getGreeting() + ","
+                }
+                
+                if let boutiqueId = staff.boutiqueId {
+                    struct MinimalBoutique: Codable { let name: String }
+                    if let boutiques: [MinimalBoutique] = try? await SupabaseManager.shared.client
+                        .from("boutiques")
+                        .select("name")
+                        .eq("id", value: boutiqueId)
+                        .execute()
+                        .value, let b = boutiques.first {
+                        await MainActor.run {
+                            self.store = b.name
+                        }
+                    }
+                }
+                
                 let fetched: [AppointmentEntity] = try await SupabaseManager.shared.client
                     .from("appointment")
-                    .select()
+                    .select("*, client(*)")
                     .eq("assigned_to", value: staff.id)
                     .order("timestamp", ascending: false)
                     .execute()
@@ -45,6 +64,7 @@ final class SAProfileViewModel {
                 }
                 
                 await fetchStats(staffId: staff.id)
+                await fetchRecentClients()
             }
         } catch {
             print("Failed to fetch appointments for SA profile: \(error)")
@@ -75,6 +95,39 @@ final class SAProfileViewModel {
             }
         } catch {
             print("Failed to fetch stats: \(error)")
+        }
+    }
+    
+    private func getGreeting() -> String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 0..<12: return "Good morning"
+        case 12..<17: return "Good afternoon"
+        default: return "Good evening"
+        }
+    }
+    
+    private func fetchRecentClients() async {
+        do {
+            let service = ClientService()
+            let allClients = try await service.fetchClients()
+            let sorted = allClients.sorted { ($0.createdAt ?? Date()) > ($1.createdAt ?? Date()) }
+            let recent = Array(sorted.prefix(5))
+            
+            let dashClients = recent.map { c in
+                SADashClient(
+                    name: c.name,
+                    tier: c.tier ?? "Standard",
+                    lastVisit: "Unknown",
+                    ltv: 0.0,
+                    initial: String(c.name.prefix(1))
+                )
+            }
+            await MainActor.run {
+                self.recentClients = dashClients
+            }
+        } catch {
+            print("Failed to fetch recent clients: \(error)")
         }
     }
 }

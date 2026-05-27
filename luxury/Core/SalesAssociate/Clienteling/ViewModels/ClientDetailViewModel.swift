@@ -254,7 +254,7 @@ final class ClientDetailViewModel {
             let apptDate = isoFormatter.date(from: appt.formattedDate) ?? Date()
             let dateStr = formatter.string(from: apptDate)
             let isActive = appt.status != "Completed" && appt.status != "Cancelled"
-            generatedTickets.append(ClientTicket(title: "Appointment - \(appt.appointmentType)", status: appt.status, date: dateStr, isActive: isActive))
+            generatedTickets.append(ClientTicket(title: "Appointment - \(appt.displayAppointmentType)", status: appt.status, date: dateStr, isActive: isActive))
         }
         
         return generatedTickets

@@ -14,6 +14,13 @@ struct AppointmentEntity: Codable, Identifiable, Hashable {
     // Optional client relationship (if we join with client)
     var client: ClientEntity?
     
+    var displayAppointmentType: String {
+        if let type = AppointmentType(rawValue: appointmentType) {
+            return type.displayName
+        }
+        return appointmentType.capitalized.replacingOccurrences(of: "_", with: " ")
+    }
+    
     var formattedTime: String {
         guard let date = ISO8601DateFormatter().date(from: timestamp) else { return timestamp }
         let f = DateFormatter()
@@ -39,5 +46,17 @@ struct AppointmentEntity: Codable, Identifiable, Hashable {
         case status
         case createdAt = "created_at"
         case client
+    }
+}
+
+public enum AppointmentType: String, Codable, CaseIterable {
+    case inStore = "in_store"
+    case online = "online"
+    
+    public var displayName: String {
+        switch self {
+        case .inStore: return "In Store"
+        case .online: return "Online"
+        }
     }
 }
