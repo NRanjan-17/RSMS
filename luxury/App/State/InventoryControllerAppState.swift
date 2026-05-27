@@ -11,4 +11,5 @@ import Observation
 @Observable
 final class InventoryControllerAppState {
     var selectedTab: ICTab = .stock
+    var activeAuditViewModel = ActiveAuditViewModel()
 }
