@@ -185,7 +185,7 @@ extension Client {
 
 struct ClientNote: Identifiable, Hashable, Codable {
     var id: UUID = UUID()
-    let note: String
+    var note: String
     let date: String
     let author: String
 }
@@ -225,12 +225,14 @@ struct ClientWishlistItem: Identifiable, Hashable, Codable {
     let brand: String
     let name: String
     let price: Double
+    var productImages: [String]?
     
-    init(id: UUID = UUID(), brand: String, name: String, price: Double) {
+    init(id: UUID = UUID(), brand: String, name: String, price: Double, productImages: [String]? = nil) {
         self.id = id
         self.brand = brand
         self.name = name
         self.price = price
+        self.productImages = productImages
     }
 }
 

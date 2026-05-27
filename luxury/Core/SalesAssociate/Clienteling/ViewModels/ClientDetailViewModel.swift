@@ -19,6 +19,7 @@ final class ClientDetailViewModel {
             refreshWishlist()
             refreshSizes()
             refreshPurchases()
+            refreshNotes()
         }
     }
     var selectedTab: String = "overview"
@@ -28,6 +29,7 @@ final class ClientDetailViewModel {
     var sizes: ClientSizePreference = ClientSizePreference()
     var purchases: [ClientPurchase] = []
     var appointments: [AppointmentEntity] = []
+    var notes: [ClientNote] = []
     
     
     
@@ -55,10 +57,18 @@ final class ClientDetailViewModel {
         refreshSizes()
         refreshPurchases()
         refreshAppointments()
+        refreshNotes()
     }
     
     func refreshWishlist() {
         self.wishlistItems = WishlistService.shared.fetchWishlist(clientId: client.id)
+        Task {
+            await WishlistService.shared.syncWishlist(clientId: client.id)
+            let updated = WishlistService.shared.fetchWishlist(clientId: client.id)
+            await MainActor.run {
+                self.wishlistItems = updated
+            }
+        }
     }
     
     func refreshSizes() {
@@ -67,6 +77,13 @@ final class ClientDetailViewModel {
     
     func refreshPurchases() {
         self.purchases = PurchaseHistoryService.shared.fetchPurchases(clientId: client.id)
+        Task {
+            await PurchaseHistoryService.shared.syncPurchases(clientId: client.id)
+            let updated = PurchaseHistoryService.shared.fetchPurchases(clientId: client.id)
+            await MainActor.run {
+                self.purchases = updated
+            }
+        }
     }
     
     func refreshAppointments() {
@@ -139,9 +156,11 @@ final class ClientDetailViewModel {
         NotificationCenter.default.post(name: NSNotification.Name("RefreshClients"), object: nil)
     }
     
-    func addProductToWishlist(brand: String, name: String, price: Double) async {
-        let newItem = ClientWishlistItem(brand: brand, name: name, price: price)
-        await WishlistService.shared.addToWishlist(clientId: client.id, item: newItem)
+    func addProductToWishlist(productId: UUID = UUID(), brand: String, name: String, price: Double) async throws {
+        let catalogs: [CatalogEntity] = (try? await SupabaseManager.shared.client.from("catalogs").select().eq("id", value: productId.uuidString).execute().value) ?? []
+        let images = catalogs.first?.productImages
+        let newItem = ClientWishlistItem(id: productId, brand: brand, name: name, price: price, productImages: images)
+        try await WishlistService.shared.addToWishlist(clientId: client.id, item: newItem)
         await MainActor.run {
             self.refreshWishlist()
         }
@@ -186,8 +205,36 @@ final class ClientDetailViewModel {
         }
     }
     
-    var notes: [ClientNote] {
-        return []
+    func refreshNotes() {
+        self.notes = NotesService.shared.fetchNotes(clientId: client.id)
+        Task {
+            await NotesService.shared.syncNotes(clientId: client.id)
+            let updated = NotesService.shared.fetchNotes(clientId: client.id)
+            await MainActor.run {
+                self.notes = updated
+            }
+        }
+    }
+    
+    func addNote(text: String) async {
+        await NotesService.shared.addNote(clientId: client.id, noteText: text)
+        await MainActor.run {
+            self.refreshNotes()
+        }
+    }
+    
+    func deleteNote(noteId: UUID) async {
+        await NotesService.shared.deleteNote(clientId: client.id, noteId: noteId)
+        await MainActor.run {
+            self.refreshNotes()
+        }
+    }
+    
+    func updateNote(noteId: UUID, text: String) async {
+        await NotesService.shared.updateNote(clientId: client.id, noteId: noteId, noteText: text)
+        await MainActor.run {
+            self.refreshNotes()
+        }
     }
     
     var tickets: [ClientTicket] {
@@ -221,4 +268,8 @@ struct GroupedWishlistItem: Identifiable, Hashable {
     let price: Double
     let quantity: Int
     let originalItems: [ClientWishlistItem]
+    
+    var productImages: [String]? {
+        return originalItems.first?.productImages
+    }
 }

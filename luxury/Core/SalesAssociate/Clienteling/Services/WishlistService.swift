@@ -8,19 +8,15 @@
 import Foundation
 import Supabase
 
-struct DBWishlistItem: Codable {
+struct DBWishlist: Codable {
     let id: UUID
     let clientId: UUID
-    let brand: String
-    let name: String
-    let price: Double
+    let products: [UUID]
     
     enum CodingKeys: String, CodingKey {
         case id
         case clientId = "client_id"
-        case brand
-        case name
-        case price
+        case products
     }
 }
 
@@ -58,17 +54,38 @@ final class WishlistService {
     
     func syncWishlist(clientId: UUID) async {
         do {
-            let dbItems: [DBWishlistItem] = try await client
+            let dbWishlists: [DBWishlist] = try await client
                 .from("wishlist")
                 .select()
                 .eq("client_id", value: clientId.uuidString)
                 .execute()
                 .value
             
-            let items = dbItems.map {
-                ClientWishlistItem(id: $0.id, brand: $0.brand, name: $0.name, price: $0.price)
+            if let record = dbWishlists.first {
+                let productIds = record.products
+                if !productIds.isEmpty {
+                    // Fetch catalogs matching these IDs
+                    let dbCatalogs: [CatalogEntity] = try await client
+                        .from("catalogs")
+                        .select()
+                        .in("id", value: productIds.map { $0.uuidString })
+                        .execute()
+                        .value
+                    
+                    // Map back to ClientWishlistItem
+                    let items = productIds.compactMap { pid in
+                        if let cat = dbCatalogs.first(where: { $0.id == pid }) {
+                            return ClientWishlistItem(id: cat.id, brand: cat.brand, name: cat.name, price: cat.amount, productImages: cat.productImages)
+                        }
+                        return nil
+                    }
+                    saveLocalWishlist(items, for: clientId)
+                } else {
+                    saveLocalWishlist([], for: clientId)
+                }
+            } else {
+                // Do not clear local cache if no record exists on Supabase (e.g. mock clients)
             }
-            saveLocalWishlist(items, for: clientId)
         } catch {
             print("Supabase fetch wishlist warning: \(error.localizedDescription)")
         }
@@ -84,33 +101,44 @@ final class WishlistService {
         }
     }
     
-    func addToWishlist(clientId: UUID, item: ClientWishlistItem) async {
-        // 1. Update local storage immediately for responsive UI
-        var currentItems = fetchWishlist(clientId: clientId)
-        if !currentItems.contains(where: { $0.id == item.id }) {
-            currentItems.append(item)
-            saveLocalWishlist(currentItems, for: clientId)
-        }
-        
-        // 2. Perform background synchronization to Supabase table "wishlist"
+    func addToWishlist(clientId: UUID, item: ClientWishlistItem) async throws {
         do {
-            let dbItem = DBWishlistItem(
-                id: item.id,
-                clientId: clientId,
-                brand: item.brand,
-                name: item.name,
-                price: item.price
-            )
-            
-            try await client
+            let dbWishlists: [DBWishlist] = try await client
                 .from("wishlist")
-                .insert(dbItem)
+                .select()
+                .eq("client_id", value: clientId.uuidString)
                 .execute()
-                
-            print("Successfully synced wishlist item to Supabase.")
+                .value
+            
+            if let record = dbWishlists.first {
+                var updatedProducts = record.products
+                if !updatedProducts.contains(item.id) {
+                    updatedProducts.append(item.id)
+                    
+                    try await client
+                        .from("wishlist")
+                        .update(["products": updatedProducts.map { $0.uuidString }])
+                        .eq("client_id", value: clientId.uuidString)
+                        .execute()
+                    print("Successfully updated existing wishlist row on Supabase.")
+                }
+            } else {
+                let payload: [String: AnyJSON] = [
+                    "client_id": .string(clientId.uuidString),
+                    "products": .array([.string(item.id.uuidString)])
+                ]
+                try await client
+                    .from("wishlist")
+                    .insert(payload)
+                    .execute()
+                print("Successfully created new wishlist row on Supabase.")
+            }
+            
+            // Force an immediate structural refetch to sync local cache
+            await syncWishlist(clientId: clientId)
         } catch {
-            // Log warning but do not fail locally (allows RLS/connectivity issues in demo)
-            print("Supabase sync warning: \(error.localizedDescription)")
+            print("Wishlist Remote Sync Error: \(error)")
+            throw error
         }
     }
     
@@ -122,16 +150,26 @@ final class WishlistService {
         
         // 2. Perform background synchronization to Supabase table "wishlist"
         do {
-            try await client
+            let dbWishlists: [DBWishlist] = try await client
                 .from("wishlist")
-                .delete()
-                .eq("id", value: itemId)
+                .select()
+                .eq("client_id", value: clientId.uuidString)
                 .execute()
+                .value
+            
+            if let record = dbWishlists.first {
+                var updatedProducts = record.products
+                updatedProducts.removeAll { $0 == itemId }
                 
-            print("Successfully deleted wishlist item from Supabase.")
+                try await client
+                    .from("wishlist")
+                    .update(["products": updatedProducts.map { $0.uuidString }])
+                    .eq("client_id", value: clientId.uuidString)
+                    .execute()
+                print("Successfully updated wishlist after removing item on Supabase.")
+            }
         } catch {
-            // Log warning but do not fail locally (allows RLS/connectivity issues in demo)
-            print("Supabase delete warning: \(error.localizedDescription)")
+            print("Supabase sync wishlist remove warning: \(error.localizedDescription)")
         }
     }
 }

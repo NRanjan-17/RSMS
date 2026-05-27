@@ -121,4 +121,25 @@ final class NotesService {
             print("Supabase delete note warning: \(error.localizedDescription)")
         }
     }
+    
+    func updateNote(clientId: UUID, noteId: UUID, noteText: String) async {
+        // 1. Update local storage
+        var current = fetchNotes(clientId: clientId)
+        if let idx = current.firstIndex(where: { $0.id == noteId }) {
+            current[idx].note = noteText
+            saveLocalNotes(current, for: clientId)
+        }
+        
+        // 2. Perform background sync to Supabase
+        do {
+            try await client
+                .from("client_notes")
+                .update(["note": noteText])
+                .eq("id", value: noteId.uuidString)
+                .execute()
+            print("Successfully updated note on Supabase.")
+        } catch {
+            print("Supabase update note warning: \(error.localizedDescription)")
+        }
+    }
 }
