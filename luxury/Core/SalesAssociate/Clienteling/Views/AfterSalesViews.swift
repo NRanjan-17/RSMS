@@ -673,7 +673,7 @@ struct AfterSalesTrackingView: View {
                             .foregroundStyle(AppColors.gold)
                             .frame(width: 44, height: 44)
                     }
-                    Text("Ticket Tracking")
+                    Text("Appointment Tracking")
                         .font(AppFonts.serif(size: 24, weight: .semibold))
                         .foregroundStyle(.white)
                     Spacer()
