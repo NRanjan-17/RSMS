@@ -109,17 +109,17 @@ struct ProductLaunchDetailView: View {
                     HStack(spacing: 6) {
                         Image(systemName: "paperplane.fill")
                             .font(.system(size: 9, weight: .bold))
-                        Text(event.remindersSent == true ? "RESEND REMINDERS" : "SEND REMINDERS")
+                        Text("SEND REMINDERS")
                             .font(AppFonts.sansSerif(size: 9, weight: .bold))
                     }
-                    .foregroundStyle(event.remindersSent == true ? AppColors.success : AppColors.gold)
+                    .foregroundStyle(AppColors.gold)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
-                    .background(event.remindersSent == true ? AppColors.success.opacity(0.15) : AppColors.gold15)
+                    .background(AppColors.gold15)
                     .clipShape(RoundedRectangle(cornerRadius: 6))
                     .overlay(
                         RoundedRectangle(cornerRadius: 6)
-                            .stroke(event.remindersSent == true ? AppColors.success.opacity(0.3) : AppColors.gold.opacity(0.3), lineWidth: 1)
+                            .stroke(AppColors.gold.opacity(0.3), lineWidth: 1)
                     )
                 }
                 .buttonStyle(.plain)
@@ -411,8 +411,10 @@ struct ProductLaunchDetailView: View {
         guard var guests = event.guests else { return }
         
         for idx in guests.indices {
-            if guests[idx].status == "No Response" {
+            if guests[idx].status == "Confirmed" {
                 guests[idx].reminderSent = true
+            } else {
+                guests[idx].reminderSent = false
             }
         }
         
@@ -438,6 +440,12 @@ struct ProductLaunchDetailView: View {
               let idx = guests.firstIndex(where: { $0.id == guestId }) else { return }
         
         guests[idx].status = status
+        
+        // Reset reminder status if status is no longer Confirmed
+        if status != "Confirmed" {
+            guests[idx].reminderSent = false
+        }
+        
         event.guests = guests
         event.rsvpCount = guests.filter { $0.status == "Confirmed" }.count
         

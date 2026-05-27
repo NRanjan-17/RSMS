@@ -79,15 +79,19 @@ struct CreateEventView: View {
                                 HStack(spacing: 10) {
                                     ForEach(eventTypes, id: \.self) { type in
                                         let isSelected = selectedType == type
-                                        Text(type)
-                                            .font(AppFonts.sansSerif(size: 12, weight: isSelected ? .medium : .light))
-                                            .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
-                                            .padding(.horizontal, 16)
-                                            .padding(.vertical, 10)
-                                            .background(isSelected ? AppColors.gold : AppColors.surface)
-                                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                                            .overlay(RoundedRectangle(cornerRadius: 10).stroke(isSelected ? Color.clear : AppColors.gold15, lineWidth: 0.5))
-                                            .onTapGesture { selectedType = type }
+                                        Button(action: {
+                                            selectedType = type
+                                        }) {
+                                            Text(type)
+                                                .font(AppFonts.sansSerif(size: 12, weight: isSelected ? .medium : .light))
+                                                .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
+                                                .padding(.horizontal, 16)
+                                                .padding(.vertical, 10)
+                                                .background(isSelected ? AppColors.gold : AppColors.surface)
+                                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                                .overlay(RoundedRectangle(cornerRadius: 10).stroke(isSelected ? Color.clear : AppColors.gold15, lineWidth: 0.5))
+                                        }
+                                        .buttonStyle(.plain)
                                     }
                                 }
                             }
@@ -122,15 +126,19 @@ struct CreateEventView: View {
                                     HStack(spacing: 10) {
                                         ForEach(venues, id: \.self) { item in
                                             let isSelected = venue == item
-                                            Text(item)
-                                                .font(AppFonts.sansSerif(size: 12, weight: isSelected ? .medium : .light))
-                                                .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
-                                                .padding(.horizontal, 16)
-                                                .padding(.vertical, 10)
-                                                .background(isSelected ? AppColors.gold : AppColors.surface)
-                                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                                                .overlay(RoundedRectangle(cornerRadius: 10).stroke(isSelected ? Color.clear : AppColors.gold15, lineWidth: 0.5))
-                                                .onTapGesture { venue = item }
+                                            Button(action: {
+                                                venue = item
+                                            }) {
+                                                Text(item)
+                                                    .font(AppFonts.sansSerif(size: 12, weight: isSelected ? .medium : .light))
+                                                    .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
+                                                    .padding(.horizontal, 16)
+                                                    .padding(.vertical, 10)
+                                                    .background(isSelected ? AppColors.gold : AppColors.surface)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(isSelected ? Color.clear : AppColors.gold15, lineWidth: 0.5))
+                                            }
+                                            .buttonStyle(.plain)
                                         }
                                     }
                                 }
@@ -147,15 +155,19 @@ struct CreateEventView: View {
                                     HStack(spacing: 10) {
                                         ForEach(hostAssociates, id: \.self) { item in
                                             let isSelected = hostAssociate == item
-                                            Text(item)
-                                                .font(AppFonts.sansSerif(size: 12, weight: isSelected ? .medium : .light))
-                                                .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
-                                                .padding(.horizontal, 16)
-                                                .padding(.vertical, 10)
-                                                .background(isSelected ? AppColors.gold : AppColors.surface)
-                                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                                                .overlay(RoundedRectangle(cornerRadius: 10).stroke(isSelected ? Color.clear : AppColors.gold15, lineWidth: 0.5))
-                                                .onTapGesture { hostAssociate = item }
+                                            Button(action: {
+                                                hostAssociate = item
+                                            }) {
+                                                Text(item)
+                                                    .font(AppFonts.sansSerif(size: 12, weight: isSelected ? .medium : .light))
+                                                    .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
+                                                    .padding(.horizontal, 16)
+                                                    .padding(.vertical, 10)
+                                                    .background(isSelected ? AppColors.gold : AppColors.surface)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(isSelected ? Color.clear : AppColors.gold15, lineWidth: 0.5))
+                                            }
+                                            .buttonStyle(.plain)
                                         }
                                     }
                                 }
@@ -189,15 +201,19 @@ struct CreateEventView: View {
                                     HStack(spacing: 10) {
                                         ForEach(reminderOptions, id: \.self) { hours in
                                             let isSelected = reminderWindowHours == hours
-                                            Text("\(hours)h before")
-                                                .font(AppFonts.sansSerif(size: 12, weight: isSelected ? .medium : .light))
-                                                .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
-                                                .padding(.horizontal, 16)
-                                                .padding(.vertical, 10)
-                                                .background(isSelected ? AppColors.gold : AppColors.surface)
-                                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                                                .overlay(RoundedRectangle(cornerRadius: 10).stroke(isSelected ? Color.clear : AppColors.gold15, lineWidth: 0.5))
-                                                .onTapGesture { reminderWindowHours = hours }
+                                            Button(action: {
+                                                reminderWindowHours = hours
+                                            }) {
+                                                Text("\(hours)h before")
+                                                    .font(AppFonts.sansSerif(size: 12, weight: isSelected ? .medium : .light))
+                                                    .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
+                                                    .padding(.horizontal, 16)
+                                                    .padding(.vertical, 10)
+                                                    .background(isSelected ? AppColors.gold : AppColors.surface)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(isSelected ? Color.clear : AppColors.gold15, lineWidth: 0.5))
+                                            }
+                                            .buttonStyle(.plain)
                                         }
                                     }
                                 }
