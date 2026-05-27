@@ -29,6 +29,7 @@ enum BMRoute: Hashable {
     case clientInsights
     case transferApproval
     case cycleCountSignoff
+    case stockReconciliation
     case refundApproval
     case writeOffApproval
     case staffRequestDetail(StaffModel)

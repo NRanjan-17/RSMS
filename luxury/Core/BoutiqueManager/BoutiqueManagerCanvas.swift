@@ -101,6 +101,8 @@ struct BoutiqueManagerCanvas: View {
             TransferApprovalView()
         case .cycleCountSignoff:
             CycleCountDetailView()
+        case .stockReconciliation:
+            StockReconciliationView()
         case .refundApproval:
             RefundApprovalView()
         case .writeOffApproval:

@@ -90,6 +90,37 @@ struct StoreView: View {
                             }
                             .padding(.horizontal, 24)
                         }
+
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("INVENTORY CONTROLS")
+                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                .foregroundStyle(AppColors.secondary)
+                                .kerning(1.5)
+                                .padding(.horizontal, 24)
+
+                            VStack(spacing: 12) {
+                                Button(action: { router.push(BMRoute.stockReconciliation) }) {
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text("Stock Reconciliation")
+                                                .font(AppFonts.serif(size: 18, weight: .medium))
+                                                .foregroundStyle(.white)
+                                            Text("Scan barcodes or QR codes to resolve quantity mismatches")
+                                                .font(AppFonts.sansSerif(size: 12))
+                                                .foregroundStyle(AppColors.secondary)
+                                        }
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .foregroundStyle(AppColors.gold)
+                                    }
+                                    .padding(20)
+                                    .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                }
+                                .buttonStyle(.plain)
+                            }
+                            .padding(.horizontal, 24)
+                        }
                         
                         VStack(alignment: .leading, spacing: 16) {
                             HStack {
