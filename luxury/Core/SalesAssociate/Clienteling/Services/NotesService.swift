@@ -57,21 +57,13 @@ final class NotesService {
     }
     
     func syncNotes(clientId: UUID) async {
-        do {
-            let dbNotes: [DBClientNote] = try await client
-                .from("client_notes")
-                .select()
-                .eq("client_id", value: clientId.uuidString)
-                .execute()
-                .value
-            
-            let notes = dbNotes.map {
-                ClientNote(id: $0.id, note: $0.note, date: $0.date, author: $0.author)
-            }
-            saveLocalNotes(notes, for: clientId)
-        } catch {
-            print("Supabase fetch client_notes warning: \(error.localizedDescription)")
-        }
+        // Supabase table 'client_notes' does not exist in schema yet.
+        // Relying on local notes only.
+        // do {
+        //     let dbNotes: [DBClientNote] = try await client
+        //         .from("client_notes")
+        //         ...
+        // }
     }
     
     func addNote(clientId: UUID, noteText: String, author: String = "Arjun Singh") async {
@@ -85,22 +77,14 @@ final class NotesService {
         current.insert(newNote, at: 0)
         saveLocalNotes(current, for: clientId)
         
-        // Sync to Supabase in background
+        // Sync to Supabase disabled (table 'client_notes' not in schema)
+        /*
         do {
-            let dbNote = DBClientNote(
-                id: newNote.id,
-                clientId: clientId,
-                note: newNote.note,
-                date: newNote.date,
-                author: newNote.author
-            )
-            try await client
-                .from("client_notes")
-                .insert(dbNote)
-                .execute()
+            ...
         } catch {
-            print("Supabase notes sync warning: \(error.localizedDescription)")
+            ...
         }
+        */
     }
     
     func deleteNote(clientId: UUID, noteId: UUID) async {
@@ -109,17 +93,7 @@ final class NotesService {
         current.removeAll { $0.id == noteId }
         saveLocalNotes(current, for: clientId)
         
-        // 2. Perform background synchronization to Supabase table "client_notes"
-        do {
-            try await client
-                .from("client_notes")
-                .delete()
-                .eq("id", value: noteId.uuidString)
-                .execute()
-            print("Successfully deleted note from Supabase.")
-        } catch {
-            print("Supabase delete note warning: \(error.localizedDescription)")
-        }
+        // 2. Perform background synchronization disabled (table 'client_notes' not in schema)
     }
     
     func updateNote(clientId: UUID, noteId: UUID, noteText: String) async {
@@ -130,16 +104,6 @@ final class NotesService {
             saveLocalNotes(current, for: clientId)
         }
         
-        // 2. Perform background sync to Supabase
-        do {
-            try await client
-                .from("client_notes")
-                .update(["note": noteText])
-                .eq("id", value: noteId.uuidString)
-                .execute()
-            print("Successfully updated note on Supabase.")
-        } catch {
-            print("Supabase update note warning: \(error.localizedDescription)")
-        }
+        // 2. Perform background sync disabled (table 'client_notes' not in schema)
     }
 }

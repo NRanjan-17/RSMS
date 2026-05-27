@@ -93,7 +93,7 @@ final class ClientDetailViewModel {
                     .from("appointment")
                     .select()
                     .eq("client_id", value: client.id)
-                    .order("appointment_date", ascending: false)
+                    .order("timestamp", ascending: false)
                     .execute()
                     .value
                 

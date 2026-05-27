@@ -305,13 +305,13 @@ final class DashboardViewModel {
     
     func assignStaff(to appointmentId: UUID, staffId: UUID) async {
         struct UpdateStaffRequest: Encodable {
-            let assigned_staff_id: UUID
+            let assigned_to: UUID
             let status: String
         }
         do {
             try await SupabaseManager.shared.client
                 .from("appointment")
-                .update(UpdateStaffRequest(assigned_staff_id: staffId, status: "assigned"))
+                .update(UpdateStaffRequest(assigned_to: staffId, status: "assigned"))
                 .eq("id", value: appointmentId)
                 .execute()
             
