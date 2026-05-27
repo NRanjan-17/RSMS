@@ -20,14 +20,34 @@ final class POSViewModel {
     static let shared = POSViewModel()
     
     var availableProducts: [CatalogItem] = []
-    var cartItems: [POSCartRow] = []
+    
+    var clientCarts: [UUID: [POSCartRow]] = [:]
+    var guestCart: [POSCartRow] = []
+    
+    var cartItems: [POSCartRow] {
+        get {
+            if let client = selectedClient {
+                return clientCarts[client.id] ?? []
+            } else {
+                return guestCart
+            }
+        }
+        set {
+            if let client = selectedClient {
+                clientCarts[client.id] = newValue
+            } else {
+                guestCart = newValue
+            }
+        }
+    }
+    
     var selectedClient: StoreClient? = nil
     
     private init() {}
     
-    var discountRate: Double = 0.08
+    var courtesyRate: Double = 0.0
     var taxFree: Bool = false
-    var approvalState: ApprovalState = .waiting
+    var approvalState: ApprovalState = .approved
     var offlineCartQueued: Bool = true
     
     var isProcessingPayment: Bool = false
@@ -37,24 +57,24 @@ final class POSViewModel {
     var isLoadingProducts = false
     var errorMessage: String? = nil
     
-    var subtotal: Double {
-        cartItems.reduce(0.0) { $0 + ($1.product.amount * Double($1.qty)) }
+    var subtotal: Int {
+        Int(cartItems.reduce(0) { $0 + ($1.product.amount * Double($1.qty)) })
     }
     
-    var discount: Double {
-        subtotal * discountRate
+    var courtesyAmount: Int {
+        Int(Double(subtotal) * courtesyRate)
     }
     
-    var tax: Double {
-        taxFree ? 0.0 : (subtotal - discount) * 0.03
+    var tax: Int {
+        taxFree ? 0 : Int(Double(subtotal - courtesyAmount) * 0.03)
     }
     
-    var total: Double {
-        subtotal - discount + tax
+    var total: Int {
+        subtotal - courtesyAmount + tax
     }
     
     var requiresApproval: Bool {
-        discountRate > 0.10
+        courtesyRate > 0.05
     }
     
     func fetchProducts() {
@@ -103,9 +123,9 @@ final class POSViewModel {
         self.selectedClient = client
     }
     
-    func applyDiscount(_ rate: Double) {
-        discountRate = rate
-        approvalState = rate > 0.10 ? .waiting : .approved
+    func applyCourtesy(_ rate: Double) {
+        courtesyRate = rate
+        approvalState = rate > 0.05 ? .waiting : .approved
     }
     
     func requestApproval() {
@@ -174,7 +194,13 @@ final class POSViewModel {
         }
     }
     
-    func formatCurrency(_ amount: Double) -> String {
-        return CurrencyManager.shared.format(amount: amount)
+    func formatCurrency(_ amount: Int) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencySymbol = CurrencyManager.shared.symbol
+        formatter.locale = Locale(identifier: "en_IN")
+        formatter.maximumFractionDigits = 0
+        return formatter.string(from: NSNumber(value: amount)) ?? "\(CurrencyManager.shared.symbol)\(amount)"
     }
 }
+

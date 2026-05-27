@@ -68,7 +68,7 @@ final class PurchaseHistoryService {
                 .value
             
             let purchases = dbItems.map {
-                ClientPurchase(id: $0.id, name: $0.name, price: $0.price, date: $0.date)
+                ClientPurchase(id: $0.id, name: $0.name, price: Double($0.price) ?? 0.0, date: $0.date)
             }
             savePurchases(purchases, for: clientId)
         } catch {
@@ -76,7 +76,7 @@ final class PurchaseHistoryService {
         }
     }
     
-    func addPurchase(clientId: UUID, name: String, price: String, date: String = "") {
+    func addPurchase(clientId: UUID, name: String, price: Double, date: String = "") {
         var current = fetchPurchases(clientId: clientId)
         
         let displayDate: String
@@ -88,7 +88,7 @@ final class PurchaseHistoryService {
             displayDate = date
         }
         
-        let newPurchase = ClientPurchase(name: name, price: price, date: displayDate)
+        let newPurchase = ClientPurchase(id: UUID(), name: name, price: price, date: displayDate)
         current.insert(newPurchase, at: 0) // Prepend newest purchase
         savePurchases(current, for: clientId)
         
@@ -99,7 +99,7 @@ final class PurchaseHistoryService {
                     id: newPurchase.id,
                     clientId: clientId,
                     name: newPurchase.name,
-                    price: newPurchase.price,
+                    price: String(newPurchase.price),
                     date: newPurchase.date
                 )
                 try await client

@@ -183,8 +183,8 @@ extension Client {
     }
 }
 
-struct ClientNote: Identifiable, Hashable {
-    let id: UUID = UUID()
+struct ClientNote: Identifiable, Hashable, Codable {
+    var id: UUID = UUID()
     let note: String
     let date: String
     let author: String
@@ -234,8 +234,8 @@ struct ClientWishlistItem: Identifiable, Hashable, Codable {
     }
 }
 
-struct ClientTicket: Identifiable, Hashable {
-    let id: UUID = UUID()
+struct ClientTicket: Identifiable, Hashable, Codable {
+    var id: UUID = UUID()
     let title: String
     let status: String
     let date: String

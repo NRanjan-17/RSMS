@@ -96,7 +96,7 @@ struct POSView: View {
                                         Text(item.product.name)
                                             .font(AppFonts.sansSerif(size: 12, weight: .medium))
                                             .foregroundStyle(.white)
-                                        Text(viewModel.formatCurrency(item.product.amount))
+                                        Text(viewModel.formatCurrency(Int(item.product.amount)))
                                             .font(AppFonts.serif(size: 15, weight: .semibold))
                                             .foregroundStyle(AppColors.gold)
                                     }
