@@ -6,10 +6,21 @@
 //
 
 import SwiftUI
+import Supabase
+import PostgREST
 
 struct BMAppointmentDetailView: View {
     @Environment(\.dismiss) private var dismiss
-    let appointment: BMAppointment
+    let appointment: AppointmentEntity
+    
+    @State private var availableStaff: [StaffModel] = []
+    @State private var selectedStaffId: UUID?
+    @State private var isSaving = false
+    
+    init(appointment: AppointmentEntity) {
+        self.appointment = appointment
+        _selectedStaffId = State(initialValue: appointment.assignedTo)
+    }
 
     var body: some View {
         ZStack {
@@ -43,16 +54,16 @@ struct BMAppointmentDetailView: View {
                                     RoundedRectangle(cornerRadius: 12)
                                         .fill(AppColors.gold08)
                                         .frame(width: 50, height: 50)
-                                    Text(appointment.clientName.prefix(1))
+                                    Text(appointment.client?.name.prefix(1) ?? "U")
                                         .font(AppFonts.serif(size: 20, weight: .bold))
                                         .foregroundStyle(AppColors.gold)
                                 }
 
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text(appointment.clientName)
+                                    Text(appointment.client?.name ?? "Unknown Client")
                                         .font(AppFonts.serif(size: 22, weight: .medium))
                                         .foregroundStyle(AppColors.text)
-                                    Text(appointment.type)
+                                    Text(appointment.appointmentType)
                                         .font(AppFonts.sansSerif(size: 13))
                                         .foregroundStyle(AppColors.secondary)
                                 }
@@ -61,8 +72,8 @@ struct BMAppointmentDetailView: View {
                             Divider().background(AppColors.gold15)
 
                             VStack(alignment: .leading, spacing: 16) {
-                                DetailRow(label: "TIME",    value: appointment.time,        icon: "clock")
-                                DetailRow(label: "ADVISOR", value: appointment.advisorName, icon: "person.fill")
+                                DetailRow(label: "TIME",    value: appointment.formattedTime,        icon: "clock")
+                                DetailRow(label: "ADVISOR", value: advisorName(for: selectedStaffId), icon: "person.fill")
                                 DetailRow(label: "STORE",   value: "Maison Mumbai",         icon: "building.2.fill")
                             }
                         }
@@ -79,19 +90,27 @@ struct BMAppointmentDetailView: View {
                                 .kerning(1.5)
                                 .padding(.horizontal, 24)
 
-                            HStack {
-                                Text("Select new advisor...")
-                                    .font(AppFonts.sansSerif(size: 14))
-                                    .foregroundStyle(AppColors.tertiary)
-                                Spacer()
-                                Image(systemName: "chevron.down")
-                                    .foregroundStyle(AppColors.gold)
+                            Menu {
+                                ForEach(availableStaff) { staff in
+                                    Button(staff.name) {
+                                        selectedStaffId = staff.id
+                                    }
+                                }
+                            } label: {
+                                HStack {
+                                    Text(selectedStaffId == nil ? "Select new advisor..." : advisorName(for: selectedStaffId))
+                                        .font(AppFonts.sansSerif(size: 14))
+                                        .foregroundStyle(selectedStaffId == nil ? AppColors.tertiary : AppColors.text)
+                                    Spacer()
+                                    Image(systemName: "chevron.down")
+                                        .foregroundStyle(AppColors.gold)
+                                }
+                                .padding(.horizontal, 20)
+                                .frame(height: 52)
+                                .background(AppColors.surface)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
                             }
-                            .padding(.horizontal, 20)
-                            .frame(height: 52)
-                            .background(AppColors.surface)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
                             .padding(.horizontal, 24)
                         }
                     }
@@ -99,15 +118,84 @@ struct BMAppointmentDetailView: View {
                 }
 
                 VStack {
-                    CustomButton(title: "Confirm Changes", action: { dismiss() })
-                        .padding(.horizontal, 24)
+                    Button(action: {
+                        Task {
+                            isSaving = true
+                            if let newStaffId = selectedStaffId {
+                                await assignStaff(to: appointment.id, staffId: newStaffId)
+                            }
+                            isSaving = false
+                            dismiss()
+                        }
+                    }) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(isSaving ? AppColors.gold.opacity(0.5) : AppColors.gold)
+                                .frame(height: 52)
+                            
+                            if isSaving {
+                                ProgressView().tint(AppColors.background)
+                            } else {
+                                Text("Confirm Changes")
+                                    .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                    .foregroundStyle(AppColors.background)
+                            }
+                        }
+                    }
+                    .disabled(isSaving)
+                    .padding(.horizontal, 24)
                 }
                 .padding(.top, 20)
                 .padding(.bottom, 40)
                 .background(AppColors.background)
             }
         }
+        .task {
+            await fetchAvailableStaff()
+        }
         .toolbar(.hidden, for: .navigationBar)
+    }
+    
+    private func fetchAvailableStaff() async {
+        do {
+            if let (_, profile) = try await ProfileService().fetchCurrentProfile(),
+               let boutique = profile as? CorporateBoutique {
+                
+                let fetched: [StaffModel] = try await SupabaseManager.shared.client
+                    .from("staff")
+                    .select()
+                    .eq("boutique_id", value: boutique.id)
+                    .execute()
+                    .value
+                
+                await MainActor.run {
+                    self.availableStaff = fetched
+                }
+            }
+        } catch {
+            print("Failed to fetch available staff: \(error)")
+        }
+    }
+    
+    private func advisorName(for staffId: UUID?) -> String {
+        guard let staffId = staffId else { return "Unassigned" }
+        return availableStaff.first(where: { $0.id == staffId })?.name ?? "Unknown"
+    }
+    
+    private func assignStaff(to appointmentId: UUID, staffId: UUID) async {
+        struct UpdateStaffRequest: Encodable {
+            let assigned_staff_id: UUID
+            let status: String
+        }
+        do {
+            try await SupabaseManager.shared.client
+                .from("appointment")
+                .update(UpdateStaffRequest(assigned_staff_id: staffId, status: "assigned"))
+                .eq("id", value: appointmentId)
+                .execute()
+        } catch {
+            print("Failed to assign staff: \(error)")
+        }
     }
 }
 
@@ -136,13 +224,3 @@ private struct DetailRow: View {
     }
 }
 
-#Preview {
-    BMAppointmentDetailView(
-        appointment: BMAppointment(
-            clientName:  "Siddharth Kapoor",
-            time:        "11:30 AM",
-            advisorName: "Aman Gupta",
-            type:        "VIP Preview"
-        )
-    )
-}

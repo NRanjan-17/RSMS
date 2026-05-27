@@ -7,14 +7,16 @@
 
 import Foundation
 import Observation
+import Supabase
 
 @Observable
 final class AppointmentsViewModel {
-    var appointments: [SAAppointment] = [
-        SAAppointment(time: "10:00 AM", name: "Rahul Bajaj", tier: "UHNW", type: "Watch Collection Preview", initial: "RB", done: true),
-        SAAppointment(time: "2:30 PM", name: "Ananya Kapoor", tier: "VIP", type: "Fall Collection Walkthrough", initial: "AK", done: false),
-        SAAppointment(time: "6:00 PM", name: "Walk-in Client", tier: nil, type: "Private Fitting", initial: "?", done: false)
-    ]
+    var appointments: [AppointmentEntity] = []
+    var isLoading = false
+    var errorMessage: String?
+    
+    private let client = SupabaseManager.shared.client
+    private let profileService = ProfileService()
     
     var currentMonthDays: [(Int, String, String)] = {
         let calendar = Calendar.current
@@ -38,6 +40,41 @@ final class AppointmentsViewModel {
     }()
     
     var remainingCount: Int {
-        appointments.filter { !$0.done }.count
+        appointments.filter { $0.status != "completed" }.count
+    }
+    
+    @MainActor
+    func fetchAppointments() async {
+        isLoading = true
+        errorMessage = nil
+        
+        do {
+            guard let session = try? await client.auth.session else {
+                throw NSError(domain: "Auth", code: 401, userInfo: [NSLocalizedDescriptionKey: "No active session"])
+            }
+            
+            // First fetch the staff profile
+            let staff: StaffModel = try await client.from("staff")
+                .select()
+                .eq("auth_user_id", value: session.user.id)
+                .single()
+                .execute()
+                .value
+            
+            // Fetch appointments where the SA is the creator OR the assigned staff
+            let fetched: [AppointmentEntity] = try await client.from("appointment")
+                .select("*, client(*)")
+                .or("created_by.eq.\(staff.id),assigned_to.eq.\(staff.id)")
+                .order("created_at", ascending: false)
+                .execute()
+                .value
+            
+            self.appointments = fetched
+        } catch {
+            print("Failed to fetch appointments: \(error)")
+            self.errorMessage = error.localizedDescription
+            self.appointments = []
+        }
+        isLoading = false
     }
 }

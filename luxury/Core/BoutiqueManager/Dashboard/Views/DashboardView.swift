@@ -163,20 +163,20 @@ struct DashboardView: View {
                                     }) {
                                         HStack(spacing: 16) {
                                             VStack(alignment: .leading, spacing: 4) {
-                                                Text(appointment.time)
+                                                Text(appointment.formattedTime)
                                                     .font(AppFonts.sansSerif(size: 14, weight: .bold))
                                                     .foregroundStyle(AppColors.gold)
-                                                Text(appointment.type.uppercased())
+                                                Text(appointment.appointmentType.uppercased())
                                                     .font(AppFonts.sansSerif(size: 8, weight: .bold))
                                                     .foregroundStyle(AppColors.tertiary)
                                             }
                                             .frame(width: 70, alignment: .leading)
                                             
                                             VStack(alignment: .leading, spacing: 2) {
-                                                Text(appointment.clientName)
+                                                Text(appointment.client?.name ?? "Unknown Client")
                                                     .font(AppFonts.serif(size: 17, weight: .medium))
                                                     .foregroundStyle(AppColors.text)
-                                                Text("Advisor: \(appointment.advisorName)")
+                                                Text("Advisor: \(viewModel.advisorName(for: appointment.assignedTo))")
                                                     .font(AppFonts.sansSerif(size: 12))
                                                     .foregroundStyle(AppColors.secondary)
                                             }

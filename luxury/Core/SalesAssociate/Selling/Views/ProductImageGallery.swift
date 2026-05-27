@@ -30,25 +30,6 @@ struct ProductImageGalleryView: View {
                 .frame(height: 300)
                 .background(AppColors.surface)
 
-                if urls.count > 1 {
-                    HStack(spacing: 6) {
-                        ForEach(0..<urls.count, id: \.self) { i in
-                            Circle()
-                                .fill(i == currentIndex ? AppColors.gold : AppColors.gold.opacity(0.25))
-                                .frame(
-                                    width:  i == currentIndex ? 8 : 5,
-                                    height: i == currentIndex ? 8 : 5
-                                )
-                                .animation(.spring(duration: 0.3), value: currentIndex)
-                        }
-                    }
-                    .padding(.top, 10)
-
-                    Text("\(currentIndex + 1) / \(urls.count)")
-                        .font(AppFonts.sansSerif(size: 11))
-                        .foregroundStyle(AppColors.tertiary)
-                        .padding(.bottom, 6)
-                }
             }
         }
     }

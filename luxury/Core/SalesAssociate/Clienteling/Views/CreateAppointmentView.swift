@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import Supabase
+import Auth
 
 struct CreateAppointmentView: View {
     @Environment(\.dismiss) private var dismiss
@@ -13,6 +15,8 @@ struct CreateAppointmentView: View {
     @State private var selectedDate = Date()
     @State private var selectedTime = "10:00 AM"
     @State private var selectedType = "Watch Consultation"
+    @State private var isSaving = false
+    @State private var errorMessage: String? = nil
     
     let times = ["10:00 AM", "11:30 AM", "01:00 PM", "02:30 PM", "04:00 PM", "05:30 PM"]
     let types = ["Watch Consultation", "Jewellery Fitting", "Leather Goods Preview", "Video Consult"]
@@ -132,13 +136,101 @@ struct CreateAppointmentView: View {
                 }
                 
                 VStack(spacing: 0) {
-                    CustomButton(title: "Confirm Appointment", action: { dismiss() })
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 40)
+                    if let error = errorMessage {
+                        Text(error)
+                            .font(AppFonts.sansSerif(size: 12))
+                            .foregroundStyle(AppColors.error)
+                            .padding(.bottom, 8)
+                    }
+                    
+                    Button(action: {
+                        Task { await saveAppointment() }
+                    }) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(clientName.isEmpty || isSaving ? AppColors.gold.opacity(0.5) : AppColors.gold)
+                                .frame(height: 52)
+                            
+                            if isSaving {
+                                ProgressView()
+                                    .tint(AppColors.background)
+                            } else {
+                                Text("Confirm Appointment")
+                                    .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                    .foregroundStyle(AppColors.background)
+                            }
+                        }
+                    }
+                    .disabled(clientName.isEmpty || isSaving)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 40)
                 }
                 .background(AppColors.background)
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+    }
+    
+    private func saveAppointment() async {
+        isSaving = true
+        errorMessage = nil
+        
+        do {
+            let client = SupabaseManager.shared.client
+            guard let session = try? await client.auth.session else {
+                throw NSError(domain: "Auth", code: 401, userInfo: [NSLocalizedDescriptionKey: "No session"])
+            }
+            
+            let profileService = ProfileService()
+            guard let (_, staffAny) = try await profileService.fetchCurrentProfile(),
+                  let staff = staffAny as? StaffModel else {
+                throw NSError(domain: "Auth", code: 403, userInfo: [NSLocalizedDescriptionKey: "Staff profile not found"])
+            }
+            
+            let timeFormatter = DateFormatter()
+            timeFormatter.dateFormat = "HH:mm"
+            let timeDate = timeFormatter.date(from: selectedTime) ?? Date()
+            
+            let calendar = Calendar.current
+            let hour = calendar.component(.hour, from: timeDate)
+            let minute = calendar.component(.minute, from: timeDate)
+            
+            guard let combinedDate = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: selectedDate) else {
+                throw NSError(domain: "Auth", code: 400, userInfo: [NSLocalizedDescriptionKey: "Invalid date/time combination"])
+            }
+            
+            let isoFormatter = ISO8601DateFormatter()
+            let timestampStr = isoFormatter.string(from: combinedDate)
+            
+            guard let boutiqueId = staff.boutiqueId else {
+                throw NSError(domain: "Auth", code: 403, userInfo: [NSLocalizedDescriptionKey: "Staff does not have an assigned boutique"])
+            }
+            
+            let appointment = AppointmentEntity(
+                id: UUID(),
+                clientId: nil,
+                boutiqueId: boutiqueId,
+                timestamp: timestampStr,
+                appointmentType: selectedType,
+                assignedTo: nil,
+                createdBy: staff.id,
+                status: "pending",
+                createdAt: nil
+            )
+            
+            try await client.from("appointment").insert(appointment).execute()
+            
+            await MainActor.run {
+                dismiss()
+            }
+        } catch {
+            await MainActor.run {
+                errorMessage = error.localizedDescription
+            }
+        }
+        
+        await MainActor.run {
+            isSaving = false
+        }
     }
 }

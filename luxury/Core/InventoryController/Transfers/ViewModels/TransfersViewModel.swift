@@ -11,7 +11,6 @@ import Observation
 @Observable
 final class TransfersViewModel {
     var pendingTransfers: [TransferRequest] = []
-    
     func fetchTransfers() {
         pendingTransfers = TransferPersistence.shared.loadTransfers()
     }

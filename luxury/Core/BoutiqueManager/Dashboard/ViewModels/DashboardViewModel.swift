@@ -83,20 +83,16 @@ final class DashboardViewModel {
         return f.localizedString(for: lastSyncedAt, relativeTo: Date())
     }
 
-    var pendingApprovals: [ApprovalRequest] = [
-        ApprovalRequest(associateName: "Aman Gupta", clientName: "Vikram Seth", amount: "\(CurrencyManager.shared.symbol)4,50,000", discount: "15%"),
-        ApprovalRequest(associateName: "Priya R.",   clientName: "Ananya M.",   amount: "\(CurrencyManager.shared.symbol)1,20,000", discount: "12%")
-    ]
+    var pendingApprovals: [ApprovalRequest] = []
 
-    var appointments: [BMAppointment] = [
-        BMAppointment(clientName: "Siddharth K.",  time: "11:30 AM", advisorName: "Aman Gupta", type: "In-Store"),
-        BMAppointment(clientName: "Meera J.",      time: "02:00 PM", advisorName: "Priya R.",   type: "Video Consult"),
-        BMAppointment(clientName: "Rajesh Khanna", time: "04:30 PM", advisorName: "Suresh V.",  type: "VIP Preview")
-    ]
+    var appointments: [AppointmentEntity] = []
+    var availableStaff: [StaffModel] = []
 
     func startRealTimeUpdates() {
         fetchBoutiqueName()
         fetchTodaySales()
+        fetchAppointments()
+        fetchAvailableStaff()
         startSalesPolling()
         startNetworkMonitoring()
         startFulfillmentPolling()
@@ -250,6 +246,79 @@ final class DashboardViewModel {
                 await self?.fetchSFSFulfillments()
                 try? await Task.sleep(for: .seconds(5))
             }
+        }
+    }
+    
+    // MARK: - Appointments & Staff
+    
+    func fetchAppointments() {
+        Task {
+            do {
+                if let (_, profile) = try await ProfileService().fetchCurrentProfile(),
+                   let boutique = profile as? CorporateBoutique {
+                    
+                    let fetched: [AppointmentEntity] = try await SupabaseManager.shared.client
+                        .from("appointment")
+                        .select()
+                        .eq("boutique_id", value: boutique.id)
+                        .order("created_at", ascending: false)
+                        .execute()
+                        .value
+                    
+                    await MainActor.run {
+                        self.appointments = fetched
+                    }
+                }
+            } catch {
+                print("Failed to fetch appointments: \(error)")
+            }
+        }
+    }
+    
+    func fetchAvailableStaff() {
+        Task {
+            do {
+                if let (_, profile) = try await ProfileService().fetchCurrentProfile(),
+                   let boutique = profile as? CorporateBoutique {
+                    
+                    let fetched: [StaffModel] = try await SupabaseManager.shared.client
+                        .from("staff")
+                        .select()
+                        .eq("boutique_id", value: boutique.id)
+                        .execute()
+                        .value
+                    
+                    await MainActor.run {
+                        self.availableStaff = fetched
+                    }
+                }
+            } catch {
+                print("Failed to fetch available staff: \(error)")
+            }
+        }
+    }
+    
+    func advisorName(for staffId: UUID?) -> String {
+        guard let staffId = staffId else { return "Unassigned" }
+        return availableStaff.first(where: { $0.id == staffId })?.name ?? "Unknown"
+    }
+    
+    func assignStaff(to appointmentId: UUID, staffId: UUID) async {
+        struct UpdateStaffRequest: Encodable {
+            let assigned_staff_id: UUID
+            let status: String
+        }
+        do {
+            try await SupabaseManager.shared.client
+                .from("appointment")
+                .update(UpdateStaffRequest(assigned_staff_id: staffId, status: "assigned"))
+                .eq("id", value: appointmentId)
+                .execute()
+            
+            // Refresh
+            fetchAppointments()
+        } catch {
+            print("Failed to assign staff: \(error)")
         }
     }
 }

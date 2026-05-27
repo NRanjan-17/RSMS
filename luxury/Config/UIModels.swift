@@ -118,20 +118,9 @@ struct Client: Identifiable, Hashable {
     var dob: String?
     var maritalStatus: String?
     var dateOfAnniversary: String?
+    var createdAt: Date?
     
-    // Stable Mock IDs
-    static let mockRahulId = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
-    static let mockPriyaId = UUID(uuidString: "00000000-0000-0000-0000-000000000002")!
-    static let mockDeepaId = UUID(uuidString: "00000000-0000-0000-0000-000000000003")!
-    static let mockAnanyaId = UUID(uuidString: "00000000-0000-0000-0000-000000000004")!
-    static let mockVikramId = UUID(uuidString: "00000000-0000-0000-0000-000000000005")!
-    static let mockRohitId = UUID(uuidString: "00000000-0000-0000-0000-000000000006")!
-    
-    static let mockIds: Set<UUID> = [
-        mockRahulId, mockPriyaId, mockDeepaId, mockAnanyaId, mockVikramId, mockRohitId
-    ]
-    
-    init(id: UUID = UUID(), name: String, tier: ClientTier, lastVisit: String, ltv: Double, initial: String, isHot: Bool = false, phone: String? = nil, email: String? = nil, dob: String? = nil, maritalStatus: String? = nil, dateOfAnniversary: String? = nil) {
+    init(id: UUID = UUID(), name: String, tier: ClientTier, lastVisit: String, ltv: Double, initial: String, isHot: Bool = false, phone: String? = nil, email: String? = nil, dob: String? = nil, maritalStatus: String? = nil, dateOfAnniversary: String? = nil, createdAt: Date? = nil) {
         self.id = id
         self.name = name
         self.tier = tier
@@ -148,6 +137,7 @@ struct Client: Identifiable, Hashable {
         self.dob = dob
         self.maritalStatus = maritalStatus
         self.dateOfAnniversary = dateOfAnniversary
+        self.createdAt = createdAt
     }
 }
 
@@ -189,11 +179,12 @@ extension Client {
         self.dob = entity.dob
         self.maritalStatus = entity.maritalStatus
         self.dateOfAnniversary = entity.dateOfAnniversary
+        self.createdAt = entity.createdAt
     }
 }
 
-struct ClientNote: Identifiable, Hashable {
-    let id: UUID = UUID()
+struct ClientNote: Identifiable, Hashable, Codable {
+    var id: UUID = UUID()
     let note: String
     let date: String
     let author: String
@@ -243,8 +234,8 @@ struct ClientWishlistItem: Identifiable, Hashable, Codable {
     }
 }
 
-struct ClientTicket: Identifiable, Hashable {
-    let id: UUID = UUID()
+struct ClientTicket: Identifiable, Hashable, Codable {
+    var id: UUID = UUID()
     let title: String
     let status: String
     let date: String
@@ -273,50 +264,6 @@ struct ApprovalRequest: Identifiable, Hashable {
     }
 }
 
-struct BMAppointment: Identifiable, Hashable {
-    let id: UUID
-    let clientName: String
-    let time: String
-    let advisorName: String
-    let type: String
-    
-    init(id: UUID = UUID(), clientName: String, time: String, advisorName: String, type: String) {
-        self.id = id
-        self.clientName = clientName
-        self.time = time
-        self.advisorName = advisorName
-        self.type = type
-    }
-}
-
-struct SAAppointment: Identifiable, Hashable {
-    var id = UUID()
-    let time: String
-    let name: String
-    let tier: String?
-    let type: String
-    let initial: String
-    let done: Bool
-    
-    init(id: UUID = UUID(), time: String, name: String, tier: String?, type: String, initial: String, done: Bool) {
-        self.id = id
-        self.time = time
-        self.name = name
-        self.tier = tier
-        self.type = type
-        self.initial = initial
-        self.done = done
-    }
-}
-
-struct SADashAppointment: Identifiable, Hashable {
-    let id = UUID()
-    let time: String
-    let name: String
-    let tier: String
-    let type: String
-    let initial: String
-}
 
 struct SADashClient: Identifiable, Hashable {
     let id = UUID()
@@ -550,7 +497,7 @@ struct StaffMetric: Identifiable, Hashable {
     let interactions: Int
 }
 
-enum MockApprovalState: String, CaseIterable, Hashable {
+enum ApprovalState: String, CaseIterable, Hashable {
     case waiting = "Waiting"
     case approved = "Approved"
     case rejected = "Rejected"

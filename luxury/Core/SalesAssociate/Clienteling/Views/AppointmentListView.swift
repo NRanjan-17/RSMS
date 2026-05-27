@@ -72,7 +72,7 @@ struct AppointmentListView: View {
                                     router.push(SARoute.clientProfile(ClientDetailViewModel.defaultClient))
                                 }) {
                                     HStack(spacing: 12) {
-                                        Text(a.time)
+                                        Text(a.formattedTime)
                                             .font(AppFonts.sansSerif(size: 10, weight: .medium))
                                             .foregroundStyle(AppColors.gold)
                                             .padding(.horizontal, 8)
@@ -84,28 +84,28 @@ struct AppointmentListView: View {
                                             RoundedRectangle(cornerRadius: 10)
                                                 .fill(AppColors.gold08)
                                                 .frame(width: 34, height: 34)
-                                            Text(a.initial)
+                                            Text(String(a.client?.name.prefix(1) ?? "U").uppercased())
                                                 .font(AppFonts.serif(size: 12, weight: .semibold))
                                                 .foregroundStyle(AppColors.gold)
                                         }
                                         
                                         VStack(alignment: .leading, spacing: 2) {
                                             HStack(spacing: 6) {
-                                                Text(a.name)
+                                                Text(a.client?.name ?? "Unknown Client")
                                                     .font(AppFonts.sansSerif(size: 13, weight: .medium))
                                                     .foregroundStyle(AppColors.text)
-                                                if let tier = a.tier {
+                                                if let tier = a.client?.tier {
                                                     StatusBadge(text: tier, status: .neutral)
                                                 }
                                             }
-                                            Text(a.type)
+                                            Text(a.appointmentType)
                                                 .font(AppFonts.sansSerif(size: 11))
                                                 .foregroundStyle(AppColors.secondary)
                                         }
                                         
                                         Spacer()
                                         
-                                        if a.done {
+                                        if a.status == "completed" {
                                             ZStack {
                                                 Circle().fill(AppColors.success.opacity(0.15)).frame(width: 20, height: 20)
                                                 Image(systemName: "checkmark")
@@ -120,10 +120,10 @@ struct AppointmentListView: View {
                                     }
                                     .padding(.horizontal, 14)
                                     .padding(.vertical, 12)
-                                    .background(a.done ? AppColors.surface.opacity(0.5) : AppColors.surface)
+                                    .background(a.status == "completed" ? AppColors.surface.opacity(0.5) : AppColors.surface)
                                     .clipShape(RoundedRectangle(cornerRadius: 12))
-                                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(a.done ? AppColors.gold08 : AppColors.gold15, lineWidth: 0.5))
-                                    .opacity(a.done ? 0.5 : 1.0)
+                                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(a.status == "completed" ? AppColors.gold08 : AppColors.gold15, lineWidth: 0.5))
+                                    .opacity(a.status == "completed" ? 0.5 : 1.0)
                                 }
                                 .buttonStyle(.plain)
                             }

@@ -114,7 +114,15 @@ struct StockView: View {
                     .padding(.top, 20)
                     .padding(.bottom, 40)
                 }
+                .refreshable {
+                    viewModel.fetchInventoryStats()
+                    viewModel.fetchSFSCount()
+                }
             }
+        }
+        .task {
+            viewModel.fetchInventoryStats()
+            viewModel.fetchSFSCount()
         }
         .toolbar(.hidden, for: .navigationBar)
         .onAppear {

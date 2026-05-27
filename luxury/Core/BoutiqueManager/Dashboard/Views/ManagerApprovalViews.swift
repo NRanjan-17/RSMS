@@ -9,7 +9,7 @@ import SwiftUI
 
 struct RefundApprovalView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var state: MockApprovalState = .waiting
+    @State private var state: ApprovalState = .waiting
 
     var body: some View {
         ManagerDecisionView(
@@ -24,7 +24,7 @@ struct RefundApprovalView: View {
 
 struct WriteOffApprovalView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var state: MockApprovalState = .waiting
+    @State private var state: ApprovalState = .waiting
 
     var body: some View {
         ManagerDecisionView(
@@ -41,7 +41,7 @@ private struct ManagerDecisionView: View {
     let title:   String
     let heading: String
     let detail:  String
-    @Binding var state: MockApprovalState
+    @Binding var state: ApprovalState
     let dismiss: DismissAction
 
     var body: some View {
@@ -92,7 +92,7 @@ private struct ManagerDecisionView: View {
                             HStack {
                                 Image(systemName: "lock.shield")
                                     .foregroundStyle(AppColors.gold)
-                                Text("Decision timestamp, manager identity, and request snapshot will be stored with the local mock record.")
+                                Text("Decision timestamp, manager identity, and request snapshot will be securely stored.")
                                     .font(AppFonts.sansSerif(size: 12))
                                     .foregroundStyle(AppColors.secondary)
                             }

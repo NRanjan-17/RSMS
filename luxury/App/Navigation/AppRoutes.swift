@@ -13,14 +13,14 @@ enum SARoute: Hashable {
     case returns
     case afterSalesIntake(clientName: String?, serialNumber: String?, isWarrantyActive: Bool)
     case afterSalesTracking
-    case lookBuilder
     case remoteSelling
     case purchaseDetails(client: Client, purchase: ClientPurchase)
+    case exchangePolicy
 }
 
 
 enum BMRoute: Hashable {
-    case appointmentDetail(BMAppointment)
+    case appointmentDetail(AppointmentEntity)
     case staffPerformanceDetail(BMStaffMember)
     case createEvent
     case salesAnalytics
@@ -68,6 +68,8 @@ enum CARoute: Hashable {
     case inventoryDetail(ProductInventorySummary)
     case staffList
     case staffDetail(StaffModel)
+    case storePerformance
+    case storePerformanceDetail(BoutiquePerformance)
 }
 
 enum AppRoutes: Hashable {
