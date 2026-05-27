@@ -139,8 +139,8 @@ struct BoutiqueConfigDetailView: View {
                             
                             VStack(spacing: 12) {
                                 LimitRow(label: "Max SA Discount", value: "10%")
-                                LimitRow(label: "Refund Threshold", value: "\(CurrencyManager.shared.symbol)50,000")
-                                LimitRow(label: "Write-off Limit", value: "\(CurrencyManager.shared.symbol)25,000")
+                                LimitRow(label: "Refund Threshold", value: CurrencyManager.shared.format(amount: 50000))
+                                LimitRow(label: "Write-off Limit", value: CurrencyManager.shared.format(amount: 25000))
                             }
                             .padding(20)
                             .background(AppColors.surface)

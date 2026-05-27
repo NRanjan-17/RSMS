@@ -205,8 +205,8 @@ struct BoutiqueManagerSettingsView: View {
                                             .foregroundStyle(.white)
                                         Spacer()
                                         Picker("Currency", selection: $currencyManager.currentCurrency) {
-                                            ForEach(AppCurrency.allCases) { currency in
-                                                Text(currency.rawValue).tag(currency)
+                                            ForEach(currencyManager.availableCurrencies, id: \.self) { code in
+                                                Text("\(code) (\(currencyManager.symbol(for: code)))").tag(code)
                                             }
                                         }
                                         .tint(AppColors.gold)
@@ -239,6 +239,7 @@ struct BoutiqueManagerSettingsView: View {
         .sheet(isPresented: $showEditBoutique) {
             if let boutique = boutiqueToEdit {
                 EditBoutiqueView(viewModel: EditBoutiqueViewModel(boutique: boutique))
+                    .presentationDragIndicator(.visible)
             }
         }
     }

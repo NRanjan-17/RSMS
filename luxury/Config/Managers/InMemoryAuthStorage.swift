@@ -24,7 +24,7 @@ final class InMemoryAuthStorage: AuthLocalStorage, @unchecked Sendable {
     
     func remove(key: String) throws {
         queue.sync {
-            storage.removeValue(forKey: key)
+            _ = storage.removeValue(forKey: key)
         }
     }
 }

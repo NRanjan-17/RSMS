@@ -14,8 +14,8 @@ final class SAProfileViewModel {
     var greeting: String = "Good morning,"
     var name: String = "Arjun Singh."
     
-    var revenue: String = "\(CurrencyManager.shared.symbol)2,45,000"
-    var target: String = "of \(CurrencyManager.shared.symbol)4,00,000 target"
+    var revenue: Double = 245000.0
+    var target: Double = 400000.0
     var progress: Double = 0.61
     
     var statClients: String = "4"
@@ -28,7 +28,7 @@ final class SAProfileViewModel {
     ]
     
     var recentClients: [SADashClient] = [
-        SADashClient(name: "Priya Mehta", tier: "VIP", lastVisit: "2 days ago", ltv: "\(CurrencyManager.shared.symbol)85,000", initial: "PM"),
-        SADashClient(name: "Sameer Jain", tier: "Standard", lastVisit: "1 week ago", ltv: "\(CurrencyManager.shared.symbol)2,40,000", initial: "SJ")
+        SADashClient(name: "Priya Mehta", tier: "VIP", lastVisit: "2 days ago", ltv: 85000.0, initial: "PM"),
+        SADashClient(name: "Sameer Jain", tier: "Standard", lastVisit: "1 week ago", ltv: 240000.0, initial: "SJ")
     ]
 }

@@ -10,7 +10,7 @@ import Observation
 
 @Observable
 final class ClientDetailViewModel {
-    static let defaultClient = Client(name: "Rahul Bajaj", tier: .uhnw, lastVisit: "Today", ltv: "\(CurrencyManager.shared.symbol)1,24,50,000", initial: "RB", isHot: true)
+    static let defaultClient = Client(name: "Rahul Bajaj", tier: .uhnw, lastVisit: "Today", ltv: 12450000.0, initial: "RB", isHot: true)
     
     var client: Client {
         didSet {
@@ -45,7 +45,7 @@ final class ClientDetailViewModel {
         let countText = String(wishlistItems.count)
         let purchaseCountText = String(purchases.count)
         return [
-            (client.ltv, "Lifetime Value"),
+            (CurrencyManager.shared.formatCompact(amount: client.ltv), "Lifetime Value"),
             (purchaseCountText, "Purchases"),
             (countText, "Wishlist")
         ]
@@ -90,14 +90,14 @@ final class ClientDetailViewModel {
         return "\(CurrencyManager.shared.symbol)\(value)"
     }
     
-    func addClientPurchase(brand: String, name: String, price: String) {
+    func addClientPurchase(brand: String, name: String, price: Double) {
         let fullName = brand.isEmpty ? name : "\(brand) \(name)"
         PurchaseHistoryService.shared.addPurchase(clientId: client.id, name: fullName, price: price)
         
-        let currentLtvVal = parsePrice(client.ltv)
-        let addedVal = parsePrice(price)
+        let currentLtvVal = client.ltv
+        let addedVal = price
         let newLtvVal = currentLtvVal + addedVal
-        let newLtvStr = formatIndianCurrency(newLtvVal)
+        let newLtvStr = String(newLtvVal)
         
         UserDefaults.standard.set(newLtvStr, forKey: "luxury_ltv_\(client.id.uuidString)")
         
@@ -106,7 +106,7 @@ final class ClientDetailViewModel {
             name: client.name,
             tier: client.tier,
             lastVisit: "Today",
-            ltv: newLtvStr,
+            ltv: newLtvVal,
             initial: client.initial,
             isHot: client.isHot,
             phone: client.phone,
@@ -120,7 +120,7 @@ final class ClientDetailViewModel {
         NotificationCenter.default.post(name: NSNotification.Name("RefreshClients"), object: nil)
     }
     
-    func addProductToWishlist(brand: String, name: String, price: String) async {
+    func addProductToWishlist(brand: String, name: String, price: Double) async {
         let newItem = ClientWishlistItem(brand: brand, name: name, price: price)
         await WishlistService.shared.addToWishlist(clientId: client.id, item: newItem)
         await MainActor.run {
@@ -199,7 +199,7 @@ struct GroupedWishlistItem: Identifiable, Hashable {
     let id: UUID
     let brand: String
     let name: String
-    let price: String
+    let price: Double
     let quantity: Int
     let originalItems: [ClientWishlistItem]
 }

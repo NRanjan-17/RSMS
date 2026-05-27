@@ -110,7 +110,7 @@ struct Client: Identifiable, Hashable {
     let name: String
     let tier: ClientTier
     let lastVisit: String
-    let ltv: String
+    let ltv: Double
     let initial: String
     let isHot: Bool
     let phone: String?
@@ -131,12 +131,12 @@ struct Client: Identifiable, Hashable {
         mockRahulId, mockPriyaId, mockDeepaId, mockAnanyaId, mockVikramId, mockRohitId
     ]
     
-    init(id: UUID = UUID(), name: String, tier: ClientTier, lastVisit: String, ltv: String, initial: String, isHot: Bool = false, phone: String? = nil, email: String? = nil, dob: String? = nil, maritalStatus: String? = nil, dateOfAnniversary: String? = nil) {
+    init(id: UUID = UUID(), name: String, tier: ClientTier, lastVisit: String, ltv: Double, initial: String, isHot: Bool = false, phone: String? = nil, email: String? = nil, dob: String? = nil, maritalStatus: String? = nil, dateOfAnniversary: String? = nil) {
         self.id = id
         self.name = name
         self.tier = tier
         self.lastVisit = lastVisit
-        if let storedLTV = UserDefaults.standard.string(forKey: "luxury_ltv_\(id.uuidString)") {
+        if let storedLTVStr = UserDefaults.standard.string(forKey: "luxury_ltv_\(id.uuidString)"), let storedLTV = Double(storedLTVStr) {
             self.ltv = storedLTV
         } else {
             self.ltv = ltv
@@ -163,19 +163,19 @@ extension Client {
         self.lastVisit = hasPurchases ? "Today" : "New Client"
         
         // Tier-based default LTV for premium look, but only if they have purchases
-        if let storedLTV = UserDefaults.standard.string(forKey: "luxury_ltv_\(entity.id.uuidString)") {
+        if let storedLTVStr = UserDefaults.standard.string(forKey: "luxury_ltv_\(entity.id.uuidString)"), let storedLTV = Double(storedLTVStr) {
             self.ltv = storedLTV
         } else if hasPurchases {
             switch clientTier {
             case .standard:
-                self.ltv = "\(CurrencyManager.shared.symbol)4,50,000"
+                self.ltv = 450000.0
             case .vip:
-                self.ltv = "\(CurrencyManager.shared.symbol)28,00,000"
+                self.ltv = 2800000.0
             case .uhnw:
-                self.ltv = "\(CurrencyManager.shared.symbol)1,15,00,000"
+                self.ltv = 11500000.0
             }
         } else {
-            self.ltv = "\(CurrencyManager.shared.symbol)0"
+            self.ltv = 0.0
         }
         
         let parts = entity.name.components(separatedBy: " ")
@@ -202,10 +202,10 @@ struct ClientNote: Identifiable, Hashable {
 struct ClientPurchase: Identifiable, Hashable, Codable {
     var id: UUID
     let name: String
-    let price: String
+    let price: Double
     let date: String
     
-    init(id: UUID = UUID(), name: String, price: String, date: String) {
+    init(id: UUID = UUID(), name: String, price: Double, date: String) {
         self.id = id
         self.name = name
         self.price = price
@@ -233,9 +233,9 @@ struct ClientWishlistItem: Identifiable, Hashable, Codable {
     var id: UUID
     let brand: String
     let name: String
-    let price: String
+    let price: Double
     
-    init(id: UUID = UUID(), brand: String, name: String, price: String) {
+    init(id: UUID = UUID(), brand: String, name: String, price: Double) {
         self.id = id
         self.brand = brand
         self.name = name
@@ -323,7 +323,7 @@ struct SADashClient: Identifiable, Hashable {
     let name: String
     let tier: String
     let lastVisit: String
-    let ltv: String
+    let ltv: Double
     let initial: String
 }
 
@@ -476,10 +476,15 @@ struct ReportItem: Identifiable, Hashable {
     }
 }
 
+enum KPIType: Hashable {
+    case string(String)
+    case currency(Double)
+}
+
 struct GlobalKPI: Identifiable, Hashable {
     let id = UUID()
     let label: String
-    let value: String
+    let type: KPIType
     let trend: Double
     let icon: String
 }
@@ -589,7 +594,7 @@ struct ReturnCase: Identifiable, Hashable {
     let receipt: String
     let client: String
     let item: String
-    let amount: String
+    let amount: Double
     let resolution: ReturnResolution
 }
 

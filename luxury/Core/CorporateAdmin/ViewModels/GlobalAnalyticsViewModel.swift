@@ -65,7 +65,16 @@ final class GlobalAnalyticsViewModel {
                 }
             }
             
+            let now = Date()
+            let calendar = Calendar.current
+            let startOfThisMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now))!
+            let startOfLastMonth = calendar.date(byAdding: .month, value: -1, to: startOfThisMonth)!
+            let thirtyDaysAgo = calendar.date(byAdding: .day, value: -30, to: now)!
+            let sixtyDaysAgo = calendar.date(byAdding: .day, value: -60, to: now)!
+            
             var totalRevenue = 0.0
+            var thisMonthRevenue = 0.0
+            var lastMonthRevenue = 0.0
             var revenueByMonth: [String: Double] = [:]
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "MMM"
@@ -75,8 +84,43 @@ final class GlobalAnalyticsViewModel {
                 if let date = tx.dateOfPurchase {
                     let monthStr = dateFormatter.string(from: date)
                     revenueByMonth[monthStr, default: 0.0] += tx.totalPrice
+                    
+                    if date >= startOfThisMonth {
+                        thisMonthRevenue += tx.totalPrice
+                    } else if date >= startOfLastMonth && date < startOfThisMonth {
+                        lastMonthRevenue += tx.totalPrice
+                    }
                 }
             }
+            
+            // Calculate revenue trend (month-over-month %)
+            let revenueTrend: Double = lastMonthRevenue > 0
+                ? ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100.0
+                : (thisMonthRevenue > 0 ? 100.0 : 0.0)
+            
+            // Calculate boutique trend (added in last 30 days vs previous 30 days)
+            let recentBoutiques = boutiquesResponse.filter { $0.createdAt >= thirtyDaysAgo }.count
+            let previousBoutiques = boutiquesResponse.filter { $0.createdAt >= sixtyDaysAgo && $0.createdAt < thirtyDaysAgo }.count
+            let boutiqueTrend: Double = previousBoutiques > 0
+                ? (Double(recentBoutiques - previousBoutiques) / Double(previousBoutiques)) * 100.0
+                : (recentBoutiques > 0 ? 100.0 : 0.0)
+            
+            // Calculate staff trend (added in last 30 days vs previous 30 days)
+            let recentStaff = staffResponse.filter { $0.createdAt >= thirtyDaysAgo }.count
+            let previousStaff = staffResponse.filter { $0.createdAt >= sixtyDaysAgo && $0.createdAt < thirtyDaysAgo }.count
+            let staffTrend: Double = previousStaff > 0
+                ? (Double(recentStaff - previousStaff) / Double(previousStaff)) * 100.0
+                : (recentStaff > 0 ? 100.0 : 0.0)
+            
+            // Calculate inventory trend (recent catalog value vs older)
+            let recentInventoryItems = catalogs.filter {
+                let totalStock = ($0.productIds?.count ?? 0) - ($0.reserved?.count ?? 0)
+                return totalStock > 0
+            }
+            let totalItems = catalogs.count
+            let inventoryTrend: Double = totalItems > 0
+                ? (Double(recentInventoryItems.count) / Double(totalItems)) * 100.0 - 50.0
+                : 0.0
             
             // Format revenue chart data
             let sortedMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -112,15 +156,11 @@ final class GlobalAnalyticsViewModel {
                 }
             }
             
-            // Format KPI values
-            let formattedRevenue = totalRevenue > 0 ? "\(CurrencyManager.shared.symbol)\(String(format: "%.2f", totalRevenue / 10000000.0)) Cr" : "\(CurrencyManager.shared.symbol)0"
-            let formattedInventoryValue = totalInventoryValue > 0 ? "\(CurrencyManager.shared.symbol)\(String(format: "%.2f", totalInventoryValue / 10000000.0)) Cr" : "\(CurrencyManager.shared.symbol)0"
-            
             let newKpis = [
-                GlobalKPI(label: "Global Revenue", value: formattedRevenue, trend: 5.2, icon: "indianrupeesign.circle.fill"),
-                GlobalKPI(label: "Active Boutiques", value: "\(boutiquesResponse.count)", trend: 0.0, icon: "building.2.fill"),
-                GlobalKPI(label: "Total Staff", value: "\(staffResponse.count)", trend: 2.1, icon: "person.3.fill"),
-                GlobalKPI(label: "Inventory Value", value: formattedInventoryValue, trend: 1.4, icon: "shippingbox.fill")
+                GlobalKPI(label: "Global Revenue", type: .currency(totalRevenue), trend: revenueTrend, icon: "chart.line.uptrend.xyaxis"),
+                GlobalKPI(label: "Active Boutiques", type: .string("\(boutiquesResponse.count)"), trend: boutiqueTrend, icon: "building.2.fill"),
+                GlobalKPI(label: "Total Staff", type: .string("\(staffResponse.count)"), trend: staffTrend, icon: "person.3.fill"),
+                GlobalKPI(label: "Inventory Value", type: .currency(totalInventoryValue), trend: inventoryTrend, icon: "shippingbox.fill")
             ]
             
             await MainActor.run {

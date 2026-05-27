@@ -141,7 +141,7 @@ struct POSView: View {
                                         Text(item.product.name)
                                             .font(AppFonts.sansSerif(size: 12, weight: .medium))
                                             .foregroundStyle(.white)
-                                        Text(viewModel.formatCurrency(Int(item.product.amount)))
+                                        Text(viewModel.formatCurrency(item.product.amount))
                                             .font(AppFonts.serif(size: 15, weight: .semibold))
                                             .foregroundStyle(AppColors.gold)
                                     }
@@ -309,6 +309,7 @@ struct POSView: View {
             ClientSelectionSheet { client in
                 viewModel.attachClient(client)
             }
+            .presentationDragIndicator(.visible)
         }
         .toolbar(.hidden, for: .navigationBar)
     }

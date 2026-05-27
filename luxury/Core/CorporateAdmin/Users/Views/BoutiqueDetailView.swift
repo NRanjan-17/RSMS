@@ -14,6 +14,7 @@ struct BoutiqueDetailView: View {
     @Environment(Router.self) private var router
     @State private var showEditBoutique = false
     @State private var showDisableAlert = false
+    @State private var showEnableAlert = false
     @State private var showRemoveAlert = false
 
     init(boutique: CorporateBoutique, viewModel: UserManagementViewModel) {
@@ -171,9 +172,7 @@ struct BoutiqueDetailView: View {
                                     .disabled(viewModel.actionBoutiqueId != nil)
                                 } else {
                                     Button(action: {
-                                        viewModel.enableBoutique(currentBoutique) {
-                                            router.pop()
-                                        }
+                                        showEnableAlert = true
                                     }) {
                                         HStack {
                                             Spacer()
@@ -187,7 +186,7 @@ struct BoutiqueDetailView: View {
                                             Spacer()
                                         }
                                         .padding(.vertical, 16)
-                                        .background(Color.green)
+                                        .background(AppColors.success)
                                         .clipShape(RoundedRectangle(cornerRadius: 12))
                                     }
                                     .disabled(viewModel.actionBoutiqueId != nil)
@@ -242,6 +241,16 @@ struct BoutiqueDetailView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Are you sure you want to disable this boutique?")
+        }
+        .alert("Enable Boutique", isPresented: $showEnableAlert) {
+            Button("Enable") {
+                viewModel.enableBoutique(currentBoutique) {
+                    router.pop()
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Are you sure you want to enable this boutique?")
         }
         .alert("Remove Boutique", isPresented: $showRemoveAlert) {
             Button("Remove", role: .destructive) {

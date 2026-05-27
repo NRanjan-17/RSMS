@@ -68,8 +68,8 @@ struct CorporateAdminSettingsView: View {
                                             .foregroundStyle(.white)
                                         Spacer()
                                         Picker("Currency", selection: $currencyManager.currentCurrency) {
-                                            ForEach(AppCurrency.allCases) { currency in
-                                                Text(currency.rawValue).tag(currency)
+                                            ForEach(currencyManager.availableCurrencies, id: \.self) { code in
+                                                Text("\(code) (\(currencyManager.symbol(for: code)))").tag(code)
                                             }
                                         }
                                         .tint(AppColors.gold)

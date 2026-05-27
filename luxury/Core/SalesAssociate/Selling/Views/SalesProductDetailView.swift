@@ -85,8 +85,8 @@ struct SalesProductDetailView: View {
                             
                             HStack(spacing: 10) {
                                 let pairings = [
-                                    ("ROLEX", "Datejust 41", "\(CurrencyManager.shared.symbol)9,20,000"),
-                                    ("ROLEX", "GMT-Master II", "\(CurrencyManager.shared.symbol)18,40,000")
+                                    ("ROLEX", "Datejust 41", 920000.0),
+                                    ("ROLEX", "GMT-Master II", 1840000.0)
                                 ]
                                 ForEach(pairings, id: \.1) { pair in
                                     VStack(alignment: .leading, spacing: 0) {
@@ -102,7 +102,7 @@ struct SalesProductDetailView: View {
                                             Text(pair.1)
                                                 .font(AppFonts.serif(size: 12, weight: .medium))
                                                 .foregroundStyle(AppColors.text)
-                                            Text(pair.2)
+                                            Text(CurrencyManager.shared.format(amount: pair.2))
                                                 .font(AppFonts.serif(size: 13, weight: .semibold))
                                                 .foregroundStyle(AppColors.gold)
                                         }

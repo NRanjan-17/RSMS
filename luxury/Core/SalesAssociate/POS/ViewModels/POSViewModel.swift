@@ -37,19 +37,19 @@ final class POSViewModel {
     var isLoadingProducts = false
     var errorMessage: String? = nil
     
-    var subtotal: Int {
-        Int(cartItems.reduce(0) { $0 + ($1.product.amount * Double($1.qty)) })
+    var subtotal: Double {
+        cartItems.reduce(0.0) { $0 + ($1.product.amount * Double($1.qty)) }
     }
     
-    var discount: Int {
-        Int(Double(subtotal) * discountRate)
+    var discount: Double {
+        subtotal * discountRate
     }
     
-    var tax: Int {
-        taxFree ? 0 : Int(Double(subtotal - discount) * 0.03)
+    var tax: Double {
+        taxFree ? 0.0 : (subtotal - discount) * 0.03
     }
     
-    var total: Int {
+    var total: Double {
         subtotal - discount + tax
     }
     
@@ -174,13 +174,7 @@ final class POSViewModel {
         }
     }
     
-    func formatCurrency(_ amount: Int) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencySymbol = CurrencyManager.shared.symbol
-        formatter.locale = Locale(identifier: "en_IN")
-        formatter.maximumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: amount)) ?? "\(CurrencyManager.shared.symbol)\(amount)"
+    func formatCurrency(_ amount: Double) -> String {
+        return CurrencyManager.shared.format(amount: amount)
     }
 }
-

@@ -13,7 +13,7 @@ struct DBWishlistItem: Codable {
     let clientId: UUID
     let brand: String
     let name: String
-    let price: String
+    let price: Double
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -56,8 +56,8 @@ final class WishlistService {
         // Fallback for mock clients during demo
         if Client.mockIds.contains(clientId) {
             let mockItems = [
-                ClientWishlistItem(brand: "Audemars Piguet", name: "Royal Oak 15500ST", price: "\(CurrencyManager.shared.symbol)42,00,000"),
-                ClientWishlistItem(brand: "Hermès", name: "Kelly 28 Retourné", price: "\(CurrencyManager.shared.symbol)12,80,000")
+                ClientWishlistItem(brand: "Audemars Piguet", name: "Royal Oak 15500ST", price: 4200000.0),
+                ClientWishlistItem(brand: "Hermès", name: "Kelly 28 Retourné", price: 1280000.0)
             ]
             saveLocalWishlist(mockItems, for: clientId)
             return mockItems

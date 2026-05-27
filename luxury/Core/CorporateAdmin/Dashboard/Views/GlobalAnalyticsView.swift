@@ -174,11 +174,18 @@ struct GlobalMetricCard: View {
             Spacer(minLength: 16)
             
             VStack(alignment: .leading, spacing: 4) {
-                Text(kpi.value)
-                    .font(AppFonts.serif(size: 22, weight: .bold))
-                    .foregroundStyle(.white)
-                    .minimumScaleFactor(0.8)
-                    .lineLimit(1)
+                Group {
+                    switch kpi.type {
+                    case .string(let str):
+                        Text(str)
+                    case .currency(let val):
+                        Text(CurrencyManager.shared.formatCompact(amount: val))
+                    }
+                }
+                .font(AppFonts.serif(size: 22, weight: .bold))
+                .foregroundStyle(.white)
+                .minimumScaleFactor(0.8)
+                .lineLimit(1)
                 Text(kpi.label.uppercased())
                     .font(AppFonts.sansSerif(size: 9, weight: .bold))
                     .foregroundStyle(AppColors.secondary)

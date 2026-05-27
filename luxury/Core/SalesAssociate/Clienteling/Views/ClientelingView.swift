@@ -128,7 +128,7 @@ struct ClientelingView: View {
                                                 StatusBadge(text: client.tier.rawValue, status: client.tier.badgeStatus)
                                             }
                                             
-                                            Text("\(client.lastVisit) · LTV \(client.ltv)")
+                                            Text("\(client.lastVisit) · LTV \(CurrencyManager.shared.formatCompact(amount: client.ltv))")
                                                 .font(AppFonts.sansSerif(size: 11))
                                                 .foregroundStyle(AppColors.secondary)
                                         }

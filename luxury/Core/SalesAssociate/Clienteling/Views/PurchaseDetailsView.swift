@@ -205,7 +205,7 @@ struct PurchaseDetailsView: View {
                                         .font(AppFonts.sansSerif(size: 12))
                                         .foregroundStyle(AppColors.secondary)
                                     Spacer()
-                                    Text(purchase.price)
+                                    Text(CurrencyManager.shared.format(amount: purchase.price))
                                         .font(AppFonts.serif(size: 13, weight: .semibold))
                                         .foregroundStyle(AppColors.gold)
                                 }

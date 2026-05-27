@@ -44,11 +44,11 @@ struct ProfileView: View {
                                         .font(AppFonts.sansSerif(size: 10))
                                         .foregroundStyle(AppColors.secondary)
                                         .kerning(1.5)
-                                    Text(viewModel.revenue)
+                                    Text(CurrencyManager.shared.format(amount: viewModel.revenue))
                                         .font(AppFonts.serif(size: 36, weight: .medium))
                                         .foregroundStyle(AppColors.gold)
                                         .kerning(-0.5)
-                                    Text(viewModel.target)
+                                    Text("of \\(CurrencyManager.shared.format(amount: viewModel.target)) target")
                                         .font(AppFonts.sansSerif(size: 11))
                                         .foregroundStyle(AppColors.secondary)
                                         .padding(.top, 2)
@@ -194,7 +194,7 @@ struct ProfileView: View {
                                                         .foregroundStyle(AppColors.text)
                                                     StatusBadge(text: cl.tier, status: cl.tier == "UHNW" ? .success : .neutral)
                                                 }
-                                                Text("Last visit \(cl.lastVisit) · LTV \(cl.ltv)")
+                                                Text("Last visit \(cl.lastVisit) · LTV \(CurrencyManager.shared.formatCompact(amount: cl.ltv))")
                                                     .font(AppFonts.sansSerif(size: 11))
                                                     .foregroundStyle(AppColors.secondary)
                                             }

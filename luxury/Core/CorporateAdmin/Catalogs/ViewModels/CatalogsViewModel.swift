@@ -72,10 +72,11 @@ final class CatalogsViewModel {
     }
     
     func addCatalog(completion: @escaping () -> Void) {
-        guard let amount = Double(newAmount) else {
+        guard let amountStr = Double(newAmount) else {
             self.errorMessage = "Invalid amount."
             return
         }
+        let amount = CurrencyManager.shared.baseAmount(fromConverted: amountStr)
         
         guard !newBarCode.isEmpty else {
             self.errorMessage = "QR/Barcode string is required."
@@ -143,7 +144,9 @@ final class CatalogsViewModel {
         newDescription = catalog.description
         newBrand = catalog.brand
         newCategory = catalog.category
-        newAmount = "\(catalog.amount)"
+        
+        let convertedAmt = CurrencyManager.shared.convertedAmount(fromINR: catalog.amount)
+        newAmount = convertedAmt.truncatingRemainder(dividingBy: 1) == 0 ? String(format: "%.0f", convertedAmt) : String(format: "%.2f", convertedAmt)
         newBarCode = catalog.barCode
         newStatus = catalog.status
         existingImageURLs = catalog.productImages ?? []
@@ -151,10 +154,11 @@ final class CatalogsViewModel {
     }
     
     func updateCatalog(_ existingCatalog: CatalogEntity, completion: @escaping () -> Void) {
-        guard let amount = Double(newAmount) else {
+        guard let amountStr = Double(newAmount) else {
             self.errorMessage = "Invalid amount."
             return
         }
+        let amount = CurrencyManager.shared.baseAmount(fromConverted: amountStr)
         
         isSaving = true
         errorMessage = nil
@@ -350,7 +354,7 @@ final class CatalogsViewModel {
     
     func hasUnsavedChanges(comparedTo editCatalog: CatalogEntity?) -> Bool {
         if let catalog = editCatalog {
-            let parsedAmount = Double(newAmount) ?? 0.0
+            let parsedAmount = CurrencyManager.shared.baseAmount(fromConverted: Double(newAmount) ?? 0.0)
             return newName != catalog.name ||
                    newDescription != catalog.description ||
                    newBrand != catalog.brand ||

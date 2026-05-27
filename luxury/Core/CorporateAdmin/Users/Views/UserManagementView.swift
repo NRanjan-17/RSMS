@@ -46,7 +46,7 @@ struct UserManagementView: View {
                         }
                     } label: {
                         ZStack(alignment: .topTrailing) {
-                            Image(systemName: "ellipsis.circle.fill")
+                            Image(systemName: "ellipsis")
                                 .font(.system(size: 24))
                                 .foregroundStyle(AppColors.gold)
                                 .frame(width: 44, height: 44)

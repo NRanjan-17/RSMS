@@ -51,7 +51,7 @@ struct ReceiptView: View {
                     }
                     
                     VStack(spacing: 12) {
-                        Text("\(CurrencyManager.shared.symbol)16,06,179")
+                        Text(CurrencyManager.shared.format(amount: 1606179.0))
                             .font(AppFonts.serif(size: 40, weight: .bold))
                             .foregroundStyle(AppColors.gold)
                         

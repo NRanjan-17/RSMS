@@ -410,7 +410,7 @@ private struct ClientOverviewTab: View {
                             Text("Patek Philippe Nautilus 5711/1A")
                                 .font(AppFonts.sansSerif(size: 13, weight: .medium))
                                 .foregroundStyle(.white)
-                            Text("\(CurrencyManager.shared.symbol)82,00,000 · March 2025")
+                            Text("\(CurrencyManager.shared.format(amount: 8200000.0)) · March 2025")
                                 .font(AppFonts.sansSerif(size: 11))
                                 .foregroundStyle(AppColors.gold)
                         }
@@ -555,7 +555,7 @@ private struct ClientHistoryTab: View {
                                 
                                 Spacer()
                                 
-                                Text(p.price)
+                                Text(CurrencyManager.shared.format(amount: p.price))
                                     .font(AppFonts.serif(size: 13, weight: .semibold))
                                     .foregroundStyle(AppColors.gold)
                             }
@@ -572,6 +572,7 @@ private struct ClientHistoryTab: View {
         }
         .sheet(isPresented: $showPurchasePicker) {
             PurchaseProductSelectionView(viewModel: viewModel)
+            .presentationDragIndicator(.visible)
         }
     }
 }
@@ -654,7 +655,7 @@ private struct ClientWishlistTab: View {
                                 Text(w.name)
                                     .font(AppFonts.serif(size: 14, weight: .medium))
                                     .foregroundStyle(.white)
-                                Text(w.price)
+                                Text(CurrencyManager.shared.format(amount: w.price))
                                     .font(AppFonts.serif(size: 15, weight: .semibold))
                                     .foregroundStyle(AppColors.gold)
                             }
@@ -789,7 +790,7 @@ private struct WishlistProductSelectionView: View {
                                         await viewModel.addProductToWishlist(
                                             brand: product.brand,
                                             name: product.name,
-                                            price: product.formattedPrice
+                                            price: product.amount
                                         )
                                         dismiss()
                                     }
@@ -968,7 +969,7 @@ private struct PurchaseProductSelectionView: View {
                                     viewModel.addClientPurchase(
                                         brand: product.brand,
                                         name: product.name,
-                                        price: product.formattedPrice
+                                        price: product.amount
                                     )
                                     dismiss()
                                 }) {

@@ -11,8 +11,8 @@ struct ReturnsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedResolution: ReturnResolution = .exchange
     @State private var cases: [ReturnCase] = [
-        ReturnCase(receipt: "RSMS-2026-0418", client: "Rahul Bajaj", item: "Bottega Veneta The Jodie", amount: "\(CurrencyManager.shared.symbol)2,45,000", resolution: .exchange),
-        ReturnCase(receipt: "RSMS-2026-0392", client: "Ananya Kapoor", item: "Cartier Love Bracelet", amount: "\(CurrencyManager.shared.symbol)5,80,000", resolution: .refund)
+        ReturnCase(receipt: "RSMS-2026-0418", client: "Rahul Bajaj", item: "Bottega Veneta The Jodie", amount: 245000.0, resolution: .exchange),
+        ReturnCase(receipt: "RSMS-2026-0392", client: "Ananya Kapoor", item: "Cartier Love Bracelet", amount: 580000.0, resolution: .refund)
     ]
     
     var body: some View {
@@ -63,7 +63,7 @@ struct ReturnsView: View {
                             }
                             
                             CustomButton(title: "Create \(selectedResolution.rawValue) Case", icon: AnyView(Image(systemName: "checkmark.seal")), action: {
-                                cases.insert(ReturnCase(receipt: "RSMS-2026-0425", client: "Rahul Bajaj", item: "Rolex Submariner Date", amount: "\(CurrencyManager.shared.symbol)14,50,000", resolution: selectedResolution), at: 0)
+                                cases.insert(ReturnCase(receipt: "RSMS-2026-0425", client: "Rahul Bajaj", item: "Rolex Submariner Date", amount: 1450000.0, resolution: selectedResolution), at: 0)
                             })
                         }
                         .padding(16)
@@ -92,7 +92,7 @@ struct ReturnsView: View {
                                     }
                                     Spacer()
                                     VStack(alignment: .trailing, spacing: 4) {
-                                        Text(item.amount)
+                                        Text(CurrencyManager.shared.format(amount: item.amount))
                                             .font(AppFonts.serif(size: 13, weight: .semibold))
                                             .foregroundStyle(AppColors.gold)
                                         StatusBadge(text: item.resolution.rawValue, status: .pending)
