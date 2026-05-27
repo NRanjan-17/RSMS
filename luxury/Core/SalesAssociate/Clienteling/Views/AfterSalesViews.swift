@@ -7,6 +7,7 @@
 
 import SwiftUI
 import PhotosUI
+import Supabase
 
 struct AfterSalesIntakeView: View {
     @Environment(\.dismiss) private var dismiss
@@ -573,10 +574,92 @@ struct AfterSalesIntakeView: View {
 }
 
 
+struct ASTDetails: Codable {
+    let id: UUID
+    let status: String
+    let description: String?
+    let remark: String?
+    let catalogs: CatalogEntity?
+    let client: ClientEntity?
+}
+
 struct AfterSalesTrackingView: View {
     @Environment(\.dismiss) private var dismiss
     
     private let ticket = AfterSalesTicket(client: "Rahul Bajaj", item: "Rolex Submariner Date", serial: "RLX-126610LN-8M2", issue: "Bracelet sizing", stage: .inspection, photoRequired: false)
+    
+    @State private var astStatus: String = "inspection"
+    @State private var fetchedAST: ASTDetails? = nil
+    
+    private enum StageState {
+        case completed
+        case active
+        case upcoming
+    }
+    
+    private func rank(for status: String) -> Int {
+        switch status.lowercased() {
+        case "open": return 1
+        case "inspection": return 2
+        case "brand_review": return 3
+        case "ready": return 4
+        default: return 2
+        }
+    }
+    
+    private func rank(for stage: AfterSalesStage) -> Int {
+        switch stage {
+        case .intake: return 1
+        case .inspection: return 2
+        case .brandReview: return 3
+        case .ready: return 4
+        }
+    }
+    
+    private func stageState(for stage: AfterSalesStage) -> StageState {
+        let currentRank = rank(for: astStatus)
+        let stageRank = rank(for: stage)
+        
+        if stage == .intake {
+            return .completed
+        }
+        
+        if astStatus.lowercased() == "ready" {
+            return .completed
+        }
+        
+        let stageStr: String
+        switch stage {
+        case .intake: stageStr = "open"
+        case .inspection: stageStr = "inspection"
+        case .brandReview: stageStr = "brand_review"
+        case .ready: stageStr = "ready"
+        }
+        
+        if astStatus.lowercased() == stageStr {
+            return .active
+        }
+        
+        if stageRank < currentRank {
+            return .completed
+        } else {
+            return .upcoming
+        }
+    }
+    
+    private var displayStatusText: String {
+        switch astStatus.lowercased() {
+        case "open": return "Intake"
+        case "inspection": return "Inspection"
+        case "brand_review": return "Brand Review"
+        case "ready": return "Ready"
+        default: return "Inspection"
+        }
+    }
+    
+    private var badgeStatus: BadgeStatus {
+        return astStatus.lowercased() == "ready" ? .success : .pending
+    }
     
     var body: some View {
         ZStack {
@@ -601,13 +684,13 @@ struct AfterSalesTrackingView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 18) {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text(ticket.item)
+                            Text(fetchedAST?.catalogs?.name ?? "Rolex Datejust")
                                 .font(AppFonts.serif(size: 22, weight: .medium))
                                 .foregroundStyle(.white)
-                            Text("\(ticket.client) · \(ticket.serial)")
+                            Text("\(fetchedAST?.client?.name ?? "Rahul Bajaj") · \(fetchedAST?.catalogs?.catalogId ?? ticket.serial)")
                                 .font(AppFonts.sansSerif(size: 12))
                                 .foregroundStyle(AppColors.secondary)
-                            StatusBadge(text: ticket.stage.rawValue, status: .pending)
+                            StatusBadge(text: displayStatusText, status: badgeStatus)
                         }
                         .padding(16)
                         .background(AppColors.surface)
@@ -615,22 +698,48 @@ struct AfterSalesTrackingView: View {
                         
                         VStack(spacing: 12) {
                             ForEach(AfterSalesStage.allCases, id: \.self) { stage in
+                                let state = stageState(for: stage)
                                 HStack(spacing: 12) {
-                                    Image(systemName: stage == ticket.stage ? "clock.fill" : "checkmark.circle.fill")
-                                        .foregroundStyle(stage == ticket.stage ? AppColors.gold : AppColors.success)
+                                    Group {
+                                        switch state {
+                                        case .completed:
+                                            Image(systemName: "checkmark.circle.fill")
+                                                .foregroundStyle(AppColors.success)
+                                        case .active:
+                                            Image(systemName: "clock.fill")
+                                                .foregroundStyle(AppColors.gold)
+                                        case .upcoming:
+                                            Image(systemName: "circle")
+                                                .foregroundStyle(.white.opacity(0.3))
+                                        }
+                                    }
+                                    
                                     VStack(alignment: .leading, spacing: 3) {
                                         Text(stage.rawValue)
                                             .font(AppFonts.sansSerif(size: 14, weight: .medium))
-                                            .foregroundStyle(.white)
-                                        Text(stage == ticket.stage ? "Current stage" : "Logged in immutable ticket timeline")
-                                            .font(AppFonts.sansSerif(size: 11))
-                                            .foregroundStyle(AppColors.secondary)
+                                            .foregroundStyle(state == .upcoming ? .white.opacity(0.4) : .white)
+                                        
+                                        Group {
+                                            switch state {
+                                            case .completed:
+                                                Text("Logged in immutable ticket timeline")
+                                                    .foregroundStyle(AppColors.secondary)
+                                            case .active:
+                                                Text("Current stage")
+                                                    .foregroundStyle(AppColors.gold)
+                                            case .upcoming:
+                                                Text("Upcoming stage")
+                                                    .foregroundStyle(AppColors.secondary.opacity(0.5))
+                                            }
+                                        }
+                                        .font(AppFonts.sansSerif(size: 11))
                                     }
                                     Spacer()
                                 }
                                 .padding(14)
                                 .background(AppColors.surface)
                                 .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .opacity(state == .upcoming ? 0.6 : 1.0)
                             }
                         }
                     }
@@ -640,5 +749,55 @@ struct AfterSalesTrackingView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .onAppear {
+            fetchTicketDetails()
+        }
+    }
+    
+    private func fetchTicketDetails() {
+        Task {
+            do {
+                let catalogs: [CatalogEntity] = try await SupabaseManager.shared.client
+                    .from("catalogs")
+                    .select()
+                    .eq("catalog_id", value: ticket.serial)
+                    .execute()
+                    .value
+                
+                if let firstCatalog = catalogs.first {
+                    let astList: [ASTDetails] = try await SupabaseManager.shared.client
+                        .from("ast")
+                        .select("*, catalogs(*), client(*)")
+                        .eq("product_id", value: firstCatalog.id.uuidString)
+                        .order("id", ascending: false)
+                        .execute()
+                        .value
+                    
+                    if let firstAST = astList.first {
+                        await MainActor.run {
+                            self.fetchedAST = firstAST
+                            self.astStatus = firstAST.status
+                        }
+                    }
+                } else {
+                    let allASTs: [ASTDetails] = try await SupabaseManager.shared.client
+                        .from("ast")
+                        .select("*, catalogs(*), client(*)")
+                        .order("id", ascending: false)
+                        .limit(1)
+                        .execute()
+                        .value
+                    
+                    if let lastAST = allASTs.first {
+                        await MainActor.run {
+                            self.fetchedAST = lastAST
+                            self.astStatus = lastAST.status
+                        }
+                    }
+                }
+            } catch {
+                print("Failed to fetch ticket details from Supabase: \(error)")
+            }
+        }
     }
 }

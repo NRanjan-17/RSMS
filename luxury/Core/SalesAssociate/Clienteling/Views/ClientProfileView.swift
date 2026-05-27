@@ -394,7 +394,147 @@ private struct ClientOverviewTab: View {
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
                 }
             }
+            
+            // UPCOMING OCCASIONS Section
+            let bdayDays = daysToNextOccasion(dateStr: client.dob)
+            let isMarried = client.maritalStatus?.lowercased() == "married"
+            let annivDays = isMarried ? daysToNextOccasion(dateStr: client.dateOfAnniversary) : nil
+            let hasUpcomingOccasions = (bdayDays != nil) || (annivDays != nil)
+            
+            VStack(alignment: .leading, spacing: 12) {
+                Text("UPCOMING OCCASIONS")
+                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                    .foregroundStyle(AppColors.secondary)
+                    .kerning(1.5)
+                
+                VStack(spacing: 0) {
+                    if let bday = bdayDays {
+                        HStack(spacing: 12) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(AppColors.surface2)
+                                    .frame(width: 42, height: 42)
+                                Image(systemName: "gift")
+                                    .font(.system(size: 16))
+                                    .foregroundStyle(AppColors.gold)
+                                    .opacity(0.8)
+                            }
+                            
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Birthday in \(bday) days")
+                                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                    .foregroundStyle(.white)
+                                Text(bday == 0 ? "Celebrating today!" : "Upcoming occasion")
+                                    .font(AppFonts.sansSerif(size: 11))
+                                    .foregroundStyle(AppColors.secondary)
+                            }
+                            Spacer()
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 12)
+                    }
+                    
+                    if bdayDays != nil && annivDays != nil {
+                        Divider().background(AppColors.gold15)
+                    }
+                    
+                    if let anniv = annivDays {
+                        HStack(spacing: 12) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(AppColors.surface2)
+                                    .frame(width: 42, height: 42)
+                                Image(systemName: "heart")
+                                    .font(.system(size: 16))
+                                    .foregroundStyle(AppColors.gold)
+                                    .opacity(0.8)
+                            }
+                            
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Anniversary in \(anniv) days")
+                                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                    .foregroundStyle(.white)
+                                Text(anniv == 0 ? "Celebrating today!" : "Upcoming occasion")
+                                    .font(AppFonts.sansSerif(size: 11))
+                                    .foregroundStyle(AppColors.secondary)
+                            }
+                            Spacer()
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 12)
+                    }
+                    
+                    if !hasUpcomingOccasions {
+                        HStack(spacing: 12) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(AppColors.surface2)
+                                    .frame(width: 42, height: 42)
+                                Image(systemName: "calendar.badge.exclamationmark")
+                                    .font(.system(size: 16))
+                                    .foregroundStyle(AppColors.secondary)
+                                    .opacity(0.4)
+                            }
+                            
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("No upcoming occasions")
+                                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                    .foregroundStyle(.white)
+                                Text("No anniversary or birthday set")
+                                    .font(AppFonts.sansSerif(size: 11))
+                                    .foregroundStyle(AppColors.secondary)
+                            }
+                            Spacer()
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 12)
+                    }
+                }
+                .background(AppColors.surface)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+            }
         }
+    }
+    
+    private func daysToNextOccasion(dateStr: String?) -> Int? {
+        guard let dateStr = dateStr, !dateStr.isEmpty else { return nil }
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+        
+        guard let date = dateFormatter.date(from: dateStr) else { return nil }
+        
+        let calendar = Calendar.current
+        let today = Date()
+        
+        let occasionComponents = calendar.dateComponents([.month, .day], from: date)
+        let currentYear = calendar.component(.year, from: today)
+        
+        var targetComponents = DateComponents()
+        targetComponents.year = currentYear
+        targetComponents.month = occasionComponents.month
+        targetComponents.day = occasionComponents.day
+        targetComponents.hour = 0
+        targetComponents.minute = 0
+        targetComponents.second = 0
+        
+        guard let targetDateThisYear = calendar.date(from: targetComponents) else { return nil }
+        
+        let startOfToday = calendar.startOfDay(for: today)
+        let startOfTarget = calendar.startOfDay(for: targetDateThisYear)
+        
+        var finalTargetDate = startOfTarget
+        if startOfTarget < startOfToday {
+            if let nextYearDate = calendar.date(byAdding: .year, value: 1, to: startOfTarget) {
+                finalTargetDate = nextYearDate
+            }
+        }
+        
+        let components = calendar.dateComponents([.day], from: startOfToday, to: finalTargetDate)
+        return components.day
     }
 }
 
