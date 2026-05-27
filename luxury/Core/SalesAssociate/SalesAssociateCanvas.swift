@@ -104,6 +104,8 @@ struct SalesAssociateCanvas: View {
             PaymentView()
         case .receipt:
             ReceiptView()
+        case .paymentFailed(let errorMessage):
+            PaymentFailedView(errorMessage: errorMessage)
         case .appointmentList:
             AppointmentListView()
         case .createAppointment:

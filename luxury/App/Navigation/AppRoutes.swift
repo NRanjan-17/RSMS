@@ -8,6 +8,7 @@ enum SARoute: Hashable {
     case barcodeScanner
     case payment
     case receipt
+    case paymentFailed(String)
     case appointmentList
     case createAppointment
     case returns

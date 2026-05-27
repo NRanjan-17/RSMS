@@ -243,13 +243,6 @@ struct POSView: View {
                 }
                 
                 VStack(spacing: 0) {
-                    if let error = viewModel.paymentError {
-                        Text(error)
-                            .font(AppFonts.sansSerif(size: 12))
-                            .foregroundStyle(AppColors.error)
-                            .padding(.bottom, 8)
-                    }
-                    
                     Button(action: {
                         guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                               let rootVC = scene.windows.first?.rootViewController else { return }
@@ -258,6 +251,8 @@ struct POSView: View {
                             let success = await viewModel.processPayment(presentingViewController: rootVC)
                             if success {
                                 router.push(SARoute.receipt)
+                            } else if let error = viewModel.paymentError {
+                                router.push(SARoute.paymentFailed(error))
                             }
                         }
                     }) {
