@@ -168,7 +168,7 @@ final class POSViewModel {
     
     @MainActor
     func processPayment(presentingViewController: UIViewController) async -> Bool {
-        guard let client = selectedClient else {
+        guard selectedClient != nil else {
             self.paymentError = "A client must be attached to the cart before processing payment."
             return false
         }
