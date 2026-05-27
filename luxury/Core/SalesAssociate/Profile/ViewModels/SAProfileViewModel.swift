@@ -144,7 +144,7 @@ final class SAProfileViewModel {
         do {
             let service = ClientService()
             let allClients = try await service.fetchClients()
-            let sorted = allClients.sorted { ($0.createdAt ?? Date()) > ($1.createdAt ?? Date()) }
+            let sorted = allClients.sorted { $0.createdAt > $1.createdAt }
             let recent = Array(sorted.prefix(5))
             
             let dashClients = recent.map { c in
