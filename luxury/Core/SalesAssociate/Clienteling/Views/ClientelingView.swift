@@ -170,9 +170,19 @@ struct ClientelingView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    Button(action: {
-                        router.presentFullScreen(SARoute.newClient)
-                    }) {
+                    Menu {
+                        Button(action: {
+                            router.presentFullScreen(SARoute.newClient)
+                        }) {
+                            Label("New Client", systemImage: "person.badge.plus")
+                        }
+                        
+                        Button(action: {
+                            router.presentFullScreen(SARoute.createAppointment)
+                        }) {
+                            Label("New Appointment", systemImage: "calendar.badge.plus")
+                        }
+                    } label: {
                         ZStack {
                             RoundedRectangle(cornerRadius: 14)
                                 .fill(AppColors.gold)

@@ -63,7 +63,7 @@ struct BMAppointmentDetailView: View {
                                     Text(appointment.client?.name ?? "Unknown Client")
                                         .font(AppFonts.serif(size: 22, weight: .medium))
                                         .foregroundStyle(AppColors.text)
-                                    Text(appointment.appointmentType)
+                                    Text(appointment.displayAppointmentType)
                                         .font(AppFonts.sansSerif(size: 13))
                                         .foregroundStyle(AppColors.secondary)
                                 }
