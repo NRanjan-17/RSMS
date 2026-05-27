@@ -66,55 +66,18 @@ struct SalesProductDetailView: View {
                             
                             HStack(spacing: 8) {
                                 StatusBadge(text: inStock ? "● In Stock" : "● Out of Stock", status: inStock ? .success : .warning)
-                                StatusBadge(text: "Serialized", status: .warning)
-                                StatusBadge(text: "RFID", status: .warning)
                             }
                             .padding(.bottom, 16)
                             
-                            Text("Oystersteel · Unidirectional rotating bezel · Waterproof to 300m · Triplock crown · Manufacture calibre 3235 · 70-hour power reserve")
-                                .font(AppFonts.sansSerif(size: 13, weight: .light))
-                                .foregroundStyle(AppColors.secondary)
-                                .lineSpacing(6)
-                                .padding(.bottom, 20)
-                            
-                            Text("AI — OFTEN PAIRED WITH")
-                                .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                                .foregroundStyle(AppColors.secondary)
-                                .kerning(1.8)
-                                .padding(.bottom, 11)
-                            
-                            HStack(spacing: 10) {
-                                let pairings = [
-                                    ("ROLEX", "Datejust 41", 920000.0),
-                                    ("ROLEX", "GMT-Master II", 1840000.0)
-                                ]
-                                ForEach(pairings, id: \.1) { pair in
-                                    VStack(alignment: .leading, spacing: 0) {
-                                        ZStack {
-                                            Rectangle().fill(AppColors.surface2).frame(height: 56)
-                                            Circle().stroke(AppColors.gold.opacity(0.3), lineWidth: 0.6).frame(width: 14, height: 14)
-                                        }
-                                        VStack(alignment: .leading, spacing: 2) {
-                                            Text(pair.0)
-                                                .font(AppFonts.sansSerif(size: 9))
-                                                .foregroundStyle(AppColors.gold)
-                                                .kerning(1)
-                                            Text(pair.1)
-                                                .font(AppFonts.serif(size: 12, weight: .medium))
-                                                .foregroundStyle(AppColors.text)
-                                            Text(CurrencyManager.shared.format(amount: pair.2))
-                                                .font(AppFonts.serif(size: 13, weight: .semibold))
-                                                .foregroundStyle(AppColors.gold)
-                                        }
-                                        .padding(.horizontal, 10)
-                                        .padding(.vertical, 8)
-                                    }
-                                    .background(AppColors.surface)
-                                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(AppColors.gold15, lineWidth: 0.5))
-                                }
+                            if !catalog.description.isEmpty {
+                                Text(catalog.description)
+                                    .font(AppFonts.sansSerif(size: 13, weight: .light))
+                                    .foregroundStyle(AppColors.secondary)
+                                    .lineSpacing(6)
+                                    .padding(.bottom, 20)
                             }
-                            .padding(.bottom, 32)
+                            
+
                             
                             VStack(spacing: 0) {
                                 Divider().background(AppColors.gold15).padding(.bottom, 12)
