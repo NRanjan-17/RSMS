@@ -12,6 +12,8 @@ struct SalesProductDetailView: View {
     @Environment(SalesAssociateAppState.self) private var saAppState
     let catalog: CatalogEntity
     
+    @State private var showToast = false
+    
     var inStock: Bool {
         ((catalog.productIds?.count ?? 0) - (catalog.reserved?.count ?? 0)) > 0
     }
@@ -58,63 +60,21 @@ struct SalesProductDetailView: View {
                                 Text(CurrencyManager.shared.format(amount: catalog.amount))
                                     .font(AppFonts.serif(size: 30, weight: .semibold))
                                     .foregroundStyle(AppColors.gold)
-                                Text("incl. 3% GST")
-                                    .font(AppFonts.sansSerif(size: 11))
-                                    .foregroundStyle(AppColors.secondary)
                             }
                             .padding(.bottom, 14)
                             
                             HStack(spacing: 8) {
                                 StatusBadge(text: inStock ? "● In Stock" : "● Out of Stock", status: inStock ? .success : .warning)
-                                StatusBadge(text: "Serialized", status: .warning)
-                                StatusBadge(text: "RFID", status: .warning)
                             }
                             .padding(.bottom, 16)
                             
-                            Text("Oystersteel · Unidirectional rotating bezel · Waterproof to 300m · Triplock crown · Manufacture calibre 3235 · 70-hour power reserve")
-                                .font(AppFonts.sansSerif(size: 13, weight: .light))
-                                .foregroundStyle(AppColors.secondary)
-                                .lineSpacing(6)
-                                .padding(.bottom, 20)
-                            
-                            Text("AI — OFTEN PAIRED WITH")
-                                .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                                .foregroundStyle(AppColors.secondary)
-                                .kerning(1.8)
-                                .padding(.bottom, 11)
-                            
-                            HStack(spacing: 10) {
-                                let pairings = [
-                                    ("ROLEX", "Datejust 41", "\(CurrencyManager.shared.symbol)9,20,000"),
-                                    ("ROLEX", "GMT-Master II", "\(CurrencyManager.shared.symbol)18,40,000")
-                                ]
-                                ForEach(pairings, id: \.1) { pair in
-                                    VStack(alignment: .leading, spacing: 0) {
-                                        ZStack {
-                                            Rectangle().fill(AppColors.surface2).frame(height: 56)
-                                            Circle().stroke(AppColors.gold.opacity(0.3), lineWidth: 0.6).frame(width: 14, height: 14)
-                                        }
-                                        VStack(alignment: .leading, spacing: 2) {
-                                            Text(pair.0)
-                                                .font(AppFonts.sansSerif(size: 9))
-                                                .foregroundStyle(AppColors.gold)
-                                                .kerning(1)
-                                            Text(pair.1)
-                                                .font(AppFonts.serif(size: 12, weight: .medium))
-                                                .foregroundStyle(AppColors.text)
-                                            Text(pair.2)
-                                                .font(AppFonts.serif(size: 13, weight: .semibold))
-                                                .foregroundStyle(AppColors.gold)
-                                        }
-                                        .padding(.horizontal, 10)
-                                        .padding(.vertical, 8)
-                                    }
-                                    .background(AppColors.surface)
-                                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(AppColors.gold15, lineWidth: 0.5))
-                                }
+                            if !catalog.description.isEmpty {
+                                Text(catalog.description)
+                                    .font(AppFonts.sansSerif(size: 13, weight: .light))
+                                    .foregroundStyle(AppColors.secondary)
+                                    .lineSpacing(6)
+                                    .padding(.bottom, 32)
                             }
-                            .padding(.bottom, 32)
                             
                             VStack(spacing: 0) {
                                 Divider().background(AppColors.gold15).padding(.bottom, 12)
@@ -138,8 +98,14 @@ struct SalesProductDetailView: View {
                                             productImages: catalog.productImages
                                         )
                                         POSViewModel.shared.addToCart(item)
-                                        saAppState.selectedTab = .pos
-                                        dismiss()
+                                        withAnimation(.spring()) {
+                                            showToast = true
+                                        }
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                            withAnimation(.spring()) {
+                                                showToast = false
+                                            }
+                                        }
                                     }
                                 )
                                 .padding(.bottom, 40)
@@ -149,6 +115,28 @@ struct SalesProductDetailView: View {
                         .padding(.top, 18)
                     }
                 }
+            }
+            
+            if showToast {
+                VStack {
+                    Spacer()
+                    HStack(spacing: 8) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(AppColors.success)
+                        Text("Added to Cart")
+                            .font(AppFonts.sansSerif(size: 14, weight: .medium))
+                            .foregroundStyle(.white)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 14)
+                    .background(AppColors.surface2)
+                    .clipShape(Capsule())
+                    .overlay(Capsule().stroke(AppColors.gold15, lineWidth: 0.5))
+                    .shadow(color: .black.opacity(0.3), radius: 10, y: 5)
+                    .padding(.bottom, 60)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+                .zIndex(1)
             }
         }
         .toolbar(.hidden, for: .navigationBar)
