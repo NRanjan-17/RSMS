@@ -255,6 +255,39 @@ struct ProfileView: View {
                         }
                         .padding(.top, 18)
                         
+                        // MARK: - Support & Policies
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("SUPPORT & POLICIES")
+                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                .foregroundStyle(AppColors.secondary)
+                                .kerning(1.5)
+                                .padding(.horizontal, 24)
+                            
+                            Button(action: {
+                                router.push(SARoute.exchangePolicy)
+                            }) {
+                                HStack {
+                                    Image(systemName: "doc.text.fill")
+                                        .font(.system(size: 18))
+                                        .foregroundStyle(AppColors.gold)
+                                    Text("Exchange Policy")
+                                        .font(AppFonts.sansSerif(size: 15))
+                                        .foregroundStyle(.white)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(AppColors.tertiary)
+                                }
+                                .padding(16)
+                                .background(AppColors.surface)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.horizontal, 24)
+                        }
+                        .padding(.top, 18)
+                        
                         CustomButton(title: "Logout", action: { showLogoutAlert = true })
                             .padding(.horizontal, 24)
                             .padding(.top, 30)

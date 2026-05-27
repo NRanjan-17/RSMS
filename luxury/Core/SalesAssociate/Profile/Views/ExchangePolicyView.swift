@@ -56,15 +56,17 @@ private struct PolicySection: View {
                 .lineLimit(isExpanded ? nil : 3)
                 .frame(minHeight: 60, alignment: .topLeading)
             
-            Button(action: {
-                withAnimation {
-                    isExpanded.toggle()
+            if !isExpanded {
+                Button(action: {
+                    withAnimation {
+                        isExpanded = true
+                    }
+                }) {
+                    Text("Read More")
+                        .font(AppFonts.sansSerif(size: 12, weight: .medium))
+                        .foregroundStyle(AppColors.gold)
+                        .padding(.top, 4)
                 }
-            }) {
-                Text(isExpanded ? "Read Less" : "Read More")
-                    .font(AppFonts.sansSerif(size: 12, weight: .medium))
-                    .foregroundStyle(AppColors.gold)
-                    .padding(.top, 4)
             }
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
