@@ -10,7 +10,10 @@ import SwiftUI
 struct SalesProductDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(SalesAssociateAppState.self) private var saAppState
+    @Environment(Router.self) private var router
     let catalog: CatalogEntity
+    
+    @State private var viewModel = SalesProductDetailViewModel()
     
     var inStock: Bool {
         ((catalog.productIds?.count ?? 0) - (catalog.reserved?.count ?? 0)) > 0
@@ -76,8 +79,27 @@ struct SalesProductDetailView: View {
                                     .lineSpacing(6)
                                     .padding(.bottom, 20)
                             }
-                            
-
+                            if viewModel.isLoadingRecommendations {
+                                ProgressView().tint(AppColors.gold).padding(.bottom, 32)
+                            } else if !viewModel.recommendations.isEmpty {
+                                Text("OFTEN PAIRED WITH")
+                                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                                    .foregroundStyle(AppColors.secondary)
+                                    .kerning(1.8)
+                                    .padding(.bottom, 11)
+                                
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 12) {
+                                        ForEach(viewModel.recommendations) { rec in
+                                            Button(action: { router.push(SARoute.catalogDetail(rec)) }) {
+                                                RecommendationCard(catalog: rec)
+                                            }
+                                            .buttonStyle(.plain)
+                                        }
+                                    }
+                                }
+                                .padding(.bottom, 32)
+                            }
                             
                             VStack(spacing: 0) {
                                 Divider().background(AppColors.gold15).padding(.bottom, 12)
@@ -117,5 +139,56 @@ struct SalesProductDetailView: View {
         .toolbar(.hidden, for: .navigationBar)
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .tabBar)
+        .onAppear {
+            viewModel.fetchRecommendations(for: catalog)
+        }
+    }
+}
+
+struct RecommendationCard: View {
+    let catalog: CatalogEntity
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ZStack {
+                Rectangle().fill(AppColors.surface2).frame(height: 80)
+                if let firstImage = catalog.productImages?.first, let url = URL(string: firstImage) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image.resizable().scaledToFill()
+                        case .empty:
+                            ProgressView().tint(AppColors.gold)
+                        default:
+                            Image(systemName: "photo").foregroundStyle(AppColors.gold.opacity(0.35))
+                        }
+                    }
+                    .frame(height: 80).clipped()
+                } else {
+                    Image(systemName: "photo").foregroundStyle(AppColors.gold.opacity(0.35))
+                }
+            }
+            VStack(alignment: .leading, spacing: 4) {
+                Text(catalog.brand.uppercased())
+                    .font(AppFonts.sansSerif(size: 9))
+                    .foregroundStyle(AppColors.gold)
+                    .kerning(1)
+                    .lineLimit(1)
+                Text(catalog.name)
+                    .font(AppFonts.serif(size: 12, weight: .medium))
+                    .foregroundStyle(AppColors.text)
+                    .lineLimit(1)
+                Text(CurrencyManager.shared.format(amount: catalog.amount))
+                    .font(AppFonts.serif(size: 13, weight: .semibold))
+                    .foregroundStyle(AppColors.gold)
+                    .lineLimit(1)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 10)
+        }
+        .frame(width: 140)
+        .background(AppColors.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(AppColors.gold15, lineWidth: 0.5))
     }
 }
