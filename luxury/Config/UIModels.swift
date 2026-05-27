@@ -118,18 +118,7 @@ struct Client: Identifiable, Hashable {
     var dob: String?
     var maritalStatus: String?
     var dateOfAnniversary: String?
-    
-    // Stable Mock IDs
-    static let mockRahulId = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
-    static let mockPriyaId = UUID(uuidString: "00000000-0000-0000-0000-000000000002")!
-    static let mockDeepaId = UUID(uuidString: "00000000-0000-0000-0000-000000000003")!
-    static let mockAnanyaId = UUID(uuidString: "00000000-0000-0000-0000-000000000004")!
-    static let mockVikramId = UUID(uuidString: "00000000-0000-0000-0000-000000000005")!
-    static let mockRohitId = UUID(uuidString: "00000000-0000-0000-0000-000000000006")!
-    
-    static let mockIds: Set<UUID> = [
-        mockRahulId, mockPriyaId, mockDeepaId, mockAnanyaId, mockVikramId, mockRohitId
-    ]
+
     
     init(id: UUID = UUID(), name: String, tier: ClientTier, lastVisit: String, ltv: String, initial: String, isHot: Bool = false, phone: String? = nil, email: String? = nil, dob: String? = nil, maritalStatus: String? = nil, dateOfAnniversary: String? = nil) {
         self.id = id
@@ -192,11 +181,18 @@ extension Client {
     }
 }
 
-struct ClientNote: Identifiable, Hashable {
-    let id: UUID = UUID()
+struct ClientNote: Identifiable, Hashable, Codable {
+    let id: UUID
     let note: String
     let date: String
     let author: String
+    
+    init(id: UUID = UUID(), note: String, date: String, author: String) {
+        self.id = id
+        self.note = note
+        self.date = date
+        self.author = author
+    }
 }
 
 struct ClientPurchase: Identifiable, Hashable, Codable {
@@ -243,12 +239,20 @@ struct ClientWishlistItem: Identifiable, Hashable, Codable {
     }
 }
 
-struct ClientTicket: Identifiable, Hashable {
-    let id: UUID = UUID()
+struct ClientTicket: Identifiable, Hashable, Codable {
+    let id: UUID
     let title: String
     let status: String
     let date: String
     let isActive: Bool
+    
+    init(id: UUID = UUID(), title: String, status: String, date: String, isActive: Bool) {
+        self.id = id
+        self.title = title
+        self.status = status
+        self.date = date
+        self.isActive = isActive
+    }
 }
 
 struct ClientStat: Identifiable, Hashable {

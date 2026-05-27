@@ -53,17 +53,25 @@ final class WishlistService {
             }
         }
         
-        // Fallback for mock clients during demo
-        if Client.mockIds.contains(clientId) {
-            let mockItems = [
-                ClientWishlistItem(brand: "Audemars Piguet", name: "Royal Oak 15500ST", price: "\(CurrencyManager.shared.symbol)42,00,000"),
-                ClientWishlistItem(brand: "Hermès", name: "Kelly 28 Retourné", price: "\(CurrencyManager.shared.symbol)12,80,000")
-            ]
-            saveLocalWishlist(mockItems, for: clientId)
-            return mockItems
-        }
-        
         return []
+    }
+    
+    func syncWishlist(clientId: UUID) async {
+        do {
+            let dbItems: [DBWishlistItem] = try await client
+                .from("wishlist")
+                .select()
+                .eq("client_id", value: clientId.uuidString)
+                .execute()
+                .value
+            
+            let items = dbItems.map {
+                ClientWishlistItem(id: $0.id, brand: $0.brand, name: $0.name, price: $0.price)
+            }
+            saveLocalWishlist(items, for: clientId)
+        } catch {
+            print("Supabase fetch wishlist warning: \(error.localizedDescription)")
+        }
     }
     
     func saveLocalWishlist(_ items: [ClientWishlistItem], for clientId: UUID) {
