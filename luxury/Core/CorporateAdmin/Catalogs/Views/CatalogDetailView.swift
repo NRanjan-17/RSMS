@@ -16,15 +16,13 @@ struct CatalogDetailView: View {
     @State private var showingDeleteConfirm = false
     @State private var showingBatchScanner = false
     @State private var scannedSerials: [String] = []
+    @State private var showingAllSerialsSheet = false
+    
+    @State private var showingBulkGenerateAlert = false
+    @State private var bulkQuantity: String = ""
     
     private var currentCatalog: CatalogEntity {
         viewModel.catalogs.first(where: { $0.id == catalog.id }) ?? catalog
-    }
-    
-    private var availableStock: Int {
-        let total = currentCatalog.productIds?.count ?? 0
-        let reserved = currentCatalog.reserved?.count ?? 0
-        return total - reserved
     }
     
     var body: some View {
@@ -59,7 +57,7 @@ struct CatalogDetailView: View {
                 LabeledContent("Catalog ID", value: currentCatalog.catalogId)
                 LabeledContent("Category", value: currentCatalog.category.rawValue)
                 LabeledContent("Description", value: currentCatalog.description)
-                LabeledContent("Stock", value: "\(availableStock)")
+                LabeledContent("Stock", value: "\((currentCatalog.productIds?.count ?? 0) - (currentCatalog.reserved?.count ?? 0))")
                 LabeledContent("Amount", value: CurrencyManager.shared.format(amount: currentCatalog.amount))
                 LabeledContent("Barcode", value: currentCatalog.barCode)
             }
@@ -68,7 +66,7 @@ struct CatalogDetailView: View {
                 Section("Product Images") {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
-                            ForEach(Array(images.enumerated()), id: \.offset) { offset, url in
+                            ForEach(Array(images.enumerated()), id: \.offset) { _, url in
                                 AsyncImage(url: URL(string: url)) { phase in
                                     if let image = phase.image {
                                         image
@@ -104,16 +102,39 @@ struct CatalogDetailView: View {
                     }
                     .font(AppFonts.sansSerif(size: 14, weight: .semibold))
                     .foregroundStyle(AppColors.gold)
+                    .padding(.vertical, 4)
+                }
+                
+                Button(action: {
+                    bulkQuantity = ""
+                    showingBulkGenerateAlert = true
+                }) {
+                    HStack {
+                        Image(systemName: "number.square.fill")
+                        Text("Create Bulk Serial Ids")
+                    }
+                    .font(AppFonts.sansSerif(size: 14, weight: .semibold))
+                    .foregroundStyle(AppColors.gold)
+                    .padding(.vertical, 4)
                 }
                 
                 if let productIds = currentCatalog.productIds, !productIds.isEmpty {
-                    ForEach(productIds, id: \.self) { serial in
+                    ForEach(productIds.prefix(10), id: \.self) { serial in
                         Text(serial)
                             .font(AppFonts.sansSerif(size: 14))
                             .foregroundStyle(AppColors.text)
                     }
                     .onDelete { indexSet in
                         viewModel.removeSerialNumbers(from: currentCatalog, at: indexSet)
+                    }
+                    
+                    if productIds.count > 10 {
+                        Button("See All (\(productIds.count))") {
+                            showingAllSerialsSheet = true
+                        }
+                        .font(AppFonts.sansSerif(size: 14, weight: .semibold))
+                        .foregroundStyle(AppColors.gold)
+                        .padding(.vertical, 4)
                     }
                 } else {
                     Text("No physical products added yet.")
@@ -187,6 +208,72 @@ struct CatalogDetailView: View {
                     showingBatchScanner = false
                 }
             }
+        }
+        .alert("Create Bulk Serial IDs", isPresented: $showingBulkGenerateAlert) {
+            TextField("Quantity", text: $bulkQuantity)
+                .keyboardType(.numberPad)
+            
+            Button("Cancel", role: .cancel) { }
+            
+            Button("Generate") {
+                if let quantity = Int(bulkQuantity), quantity > 0 {
+                    generateBulkSerials(quantity: quantity)
+                }
+            }
+        } message: {
+            Text("Enter the number of random serials to generate for this catalog.")
+        }
+        .sheet(isPresented: $showingAllSerialsSheet) {
+            NavigationStack {
+                List {
+                    if let productIds = currentCatalog.productIds {
+                        ForEach(productIds, id: \.self) { serial in
+                            Text(serial)
+                                .font(AppFonts.sansSerif(size: 14))
+                                .foregroundStyle(AppColors.text)
+                        }
+                        .onDelete { indexSet in
+                            viewModel.removeSerialNumbers(from: currentCatalog, at: indexSet)
+                        }
+                    }
+                }
+                .navigationTitle("All Serial Numbers")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Done") {
+                            showingAllSerialsSheet = false
+                        }
+                        .foregroundStyle(AppColors.gold)
+                    }
+                }
+            }
+        }
+    }
+    
+    private func generateBulkSerials(quantity: Int) {
+        let rawPrefix = currentCatalog.catalogId
+        var prefix = String(rawPrefix.prefix(4)).uppercased()
+        
+        while prefix.count < 4 {
+            prefix.append("0")
+        }
+        
+        let existingSerials = Set(currentCatalog.productIds ?? [])
+        var newSerials: [String] = []
+        let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        
+        while newSerials.count < quantity {
+            let random16 = String((0..<16).map { _ in characters.randomElement()! })
+            let generatedSerial = "\(prefix)\(random16)"
+            
+            if !existingSerials.contains(generatedSerial) && !newSerials.contains(generatedSerial) {
+                newSerials.append(generatedSerial)
+            }
+        }
+        
+        viewModel.addSerialNumbers(to: currentCatalog, serials: newSerials) {
+            // Success
         }
     }
     
