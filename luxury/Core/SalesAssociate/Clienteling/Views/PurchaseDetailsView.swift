@@ -102,7 +102,7 @@ struct PurchaseDetailsView: View {
     }
     
     private var displayTransactionId: String {
-        return details?.transactionId ?? "TX-90428-RB"
+        return details?.transactionId ?? "TX-UNKNOWN"
     }
     
     private var displayAdvisorName: String {

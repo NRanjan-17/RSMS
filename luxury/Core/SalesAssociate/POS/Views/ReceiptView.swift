@@ -45,7 +45,7 @@ struct ReceiptView: View {
                             .font(AppFonts.serif(size: 32, weight: .semibold))
                             .foregroundStyle(.white)
                         
-                        Text("Transaction ID: #TX-90428-RB")
+                        Text("Transaction ID: #TX-PENDING")
                             .font(AppFonts.sansSerif(size: 13))
                             .foregroundStyle(AppColors.secondary)
                     }

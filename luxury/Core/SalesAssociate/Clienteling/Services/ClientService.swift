@@ -10,7 +10,7 @@ import Supabase
 
 final class ClientService {
     private let client = SupabaseManager.shared.client
-    private let localClientsKey = "luxury_local_clients"
+    private let localClientsKey = "luxury_local_clients_v2"
     
     private var localEncoder: JSONEncoder {
         let encoder = JSONEncoder()
