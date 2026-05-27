@@ -94,5 +94,8 @@ struct StockSearchView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .onAppear {
+            viewModel.fetchItems()
+        }
     }
 }

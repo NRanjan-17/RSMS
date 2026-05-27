@@ -11,29 +11,66 @@ struct DashboardView: View {
     @Environment(AppCoordinator.self) private var coordinator
     @Environment(Router.self) private var router
     @State private var viewModel = DashboardViewModel()
+
+    @State private var showingSettings = false
     
     var body: some View {
         ZStack {
             AppColors.background.ignoresSafeArea()
-            
+
             VStack(spacing: 0) {
-                CustomHeader(title: "Dashboard")
-                
+                HStack {
+                    Text(viewModel.boutiqueName)
+                        .font(AppFonts.serif(size: 28, weight: .semibold))
+                        .foregroundStyle(.white)
+                    Spacer()
+                    Button(action: { showingSettings = true }) {
+                        Image(systemName: "gearshape")
+                            .font(.system(size: 20))
+                            .foregroundStyle(AppColors.gold)
+                    }
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 16)
+                .padding(.bottom, 12)
+                .background(AppColors.background)
+
+                if viewModel.isOffline {
+                    HStack(spacing: 10) {
+                        Image(systemName: "wifi.slash")
+                            .font(AppFonts.sansSerif(size: 12))
+                            .foregroundStyle(AppColors.error)
+                        Text("Offline · Last synced \(viewModel.lastSyncedText)")
+                            .font(AppFonts.sansSerif(size: 12))
+                            .foregroundStyle(AppColors.error)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 10)
+                    .background(AppColors.error.opacity(0.08))
+                }
+
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 28) {
+
                         VStack(alignment: .leading, spacing: 16) {
                             Text("TODAY'S PERFORMANCE")
                                 .font(AppFonts.sansSerif(size: 11, weight: .bold))
                                 .foregroundStyle(AppColors.secondary)
                                 .kerning(1.5)
-                            
-                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                                MetricCard(title: "Sales", value: viewModel.todaySales, subtitle: "\(Int(viewModel.salesProgress * 100))% of Target", icon: "indianrupeesign")
-                                MetricCard(title: "Target", value: viewModel.salesTarget, subtitle: "Daily Goal", icon: "target")
-                            }
+
+                            SalesTargetCard(
+                                actual:             viewModel.todaySales,
+                                target:             viewModel.salesTarget,
+                                actualProgress:     viewModel.salesProgress,
+                                pacingProgress:     viewModel.pacingProgress,
+                                projectedSales:     viewModel.projectedSales,
+                                pacingStatus:       viewModel.pacingStatus,
+                                isTargetConfigured: viewModel.isTargetConfigured
+                            )
                         }
                         .padding(.horizontal, 24)
-                        
+
                         VStack(alignment: .leading, spacing: 16) {
                             HStack {
                                 Text("PENDING APPROVALS")
@@ -44,7 +81,7 @@ struct DashboardView: View {
                                 StatusBadge(text: "\(viewModel.pendingApprovals.count) Pending", status: .warning)
                             }
                             .padding(.horizontal, 24)
-                            
+
                             VStack(spacing: 12) {
                                 ForEach(viewModel.pendingApprovals) { request in
                                     VStack(alignment: .leading, spacing: 14) {
@@ -52,7 +89,7 @@ struct DashboardView: View {
                                             VStack(alignment: .leading, spacing: 2) {
                                                 Text(request.clientName)
                                                     .font(AppFonts.serif(size: 18, weight: .medium))
-                                                    .foregroundStyle(.white)
+                                                    .foregroundStyle(AppColors.text)
                                                 Text("Requested by \(request.associateName)")
                                                     .font(AppFonts.sansSerif(size: 12))
                                                     .foregroundStyle(AppColors.secondary)
@@ -67,7 +104,7 @@ struct DashboardView: View {
                                                     .foregroundStyle(AppColors.error)
                                             }
                                         }
-                                        
+
                                         HStack(spacing: 12) {
                                             Button("Reject") { viewModel.reject(request) }
                                                 .font(AppFonts.sansSerif(size: 13, weight: .bold))
@@ -76,7 +113,7 @@ struct DashboardView: View {
                                                 .padding(.vertical, 10)
                                                 .background(AppColors.error.opacity(0.1))
                                                 .clipShape(RoundedRectangle(cornerRadius: 8))
-                                            
+
                                             Button("Approve") { viewModel.approve(request) }
                                                 .font(AppFonts.sansSerif(size: 13, weight: .bold))
                                                 .foregroundStyle(AppColors.background)
@@ -96,26 +133,30 @@ struct DashboardView: View {
                                 }
                             }
                             .padding(.horizontal, 24)
-                            
+
                             HStack(spacing: 10) {
-                                CustomOutlineButton(title: "Refund Queue", icon: AnyView(Image(systemName: "arrow.uturn.backward.circle")), action: {
-                                    router.push(BMRoute.refundApproval)
-                                })
-                                CustomOutlineButton(title: "Write-Off", icon: AnyView(Image(systemName: "exclamationmark.triangle")), action: {
-                                    router.push(BMRoute.writeOffApproval)
-                                })
+                                CustomOutlineButton(
+                                    title: "Refund Queue",
+                                    icon: AnyView(Image(systemName: "arrow.uturn.backward.circle")),
+                                    action: { router.push(BMRoute.refundApproval) }
+                                )
+                                CustomOutlineButton(
+                                    title: "Write-Off",
+                                    icon: AnyView(Image(systemName: "exclamationmark.triangle")),
+                                    action: { router.push(BMRoute.writeOffApproval) }
+                                )
                             }
                             .padding(.horizontal, 24)
                         }
-                        
+
                         VStack(alignment: .leading, spacing: 16) {
                             Text("UPCOMING APPOINTMENTS")
                                 .font(AppFonts.sansSerif(size: 11, weight: .bold))
                                 .foregroundStyle(AppColors.secondary)
                                 .kerning(1.5)
                                 .padding(.horizontal, 24)
-                            
-                            VStack(spacing: 1) {
+
+                            VStack(spacing: 12) {
                                 ForEach(viewModel.appointments) { appointment in
                                     Button(action: {
                                         router.presentFullScreen(BMRoute.appointmentDetail(appointment))
@@ -134,7 +175,7 @@ struct DashboardView: View {
                                             VStack(alignment: .leading, spacing: 2) {
                                                 Text(appointment.clientName)
                                                     .font(AppFonts.serif(size: 17, weight: .medium))
-                                                    .foregroundStyle(.white)
+                                                    .foregroundStyle(AppColors.text)
                                                 Text("Advisor: \(appointment.advisorName)")
                                                     .font(AppFonts.sansSerif(size: 12))
                                                     .foregroundStyle(AppColors.secondary)
@@ -143,27 +184,46 @@ struct DashboardView: View {
                                             Spacer()
                                             
                                             Image(systemName: "chevron.right")
-                                                .font(.system(size: 12))
+                                                .font(AppFonts.sansSerif(size: 12))
                                                 .foregroundStyle(AppColors.tertiary)
                                         }
-                                        .padding(.horizontal, 24)
-                                        .padding(.vertical, 18)
+                                        .padding(20)
                                         .background(AppColors.surface)
+                                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 16)
+                                                .stroke(AppColors.gold15, lineWidth: 0.5)
+                                        )
                                     }
                                     .buttonStyle(.plain)
                                 }
                             }
-                        }
-                        
-                        CustomButton(title: "Logout", action: { coordinator.logout() })
                             .padding(.horizontal, 24)
-                            .padding(.top, 20)
-                            .padding(.bottom, 40)
+                        }
                     }
                     .padding(.top, 20)
+                }
+                .task {
+                    viewModel.startRealTimeUpdates()
+                }
+                .onDisappear {
+                    viewModel.stopRealTimeUpdates()
                 }
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .sheet(isPresented: $showingSettings, onDismiss: {
+            viewModel.fetchBoutiqueName()
+        }) {
+            BoutiqueManagerSettingsView()
+        }
+    }
+}
+
+#Preview {
+    NavigationStack {
+        DashboardView()
+            .environment(AppCoordinator())
+            .environment(Router())
     }
 }

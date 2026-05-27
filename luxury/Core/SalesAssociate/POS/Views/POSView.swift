@@ -9,7 +9,9 @@ import SwiftUI
 
 struct POSView: View {
     @Environment(Router.self) private var router
-    @State private var viewModel = POSViewModel()
+    @State private var viewModel = POSViewModel.shared
+    @State private var showClientSheet = false
+    @State private var showCourtesySheet = false
     
     var body: some View {
         ZStack {
@@ -20,45 +22,58 @@ struct POSView: View {
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 0) {
-                        HStack(spacing: 7) {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 7)
-                                    .fill(AppColors.gold15)
-                                    .frame(width: 22, height: 22)
-                                Text("RB")
-                                    .font(AppFonts.serif(size: 10, weight: .bold))
-                                    .foregroundStyle(AppColors.gold)
+                        if let client = viewModel.selectedClient {
+                            HStack(spacing: 7) {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 7)
+                                        .fill(AppColors.gold15)
+                                        .frame(width: 22, height: 22)
+                                    Text(String(client.name.prefix(2)).uppercased())
+                                        .font(AppFonts.serif(size: 10, weight: .bold))
+                                        .foregroundStyle(AppColors.gold)
+                                }
+                                Text(client.name)
+                                    .font(AppFonts.sansSerif(size: 12, weight: .medium))
+                                    .foregroundStyle(.white)
+                                if let tier = client.tier {
+                                    StatusBadge(text: tier, status: .success)
+                                }
+                                Spacer()
+                                Button("Change") {
+                                    showClientSheet = true
+                                }
+                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                .foregroundStyle(AppColors.gold)
                             }
-                            Text("Rahul Bajaj")
-                                .font(AppFonts.sansSerif(size: 12, weight: .medium))
-                                .foregroundStyle(.white)
-                            StatusBadge(text: "UHNW", status: .success)
-                        }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(AppColors.gold08)
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(AppColors.gold15, lineWidth: 0.5))
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 18)
-                        
-                        if viewModel.offlineCartQueued {
-                            HStack(spacing: 10) {
-                                Image(systemName: "wifi.slash")
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(AppColors.gold08)
+                            .clipShape(Capsule())
+                            .overlay(Capsule().stroke(AppColors.gold15, lineWidth: 0.5))
+                            .padding(.horizontal, 24)
+                            .padding(.bottom, 18)
+                        } else {
+                            HStack(spacing: 7) {
+                                Image(systemName: "person.crop.circle.badge.plus")
                                     .foregroundStyle(AppColors.gold)
-                                Text("Offline cart snapshot saved locally")
+                                Text("Attach Client")
                                     .font(AppFonts.sansSerif(size: 12, weight: .medium))
                                     .foregroundStyle(AppColors.gold)
                                 Spacer()
-                                StatusBadge(text: "Queued", status: .pending)
                             }
-                            .padding(14)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
                             .background(AppColors.gold08)
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                            .overlay(RoundedRectangle(cornerRadius: 10).stroke(AppColors.gold15, lineWidth: 0.5))
+                            .clipShape(Capsule())
+                            .overlay(Capsule().stroke(AppColors.gold15, lineWidth: 0.5))
                             .padding(.horizontal, 24)
-                            .padding(.bottom, 14)
+                            .padding(.bottom, 18)
+                            .onTapGesture {
+                                showClientSheet = true
+                            }
                         }
+                        
+
                         
                         VStack(spacing: 10) {
                             ForEach(viewModel.cartItems) { item in
@@ -74,14 +89,14 @@ struct POSView: View {
                                     }
                                     
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text(item.brand.uppercased())
+                                        Text(item.product.brand.uppercased())
                                             .font(AppFonts.sansSerif(size: 10, weight: .bold))
                                             .foregroundStyle(AppColors.gold)
                                             .kerning(1)
-                                        Text(item.name)
+                                        Text(item.product.name)
                                             .font(AppFonts.sansSerif(size: 12, weight: .medium))
                                             .foregroundStyle(.white)
-                                        Text(viewModel.formatCurrency(item.price))
+                                        Text(viewModel.formatCurrency(Int(item.product.amount)))
                                             .font(AppFonts.serif(size: 15, weight: .semibold))
                                             .foregroundStyle(AppColors.gold)
                                     }
@@ -89,21 +104,25 @@ struct POSView: View {
                                     Spacer()
                                     
                                     HStack(spacing: 8) {
-                                        Circle()
-                                            .stroke(AppColors.gold15, lineWidth: 0.5)
-                                            .background(AppColors.surface2)
-                                            .frame(width: 26, height: 26)
-                                            .overlay(Text("−").font(.system(size: 14)).foregroundStyle(AppColors.secondary))
+                                        Button(action: { viewModel.decreaseQty(of: item.id) }) {
+                                            Circle()
+                                                .stroke(AppColors.gold15, lineWidth: 0.5)
+                                                .background(AppColors.surface2)
+                                                .frame(width: 26, height: 26)
+                                                .overlay(Text("−").font(.system(size: 14)).foregroundStyle(AppColors.secondary))
+                                        }
                                         
                                         Text("\(item.qty)")
                                             .font(AppFonts.serif(size: 16, weight: .medium))
                                             .foregroundStyle(.white)
                                         
-                                        Circle()
-                                            .stroke(AppColors.gold15, lineWidth: 0.5)
-                                            .background(AppColors.surface2)
-                                            .frame(width: 26, height: 26)
-                                            .overlay(Text("+").font(.system(size: 14)).foregroundStyle(AppColors.secondary))
+                                        Button(action: { viewModel.increaseQty(of: item.id) }) {
+                                            Circle()
+                                                .stroke(AppColors.gold15, lineWidth: 0.5)
+                                                .background(AppColors.surface2)
+                                                .frame(width: 26, height: 26)
+                                                .overlay(Text("+").font(.system(size: 14)).foregroundStyle(AppColors.secondary))
+                                        }
                                     }
                                 }
                                 .padding(.horizontal, 14)
@@ -117,37 +136,38 @@ struct POSView: View {
                         .padding(.bottom, 16)
                         
                         VStack(alignment: .leading, spacing: 12) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "tag.fill")
-                                    .font(.system(size: 12))
-                                    .foregroundStyle(AppColors.gold)
-                                Text("Discount \(Int(viewModel.discountRate * 100))% by Arjun Singh")
-                                    .font(AppFonts.sansSerif(size: 12))
-                                    .foregroundStyle(AppColors.gold)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                Text("−\(viewModel.formatCurrency(viewModel.discount))")
-                                    .font(AppFonts.serif(size: 13, weight: .semibold))
-                                    .foregroundStyle(AppColors.gold)
+                            HStack {
+                                Button(action: {
+                                    showCourtesySheet = true
+                                }) {
+                                    HStack {
+                                        Image(systemName: "gift")
+                                        Text(viewModel.courtesyRate > 0 ? "Courtesy Applied (\(Int(viewModel.courtesyRate * 100))%)" : "Apply Courtesy")
+                                    }
+                                    .font(AppFonts.sansSerif(size: 12, weight: .semibold))
+                                    .foregroundStyle(viewModel.courtesyRate > 0 ? AppColors.success : AppColors.gold)
+                                }
+                                
+                                Spacer()
+                                
+                                if viewModel.courtesyRate > 0 {
+                                    Button(action: { viewModel.applyCourtesy(0) }) {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .foregroundStyle(AppColors.secondary)
+                                    }
+                                }
                             }
-                            
-                            HStack(spacing: 8) {
-                                Button("8%") { viewModel.applyDiscount(0.08) }
-                                Button("12%") { viewModel.applyDiscount(0.12) }
-                                Button("Approve") { viewModel.approve() }
-                                Button("Reject") { viewModel.reject() }
-                            }
-                            .font(AppFonts.sansSerif(size: 11, weight: .bold))
-                            .buttonStyle(.bordered)
-                            .tint(AppColors.gold)
                             
                             if viewModel.requiresApproval {
                                 HStack(spacing: 8) {
                                     StatusBadge(text: viewModel.approvalState.rawValue, status: viewModel.approvalState == .approved ? .success : viewModel.approvalState == .rejected ? .error : .pending)
-                                    Text("Manager approval required above 10%. Immutable audit will capture decision state.")
+                                    Text("Manager approval required for courtesy above 5%.")
                                         .font(AppFonts.sansSerif(size: 11))
                                         .foregroundStyle(AppColors.secondary)
                                 }
                             }
+                            
+                            Divider().background(AppColors.gold15).padding(.vertical, 4)
                             
                             Toggle("Tax-free eligible client", isOn: $viewModel.taxFree)
                                 .font(AppFonts.sansSerif(size: 12))
@@ -155,15 +175,17 @@ struct POSView: View {
                                 .toggleStyle(LuxuryToggleStyle())
                         }
                         .padding(14)
-                        .background(AppColors.gold.opacity(0.06))
+                        .background(AppColors.surface)
                         .clipShape(RoundedRectangle(cornerRadius: 10))
-                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(AppColors.gold50, lineWidth: 0.5))
+                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(AppColors.gold15, lineWidth: 0.5))
                         .padding(.horizontal, 24)
                         .padding(.bottom, 18)
                         
                         VStack(spacing: 10) {
                             PriceRow(label: "Subtotal", value: viewModel.formatCurrency(viewModel.subtotal))
-                            PriceRow(label: "Discount (\(Int(viewModel.discountRate * 100))%)", value: "−\(viewModel.formatCurrency(viewModel.discount))")
+                            if viewModel.courtesyRate > 0 {
+                                PriceRow(label: "Courtesy (\(Int(viewModel.courtesyRate * 100))%)", value: "−\(viewModel.formatCurrency(viewModel.courtesyAmount))")
+                            }
                             PriceRow(label: viewModel.taxFree ? "GST" : "GST (3%)", value: "+\(viewModel.formatCurrency(viewModel.tax))")
                             
                             Divider().background(AppColors.gold15).padding(.vertical, 4)
@@ -183,27 +205,39 @@ struct POSView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
                         .padding(.horizontal, 24)
-                        
-                        CustomOutlineButton(title: "Start Return or Exchange", icon: AnyView(Image(systemName: "arrow.uturn.backward")), action: {
-                            router.push(SARoute.returns)
-                        })
-                        .padding(.horizontal, 24)
-                        .padding(.top, 18)
                         .padding(.bottom, 120)
                     }
                     .padding(.top, 14)
                 }
                 
                 VStack(spacing: 0) {
-                    Divider().background(AppColors.gold15).padding(.bottom, 10)
+                    if let error = viewModel.paymentError {
+                        Text(error)
+                            .font(AppFonts.sansSerif(size: 12))
+                            .foregroundStyle(AppColors.error)
+                            .padding(.bottom, 8)
+                    }
+                    
                     Button(action: {
-                        viewModel.completeMockPayment()
-                        router.push(SARoute.payment)
+                        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                              let rootVC = scene.windows.first?.rootViewController else { return }
+                        
+                        Task {
+                            let success = await viewModel.processPayment(presentingViewController: rootVC, staffId: UUID(), boutiqueId: UUID())
+                            if success {
+                                router.push(SARoute.payment)
+                            }
+                        }
                     }) {
                         HStack(spacing: 10) {
-                            Text("Checkout · \(viewModel.formatCurrency(viewModel.total))")
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 14, weight: .semibold))
+                            if viewModel.isProcessingPayment {
+                                ProgressView()
+                                    .tint(AppColors.background)
+                            } else {
+                                Text("Checkout · \(viewModel.formatCurrency(viewModel.total))")
+                                Image(systemName: "arrow.right")
+                                    .font(.system(size: 14, weight: .semibold))
+                            }
                         }
                         .font(AppFonts.sansSerif(size: 15, weight: .medium))
                         .foregroundStyle(AppColors.background)
@@ -212,12 +246,25 @@ struct POSView: View {
                         .background(RoundedRectangle(cornerRadius: 14).fill(AppColors.gold))
                     }
                     .buttonStyle(.plain)
-                    .disabled(viewModel.requiresApproval && viewModel.approvalState != .approved)
-                    .opacity(viewModel.requiresApproval && viewModel.approvalState != .approved ? 0.45 : 1)
+                    .disabled((viewModel.requiresApproval && viewModel.approvalState != .approved) || viewModel.isProcessingPayment)
+                    .opacity((viewModel.requiresApproval && viewModel.approvalState != .approved) || viewModel.isProcessingPayment ? 0.45 : 1)
                     .padding(.horizontal, 24)
                     .padding(.bottom, 40)
                 }
                 .background(AppColors.background)
+            }
+        }
+        .onAppear {
+            viewModel.fetchProducts()
+        }
+        .sheet(isPresented: $showClientSheet) {
+            ClientSelectionSheet { client in
+                viewModel.attachClient(client)
+            }
+        }
+        .sheet(isPresented: $showCourtesySheet) {
+            CourtesySheet { rate in
+                viewModel.applyCourtesy(rate)
             }
         }
         .toolbar(.hidden, for: .navigationBar)
@@ -237,6 +284,59 @@ private struct PriceRow: View {
             Text(value)
                 .font(AppFonts.serif(size: 13))
                 .foregroundStyle(.white)
+        }
+    }
+}
+
+private struct CourtesySheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let onApply: (Double) -> Void
+    
+    var body: some View {
+        ZStack {
+            AppColors.background.ignoresSafeArea()
+            
+            VStack(spacing: 24) {
+                Text("Apply Courtesy")
+                    .font(AppFonts.serif(size: 20, weight: .medium))
+                    .foregroundStyle(.white)
+                    .padding(.top, 24)
+                
+                VStack(spacing: 12) {
+                    CourtesyButton(title: "VIP Privilege (5%)", rate: 0.05, action: { onApply(0.05); dismiss() })
+                    CourtesyButton(title: "Service Recovery (8%)", rate: 0.08, action: { onApply(0.08); dismiss() })
+                    CourtesyButton(title: "Exceptional Gesture (12%)", rate: 0.12, action: { onApply(0.12); dismiss() })
+                }
+                
+                Spacer()
+            }
+            .padding(.horizontal, 24)
+        }
+        .presentationDetents([.height(320)])
+        .presentationDragIndicator(.visible)
+    }
+}
+
+private struct CourtesyButton: View {
+    let title: String
+    let rate: Double
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Text(title)
+                    .font(AppFonts.sansSerif(size: 14, weight: .medium))
+                    .foregroundStyle(AppColors.gold)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(AppColors.gold.opacity(0.5))
+            }
+            .padding()
+            .background(AppColors.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
         }
     }
 }

@@ -21,6 +21,12 @@ struct CatalogDetailView: View {
         viewModel.catalogs.first(where: { $0.id == catalog.id }) ?? catalog
     }
     
+    private var availableStock: Int {
+        let total = currentCatalog.productIds?.count ?? 0
+        let reserved = currentCatalog.reserved?.count ?? 0
+        return total - reserved
+    }
+    
     var body: some View {
         List {
             Section {
@@ -53,8 +59,8 @@ struct CatalogDetailView: View {
                 LabeledContent("Catalog ID", value: currentCatalog.catalogId)
                 LabeledContent("Category", value: currentCatalog.category.rawValue)
                 LabeledContent("Description", value: currentCatalog.description)
-                LabeledContent("Stock", value: "\((currentCatalog.productIds?.count ?? 0) - (currentCatalog.reserved?.count ?? 0))")
-                LabeledContent("Amount", value: String(format: "$%.2f", currentCatalog.amount))
+                LabeledContent("Stock", value: "\(availableStock)")
+                LabeledContent("Amount", value: CurrencyManager.shared.format(amount: currentCatalog.amount))
                 LabeledContent("Barcode", value: currentCatalog.barCode)
             }
             
@@ -62,7 +68,7 @@ struct CatalogDetailView: View {
                 Section("Product Images") {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
-                            ForEach(images, id: \.self) { url in
+                            ForEach(Array(images.enumerated()), id: \.offset) { offset, url in
                                 AsyncImage(url: URL(string: url)) { phase in
                                     if let image = phase.image {
                                         image
@@ -106,6 +112,9 @@ struct CatalogDetailView: View {
                             .font(AppFonts.sansSerif(size: 14))
                             .foregroundStyle(AppColors.text)
                     }
+                    .onDelete { indexSet in
+                        viewModel.removeSerialNumbers(from: currentCatalog, at: indexSet)
+                    }
                 } else {
                     Text("No physical products added yet.")
                         .font(AppFonts.sansSerif(size: 14))
@@ -114,7 +123,7 @@ struct CatalogDetailView: View {
             }
             Section("Reservations") {
                 if let reserved = currentCatalog.reserved, !reserved.isEmpty {
-                    ForEach(reserved, id: \.self) { reservationId in
+                    ForEach(Array(reserved.enumerated()), id: \.offset) { _, reservationId in
                         Text(reservationId)
                             .font(AppFonts.sansSerif(size: 14))
                             .foregroundStyle(AppColors.text)
@@ -191,150 +200,6 @@ struct CatalogDetailView: View {
     
     private func statusBackgroundColor(for status: CatalogStatus) -> Color {
         statusTextColor(for: status).opacity(0.1)
-    }
-}
-
-struct BatchScannerSheet: View {
-    @Binding var scannedSerials: [String]
-    let existingSerials: [String]
-    let onDone: () -> Void
-    
-    @State private var scannerService = ScannerService()
-    @State private var duplicateToast: String?
-    @State private var showingList = true
-    
-    var body: some View {
-        ZStack(alignment: .top) {
-            // Full Screen Camera
-            QRScannerView(scannerService: scannerService)
-                .ignoresSafeArea()
-            
-            // Custom Top Navigation Bar
-            HStack {
-                Button("Cancel") { onDone() }
-                    .font(AppFonts.sansSerif(size: 16, weight: .semibold))
-                    .foregroundStyle(AppColors.gold)
-                
-                Spacer()
-                
-                Text("Batch Scan")
-                    .font(AppFonts.sansSerif(size: 16, weight: .bold))
-                    .foregroundStyle(.white)
-                
-                Spacer()
-                
-                Button("Done") { onDone() }
-                    .font(AppFonts.sansSerif(size: 16, weight: .bold))
-                    .foregroundStyle(AppColors.gold)
-            }
-            .padding()
-            .background(Color.black.opacity(0.6))
-            
-            // Toast Notification
-            VStack {
-                Spacer()
-                if let toast = duplicateToast {
-                    Text(toast)
-                        .font(AppFonts.sansSerif(size: 14, weight: .bold))
-                        .foregroundStyle(.white)
-                        .padding()
-                        .background(AppColors.error)
-                        .clipShape(Capsule())
-                        .padding(.bottom, 120)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
-            }
-        }
-        .sheet(isPresented: $showingList) {
-            ScannedSerialsListView(scannedSerials: $scannedSerials)
-                .presentationDetents([.fraction(0.2), .medium, .large])
-                .presentationBackgroundInteraction(.enabled(upThrough: .large))
-                .presentationBackground(.ultraThinMaterial)
-                .interactiveDismissDisabled()
-        }
-        .onAppear {
-            scannerService.onScannedCode = { code in
-                let trimmed = code.trimmingCharacters(in: .whitespacesAndNewlines)
-                guard !trimmed.isEmpty else { return }
-                
-                if !scannedSerials.contains(trimmed) && !existingSerials.contains(trimmed) {
-                    withAnimation {
-                        scannedSerials.append(trimmed)
-                    }
-                    scannerService.playSuccessFeedback()
-                } else {
-                    scannerService.playErrorFeedback()
-                    if existingSerials.contains(trimmed) {
-                        showToast("Already in Catalog: \(trimmed)")
-                    } else {
-                        showToast("Duplicate: \(trimmed)")
-                    }
-                }
-            }
-        }
-    }
-    
-    private func showToast(_ message: String) {
-        withAnimation {
-            duplicateToast = message
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            withAnimation {
-                if duplicateToast == message {
-                    duplicateToast = nil
-                }
-            }
-        }
-    }
-}
-
-struct ScannedSerialsListView: View {
-    @Binding var scannedSerials: [String]
-    
-    var body: some View {
-        NavigationStack {
-            List {
-                Section(header: Text("Scanned Serials (\(scannedSerials.count))")) {
-                    if scannedSerials.isEmpty {
-                        Text("Scan items to add them here.")
-                            .foregroundStyle(AppColors.secondary)
-                    } else {
-                        ForEach(scannedSerials.reversed(), id: \.self) { serial in
-                            HStack {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundStyle(AppColors.success)
-                                Text(serial)
-                                    .foregroundStyle(AppColors.text)
-                                
-                                Spacer()
-                                
-                                Button(action: {
-                                    withAnimation {
-                                        scannedSerials.removeAll { $0 == serial }
-                                    }
-                                }) {
-                                    Image(systemName: "trash")
-                                        .foregroundStyle(AppColors.error)
-                                }
-                                .buttonStyle(BorderlessButtonStyle())
-                            }
-                        }
-                        .onDelete { indexSet in
-                            let realIndices = indexSet.map { scannedSerials.count - 1 - $0 }
-                            for index in realIndices.sorted(by: >) {
-                                scannedSerials.remove(at: index)
-                            }
-                        }
-                    }
-                }
-            }
-            .listStyle(.insetGrouped)
-            .scrollContentBackground(.hidden)
-            .background(Color.clear)
-            .navigationTitle("Scanned Items")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(.visible, for: .navigationBar)
-        }
     }
 }
 

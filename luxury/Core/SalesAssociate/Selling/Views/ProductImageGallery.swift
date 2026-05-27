@@ -1,0 +1,141 @@
+//
+//  ProductImageGallery.swift
+//  luxury
+//
+//  Created by Kaushiki Rai on 25/05/26.
+//
+
+import SwiftUI
+
+struct ProductImageGalleryView: View {
+    let imageUrls: [String]?
+
+    @State private var currentIndex = 0
+
+    private var urls: [URL] {
+        (imageUrls ?? []).filter { !$0.isEmpty }.compactMap { URL(string: $0) }
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            if urls.isEmpty {
+                emptyState
+            } else {
+                TabView(selection: $currentIndex) {
+                    ForEach(Array(urls.enumerated()), id: \.offset) { index, url in
+                        ZoomableImageView(url: url).tag(index)
+                    }
+                }
+                .tabViewStyle(.page(indexDisplayMode: .never))
+                .frame(height: 300)
+                .background(AppColors.surface)
+
+            }
+        }
+    }
+
+    private var emptyState: some View {
+        ZStack {
+            Rectangle().fill(AppColors.surface).frame(height: 300)
+            VStack(spacing: 10) {
+                Image(systemName: "photo")
+                    .font(.system(size: 28))
+                    .foregroundStyle(AppColors.gold.opacity(0.4))
+                Text("NO IMAGE")
+                    .font(AppFonts.sansSerif(size: 10))
+                    .foregroundStyle(AppColors.tertiary)
+                    .kerning(2)
+            }
+        }
+    }
+}
+
+struct ZoomableImageView: View {
+    let url: URL
+
+    @State private var scale:      CGFloat = 1.0
+    @State private var lastScale:  CGFloat = 1.0
+    @State private var offset:     CGSize  = .zero
+    @State private var lastOffset: CGSize  = .zero
+
+    private let maxScale: CGFloat = 4.0
+    private let minScale: CGFloat = 1.0
+
+    var body: some View {
+        AsyncImage(url: url) { phase in
+            switch phase {
+            case .empty:
+                ZStack {
+                    Rectangle().fill(AppColors.surface2)
+                    ProgressView().progressViewStyle(.circular).tint(AppColors.gold).scaleEffect(1.2)
+                }
+            case .success(let image):
+                image
+                    .resizable()
+                    .scaledToFit()
+                    .scaleEffect(scale)
+                    .offset(offset)
+                    .gesture(
+                        MagnificationGesture()
+                            .onChanged { scale = min(max(lastScale * $0, minScale), maxScale) }
+                            .onEnded { _ in
+                                lastScale = scale
+                                if scale <= minScale { resetZoom() }
+                            }
+                    )
+                    .simultaneousGesture(
+                        DragGesture()
+                            .onChanged { value in
+                                guard scale > 1.0 else { return }
+                                offset = CGSize(
+                                    width:  lastOffset.width  + value.translation.width,
+                                    height: lastOffset.height + value.translation.height
+                                )
+                            }
+                            .onEnded { _ in
+                                guard scale > 1.0 else { return }
+                                lastOffset = offset
+                            }
+                    )
+                    .onTapGesture(count: 2) {
+                        withAnimation(.spring(duration: 0.35)) {
+                            if scale > 1.0 { resetZoom() } else { scale = 2.5; lastScale = 2.5 }
+                        }
+                    }
+            case .failure:
+                ZStack {
+                    Rectangle().fill(AppColors.surface2)
+                    Image(systemName: "photo")
+                        .font(.system(size: 28))
+                        .foregroundStyle(AppColors.gold.opacity(0.4))
+                }
+            @unknown default:
+                EmptyView()
+            }
+        }
+        .frame(height: 300)
+        .clipped()
+    }
+
+    private func resetZoom() {
+        scale = minScale; lastScale = minScale; offset = .zero; lastOffset = .zero
+    }
+}
+
+#Preview("With Images") {
+    ProductImageGalleryView(imageUrls: [
+        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600",
+        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600",
+        "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=600"
+    ])
+}
+
+#Preview("Single Image") {
+    ProductImageGalleryView(imageUrls: [
+        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600"
+    ])
+}
+
+#Preview("No Image") {
+    ProductImageGalleryView(imageUrls: nil)
+}

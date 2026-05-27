@@ -9,9 +9,18 @@ import SwiftUI
 
 struct CustomHeader: View {
     let title: String
+    var showBackButton: Bool = false
+    var backAction: (() -> Void)? = nil
     
     var body: some View {
-        HStack {
+        HStack(spacing: 12) {
+            if showBackButton, let action = backAction {
+                Button(action: action) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(AppColors.gold)
+                }
+            }
             Text(title)
                 .font(AppFonts.serif(size: 28, weight: .semibold))
                 .foregroundStyle(.white)

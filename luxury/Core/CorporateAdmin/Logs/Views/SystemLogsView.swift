@@ -34,16 +34,23 @@ struct SystemLogsView: View {
                         .padding(.horizontal, 24)
                     }
                     
-                    if viewModel.isLoading {
-                        Spacer()
-                        ProgressView().tint(AppColors.gold)
-                        Spacer()
-                    } else if let error = viewModel.errorMessage {
-                        Spacer()
-                        Text(error).font(AppFonts.sansSerif(size: 14)).foregroundStyle(AppColors.error).padding(40)
-                        Spacer()
-                    } else {
-                        ScrollView(showsIndicators: false) {
+                    ScrollView(showsIndicators: false) {
+                        if viewModel.isLoading {
+                            ProgressView().tint(AppColors.gold).padding(.top, 40)
+                        } else if let error = viewModel.errorMessage {
+                            Text(error)
+                                .font(AppFonts.sansSerif(size: 14))
+                                .foregroundStyle(AppColors.error)
+                                .padding(40)
+                                .multilineTextAlignment(.center)
+                                .frame(maxWidth: .infinity, minHeight: 200)
+                        } else if viewModel.filteredLogs.isEmpty {
+                            Text("No logs found for this category.")
+                                .font(AppFonts.sansSerif(size: 14))
+                                .foregroundStyle(AppColors.secondary)
+                                .padding(.top, 40)
+                                .frame(maxWidth: .infinity, minHeight: 200)
+                        } else {
                             VStack(spacing: 0) {
                                 ForEach(viewModel.filteredLogs) { log in
                                     LogRow(log: log)
@@ -52,22 +59,16 @@ struct SystemLogsView: View {
                                     }
                                 }
                             }
+                            .frame(maxWidth: .infinity)
                             .background(AppColors.surface)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                             .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
                             .padding(.horizontal, 24)
-                            
-                            CustomButton(
-                                title: "Logout",
-                                icon: AnyView(Image(systemName: "rectangle.portrait.and.arrow.right").font(.system(size: 14, weight: .semibold))),
-                                action: {
-                                    coordinator.logout()
-                                }
-                            )
-                            .padding(.horizontal, 24)
-                            .padding(.top, 32)
-                            .padding(.bottom, 40)
+                            .padding(.bottom, 60)
                         }
+                    }
+                    .refreshable {
+                        viewModel.fetchData()
                     }
                 }
                 .padding(.top, 20)

@@ -147,7 +147,7 @@ struct CatalogItemRow: View {
                 
                 Spacer()
                 
-                Text(String(format: "$%.2f", catalog.amount))
+                Text(CurrencyManager.shared.format(amount: catalog.amount))
                     .font(AppFonts.sansSerif(size: 16, weight: .bold))
                     .foregroundStyle(AppColors.text)
             }

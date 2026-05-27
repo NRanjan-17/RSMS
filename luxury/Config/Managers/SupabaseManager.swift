@@ -2,7 +2,7 @@
 //  SupabaseManager.swift
 //  luxury
 //
-//  Created by Gemini CLI on 19/05/26.
+//  Created by Aditya Chauhan on 19/05/26.
 //
 
 import Foundation
@@ -16,7 +16,12 @@ final class SupabaseManager {
     private init() {
         self.client = SupabaseClient(
             supabaseURL: SupabaseConfig.url,
-            supabaseKey: SupabaseConfig.anonKey
+            supabaseKey: SupabaseConfig.anonKey,
+            options: SupabaseClientOptions(
+                auth: SupabaseClientOptions.AuthOptions(
+                    emitLocalSessionAsInitialSession: true
+                )
+            )
         )
     }
 }

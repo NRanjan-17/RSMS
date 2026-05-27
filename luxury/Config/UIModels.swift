@@ -2,7 +2,7 @@
 //  UIModels.swift
 //  luxury
 //
-//  Created by Gemini CLI on 20/05/26.
+//  Created by Aditya Chauhan on 20/05/26.
 //
 
 import Foundation
@@ -113,45 +113,146 @@ struct Client: Identifiable, Hashable {
     let ltv: String
     let initial: String
     let isHot: Bool
+    let phone: String?
+    let email: String?
+    var dob: String?
+    var maritalStatus: String?
+    var dateOfAnniversary: String?
+
     
-    init(id: UUID = UUID(), name: String, tier: ClientTier, lastVisit: String, ltv: String, initial: String, isHot: Bool = false) {
+    init(id: UUID = UUID(), name: String, tier: ClientTier, lastVisit: String, ltv: String, initial: String, isHot: Bool = false, phone: String? = nil, email: String? = nil, dob: String? = nil, maritalStatus: String? = nil, dateOfAnniversary: String? = nil) {
         self.id = id
         self.name = name
         self.tier = tier
         self.lastVisit = lastVisit
-        self.ltv = ltv
+        if let storedLTV = UserDefaults.standard.string(forKey: "luxury_ltv_\(id.uuidString)") {
+            self.ltv = storedLTV
+        } else {
+            self.ltv = ltv
+        }
         self.initial = initial
         self.isHot = isHot
+        self.phone = phone
+        self.email = email
+        self.dob = dob
+        self.maritalStatus = maritalStatus
+        self.dateOfAnniversary = dateOfAnniversary
     }
 }
 
-struct ClientNote: Identifiable, Hashable {
-    let id: UUID = UUID()
+extension Client {
+    init(entity: ClientEntity) {
+        self.id = entity.id
+        self.name = entity.name
+        
+        let clientTier = ClientTier(rawValue: entity.tier ?? "Standard") ?? .standard
+        self.tier = clientTier
+        
+        let hasPurchases = !(entity.productsPurchased?.isEmpty ?? true)
+        self.lastVisit = hasPurchases ? "Today" : "New Client"
+        
+        // Tier-based default LTV for premium look, but only if they have purchases
+        if let storedLTV = UserDefaults.standard.string(forKey: "luxury_ltv_\(entity.id.uuidString)") {
+            self.ltv = storedLTV
+        } else if hasPurchases {
+            switch clientTier {
+            case .standard:
+                self.ltv = "\(CurrencyManager.shared.symbol)4,50,000"
+            case .vip:
+                self.ltv = "\(CurrencyManager.shared.symbol)28,00,000"
+            case .uhnw:
+                self.ltv = "\(CurrencyManager.shared.symbol)1,15,00,000"
+            }
+        } else {
+            self.ltv = "\(CurrencyManager.shared.symbol)0"
+        }
+        
+        let parts = entity.name.components(separatedBy: " ")
+        let firstInit = parts.first?.prefix(1) ?? ""
+        let lastInit = parts.count > 1 ? (parts.last?.prefix(1) ?? "") : ""
+        self.initial = "\(firstInit)\(lastInit)".uppercased()
+        
+        self.isHot = (clientTier == .uhnw && hasPurchases)
+        self.phone = entity.phone
+        self.email = entity.email
+        self.dob = entity.dob
+        self.maritalStatus = entity.maritalStatus
+        self.dateOfAnniversary = entity.dateOfAnniversary
+    }
+}
+
+struct ClientNote: Identifiable, Hashable, Codable {
+    let id: UUID
     let note: String
     let date: String
     let author: String
+    
+    init(id: UUID = UUID(), note: String, date: String, author: String) {
+        self.id = id
+        self.note = note
+        self.date = date
+        self.author = author
+    }
 }
 
-struct ClientPurchase: Identifiable, Hashable {
-    let id: UUID = UUID()
+struct ClientPurchase: Identifiable, Hashable, Codable {
+    var id: UUID
     let name: String
     let price: String
     let date: String
+    
+    init(id: UUID = UUID(), name: String, price: String, date: String) {
+        self.id = id
+        self.name = name
+        self.price = price
+        self.date = date
+    }
 }
 
-struct ClientWishlistItem: Identifiable, Hashable {
-    let id: UUID = UUID()
+struct ClientSizePreference: Identifiable, Hashable, Codable {
+    var id: UUID
+    var ringSize: String
+    var wristSize: String
+    var apparelSize: String
+    var shoeSize: String
+    
+    init(id: UUID = UUID(), ringSize: String = "", wristSize: String = "", apparelSize: String = "", shoeSize: String = "") {
+        self.id = id
+        self.ringSize = ringSize
+        self.wristSize = wristSize
+        self.apparelSize = apparelSize
+        self.shoeSize = shoeSize
+    }
+}
+
+struct ClientWishlistItem: Identifiable, Hashable, Codable {
+    var id: UUID
     let brand: String
     let name: String
     let price: String
+    
+    init(id: UUID = UUID(), brand: String, name: String, price: String) {
+        self.id = id
+        self.brand = brand
+        self.name = name
+        self.price = price
+    }
 }
 
-struct ClientTicket: Identifiable, Hashable {
-    let id: UUID = UUID()
+struct ClientTicket: Identifiable, Hashable, Codable {
+    let id: UUID
     let title: String
     let status: String
     let date: String
     let isActive: Bool
+    
+    init(id: UUID = UUID(), title: String, status: String, date: String, isActive: Bool) {
+        self.id = id
+        self.title = title
+        self.status = status
+        self.date = date
+        self.isActive = isActive
+    }
 }
 
 struct ClientStat: Identifiable, Hashable {
@@ -287,7 +388,7 @@ struct ScanSession: Identifiable, Hashable {
     }
 }
 
-struct RFIDTag: Identifiable, Hashable {
+struct RFIDTag: Identifiable, Hashable, Codable {
     let id: UUID
     let epc: String
     let name: String
@@ -306,12 +407,14 @@ struct TransferItem: Identifiable, Hashable {
     let sku: String
     let name: String
     var qty: Int
+    var availableQty: Int
     
-    init(id: UUID = UUID(), sku: String, name: String, qty: Int) {
+    init(id: UUID = UUID(), sku: String, name: String, qty: Int, availableQty: Int = 10) {
         self.id = id
         self.sku = sku
         self.name = name
         self.qty = qty
+        self.availableQty = availableQty
     }
 }
 

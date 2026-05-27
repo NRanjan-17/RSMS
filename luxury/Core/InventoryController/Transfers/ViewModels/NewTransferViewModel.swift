@@ -7,18 +7,88 @@
 
 import Foundation
 import Observation
+import Supabase
+import PostgREST
 
 @Observable
 final class NewTransferViewModel {
-    var sourceStore: String = "Main Boutique"
-    var destinationStore: String = "Airport Lounge"
-    var items: [TransferItem] = [
-        TransferItem(sku: "ROL-SUB-126610-LN", name: "Rolex Submariner Date 126610LN", qty: 1),
-        TransferItem(sku: "OMG-210.30.42.20.01", name: "Omega Seamaster 210.30.42", qty: 2),
-        TransferItem(sku: "AJD-1-HI-OG-CHI-44", name: "Air Jordan 1 High OG Chicago #44", qty: 1)
-    ]
+    var sourceStore: CorporateBoutique?
+    var destinationStore: CorporateBoutique?
+    var availableBoutiques: [CorporateBoutique] = []
+    
+    var items: [TransferItem] = []
     var approvalState: MockApprovalState = .waiting
     var packingSlipGenerated: Bool = false
+    
+    var showAlert: Bool = false
+    var alertMessage: String = ""
+    
+    var hasStockError: Bool {
+        items.contains(where: { $0.qty > $0.availableQty })
+    }
+    
+    func fetchBoutiques() {
+        Task {
+            do {
+                let boutiques: [CorporateBoutique] = try await SupabaseManager.shared.client
+                    .from("boutiques")
+                    .select()
+                    .eq("status", value: "approved")
+                    .execute()
+                    .value
+                
+                await MainActor.run {
+                    self.availableBoutiques = boutiques
+                    if !boutiques.isEmpty {
+                        self.sourceStore = boutiques.first
+                        self.destinationStore = nil
+                    }
+                }
+            } catch {
+                print("Error fetching boutiques for transfer: \(error)")
+            }
+        }
+    }
+    
+    func addItem(_ catalogItem: CatalogEntity) {
+        // Prevent duplicate entries
+        if items.contains(where: { $0.sku == catalogItem.barCode }) { return }
+        
+        let stock = max(0, (catalogItem.productIds?.count ?? 0) - (catalogItem.reserved?.count ?? 0))
+        
+        if stock < 1 {
+            alertMessage = "This item has no available stock to transfer."
+            showAlert = true
+            return
+        }
+        
+        let newItem = TransferItem(
+            sku: catalogItem.barCode,
+            name: catalogItem.name,
+            qty: 1, // Default to 1
+            availableQty: stock
+        )
+        items.append(newItem)
+    }
+    
+    func incrementQty(for itemId: UUID) {
+        if let index = items.firstIndex(where: { $0.id == itemId }) {
+            if items[index].qty < items[index].availableQty {
+                items[index].qty += 1
+            } else {
+                alertMessage = "Cannot request more than the available stock (\(items[index].availableQty) units)."
+                showAlert = true
+            }
+        }
+    }
+    
+    func decrementQty(for itemId: UUID) {
+        if let index = items.firstIndex(where: { $0.id == itemId }) {
+            if items[index].qty > 1 {
+                items[index].qty -= 1
+            }
+        }
+    }
     
     func submit() {
         approvalState = .waiting

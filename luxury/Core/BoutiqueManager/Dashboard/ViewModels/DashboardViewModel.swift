@@ -7,29 +7,199 @@
 
 import Foundation
 import Observation
+import Network
+import Supabase
+
+enum PacingStatus: String {
+    case exceeded = "Target Achieved"
+    case ahead    = "Ahead of Pace"
+    case onTrack  = "On Track"
+    case behind   = "Behind Pace"
+
+    var badgeStatus: BadgeStatus {
+        switch self {
+        case .exceeded: return .success
+        case .ahead:    return .success
+        case .onTrack:  return .warning
+        case .behind:   return .error
+        }
+    }
+}
 
 @Observable
 final class DashboardViewModel {
-    var todaySales: String = "₹12,45,000"
-    var salesTarget: String = "₹15,00,000"
-    var salesProgress: Double = 0.83
-    
+
+    private var salesActualRaw: Double = 0
+    private let storeOpenHour:  Double = 10
+    private let storeCloseHour: Double = 20
+    private var updateTask:  Task<Void, Never>?
+    private var monitorTask: Task<Void, Never>?
+
+    var salesTargetRaw: Double {
+        get { UserDefaults.standard.double(forKey: "bm_daily_sales_target") }
+        set { UserDefaults.standard.set(newValue, forKey: "bm_daily_sales_target") }
+    }
+
+    var isTargetConfigured: Bool { salesTargetRaw > 0 }
+    var isOffline:          Bool = false
+    var lastSyncedAt:       Date = Date()
+    var isLoadingSales:     Bool = false
+    var boutiqueName:       String = "Dashboard"
+
+    var todaySales:  String { isTargetConfigured ? formatCurrency(salesActualRaw) : formatCurrency(salesActualRaw) }
+    var salesTarget: String { isTargetConfigured ? formatCurrency(salesTargetRaw) : "No target set" }
+
+    var salesProgress: Double {
+        guard isTargetConfigured, salesTargetRaw > 0 else { return 0 }
+        return salesActualRaw / salesTargetRaw
+    }
+
+    var pacingProgress: Double {
+        let c   = Calendar.current.dateComponents([.hour, .minute], from: Date())
+        let now = Double(c.hour ?? Int(storeOpenHour)) + Double(c.minute ?? 0) / 60.0
+        return min(1.0, max(0, now - storeOpenHour) / (storeCloseHour - storeOpenHour))
+    }
+
+    var pacingStatus: PacingStatus {
+        guard isTargetConfigured else { return .onTrack }
+        if salesProgress >= 1.0   { return .exceeded }
+        let d = salesProgress - pacingProgress
+        if d >  0.05 { return .ahead  }
+        if d < -0.05 { return .behind }
+        return .onTrack
+    }
+
+    var projectedSales: String {
+        guard isTargetConfigured, pacingProgress > 0.01 else { return salesTarget }
+        return formatCurrency(salesActualRaw / pacingProgress)
+    }
+
+    var lastSyncedText: String {
+        let f        = RelativeDateTimeFormatter()
+        f.unitsStyle = .short
+        return f.localizedString(for: lastSyncedAt, relativeTo: Date())
+    }
+
     var pendingApprovals: [ApprovalRequest] = [
-        ApprovalRequest(associateName: "Aman Gupta", clientName: "Vikram Seth", amount: "₹4,50,000", discount: "15%"),
-        ApprovalRequest(associateName: "Priya R.", clientName: "Ananya M.", amount: "₹1,20,000", discount: "12%")
+        ApprovalRequest(associateName: "Aman Gupta", clientName: "Vikram Seth", amount: "\(CurrencyManager.shared.symbol)4,50,000", discount: "15%"),
+        ApprovalRequest(associateName: "Priya R.",   clientName: "Ananya M.",   amount: "\(CurrencyManager.shared.symbol)1,20,000", discount: "12%")
     ]
-    
+
     var appointments: [BMAppointment] = [
-        BMAppointment(clientName: "Siddharth K.", time: "11:30 AM", advisorName: "Aman Gupta", type: "In-Store"),
-        BMAppointment(clientName: "Meera J.", time: "02:00 PM", advisorName: "Priya R.", type: "Video Consult"),
-        BMAppointment(clientName: "Rajesh Khanna", time: "04:30 PM", advisorName: "Suresh V.", type: "VIP Preview")
+        BMAppointment(clientName: "Siddharth K.",  time: "11:30 AM", advisorName: "Aman Gupta", type: "In-Store"),
+        BMAppointment(clientName: "Meera J.",      time: "02:00 PM", advisorName: "Priya R.",   type: "Video Consult"),
+        BMAppointment(clientName: "Rajesh Khanna", time: "04:30 PM", advisorName: "Suresh V.",  type: "VIP Preview")
     ]
-    
+
+    func startRealTimeUpdates() {
+        fetchBoutiqueName()
+        fetchTodaySales()
+        startSalesPolling()
+        startNetworkMonitoring()
+    }
+
+    func stopRealTimeUpdates() {
+        updateTask?.cancel()
+        updateTask = nil
+        monitorTask?.cancel()
+        monitorTask = nil
+    }
+
     func approve(_ request: ApprovalRequest) {
         pendingApprovals.removeAll { $0.id == request.id }
     }
-    
+
     func reject(_ request: ApprovalRequest) {
         pendingApprovals.removeAll { $0.id == request.id }
+    }
+
+    // MARK: – Live Sales Fetch
+
+    func fetchTodaySales() {
+        isLoadingSales = true
+        Task {
+            do {
+                let calendar = Calendar.current
+                let startOfDay = calendar.startOfDay(for: Date())
+                let isoFormatter = ISO8601DateFormatter()
+                isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                let startISO = isoFormatter.string(from: startOfDay)
+
+                let orders: [OrderEntity] = try await SupabaseManager.shared.client
+                    .from("order")
+                    .select()
+                    .gte("date_of_purchase", value: startISO)
+                    .execute()
+                    .value
+
+                let totalRevenue = orders.reduce(0.0) { $0 + $1.totalPrice }
+
+                await MainActor.run {
+                    self.salesActualRaw = totalRevenue
+                    self.lastSyncedAt = Date()
+                    self.isLoadingSales = false
+                }
+            } catch {
+                await MainActor.run {
+                    self.isLoadingSales = false
+                }
+                print("Failed to fetch today's sales: \(error)")
+            }
+        }
+    }
+
+    private func startSalesPolling() {
+        updateTask = Task { @MainActor [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(30))
+                self?.fetchTodaySales()
+            }
+        }
+    }
+
+    private func startNetworkMonitoring() {
+        monitorTask = Task { @MainActor [weak self] in
+            for await offline in Self.networkStatusStream() {
+                guard !Task.isCancelled else { return }
+                self?.isOffline = offline
+                if !offline { self?.lastSyncedAt = Date() }
+            }
+        }
+    }
+
+    private static func networkStatusStream() -> AsyncStream<Bool> {
+        AsyncStream { continuation in
+            let monitor = NWPathMonitor()
+            monitor.pathUpdateHandler = { path in
+                continuation.yield(path.status != .satisfied)
+            }
+            monitor.start(queue: .global())
+            continuation.onTermination = { _ in monitor.cancel() }
+        }
+    }
+
+    private func formatCurrency(_ value: Double) -> String {
+        let f                   = NumberFormatter()
+        f.numberStyle           = .currency
+        f.currencySymbol = CurrencyManager.shared.symbol
+        f.maximumFractionDigits = 0
+        f.locale                = Locale(identifier: "en_IN")
+        return f.string(from: NSNumber(value: value)) ?? "\(CurrencyManager.shared.symbol)0"
+    }
+
+    func fetchBoutiqueName() {
+        Task {
+            do {
+                if let (_, profile) = try await ProfileService().fetchCurrentProfile() {
+                    if let boutique = profile as? CorporateBoutique {
+                        await MainActor.run {
+                            self.boutiqueName = boutique.name.isEmpty ? "Dashboard" : boutique.name
+                        }
+                    }
+                }
+            } catch {
+                print("Failed to fetch boutique name: \(error)")
+            }
+        }
     }
 }

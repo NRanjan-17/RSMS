@@ -67,6 +67,7 @@ final class UserManagementViewModel {
         Task {
             do {
                 try await approvalService.approveBoutique(id: boutique.id)
+                SystemLogService.shared.logAction(category: .access, severity: .info, message: "Approved boutique: \(boutique.name)", boutiqueName: boutique.name)
                 await MainActor.run {
                     self.pendingBoutiques.removeAll { $0.id == boutique.id }
                     self.actionBoutiqueId = nil
@@ -90,6 +91,7 @@ final class UserManagementViewModel {
         Task {
             do {
                 try await approvalService.rejectBoutique(id: boutique.id)
+                SystemLogService.shared.logAction(category: .access, severity: .warning, message: "Rejected boutique: \(boutique.name)", boutiqueName: boutique.name)
                 await MainActor.run {
                     self.pendingBoutiques.removeAll { $0.id == boutique.id }
                     self.actionBoutiqueId = nil
@@ -100,6 +102,76 @@ final class UserManagementViewModel {
                 await MainActor.run {
                     self.actionBoutiqueId = nil
                     self.actionErrorMessage = "Rejection failed: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+    
+    func disableBoutique(_ boutique: CorporateBoutique, completion: @escaping () -> Void = {}) {
+        actionBoutiqueId = boutique.id
+        actionErrorMessage = nil
+        errorMessage = nil
+
+        Task {
+            do {
+                try await approvalService.disableBoutique(id: boutique.id)
+                SystemLogService.shared.logAction(category: .access, severity: .warning, message: "Disabled boutique: \(boutique.name)", boutiqueName: boutique.name)
+                await MainActor.run {
+                    self.actionBoutiqueId = nil
+                    fetchData()
+                    completion()
+                }
+            } catch {
+                await MainActor.run {
+                    self.actionBoutiqueId = nil
+                    self.actionErrorMessage = "Disable failed: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+    
+    func enableBoutique(_ boutique: CorporateBoutique, completion: @escaping () -> Void = {}) {
+        actionBoutiqueId = boutique.id
+        actionErrorMessage = nil
+        errorMessage = nil
+
+        Task {
+            do {
+                try await approvalService.enableBoutique(id: boutique.id)
+                SystemLogService.shared.logAction(category: .access, severity: .info, message: "Enabled boutique: \(boutique.name)", boutiqueName: boutique.name)
+                await MainActor.run {
+                    self.actionBoutiqueId = nil
+                    fetchData()
+                    completion()
+                }
+            } catch {
+                await MainActor.run {
+                    self.actionBoutiqueId = nil
+                    self.actionErrorMessage = "Enable failed: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+    
+    func removeBoutique(_ boutique: CorporateBoutique, completion: @escaping () -> Void = {}) {
+        actionBoutiqueId = boutique.id
+        actionErrorMessage = nil
+        errorMessage = nil
+
+        Task {
+            do {
+                try await approvalService.removeBoutique(id: boutique.id)
+                SystemLogService.shared.logAction(category: .security, severity: .critical, message: "Removed boutique: \(boutique.name)", boutiqueName: boutique.name)
+                await MainActor.run {
+                    self.approvedBoutiques.removeAll { $0.id == boutique.id }
+                    self.actionBoutiqueId = nil
+                    fetchData()
+                    completion()
+                }
+            } catch {
+                await MainActor.run {
+                    self.actionBoutiqueId = nil
+                    self.actionErrorMessage = "Removal failed: \(error.localizedDescription)"
                 }
             }
         }
@@ -140,5 +212,7 @@ final class UserManagementViewModel {
             email: trimmedEmail,
             provider: "email"
         )
+        
+        SystemLogService.shared.logAction(category: .access, severity: .info, message: "Invited new boutique manager: \(trimmedEmail)")
     }
 }

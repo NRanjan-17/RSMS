@@ -11,10 +11,11 @@ enum SARoute: Hashable {
     case appointmentList
     case createAppointment
     case returns
-    case afterSalesIntake
+    case afterSalesIntake(clientName: String?, serialNumber: String?, isWarrantyActive: Bool)
     case afterSalesTracking
-    case lookBuilder
     case remoteSelling
+    case purchaseDetails(client: Client, purchase: ClientPurchase)
+    case exchangePolicy
 }
 
 
@@ -33,18 +34,22 @@ enum BMRoute: Hashable {
     case staffRequestDetail(StaffModel)
     case pendingStaff
     case staffDetail(StaffModel)
+    case endlessAisleRequests
 }
 
 enum ICRoute: Hashable {
     case stockDetail(InventoryAlert)
     case stockSearch
     case scanSessionDetail(ScanSession)
-    case activeScan
+    case barcodeScan
     case transferDetail(TransferRequest)
     case newTransfer
     case auditDetail(RSMSCycleCount)
     case activeAudit
     case serialCertificate
+    case sfsOrders
+    case sfsVerification(PurchasedItemEntity)
+    case endlessAisleSelection
 }
 
 enum CARoute: Hashable {
@@ -59,6 +64,9 @@ enum CARoute: Hashable {
     case boutiqueRequestDetail(CorporateBoutique)
     case pendingBoutiques
     case boutiqueDetail(CorporateBoutique)
+    case inventoryDetail(ProductInventorySummary)
+    case staffList
+    case staffDetail(StaffModel)
 }
 
 enum AppRoutes: Hashable {

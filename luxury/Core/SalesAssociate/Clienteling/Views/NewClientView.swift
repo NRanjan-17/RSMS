@@ -14,10 +14,21 @@ struct NewClientView: View {
     @State private var mobile: String = ""
     @State private var email: String = ""
     @State private var selectedTier: String = "VIP"
+    @State private var dobDate: Date = Date()
+    @State private var hasDobSet: Bool = false
+    @State private var maritalStatus: String = "Single"
+    @State private var anniversaryDate: Date = Date()
+    @State private var hasAnniversarySet: Bool = false
     
     @State private var marketingConsent = true
     @State private var dataConsent = true
     @State private var thirdPartyConsent = false
+    
+    @State private var isLoading = false
+    @State private var errorMessage: String? = nil
+    @State private var showErrorAlert = false
+    
+    private let clientService = ClientService()
     
     var body: some View {
         ZStack {
@@ -37,10 +48,11 @@ struct NewClientView: View {
                     Spacer()
                     
                     Button("Save") {
-                        dismiss()
+                        saveClient()
                     }
                     .font(AppFonts.sansSerif(size: 13))
                     .foregroundStyle(AppColors.gold)
+                    .disabled(isLoading)
                 }
                 .padding(.horizontal, 24)
                 .padding(.vertical, 16)
@@ -66,6 +78,46 @@ struct NewClientView: View {
                             
                             RSMSField(label: "Mobile", placeholder: "+91 98XXX XXXXX", text: $mobile)
                             RSMSField(label: "Email", placeholder: "client@email.com", text: $email)
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 16)
+                        
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("ADDITIONAL PROFILE INFO")
+                                .font(AppFonts.sansSerif(size: 10))
+                                .foregroundStyle(AppColors.gold)
+                                .kerning(2)
+                                .padding(.top, 4)
+                            
+                            RSMSDatePicker(label: "Date of Birth", date: $dobDate, isSet: $hasDobSet)
+                            
+                            Text("MARITAL STATUS")
+                                .font(AppFonts.sansSerif(size: 10))
+                                .foregroundStyle(AppColors.gold)
+                                .kerning(2)
+                                .padding(.top, 4)
+                            
+                            HStack(spacing: 8) {
+                                let statuses = ["Single", "Married", "Other"]
+                                ForEach(statuses, id: \.self) { s in
+                                    let isSelected = maritalStatus == s
+                                    Text(s)
+                                        .font(AppFonts.sansSerif(size: 13, weight: isSelected ? .medium : .light))
+                                        .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 40)
+                                        .background(isSelected ? AppColors.gold : Color.clear)
+                                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(isSelected ? Color.clear : AppColors.gold15, lineWidth: 0.5))
+                                        .onTapGesture {
+                                            withAnimation { maritalStatus = s }
+                                        }
+                                }
+                            }
+                            
+                            if maritalStatus == "Married" {
+                                RSMSDatePicker(label: "Anniversary Date", date: $anniversaryDate, isSet: $hasAnniversarySet)
+                            }
                         }
                         .padding(.horizontal, 24)
                         .padding(.bottom, 16)
@@ -136,7 +188,7 @@ struct NewClientView: View {
                 }
                 
                 VStack(spacing: 0) {
-                    CustomButton(title: "Create Profile", action: { dismiss() })
+                    CustomButton(title: "Create Profile", isLoading: isLoading, action: { saveClient() })
                         .padding(.horizontal, 24)
                         .padding(.vertical, 14)
                         .padding(.bottom, 38)
@@ -147,6 +199,74 @@ struct NewClientView: View {
         .toolbar(.hidden, for: .navigationBar)
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .tabBar)
+        .alert("Error Saving Client", isPresented: $showErrorAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            if let errorMessage = errorMessage {
+                Text(errorMessage)
+            }
+        }
+    }
+    
+    private func saveClient() {
+        let trimmedFirst = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedLast = lastName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedMobile = mobile.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard !trimmedFirst.isEmpty else {
+            errorMessage = "First name is required."
+            showErrorAlert = true
+            return
+        }
+        
+        guard !trimmedEmail.isEmpty else {
+            errorMessage = "Email is required."
+            showErrorAlert = true
+            return
+        }
+        
+        let fullName = trimmedLast.isEmpty ? trimmedFirst : "\(trimmedFirst) \(trimmedLast)"
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+        
+        let dobStr = hasDobSet ? dateFormatter.string(from: dobDate) : nil
+        let anniversaryStr = (maritalStatus == "Married" && hasAnniversarySet) ? dateFormatter.string(from: anniversaryDate) : nil
+        
+        let clientEntity = ClientEntity(
+            id: UUID(),
+            name: fullName,
+            email: trimmedEmail,
+            phone: trimmedMobile.isEmpty ? nil : trimmedMobile,
+            dob: dobStr,
+            tier: selectedTier,
+            productsPurchased: [],
+            createdAt: Date(),
+            updatedAt: Date(),
+            maritalStatus: maritalStatus,
+            dateOfAnniversary: anniversaryStr
+        )
+        
+        isLoading = true
+        Task {
+            do {
+                try await clientService.createClient(clientEntity)
+                await MainActor.run {
+                    isLoading = false
+                    NotificationCenter.default.post(name: NSNotification.Name("RefreshClients"), object: nil)
+                    dismiss()
+                }
+            } catch {
+                await MainActor.run {
+                    isLoading = false
+                    errorMessage = error.localizedDescription
+                    showErrorAlert = true
+                }
+            }
+        }
     }
 }
 
@@ -174,3 +294,4 @@ private struct RSMSField: View {
         }
     }
 }
+

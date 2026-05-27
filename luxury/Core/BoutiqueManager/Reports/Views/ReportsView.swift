@@ -28,7 +28,7 @@ struct ReportsView: View {
                             .padding(.horizontal, 24)
                             .padding(.top, 20)
                         
-                        VStack(spacing: 1) {
+                        VStack(spacing: 12) {
                             ForEach(viewModel.reportCategories) { report in
                                 Button(action: {
                                     if let route = route(for: report.title) {
@@ -60,17 +60,18 @@ struct ReportsView: View {
                                             .font(.system(size: 12))
                                             .foregroundStyle(AppColors.tertiary)
                                     }
-                                    .padding(.horizontal, 24)
-                                    .padding(.vertical, 16)
+                                    .padding(20)
                                     .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .stroke(AppColors.gold15, lineWidth: 0.5)
+                                    )
                                 }
                                 .buttonStyle(.plain)
                             }
                         }
-                        
-                        CustomButton(title: "Logout", action: { coordinator.logout() })
-                            .padding(.horizontal, 24)
-                            .padding(.top, 16)
+                        .padding(.horizontal, 24)
                         
                         VStack(alignment: .center, spacing: 8) {
                             Image(systemName: "lock.shield")

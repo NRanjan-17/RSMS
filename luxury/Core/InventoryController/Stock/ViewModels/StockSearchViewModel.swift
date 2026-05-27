@@ -7,16 +7,46 @@
 
 import Foundation
 import Observation
+import Supabase
+import PostgREST
 
 @Observable
 final class StockSearchViewModel {
     var searchText: String = ""
-    var stockItems: [StockItem] = [
-        StockItem(brand: "Rolex", name: "Submariner Date 126610LN", qty: 3, rfid: true, alert: false),
-        StockItem(brand: "Hermès", name: "Birkin 30 Togo Noir", qty: 1, rfid: true, alert: true),
-        StockItem(brand: "Patek Philippe", name: "Nautilus 5711/1A Acier", qty: 0, rfid: true, alert: true),
-        StockItem(brand: "Bottega Veneta", name: "The Jodie Hobo Kiwi", qty: 5, rfid: false, alert: false)
-    ]
+    var stockItems: [StockItem] = []
+    
+    func fetchItems() {
+        Task {
+            do {
+                let catalogs: [CatalogEntity] = try await SupabaseManager.shared.client
+                    .from("catalogs")
+                    .select()
+                    .execute()
+                    .value
+                
+                var newItems: [StockItem] = []
+                for catalog in catalogs {
+                    let totalCount = catalog.productIds?.count ?? 0
+                    let reservedCount = catalog.reserved?.count ?? 0
+                    let available = totalCount - reservedCount
+                    
+                    newItems.append(StockItem(
+                        brand: catalog.brand,
+                        name: catalog.name,
+                        qty: available,
+                        rfid: true, // Assuming true for now
+                        alert: available < 3
+                    ))
+                }
+                
+                await MainActor.run {
+                    self.stockItems = newItems
+                }
+            } catch {
+                print("Failed to fetch stock items: \(error)")
+            }
+        }
+    }
     
     var filteredItems: [StockItem] {
         if searchText.isEmpty {

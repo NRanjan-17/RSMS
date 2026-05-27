@@ -9,29 +9,25 @@ import SwiftUI
 
 struct DiscountApprovalView: View {
     @Environment(\.dismiss) private var dismiss
-    
-    let requests: [DiscountRequest] = [
-        DiscountRequest(client: "Meera Kapoor", total: "₹2,45,000", discount: "15%", advisor: "Rahul Sharma", time: "2 min ago"),
-        DiscountRequest(client: "Vikram Malhotra", total: "₹85,000", discount: "12%", advisor: "Anjali Pathak", time: "10 min ago"),
-        DiscountRequest(client: "Sarah John", total: "₹1,20,000", discount: "20%", advisor: "Rahul Sharma", time: "15 min ago")
-    ]
-    
+    @State private var viewModel = DiscountApprovalViewModel()
+
     var body: some View {
         ZStack {
             AppColors.background.ignoresSafeArea()
+
             VStack(spacing: 0) {
                 CustomHeader(title: "Discount Approvals")
-                
+
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 12) {
-                        ForEach(requests) { request in
+                        ForEach(viewModel.requests) { request in
                             VStack(alignment: .leading, spacing: 16) {
                                 HStack {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(request.client)
                                             .font(AppFonts.sansSerif(size: 16, weight: .bold))
                                             .foregroundStyle(AppColors.text)
-                                        Text("By \(request.advisor) • \(request.time)")
+                                        Text("By \(request.advisor) · \(request.time)")
                                             .font(AppFonts.sansSerif(size: 11))
                                             .foregroundStyle(AppColors.secondary)
                                     }
@@ -45,9 +41,9 @@ struct DiscountApprovalView: View {
                                             .foregroundStyle(AppColors.secondary)
                                     }
                                 }
-                                
+
                                 HStack(spacing: 12) {
-                                    Button(action: { dismiss() }) {
+                                    Button(action: { viewModel.reject(request) }) {
                                         Text("Reject")
                                             .font(AppFonts.sansSerif(size: 12, weight: .bold))
                                             .foregroundStyle(AppColors.error)
@@ -60,8 +56,8 @@ struct DiscountApprovalView: View {
                                                     .stroke(AppColors.error.opacity(0.3), lineWidth: 1)
                                             )
                                     }
-                                    
-                                    Button(action: { dismiss() }) {
+
+                                    Button(action: { viewModel.approve(request) }) {
                                         Text("Approve")
                                             .font(AppFonts.sansSerif(size: 12, weight: .bold))
                                             .foregroundStyle(AppColors.background)

@@ -85,72 +85,84 @@ struct ClientelingView: View {
                 .padding(.bottom, 20)
                 
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 1) {
-                        let clients = viewModel.filteredClients
-                        ForEach(clients, id: \.id) { client in
-                            Button(action: {
-                                router.push(SARoute.clientProfile(client))
-                            }) {
-                                HStack(spacing: 16) {
-                                    ZStack {
-                                        Circle()
-                                            .fill(AppColors.gold08)
-                                            .frame(width: 40, height: 40)
-                                        Text(client.initial)
-                                            .font(AppFonts.serif(size: 13, weight: .bold))
-                                            .foregroundStyle(AppColors.gold)
-                                        
-                                        if client.isHot {
-                                            Circle()
-                                                .fill(Color(hex: 0xFF9F3F))
-                                                .frame(width: 8, height: 8)
-                                                .overlay(Circle().stroke(AppColors.background, lineWidth: 1.5))
-                                                .offset(x: 14, y: -14)
-                                        }
-                                    }
-                                    
-                                    VStack(alignment: .leading, spacing: 3) {
-                                        HStack(spacing: 6) {
-                                            Text(client.name)
-                                                .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                                                .foregroundStyle(.white)
-                                            StatusBadge(text: client.tier.rawValue, status: client.tier.badgeStatus)
-                                        }
-                                        
-                                        Text("\(client.lastVisit) · LTV \(client.ltv)")
-                                            .font(AppFonts.sansSerif(size: 11))
-                                            .foregroundStyle(AppColors.secondary)
-                                    }
-                                    
-                                    Spacer()
-                                    
-                                    Image(systemName: "chevron.right")
-                                        .font(.system(size: 12))
-                                        .foregroundStyle(AppColors.tertiary)
-                                }
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 12)
-                                .background(AppColors.surface)
-                                .overlay(
-                                    VStack {
-                                        Spacer()
-                                        if client.id != clients.last?.id {
-                                            Divider().background(AppColors.gold08).padding(.horizontal, 14)
-                                        }
-                                    }
-                                )
-                            }
-                            .buttonStyle(.plain)
+                    if viewModel.isLoading && viewModel.clients.isEmpty {
+                        VStack {
+                            Spacer()
+                            ProgressView()
+                                .tint(AppColors.gold)
+                                .scaleEffect(1.2)
+                                .padding(.top, 60)
+                            Spacer()
                         }
+                        .frame(maxWidth: .infinity)
+                    } else {
+                        VStack(spacing: 1) {
+                            let clients = viewModel.filteredClients
+                            ForEach(clients, id: \.id) { client in
+                                Button(action: {
+                                    router.push(SARoute.clientProfile(client))
+                                }) {
+                                    HStack(spacing: 16) {
+                                        ZStack {
+                                            Circle()
+                                                .fill(AppColors.gold08)
+                                                .frame(width: 40, height: 40)
+                                            Text(client.initial)
+                                                .font(AppFonts.serif(size: 13, weight: .bold))
+                                                .foregroundStyle(AppColors.gold)
+                                            
+                                            if client.isHot {
+                                                Circle()
+                                                    .fill(Color(hex: 0xFF9F3F))
+                                                    .frame(width: 8, height: 8)
+                                                    .overlay(Circle().stroke(AppColors.background, lineWidth: 1.5))
+                                                    .offset(x: 14, y: -14)
+                                            }
+                                        }
+                                        
+                                        VStack(alignment: .leading, spacing: 3) {
+                                            HStack(spacing: 6) {
+                                                Text(client.name)
+                                                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                                    .foregroundStyle(.white)
+                                                StatusBadge(text: client.tier.rawValue, status: client.tier.badgeStatus)
+                                            }
+                                            
+                                            Text("\(client.lastVisit) · LTV \(client.ltv)")
+                                                .font(AppFonts.sansSerif(size: 11))
+                                                .foregroundStyle(AppColors.secondary)
+                                        }
+                                        
+                                        Spacer()
+                                        
+                                        Image(systemName: "chevron.right")
+                                            .font(.system(size: 12))
+                                            .foregroundStyle(AppColors.tertiary)
+                                    }
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 12)
+                                    .background(AppColors.surface)
+                                    .overlay(
+                                        VStack {
+                                            Spacer()
+                                            if client.id != clients.last?.id {
+                                                Divider().background(AppColors.gold08).padding(.horizontal, 14)
+                                            }
+                                        }
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .background(AppColors.surface)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(AppColors.gold15, lineWidth: 0.5)
+                        )
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 120)
                     }
-                    .background(AppColors.surface)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(AppColors.gold15, lineWidth: 0.5)
-                    )
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 120)
                 }
             }
             
@@ -178,5 +190,13 @@ struct ClientelingView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .task {
+            await viewModel.loadClients()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshClients"))) { _ in
+            Task {
+                await viewModel.loadClients()
+            }
+        }
     }
 }

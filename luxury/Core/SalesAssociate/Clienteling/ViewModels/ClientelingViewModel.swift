@@ -14,20 +14,18 @@ final class ClientelingViewModel {
     var selectedFilter: String = "All"
     let filters: [String] = ["All", "UHNW", "VIP", "Standard"]
     
+    var isLoading = false
+    var errorMessage: String? = nil
+    
     var stats: [ClientStat] = [
-        ClientStat(value: "284", label: "Total"),
-        ClientStat(value: "8", label: "UHNW"),
-        ClientStat(value: "42", label: "VIP")
+        ClientStat(value: "0", label: "Total"),
+        ClientStat(value: "0", label: "UHNW"),
+        ClientStat(value: "0", label: "VIP")
     ]
     
-    var clients: [Client] = [
-        Client(name: "Rahul Bajaj", tier: .uhnw, lastVisit: "Today", ltv: "₹1,24,50,000", initial: "RB", isHot: true),
-        Client(name: "Priya Shah", tier: .uhnw, lastVisit: "3 days", ltv: "₹85,20,000", initial: "PS"),
-        Client(name: "Deepa Srinivas", tier: .vip, lastVisit: "Today", ltv: "₹31,00,000", initial: "DS", isHot: true),
-        Client(name: "Ananya Kapoor", tier: .vip, lastVisit: "1 week", ltv: "₹24,80,000", initial: "AK"),
-        Client(name: "Vikram Nair", tier: .vip, lastVisit: "2 weeks", ltv: "₹18,40,000", initial: "VN"),
-        Client(name: "Rohit Malhotra", tier: .standard, lastVisit: "1 month", ltv: "₹4,20,000", initial: "RM")
-    ]
+    var clients: [Client] = []
+    
+    private let clientService = ClientService()
     
     var filteredClients: [Client] {
         var filtered = clients
@@ -35,8 +33,45 @@ final class ClientelingViewModel {
             filtered = filtered.filter { $0.tier.rawValue == selectedFilter }
         }
         if !searchText.isEmpty {
-            filtered = filtered.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+            filtered = filtered.filter { client in
+                client.name.localizedCaseInsensitiveContains(searchText) ||
+                (client.phone?.localizedCaseInsensitiveContains(searchText) ?? false) ||
+                (client.email?.localizedCaseInsensitiveContains(searchText) ?? false)
+            }
         }
         return filtered
+    }
+    
+    func loadClients() async {
+        isLoading = true
+        errorMessage = nil
+        
+        do {
+            let entities = try await clientService.fetchClients()
+            let dbClients = entities.map { Client(entity: $0) }
+            
+            await MainActor.run {
+                self.clients = dbClients
+            }
+        } catch {
+            print("Error fetching clients: \(error)")
+            await MainActor.run {
+                self.errorMessage = error.localizedDescription
+                self.clients = []
+            }
+        }
+        
+        await MainActor.run {
+            let totalCount = self.clients.count
+            let uhnwCount = self.clients.filter { $0.tier == .uhnw }.count
+            let vipCount = self.clients.filter { $0.tier == .vip }.count
+            
+            self.stats = [
+                ClientStat(value: "\(totalCount)", label: "Total"),
+                ClientStat(value: "\(uhnwCount)", label: "UHNW"),
+                ClientStat(value: "\(vipCount)", label: "VIP")
+            ]
+            isLoading = false
+        }
     }
 }

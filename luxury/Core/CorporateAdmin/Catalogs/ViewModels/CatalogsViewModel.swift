@@ -122,6 +122,7 @@ final class CatalogsViewModel {
                 catalogToSave.productImages = uploadedURLs
                 
                 try await catalogService.addCatalog(catalogToSave)
+                SystemLogService.shared.logAction(category: .inventory, severity: .info, message: "Added new catalog \(catalogToSave.name) (\(catalogToSave.catalogId))")
                 await MainActor.run {
                     self.catalogs.append(catalogToSave)
                     self.isSaving = false
@@ -190,6 +191,7 @@ final class CatalogsViewModel {
                 catalogToUpdate.productImages = uploadedURLs
                 
                 try await catalogService.updateCatalog(catalogToUpdate)
+                SystemLogService.shared.logAction(category: .inventory, severity: .info, message: "Updated catalog \(catalogToUpdate.name) (\(catalogToUpdate.catalogId))")
                 await MainActor.run {
                     if let index = self.catalogs.firstIndex(where: { $0.id == updatedCatalog.id }) {
                         self.catalogs[index] = catalogToUpdate
@@ -214,6 +216,7 @@ final class CatalogsViewModel {
         Task {
             do {
                 try await catalogService.deleteCatalog(id: catalog.id)
+                SystemLogService.shared.logAction(category: .inventory, severity: .warning, message: "Deleted catalog \(catalog.name) (\(catalog.catalogId))")
                 await MainActor.run {
                     self.catalogs.removeAll { $0.id == catalog.id }
                     self.isSaving = false
@@ -240,6 +243,7 @@ final class CatalogsViewModel {
         Task {
             do {
                 try await catalogService.updateCatalog(updatedCatalog)
+                SystemLogService.shared.logAction(category: .inventory, severity: .info, message: "Added \(serials.count) serial numbers to catalog \(catalog.name) (\(catalog.catalogId))")
                 await MainActor.run {
                     if let index = self.catalogs.firstIndex(where: { $0.id == updatedCatalog.id }) {
                         self.catalogs[index] = updatedCatalog
@@ -251,6 +255,56 @@ final class CatalogsViewModel {
                 await MainActor.run {
                     self.errorMessage = "Failed to add products: \(error.localizedDescription)"
                     self.isSaving = false
+                }
+            }
+        }
+    }
+    
+    func removeSerialNumbers(from catalog: CatalogEntity, at offsets: IndexSet) {
+        guard let currentProducts = catalog.productIds else { return }
+        
+        var updatedProducts = currentProducts
+        updatedProducts.remove(atOffsets: offsets)
+        
+        var updatedCatalog = catalog
+        updatedCatalog.productIds = updatedProducts
+        
+        Task {
+            do {
+                try await catalogService.updateCatalog(updatedCatalog)
+                SystemLogService.shared.logAction(category: .inventory, severity: .warning, message: "Removed \(offsets.count) serial numbers from catalog \(catalog.name) (\(catalog.catalogId))")
+                await MainActor.run {
+                    if let index = self.catalogs.firstIndex(where: { $0.id == updatedCatalog.id }) {
+                        self.catalogs[index] = updatedCatalog
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    self.errorMessage = "Failed to remove products: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+
+    func removeImage(at index: Int, from catalog: CatalogEntity) {
+        var updatedCatalog = catalog
+        var images = updatedCatalog.productImages ?? []
+        guard index >= 0 && index < images.count else { return }
+        
+        images.remove(at: index)
+        updatedCatalog.productImages = images
+        
+        Task {
+            do {
+                try await catalogService.updateCatalog(updatedCatalog)
+                await MainActor.run {
+                    if let idx = self.catalogs.firstIndex(where: { $0.id == updatedCatalog.id }) {
+                        self.catalogs[idx] = updatedCatalog
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    self.errorMessage = "Failed to remove image: \(error.localizedDescription)"
                 }
             }
         }
@@ -269,6 +323,17 @@ final class CatalogsViewModel {
         selectedImagesData = []
     }
     
+    func removeExistingImage(at index: Int) {
+        guard index >= 0 && index < existingImageURLs.count else { return }
+        existingImageURLs.remove(at: index)
+    }
+    
+    func removeSelectedImage(at index: Int) {
+        guard index >= 0 && index < selectedImagesData.count else { return }
+        selectedImagesData.remove(at: index)
+        selectedPhotoItems.remove(at: index)
+    }
+    
     func loadSelectedImages() {
         Task {
             var loadedData: [Data] = []
@@ -280,6 +345,29 @@ final class CatalogsViewModel {
             await MainActor.run {
                 self.selectedImagesData = loadedData
             }
+        }
+    }
+    
+    func hasUnsavedChanges(comparedTo editCatalog: CatalogEntity?) -> Bool {
+        if let catalog = editCatalog {
+            let parsedAmount = Double(newAmount) ?? 0.0
+            return newName != catalog.name ||
+                   newDescription != catalog.description ||
+                   newBrand != catalog.brand ||
+                   newCategory != catalog.category ||
+                   parsedAmount != catalog.amount ||
+                   newBarCode != catalog.barCode ||
+                   newStatus != catalog.status ||
+                   existingImageURLs != (catalog.productImages ?? []) ||
+                   !selectedPhotoItems.isEmpty
+        } else {
+            return !newName.isEmpty ||
+                   !newDescription.isEmpty ||
+                   !newBrand.isEmpty ||
+                   !newAmount.isEmpty ||
+                   !newBarCode.isEmpty ||
+                   !existingImageURLs.isEmpty ||
+                   !selectedPhotoItems.isEmpty
         }
     }
 }

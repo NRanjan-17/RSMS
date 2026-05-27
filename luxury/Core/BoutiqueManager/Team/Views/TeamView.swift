@@ -123,6 +123,8 @@ struct TeamView: View {
                                 .foregroundStyle(AppColors.secondary)
                             
                             SecureField("Enter password", text: $invitePassword)
+                                .autocorrectionDisabled()
+                                .textInputAutocapitalization(.never)
                                 .padding()
                                 .background(AppColors.surface)
                                 .clipShape(RoundedRectangle(cornerRadius: 12))

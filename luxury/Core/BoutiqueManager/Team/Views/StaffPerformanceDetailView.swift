@@ -73,11 +73,11 @@ struct StaffPerformanceDetailView: View {
                                 .kerning(1.5)
                                 .padding(.horizontal, 24)
                             
-                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                            LazyVGrid(columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible())], spacing: 16) {
                                 MetricCard(title: "Revenue", value: member.rev, subtitle: "\(Int(member.pct * 100))% of Target", icon: "chart.line.uptrend.xyaxis")
                                 MetricCard(title: "Conversion", value: "32%", subtitle: "+4% vs Avg", icon: "person.2.fill")
                                 MetricCard(title: "Clients", value: "\(member.clients)", subtitle: "Active Today", icon: "person.text.rectangle")
-                                MetricCard(title: "ATV", value: "₹42,500", subtitle: "Avg Transaction", icon: "cart.fill")
+                                MetricCard(title: "ATV", value: "\(CurrencyManager.shared.symbol)42,500", subtitle: "Avg Transaction", icon: "cart.fill")
                             }
                             .padding(.horizontal, 24)
                         }
@@ -116,9 +116,9 @@ struct StaffPerformanceDetailView: View {
                                 .padding(.horizontal, 24)
                             
                             VStack(spacing: 1) {
-                                SaleRow(item: "Royal Oak 41mm", amount: "₹3,45,000", time: "2h ago")
-                                SaleRow(item: "Serpenti Bracelet", amount: "₹1,20,000", time: "4h ago")
-                                SaleRow(item: "Leather Tote Black", amount: "₹85,000", time: "Yesterday")
+                                SaleRow(item: "Royal Oak 41mm", amount: "\(CurrencyManager.shared.symbol)3,45,000", time: "2h ago")
+                                SaleRow(item: "Serpenti Bracelet", amount: "\(CurrencyManager.shared.symbol)1,20,000", time: "4h ago")
+                                SaleRow(item: "Leather Tote Black", amount: "\(CurrencyManager.shared.symbol)85,000", time: "Yesterday")
                             }
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                             .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))

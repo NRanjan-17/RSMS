@@ -10,7 +10,7 @@ final class ApprovalService {
     }
     
     func fetchApprovedBoutiques() async throws -> [CorporateBoutique] {
-        let boutiques: [CorporateBoutique] = try await client.from("boutiques").select().eq("status", value: "approved").execute().value
+        let boutiques: [CorporateBoutique] = try await client.from("boutiques").select().or("status.eq.approved,status.eq.paused").execute().value
         return boutiques.filter { !$0.isRegistrationIncomplete }
     }
     
@@ -25,6 +25,18 @@ final class ApprovalService {
     
     func rejectBoutique(id: UUID) async throws {
         try await updateBoutiqueStatus(id: id, status: .rejected)
+    }
+    
+    func disableBoutique(id: UUID) async throws {
+        try await updateBoutiqueStatus(id: id, status: .paused)
+    }
+    
+    func enableBoutique(id: UUID) async throws {
+        try await updateBoutiqueStatus(id: id, status: .approved)
+    }
+    
+    func removeBoutique(id: UUID) async throws {
+        try await client.from("boutiques").delete().eq("id", value: id).execute()
     }
     
     func approveStaff(id: UUID) async throws {

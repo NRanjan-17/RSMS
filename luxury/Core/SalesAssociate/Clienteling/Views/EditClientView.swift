@@ -17,17 +17,76 @@ struct EditClientView: View {
     @State private var email: String = ""
     @State private var selectedTier: String = ""
     
+    @State private var dobDate: Date = Date()
+    @State private var hasDobSet: Bool = false
+    @State private var maritalStatus: String = "Single"
+    @State private var anniversaryDate: Date = Date()
+    @State private var hasAnniversarySet: Bool = false
+    
+    @State private var ringSize: String = ""
+    @State private var wristSize: String = ""
+    @State private var apparelSize: String = ""
+    @State private var shoeSize: String = ""
+    
     @State private var marketingConsent: Bool = true
     @State private var dataConsent: Bool = true
     @State private var thirdPartyConsent: Bool = false
     
+    @State private var isLoading = false
+    @State private var errorMessage: String? = nil
+    @State private var showErrorAlert = false
+    @State private var clientEntity: ClientEntity? = nil
+    
+    private let clientService = ClientService()
+    
     init(client: Client) {
         self.client = client
-        _firstName = State(initialValue: client.name.components(separatedBy: " ").first ?? "")
-        _lastName = State(initialValue: client.name.components(separatedBy: " ").last ?? "")
+        let nameParts = client.name.components(separatedBy: " ")
+        _firstName = State(initialValue: nameParts.first ?? "")
+        _lastName = State(initialValue: nameParts.count > 1 ? nameParts.dropFirst().joined(separator: " ") : "")
         _selectedTier = State(initialValue: client.tier.rawValue)
-        _mobile = State(initialValue: "+91 98210 54321")
-        _email = State(initialValue: "rahul.b@example.com")
+        
+        let initialSizes = SizePreferenceService.shared.fetchSizePreference(clientId: client.id)
+        _ringSize = State(initialValue: initialSizes.ringSize)
+        _wristSize = State(initialValue: initialSizes.wristSize)
+        _apparelSize = State(initialValue: initialSizes.apparelSize)
+        _shoeSize = State(initialValue: initialSizes.shoeSize)
+        
+        if let clientEmail = client.email, !clientEmail.isEmpty {
+            _email = State(initialValue: clientEmail)
+        } else {
+            let emailPrefix = nameParts.first?.lowercased() ?? "client"
+            _email = State(initialValue: "\(emailPrefix)@example.com")
+        }
+        
+        if let clientPhone = client.phone, !clientPhone.isEmpty {
+            _mobile = State(initialValue: clientPhone)
+        } else {
+            _mobile = State(initialValue: "+91 98210 54321")
+        }
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+        
+        if let dobStr = client.dob, let date = dateFormatter.date(from: dobStr) {
+            _dobDate = State(initialValue: date)
+            _hasDobSet = State(initialValue: true)
+        } else {
+            _dobDate = State(initialValue: Date())
+            _hasDobSet = State(initialValue: false)
+        }
+        
+        _maritalStatus = State(initialValue: client.maritalStatus ?? "Single")
+        
+        if let annivStr = client.dateOfAnniversary, let date = dateFormatter.date(from: annivStr) {
+            _anniversaryDate = State(initialValue: date)
+            _hasAnniversarySet = State(initialValue: true)
+        } else {
+            _anniversaryDate = State(initialValue: Date())
+            _hasAnniversarySet = State(initialValue: false)
+        }
     }
     
     var body: some View {
@@ -48,10 +107,11 @@ struct EditClientView: View {
                     Spacer()
                     
                     Button("Save") {
-                        dismiss()
+                        updateClient()
                     }
                     .font(AppFonts.sansSerif(size: 13))
                     .foregroundStyle(AppColors.gold)
+                    .disabled(isLoading)
                 }
                 .padding(.horizontal, 24)
                 .padding(.vertical, 16)
@@ -82,6 +142,46 @@ struct EditClientView: View {
                         .padding(.bottom, 16)
                         
                         VStack(alignment: .leading, spacing: 12) {
+                            Text("ADDITIONAL PROFILE INFO")
+                                .font(AppFonts.sansSerif(size: 10))
+                                .foregroundStyle(AppColors.gold)
+                                .kerning(2)
+                                .padding(.top, 4)
+                            
+                            RSMSDatePicker(label: "Date of Birth", date: $dobDate, isSet: $hasDobSet)
+                            
+                            Text("MARITAL STATUS")
+                                .font(AppFonts.sansSerif(size: 10))
+                                .foregroundStyle(AppColors.gold)
+                                .kerning(2)
+                                .padding(.top, 4)
+                            
+                            HStack(spacing: 8) {
+                                let statuses = ["Single", "Married", "Other"]
+                                ForEach(statuses, id: \.self) { s in
+                                    let isSelected = maritalStatus == s
+                                    Text(s)
+                                        .font(AppFonts.sansSerif(size: 13, weight: isSelected ? .medium : .light))
+                                        .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 40)
+                                        .background(isSelected ? AppColors.gold : Color.clear)
+                                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(isSelected ? Color.clear : AppColors.gold15, lineWidth: 0.5))
+                                        .onTapGesture {
+                                            withAnimation { maritalStatus = s }
+                                        }
+                                }
+                            }
+                            
+                            if maritalStatus == "Married" {
+                                RSMSDatePicker(label: "Anniversary Date", date: $anniversaryDate, isSet: $hasAnniversarySet)
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 16)
+                        
+                        VStack(alignment: .leading, spacing: 12) {
                             Text("TIER")
                                 .font(AppFonts.sansSerif(size: 10))
                                 .foregroundStyle(AppColors.gold)
@@ -104,6 +204,26 @@ struct EditClientView: View {
                                             withAnimation { selectedTier = t }
                                         }
                                 }
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 16)
+                        
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("SIZE PREFERENCES")
+                                .font(AppFonts.sansSerif(size: 10))
+                                .foregroundStyle(AppColors.gold)
+                                .kerning(2)
+                                .padding(.top, 4)
+                            
+                            HStack(spacing: 10) {
+                                RSMSField(label: "Ring Size", placeholder: "e.g. 9", text: $ringSize)
+                                RSMSField(label: "Wrist Size", placeholder: "e.g. 18.5 cm", text: $wristSize)
+                            }
+                            
+                            HStack(spacing: 10) {
+                                RSMSField(label: "Apparel Size", placeholder: "e.g. L", text: $apparelSize)
+                                RSMSField(label: "Shoe Size", placeholder: "e.g. 43", text: $shoeSize)
                             }
                         }
                         .padding(.horizontal, 24)
@@ -160,7 +280,7 @@ struct EditClientView: View {
                 }
                 
                 VStack(spacing: 0) {
-                    CustomButton(title: "Save Changes", action: { dismiss() })
+                    CustomButton(title: "Save Changes", isLoading: isLoading, action: { updateClient() })
                         .padding(.horizontal, 24)
                         .padding(.vertical, 14)
                         .padding(.bottom, 38)
@@ -171,6 +291,135 @@ struct EditClientView: View {
         .toolbar(.hidden, for: .navigationBar)
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .tabBar)
+        .task {
+            await loadClientData()
+        }
+        .alert("Error Saving Client", isPresented: $showErrorAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            if let errorMessage = errorMessage {
+                Text(errorMessage)
+            }
+        }
+    }
+    
+    private func loadClientData() async {
+        isLoading = true
+        do {
+            let entity = try await clientService.fetchClient(id: client.id)
+            await MainActor.run {
+                self.clientEntity = entity
+                self.firstName = entity.name.components(separatedBy: " ").first ?? ""
+                self.lastName = entity.name.components(separatedBy: " ").dropFirst().joined(separator: " ")
+                self.email = entity.email
+                self.mobile = entity.phone ?? ""
+                self.selectedTier = entity.tier ?? "Standard"
+                
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd"
+                dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+                dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+                
+                if let dobStr = entity.dob, let date = dateFormatter.date(from: dobStr) {
+                    self.dobDate = date
+                    self.hasDobSet = true
+                } else {
+                    self.hasDobSet = false
+                }
+                
+                self.maritalStatus = entity.maritalStatus ?? "Single"
+                
+                if let annivStr = entity.dateOfAnniversary, let date = dateFormatter.date(from: annivStr) {
+                    self.anniversaryDate = date
+                    self.hasAnniversarySet = true
+                } else {
+                    self.hasAnniversarySet = false
+                }
+                
+                let localSizes = SizePreferenceService.shared.fetchSizePreference(clientId: client.id)
+                self.ringSize = localSizes.ringSize
+                self.wristSize = localSizes.wristSize
+                self.apparelSize = localSizes.apparelSize
+                self.shoeSize = localSizes.shoeSize
+                self.isLoading = false
+            }
+        } catch {
+            await MainActor.run {
+                self.isLoading = false
+                print("Error loading client from database: \(error)")
+            }
+        }
+    }
+    
+    private func updateClient() {
+        let trimmedFirst = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedLast = lastName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedMobile = mobile.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard !trimmedFirst.isEmpty else {
+            errorMessage = "First name is required."
+            showErrorAlert = true
+            return
+        }
+        
+        guard !trimmedEmail.isEmpty else {
+            errorMessage = "Email is required."
+            showErrorAlert = true
+            return
+        }
+        
+        let fullName = trimmedLast.isEmpty ? trimmedFirst : "\(trimmedFirst) \(trimmedLast)"
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+        
+        let dobStr = hasDobSet ? dateFormatter.string(from: dobDate) : nil
+        let anniversaryStr = (maritalStatus == "Married" && hasAnniversarySet) ? dateFormatter.string(from: anniversaryDate) : nil
+        
+        let updatedEntity = ClientEntity(
+            id: client.id,
+            name: fullName,
+            email: trimmedEmail,
+            phone: trimmedMobile.isEmpty ? nil : trimmedMobile,
+            dob: dobStr,
+            tier: selectedTier,
+            productsPurchased: clientEntity?.productsPurchased ?? [],
+            createdAt: clientEntity?.createdAt ?? Date(),
+            updatedAt: Date(),
+            maritalStatus: maritalStatus,
+            dateOfAnniversary: anniversaryStr
+        )
+        
+        // Save size preferences locally
+        let newSizes = ClientSizePreference(
+            id: client.id,
+            ringSize: ringSize,
+            wristSize: wristSize,
+            apparelSize: apparelSize,
+            shoeSize: shoeSize
+        )
+        SizePreferenceService.shared.saveSizePreference(newSizes, for: client.id)
+        
+        isLoading = true
+        Task {
+            do {
+                try await clientService.updateClient(updatedEntity)
+                await MainActor.run {
+                    isLoading = false
+                    NotificationCenter.default.post(name: NSNotification.Name("RefreshClients"), object: nil)
+                    dismiss()
+                }
+            } catch {
+                await MainActor.run {
+                    isLoading = false
+                    errorMessage = error.localizedDescription
+                    showErrorAlert = true
+                }
+            }
+        }
     }
 }
 

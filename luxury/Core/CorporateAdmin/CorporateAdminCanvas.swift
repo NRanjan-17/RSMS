@@ -16,6 +16,8 @@ struct CorporateAdminCanvas: View {
     @State private var logsRouter = Router()
     @State private var userManagementViewModel = UserManagementViewModel()
     @State private var catalogsViewModel = CatalogsViewModel()
+    @State private var inventoryRouter = Router()
+    @State private var inventoryViewModel = GlobalInventoryViewModel()
     
     var body: some View {
         TabView(selection: Binding(
@@ -65,6 +67,17 @@ struct CorporateAdminCanvas: View {
             .environment(logsRouter)
             .tabItem { Label("Logs", systemImage: "list.bullet.rectangle.portrait.fill") }
             .tag(CATab.systemLogs)
+            
+            NavigationStack(path: $inventoryRouter.path) {
+                GlobalInventoryView()
+                    .navigationDestination(for: CARoute.self) { route in
+                        destination(for: route, router: inventoryRouter)
+                    }
+            }
+            .environment(inventoryRouter)
+            .environment(inventoryViewModel)
+            .tabItem { Label("Inventory", systemImage: "shippingbox.fill") }
+            .tag(CATab.inventory)
         }
         .tint(AppColors.gold)
     }
@@ -106,6 +119,12 @@ struct CorporateAdminCanvas: View {
             PendingBoutiquesView(viewModel: userManagementViewModel)
         case .boutiqueDetail(let boutique):
             BoutiqueDetailView(boutique: boutique, viewModel: userManagementViewModel)
+        case .inventoryDetail(let summary):
+            ProductStockDetailView(summary: summary)
+        case .staffList:
+            CAStaffListView()
+        case .staffDetail(let staff):
+            EmployeeDetailView(employee: staff)
         }
     }
 }
