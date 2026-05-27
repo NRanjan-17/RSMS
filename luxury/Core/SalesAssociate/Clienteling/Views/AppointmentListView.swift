@@ -101,7 +101,6 @@ struct AppointmentListView: View {
                             }
                         }
                         .padding(.horizontal, 24)
-<<<<<<< HEAD
                         
                         VStack(alignment: .leading, spacing: 10) {
                             Text("UPCOMING")
@@ -148,8 +147,6 @@ struct AppointmentListView: View {
                             .buttonStyle(.plain)
                             .padding(.horizontal, 24)
                         }
-=======
->>>>>>> f2d7d3e05f75b165bd8ad89cbf740acaecfd36f0
                     }
                     .padding(.top, 20)
                     .padding(.bottom, 120)
