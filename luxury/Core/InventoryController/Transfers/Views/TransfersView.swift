@@ -89,5 +89,8 @@ struct TransfersView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .onAppear {
+            viewModel.fetchTransfers()
+        }
     }
 }

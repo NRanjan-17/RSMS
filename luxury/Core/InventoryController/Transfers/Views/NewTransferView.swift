@@ -10,7 +10,6 @@ import SwiftUI
 struct NewTransferView: View {
     @Environment(Router.self) private var router
     @State private var viewModel = NewTransferViewModel()
-    @State private var showSearchSheet = false
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -36,9 +35,7 @@ struct NewTransferView: View {
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 32) {
-                        // Source & Destination
                         VStack(spacing: 8) {
-                            // Source
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("SOURCE")
@@ -46,20 +43,11 @@ struct NewTransferView: View {
                                         .foregroundStyle(AppColors.secondary)
                                         .kerning(1.5)
                                     
-                                    Menu {
-                                        ForEach(viewModel.availableBoutiques) { boutique in
-                                            Button(boutique.name) { viewModel.sourceStore = boutique }
-                                        }
-                                    } label: {
-                                        HStack {
-                                            Text(viewModel.sourceStore?.name ?? "Select Source")
-                                                .font(AppFonts.serif(size: 18, weight: .medium))
-                                                .foregroundStyle(viewModel.sourceStore == nil ? AppColors.tertiary : .white)
-                                                .lineLimit(1)
-                                            Image(systemName: "chevron.up.chevron.down")
-                                                .font(.system(size: 10))
-                                                .foregroundStyle(AppColors.secondary)
-                                        }
+                                    HStack {
+                                        Text(viewModel.sourceStore?.name ?? "Resolving Source...")
+                                            .font(AppFonts.serif(size: 18, weight: .medium))
+                                            .foregroundStyle(.white)
+                                            .lineLimit(1)
                                     }
                                 }
                                 Spacer()
@@ -74,7 +62,6 @@ struct NewTransferView: View {
                                 .foregroundStyle(AppColors.tertiary)
                                 .padding(.vertical, 4)
                             
-                            // Destination
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("DESTINATION")
@@ -110,17 +97,72 @@ struct NewTransferView: View {
                         .padding(.horizontal, 24)
                         
                         VStack(alignment: .leading, spacing: 16) {
+                            Text("BARCODE SCAN SIMULATOR")
+                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                .foregroundStyle(AppColors.secondary)
+                                .kerning(1.5)
+                                .padding(.horizontal, 24)
+                            
+                            if viewModel.destinationStore == nil {
+                                HStack {
+                                    Image(systemName: "lock.fill")
+                                        .foregroundStyle(AppColors.gold)
+                                    Text("Please select a destination boutique to unlock scanner.")
+                                        .font(AppFonts.sansSerif(size: 13))
+                                        .foregroundStyle(AppColors.secondary)
+                                }
+                                .padding()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(AppColors.surface)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                .padding(.horizontal, 24)
+                            } else {
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 12) {
+                                        ForEach(viewModel.availableProducts) { product in
+                                            Button(action: {
+                                                Task {
+                                                    let result = await viewModel.scanItem(barcode: product.barCode)
+                                                    switch result {
+                                                    case .success:
+                                                        break
+                                                    case .failure(let error):
+                                                        await MainActor.run {
+                                                            viewModel.alertTitle = "Scan Warning"
+                                                            viewModel.alertMessage = error.localizedDescription
+                                                            viewModel.showAlert = true
+                                                        }
+                                                    }
+                                                }
+                                            }) {
+                                                HStack {
+                                                    Image(systemName: "barcode.viewfinder")
+                                                        .font(.system(size: 14))
+                                                    Text("Scan \(product.name)")
+                                                        .font(AppFonts.sansSerif(size: 13, weight: .semibold))
+                                                }
+                                                .padding(.horizontal, 16)
+                                                .padding(.vertical, 10)
+                                                .background(AppColors.surface2)
+                                                .foregroundStyle(AppColors.gold)
+                                                .clipShape(Capsule())
+                                                .overlay(Capsule().stroke(AppColors.gold50, lineWidth: 0.5))
+                                            }
+                                        }
+                                    }
+                                    .padding(.horizontal, 24)
+                                }
+                            }
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 16) {
                             HStack {
                                 Text("ITEMS TO TRANSFER")
                                     .font(AppFonts.sansSerif(size: 11, weight: .bold))
                                     .foregroundStyle(AppColors.secondary)
                                     .kerning(1.5)
                                 Spacer()
-                                Button("+ Add Item") {
-                                    showSearchSheet = true
-                                }
-                                .font(AppFonts.sansSerif(size: 12, weight: .semibold))
-                                .foregroundStyle(AppColors.gold)
                             }
                             .padding(.horizontal, 24)
                             
@@ -173,25 +215,30 @@ struct NewTransferView: View {
                                 }
                             }
                         }
-                        
-                        HStack(spacing: 10) {
-                            StatusBadge(text: viewModel.approvalState.rawValue, status: viewModel.approvalState == .approved ? .success : .pending)
-                            StatusBadge(text: viewModel.packingSlipGenerated ? "Packing Slip Ready" : "ASN Match Pending", status: viewModel.packingSlipGenerated ? .success : .neutral)
-                        }
-                        .padding(.horizontal, 24)
                     }
                     .padding(.top, 8)
                 }
                 
                 VStack {
                     HStack(spacing: 10) {
-                        CustomOutlineButton(title: "Approve Mock", action: { viewModel.approve() })
                         CustomButton(title: "Submit Request", action: {
-                            viewModel.submit()
-                            viewModel.completeSession()
-                            dismiss()
+                            Task {
+                                let result = await viewModel.confirmTransfer()
+                                switch result {
+                                case .success:
+                                    await MainActor.run {
+                                        dismiss()
+                                    }
+                                case .failure(let error):
+                                    await MainActor.run {
+                                        viewModel.alertTitle = "Transfer Blocked"
+                                        viewModel.alertMessage = error.localizedDescription
+                                        viewModel.showAlert = true
+                                    }
+                                }
+                            }
                         })
-                        .disabled(viewModel.hasStockError || viewModel.destinationStore == nil)
+                        .disabled(viewModel.items.isEmpty || viewModel.hasStockError || viewModel.destinationStore == nil)
                     }
                     .padding(.horizontal, 24)
                 }
@@ -203,14 +250,10 @@ struct NewTransferView: View {
         .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             viewModel.fetchBoutiques()
-        }
-        .sheet(isPresented: $showSearchSheet) {
-            TransferItemSearchSheet { selectedItem in
-                viewModel.addItem(selectedItem)
-            }
+            viewModel.fetchAvailableProducts()
         }
         .alert(
-            "Stock Limit Reached",
+            viewModel.alertTitle,
             isPresented: Binding(
                 get: { viewModel.showAlert },
                 set: { viewModel.showAlert = $0 }

@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-enum BadgeStatus: Hashable {
+enum BadgeStatus: String, Codable, Hashable {
     case success
     case warning
     case error
@@ -398,7 +398,7 @@ struct RFIDTag: Identifiable, Hashable, Codable {
     }
 }
 
-struct TransferItem: Identifiable, Hashable {
+struct TransferItem: Identifiable, Hashable, Codable {
     let id: UUID
     let sku: String
     let name: String
@@ -414,7 +414,7 @@ struct TransferItem: Identifiable, Hashable {
     }
 }
 
-struct TransferRequest: Identifiable, Hashable {
+struct TransferRequest: Identifiable, Hashable, Codable {
     let id: UUID
     let reference: String
     let source: String

@@ -23,6 +23,9 @@ struct SFSVerificationView: View {
     @State private var isUpdating: Bool = false
     @State private var laserOffset: CGFloat = -110
     
+    @State private var showAlert = false
+    @State private var alertMessage = ""
+    
     private var allChecked: Bool {
         check1 && check2 && check3
     }
@@ -89,12 +92,52 @@ struct SFSVerificationView: View {
                                         .font(AppFonts.sansSerif(size: 14, weight: .semibold))
                                         .foregroundStyle(AppColors.gold)
                                 }
+                                
+                                Divider().background(AppColors.border)
+                                
+                                HStack {
+                                    Text("Store Location")
+                                        .font(AppFonts.sansSerif(size: 13))
+                                        .foregroundStyle(AppColors.secondary)
+                                    Spacer()
+                                    Text(order.storeLocation ?? "Vault - Aisle A, Shelf 1")
+                                        .font(AppFonts.sansSerif(size: 14, weight: .semibold))
+                                        .foregroundStyle(.white)
+                                }
                             }
                             .padding(20)
                             .background(AppColors.surface)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                             .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
                         }
+                        .padding(.horizontal, 24)
+                        
+                        Button(action: {
+                            isUpdating = true
+                            Task {
+                                let success = await viewModel.flagItemAsMissing(orderId: order.id)
+                                if success {
+                                    router.pop()
+                                } else {
+                                    await MainActor.run {
+                                        alertMessage = viewModel.errorMessage ?? "Failed to flag item as missing."
+                                        showAlert = true
+                                    }
+                                }
+                                isUpdating = false
+                            }
+                        }) {
+                            Text("Flag Item as Missing")
+                                .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(AppColors.error.opacity(0.8))
+                                )
+                        }
+                        .disabled(isUpdating)
                         .padding(.horizontal, 24)
                         
                         VStack(alignment: .leading, spacing: 12) {
@@ -162,9 +205,17 @@ struct SFSVerificationView: View {
                                         }
                                         
                                         Button(action: {
-                                            withAnimation {
-                                                isVerified = true
-                                                scanError = nil
+                                            let result = viewModel.verifyScannedSku(orderSku: order.productSku, scannedCode: order.productSku ?? "")
+                                            switch result {
+                                            case .success:
+                                                withAnimation {
+                                                    isVerified = true
+                                                    scanError = nil
+                                                }
+                                            case .failure(let error):
+                                                withAnimation {
+                                                    scanError = error.localizedDescription
+                                                }
                                             }
                                         }) {
                                             Text("Simulate Barcode Scan")
@@ -204,13 +255,17 @@ struct SFSVerificationView: View {
                                         .textInputAutocapitalization(.characters)
                                     
                                     Button(action: {
-                                        if inputSku.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == (order.productSku ?? "").lowercased() {
+                                        let result = viewModel.verifyScannedSku(orderSku: order.productSku, scannedCode: inputSku)
+                                        switch result {
+                                        case .success:
                                             withAnimation {
                                                 isVerified = true
                                                 scanError = nil
                                             }
-                                        } else {
-                                            scanError = "SKU mismatch. Please try again."
+                                        case .failure(let error):
+                                            withAnimation {
+                                                scanError = error.localizedDescription
+                                            }
                                         }
                                     }) {
                                         Text("Verify")
@@ -268,6 +323,11 @@ struct SFSVerificationView: View {
                                         let success = await viewModel.updateStatusToSecured(orderId: order.id)
                                         if success {
                                             router.pop()
+                                        } else {
+                                            await MainActor.run {
+                                                alertMessage = viewModel.errorMessage ?? "An unknown conflict occurred."
+                                                showAlert = true
+                                            }
                                         }
                                         isUpdating = false
                                     }
@@ -302,5 +362,12 @@ struct SFSVerificationView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .alert(isPresented: $showAlert) {
+            Alert(
+                title: Text("Fulfillment Alert"),
+                message: Text(alertMessage),
+                dismissButton: .default(Text("OK"))
+            )
+        }
     }
 }
