@@ -95,7 +95,7 @@ private struct TransactionCard: View {
                     .font(AppFonts.sansSerif(size: 14, weight: .medium))
                     .foregroundStyle(AppColors.text)
                 
-                if let date = transaction.createdAt {
+                if let date = transaction.dateOfTransaction {
                     Text(formatDate(date))
                         .font(AppFonts.sansSerif(size: 11))
                         .foregroundStyle(AppColors.secondary)

@@ -90,7 +90,7 @@ final class SAProfileViewModel {
                 .from("transaction")
                 .select("*, client:client_id(*)")
                 .eq("staff_id", value: staffId)
-                .order("created_at", ascending: false)
+                .order("date_of_transaction", ascending: false)
                 .execute()
                 .value
             
@@ -106,7 +106,7 @@ final class SAProfileViewModel {
                 guard let client = tx.client else { continue }
                 if !seenClients.contains(client.id) {
                     seenClients.insert(client.id)
-                    let visitStr = tx.createdAt.map { formatter.string(from: $0) } ?? "Unknown"
+                    let visitStr = tx.dateOfTransaction.map { formatter.string(from: $0) } ?? "Unknown"
                     let initial = String(client.name.prefix(1)).uppercased()
                     let dashClient = SADashClient(
                         name: client.name,

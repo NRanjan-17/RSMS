@@ -42,6 +42,7 @@ final class POSDataService {
         let payload: [String: AnyJSON] = [
             "transaction_amount": .double(amount),
             "purpose": .string(purpose),
+            "date_of_transaction": .string(ISO8601DateFormatter().string(from: Date())),
             "client_id": clientId.map { .string($0.uuidString) } ?? .null,
             "boutique_id": .string(boutiqueId.uuidString),
             "staff_id": .string(staffId.uuidString)

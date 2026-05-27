@@ -21,7 +21,7 @@ struct OrderEntity: Identifiable, Codable, Hashable {
 struct SATransactionEntity: Identifiable, Codable, Hashable {
     let id: UUID
     let transactionAmount: Double
-    let createdAt: Date?
+    let dateOfTransaction: Date?
     let purpose: String
     let clientId: UUID?
     let boutiqueId: UUID?
@@ -31,7 +31,7 @@ struct SATransactionEntity: Identifiable, Codable, Hashable {
     enum CodingKeys: String, CodingKey {
         case id
         case transactionAmount = "transaction_amount"
-        case createdAt = "created_at"
+        case dateOfTransaction = "date_of_transaction"
         case purpose
         case clientId = "client_id"
         case boutiqueId = "boutique_id"
