@@ -9,6 +9,7 @@ import SwiftUI
 
 struct AuditDetailView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(Router.self) private var router
     let audit: RSMSCycleCount
     
     var body: some View {
@@ -93,6 +94,9 @@ struct AuditDetailView: View {
                 VStack {
                     CustomButton(title: "Begin Audit Scan", icon: AnyView(Image(systemName: "barcode.viewfinder")), action: {
                         dismiss()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            router.presentFullScreen(ICRoute.activeAudit(audit))
+                        }
                     })
                     .padding(.horizontal, 24)
                 }
@@ -134,4 +138,15 @@ private struct ChecklistRow: View {
         .padding(.vertical, 16)
         .background(AppColors.surface)
     }
+}
+
+#Preview {
+    AuditDetailView(audit: RSMSCycleCount(
+        title: "High Value Zone",
+        date: "Today",
+        scope: "Watches",
+        status: "Due",
+        badgeStatus: .warning
+    ))
+    .environment(Router())
 }

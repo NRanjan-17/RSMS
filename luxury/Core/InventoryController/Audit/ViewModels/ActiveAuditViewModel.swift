@@ -219,4 +219,14 @@ final class ActiveAuditViewModel {
             return .failure(error)
         }
     }
-}
+
+    var missingItems: [String] {
+        return expectedItems.filter { $0.countedQty == 0 }.map { $0.name }
+    }
+    
+    func addScannedItems(barcodes: [String]) {
+        for barcode in barcodes {
+            let _ = scanItem(barcode: barcode)
+        }
+    }
+    }

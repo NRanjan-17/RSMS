@@ -2,6 +2,8 @@
 //  BatchScannerSheet.swift
 //  luxury
 //
+//  Created by Kaushiki Rai on 27/05/26.
+//
 
 import SwiftUI
 
@@ -12,11 +14,18 @@ struct BatchScannerSheet: View {
     let existingSerials: [String]
     let allowsDamageReporting: Bool
     let productName: String
+    let expectedSerials: [String]?
     let onDone: () -> Void
 
     @State private var scannerService = ScannerService()
-    @State private var duplicateToast: String?
     @State private var showingList = true
+    @State private var showingDuplicateAlert = false
+    @State private var duplicateAlertItem = ""
+    @State private var showingUnexpectedAlert = false
+    @State private var unexpectedAlertItem = ""
+    @State private var scanLineOffset: CGFloat = -120
+    @State private var hudMessage: String? = nil
+    @State private var hudStatus: ScanHUDStatus = .success
 
     init(
         scannedSerials: Binding<[String]>,
@@ -24,6 +33,7 @@ struct BatchScannerSheet: View {
         allowsDamageReporting: Bool = false,
         damagedItems: Binding<[DamagedDeliveryItemDraft]> = .constant([]),
         productName: String = "",
+        expectedSerials: [String]? = nil,
         onDone: @escaping () -> Void
     ) {
         _scannedSerials = scannedSerials
@@ -31,6 +41,7 @@ struct BatchScannerSheet: View {
         self.existingSerials = existingSerials
         self.allowsDamageReporting = allowsDamageReporting
         self.productName = productName
+        self.expectedSerials = expectedSerials
         self.onDone = onDone
     }
 
@@ -38,6 +49,31 @@ struct BatchScannerSheet: View {
         ZStack(alignment: .top) {
             QRScannerView(scannerService: scannerService)
                 .ignoresSafeArea()
+
+            VStack {
+                Spacer()
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(AppColors.gold, lineWidth: 2)
+                    .frame(width: 250, height: 250)
+                    .overlay(
+                        Rectangle()
+                            .fill(Color.red)
+                            .frame(height: 2)
+                            .offset(y: scanLineOffset)
+                            .onAppear {
+                                withAnimation(Animation.linear(duration: 2.0).repeatForever(autoreverses: true)) {
+                                    scanLineOffset = 120
+                                }
+                            }
+                    )
+                
+                Text("Align barcode / QR code within the frame")
+                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                    .foregroundStyle(AppColors.gold)
+                    .padding(.top, 16)
+                
+                Spacer()
+            }
 
             HStack {
                 Button("Cancel") { onDone() }
@@ -60,16 +96,21 @@ struct BatchScannerSheet: View {
             .background(Color.black.opacity(0.6))
 
             VStack {
-                Spacer()
-                if let toast = duplicateToast {
-                    Text(toast)
-                        .font(AppFonts.sansSerif(size: 14, weight: .bold))
-                        .foregroundStyle(.white)
-                        .padding()
-                        .background(AppColors.error)
-                        .clipShape(Capsule())
-                        .padding(.bottom, 120)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                Spacer().frame(height: 80)
+                if let message = hudMessage {
+                    HStack(spacing: 8) {
+                        Image(systemName: hudStatus == .success ? "checkmark.circle.fill" : (hudStatus == .duplicate ? "exclamationmark.triangle.fill" : "questionmark.circle.fill"))
+                            .foregroundColor(.white)
+                        Text(message)
+                            .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 24)
+                    .background(hudStatus == .success ? AppColors.success : (hudStatus == .duplicate ? AppColors.error : Color.orange))
+                    .clipShape(Capsule())
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .shadow(radius: 5)
                 }
             }
         }
@@ -81,7 +122,7 @@ struct BatchScannerSheet: View {
                 productName: productName,
                 onManualEntry: handleScannedCode
             )
-            .presentationDetents([.fraction(0.2), .medium, .large])
+            .presentationDetents([.fraction(0.25), .medium, .large])
             .presentationBackgroundInteraction(.enabled(upThrough: .large))
             .presentationBackground(.ultraThinMaterial)
             .interactiveDismissDisabled()
@@ -89,39 +130,69 @@ struct BatchScannerSheet: View {
         .onAppear {
             scannerService.onScannedCode = handleScannedCode
         }
+        .alert("Duplicate Item", isPresented: $showingDuplicateAlert) {
+            Button("Dismiss", role: .cancel) {}
+        } message: {
+            Text("The item '\(duplicateAlertItem)' has already been scanned in this session.")
+        }
+        .alert("Unexpected Item", isPresented: $showingUnexpectedAlert) {
+            Button("Cancel", role: .cancel) {}
+            Button("Verify & Include") {
+                withAnimation {
+                    scannedSerials.append(unexpectedAlertItem)
+                }
+                showHUD(message: "Scanned: \(unexpectedAlertItem)", status: .success)
+                scannerService.playSuccessFeedback()
+            }
+        } message: {
+            Text("The item '\(unexpectedAlertItem)' does not match the expected count list. Verify before including.")
+        }
     }
 
     private func handleScannedCode(_ code: String) {
         let trimmed = code.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
 
-        if !scannedSerials.contains(trimmed) && !existingSerials.contains(trimmed) {
-            withAnimation {
-                scannedSerials.append(trimmed)
-            }
-            scannerService.playSuccessFeedback()
-        } else {
+        if scannedSerials.contains(trimmed) || existingSerials.contains(trimmed) {
             scannerService.playErrorFeedback()
-            if existingSerials.contains(trimmed) {
-                showToast("Already in System: \(trimmed)")
-            } else {
-                showToast("Duplicate: \(trimmed)")
-            }
+            showHUD(message: "Duplicate: \(trimmed)", status: .duplicate)
+            duplicateAlertItem = trimmed
+            showingDuplicateAlert = true
+            return
         }
+
+        if let expected = expectedSerials, !expected.contains(trimmed) {
+            scannerService.playErrorFeedback()
+            showHUD(message: "Unexpected: \(trimmed)", status: .unexpected)
+            unexpectedAlertItem = trimmed
+            showingUnexpectedAlert = true
+            return
+        }
+
+        withAnimation {
+            scannedSerials.append(trimmed)
+        }
+        showHUD(message: "Scanned: \(trimmed)", status: .success)
+        scannerService.playSuccessFeedback()
     }
 
-    private func showToast(_ message: String) {
+    private func showHUD(message: String, status: ScanHUDStatus) {
         withAnimation {
-            duplicateToast = message
+            hudMessage = message
+            hudStatus = status
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
             withAnimation {
-                if duplicateToast == message {
-                    duplicateToast = nil
+                if hudMessage == message {
+                    hudMessage = nil
                 }
             }
         }
     }
+}
+
+private enum ScanHUDStatus {
+    case success, duplicate, unexpected
 }
 
 struct ScannedSerialsListView: View {
@@ -264,4 +335,12 @@ private struct ReportedSerial: Identifiable {
     var id: String {
         value
     }
+}
+
+#Preview {
+    BatchScannerSheet(
+        scannedSerials: .constant([]),
+        existingSerials: [],
+        onDone: {}
+    )
 }

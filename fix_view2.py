@@ -1,4 +1,10 @@
-//
+import re
+
+with open("luxury/Core/InventoryController/Audit/Views/ActiveAuditView.swift", "r") as f:
+    content = f.read()
+
+# I will just write a python script to replace the whole view correctly.
+fixed_code = """//
 //  ActiveAuditView.swift
 //  luxury
 //
@@ -11,7 +17,7 @@ struct ActiveAuditView: View {
     let audit: RSMSCycleCount
     @Environment(Router.self) private var router
     @State private var viewModel: ActiveAuditViewModel
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\\.dismiss) private var dismiss
     
     @State private var showingBatchScanner = false
     @State private var tempScannedSerials: [String] = []
@@ -50,7 +56,7 @@ struct ActiveAuditView: View {
                             .font(AppFonts.sansSerif(size: 11, weight: .bold))
                             .foregroundStyle(AppColors.secondary)
                         Spacer()
-                        Text("\(viewModel.totalScanned)/\(viewModel.totalExpected) items")
+                        Text("\\(viewModel.totalScanned)/\\(viewModel.totalExpected) items")
                             .font(AppFonts.sansSerif(size: 11, weight: .bold))
                             .foregroundStyle(AppColors.gold)
                     }
@@ -85,7 +91,7 @@ struct ActiveAuditView: View {
                                             HStack {
                                                 Image(systemName: "barcode.viewfinder")
                                                     .font(.system(size: 14))
-                                                Text("Scan \(item.name)")
+                                                Text("Scan \\(item.name)")
                                                     .font(AppFonts.sansSerif(size: 13, weight: .semibold))
                                             }
                                             .padding(.horizontal, 16)
@@ -147,7 +153,7 @@ struct ActiveAuditView: View {
                                 .padding(.horizontal, 24)
 
                             VStack(spacing: 1) {
-                                ForEach(viewModel.missingItems, id: \.self) { item in
+                                ForEach(viewModel.missingItems, id: \\.self) { item in
                                     HStack {
                                         VStack(alignment: .leading, spacing: 4) {
                                             Text(item)
@@ -222,6 +228,10 @@ struct ActiveAuditView: View {
 }
 
 #Preview {
-    ActiveAuditView(audit: RSMSCycleCount(id: UUID(), title: "Test", date: "May 2026", scope: "Test", status: "In Progress", badgeStatus: .warning))
+    ActiveAuditView(audit: RSMSCycleCount(id: UUID(), title: "Test", date: Date(), scope: "Test", createdBy: UUID(), storeId: UUID()))
         .environment(InventoryControllerAppState())
 }
+"""
+
+with open("luxury/Core/InventoryController/Audit/Views/ActiveAuditView.swift", "w") as f:
+    f.write(fixed_code)
