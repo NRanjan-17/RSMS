@@ -26,10 +26,13 @@ struct ProductImageGalleryView: View {
                         ZoomableImageView(url: url).tag(index)
                     }
                 }
-                .tabViewStyle(.page(indexDisplayMode: .never))
+                .tabViewStyle(.page(indexDisplayMode: .automatic))
                 .frame(height: 300)
                 .background(AppColors.surface)
-
+                .onAppear {
+                    UIPageControl.appearance().currentPageIndicatorTintColor = UIColor(AppColors.gold)
+                    UIPageControl.appearance().pageIndicatorTintColor = UIColor(AppColors.gold).withAlphaComponent(0.3)
+                }
             }
         }
     }
@@ -77,14 +80,17 @@ struct ZoomableImageView: View {
                     .offset(offset)
                     .gesture(
                         MagnificationGesture()
-                            .onChanged { scale = min(max(lastScale * $0, minScale), maxScale) }
+                            .onChanged { newScale in 
+                                let proposedScale = lastScale * newScale
+                                scale = min(max(proposedScale, minScale), maxScale) 
+                            }
                             .onEnded { _ in
                                 lastScale = scale
                                 if scale <= minScale { resetZoom() }
                             }
                     )
                     .simultaneousGesture(
-                        DragGesture()
+                        DragGesture(minimumDistance: scale > 1.0 ? 0 : 10000)
                             .onChanged { value in
                                 guard scale > 1.0 else { return }
                                 offset = CGSize(
@@ -120,22 +126,4 @@ struct ZoomableImageView: View {
     private func resetZoom() {
         scale = minScale; lastScale = minScale; offset = .zero; lastOffset = .zero
     }
-}
-
-#Preview("With Images") {
-    ProductImageGalleryView(imageUrls: [
-        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600",
-        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600",
-        "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=600"
-    ])
-}
-
-#Preview("Single Image") {
-    ProductImageGalleryView(imageUrls: [
-        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600"
-    ])
-}
-
-#Preview("No Image") {
-    ProductImageGalleryView(imageUrls: nil)
 }
