@@ -59,6 +59,18 @@ struct ReceiptView: View {
                         Text("Paid securely via Razorpay")
                             .font(AppFonts.sansSerif(size: 12))
                             .foregroundStyle(AppColors.tertiary)
+                            
+                        if let boutique = POSViewModel.shared.lastBoutique {
+                            VStack(spacing: 4) {
+                                Text(boutique.name)
+                                    .font(AppFonts.sansSerif(size: 13, weight: .semibold))
+                                    .foregroundStyle(.white)
+                                Text("\(boutique.address), \(boutique.city) - \(boutique.pinCode)")
+                                    .font(AppFonts.sansSerif(size: 11))
+                                    .foregroundStyle(AppColors.tertiary)
+                            }
+                            .padding(.top, 8)
+                        }
                     }
                     .padding(.top, 16)
                     .padding(.bottom, 16)
