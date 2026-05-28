@@ -36,14 +36,6 @@ struct ClientProfileView: View {
                     
                     Spacer()
                     
-                    Button(action: {
-                        showDeleteClientAlert = true
-                    }) {
-                        Image(systemName: "trash")
-                            .font(AppFonts.sansSerif(size: 15))
-                            .foregroundStyle(AppColors.error)
-                    }
-                    
                     Button("Edit") {
                         router.presentFullScreen(SARoute.editClient(viewModel.client))
                     }

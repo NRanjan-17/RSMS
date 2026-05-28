@@ -35,6 +35,8 @@ struct EditClientView: View {
     @State private var isLoading = false
     @State private var errorMessage: String? = nil
     @State private var showErrorAlert = false
+    @State private var showDeactivateAlert = false
+    @State private var showDeleteAlert = false
     @State private var clientEntity: ClientEntity? = nil
     
     private let clientService = ClientService()
@@ -264,9 +266,25 @@ struct EditClientView: View {
                         .padding(.horizontal, 24)
                         .padding(.bottom, 24)
                         
-                        Button(action: {}) {
+                        Button(action: {
+                            showDeactivateAlert = true
+                        }) {
                             Text("Deactivate Client Profile")
                                 .font(AppFonts.sansSerif(size: 13))
+                                .foregroundStyle(AppColors.text)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                                .background(AppColors.surface)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                        }
+                        .padding(.horizontal, 24)
+                        
+                        Button(action: {
+                            showDeleteAlert = true
+                        }) {
+                            Text("Delete Client Profile")
+                                .font(AppFonts.sansSerif(size: 13, weight: .medium))
                                 .foregroundStyle(AppColors.error)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 14)
@@ -287,6 +305,23 @@ struct EditClientView: View {
                 }
                 .background(AppColors.background)
             }
+        }
+        .alert("Deactivate Client", isPresented: $showDeactivateAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Client deactivation is not currently supported by the backend.")
+        }
+        .alert("Delete Client", isPresented: $showDeleteAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                Task {
+                    try? await clientService.deleteClient(id: client.id)
+                    NotificationCenter.default.post(name: NSNotification.Name("RefreshClients"), object: nil)
+                    dismiss()
+                }
+            }
+        } message: {
+            Text("Are you sure you want to delete \(client.name)? This action cannot be undone.")
         }
         .toolbar(.hidden, for: .navigationBar)
         .navigationBarBackButtonHidden(true)
