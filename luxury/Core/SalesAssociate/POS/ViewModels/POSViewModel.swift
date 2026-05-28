@@ -80,6 +80,7 @@ final class POSViewModel {
     var paymentError: String? = nil
     var lastTransactionId: String? = nil
     var lastTotalPaid: Int? = nil
+    var lastPurchasedItems: [POSCartRow] = []
     
     var isLoadingProducts = false
     var errorMessage: String? = nil
@@ -256,6 +257,7 @@ final class POSViewModel {
             
             self.lastTotalPaid = self.total
             self.lastTransactionId = transactionIdStr
+            self.lastPurchasedItems = self.cartItems
             self.offlineCartQueued = false
             self.isProcessingPayment = false
             self.cartItems.removeAll()

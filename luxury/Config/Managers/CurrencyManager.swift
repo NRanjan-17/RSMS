@@ -110,12 +110,18 @@ final class CurrencyManager {
     func format(amount amountInINR: Double) -> String {
         let converted = convertedAmount(fromINR: amountInINR)
         let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
+        formatter.numberStyle = .currency
+        if currentCurrency == "INR" {
+            formatter.locale = Locale(identifier: "en_IN")
+        } else {
+            formatter.locale = Locale(identifier: "en_US")
+        }
+        formatter.currencyCode = currentCurrency
+        formatter.currencySymbol = symbol(for: currentCurrency)
         formatter.maximumFractionDigits = currentCurrency == "JPY" ? 0 : 2
         formatter.minimumFractionDigits = 0
         
-        let formattedNumber = formatter.string(from: NSNumber(value: converted)) ?? "\(converted)"
-        return "\(symbol(for: currentCurrency))\(formattedNumber)"
+        return formatter.string(from: NSNumber(value: converted)) ?? "\(symbol(for: currentCurrency))\(converted)"
     }
     
     func formatCompact(amount amountInINR: Double) -> String {
@@ -140,10 +146,17 @@ final class CurrencyManager {
         }
         
         let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
+        formatter.numberStyle = .currency
+        if currentCurrency == "INR" {
+            formatter.locale = Locale(identifier: "en_IN")
+        } else {
+            formatter.locale = Locale(identifier: "en_US")
+        }
+        formatter.currencyCode = currentCurrency
+        formatter.currencySymbol = symbol(for: currentCurrency)
         formatter.maximumFractionDigits = currentCurrency == "JPY" ? 0 : 2
+        formatter.minimumFractionDigits = 0
         
-        let formattedNumber = formatter.string(from: NSNumber(value: converted)) ?? "\(converted)"
-        return "\(symbol(for: currentCurrency))\(formattedNumber)"
+        return formatter.string(from: NSNumber(value: converted)) ?? "\(symbol(for: currentCurrency))\(converted)"
     }
 }

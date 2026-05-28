@@ -61,7 +61,42 @@ struct ReceiptView: View {
                             .foregroundStyle(AppColors.tertiary)
                     }
                     .padding(.top, 16)
-                    .padding(.bottom, 32)
+                    .padding(.bottom, 16)
+                    
+                    if !POSViewModel.shared.lastPurchasedItems.isEmpty {
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: 12) {
+                                ForEach(POSViewModel.shared.lastPurchasedItems, id: \.product.id) { item in
+                                    HStack(alignment: .top) {
+                                        Text("\(item.qty)x")
+                                            .font(AppFonts.sansSerif(size: 13, weight: .bold))
+                                            .foregroundStyle(AppColors.secondary)
+                                            
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(item.product.name)
+                                                .font(AppFonts.sansSerif(size: 13, weight: .semibold))
+                                                .foregroundStyle(.white)
+                                            Text("S/N: \(item.product.barCode)")
+                                                .font(AppFonts.sansSerif(size: 11))
+                                                .foregroundStyle(AppColors.secondary)
+                                        }
+                                        
+                                        Spacer()
+                                        
+                                        Text(POSViewModel.shared.formatCurrency(Int(item.product.amount) * item.qty))
+                                            .font(AppFonts.sansSerif(size: 13, weight: .semibold))
+                                            .foregroundStyle(.white)
+                                    }
+                                    
+                                    Divider()
+                                        .background(AppColors.border)
+                                }
+                            }
+                            .padding(.horizontal, 24)
+                        }
+                        .frame(maxHeight: 150)
+                        .padding(.bottom, 16)
+                    }
                     
                     VStack(spacing: 12) {
                         CustomButton(title: "Email Receipt", icon: AnyView(Image(systemName: "envelope")), action: {})
