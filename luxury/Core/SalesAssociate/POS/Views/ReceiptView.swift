@@ -11,6 +11,7 @@ struct ReceiptView: View {
     @Environment(Router.self) private var router
     @Environment(SalesAssociateAppState.self) private var saAppState
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
     
     var body: some View {
         ZStack {
@@ -111,7 +112,9 @@ struct ReceiptView: View {
                     }
                     
                     VStack(spacing: 12) {
-                        CustomButton(title: "Email Receipt", icon: AnyView(Image(systemName: "envelope")), action: {})
+                        CustomButton(title: "Email Receipt", icon: AnyView(Image(systemName: "envelope")), action: {
+                            sendEmailReceipt()
+                        })
                         CustomOutlineButton(title: "Print Receipt", icon: AnyView(Image(systemName: "printer")), action: {
                             printReceipt()
                         })
@@ -223,6 +226,31 @@ struct ReceiptView: View {
             printController.printInfo = printInfo
             printController.printingItem = uiImage
             printController.present(animated: true, completionHandler: nil)
+        }
+    }
+    
+    private func sendEmailReceipt() {
+        // Need client email from somewhere. In ReceiptView, POSViewModel.shared.selectedClient is cleared, but maybe we can just compose a blank email for now if we don't have it, or use a placeholder.
+        // Wait, POSViewModel.shared.selectedClient is nil. I will just open a blank email with the subject and body.
+        
+        let subject = "Your RSMS Receipt"
+        var body = "Thank you for your purchase.\n\n"
+        body += "Transaction ID: \(POSViewModel.shared.lastTransactionId ?? "Pending")\n"
+        body += "Total Paid: \(POSViewModel.shared.formatCurrency(POSViewModel.shared.lastTotalPaid ?? 0))\n\n"
+        
+        if !POSViewModel.shared.lastPurchasedItems.isEmpty {
+            body += "Products:\n"
+            for item in POSViewModel.shared.lastPurchasedItems {
+                body += "\(item.qty)x \(item.product.name) (S/N: \(item.product.barCode)) - \(POSViewModel.shared.formatCurrency(Int(item.product.amount) * item.qty))\n"
+            }
+            body += "\n"
+        }
+        
+        let subjectEncoded = subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let bodyEncoded = body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        
+        if let url = URL(string: "mailto:?subject=\(subjectEncoded)&body=\(bodyEncoded)") {
+            openURL(url)
         }
     }
 }

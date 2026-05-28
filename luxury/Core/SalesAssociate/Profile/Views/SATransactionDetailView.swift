@@ -6,12 +6,16 @@
 //
 
 import SwiftUI
+import Supabase
 
 struct SATransactionDetailView: View {
     let transaction: SATransactionEntity
     @Environment(Router.self) private var router
+    @Environment(\.openURL) private var openURL
     @State private var isEmailing = false
     @State private var emailSent = false
+    @State private var purchasedProducts: [(qty: Int, product: CatalogEntity)] = []
+    @State private var isLoadingProducts = true
     
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
@@ -55,7 +59,7 @@ struct SATransactionDetailView: View {
                                 .font(AppFonts.sansSerif(size: 14))
                                 .foregroundStyle(AppColors.secondary)
                             
-                            Text("$\(String(format: "%.2f", transaction.transactionAmount))")
+                            Text(CurrencyManager.shared.format(amount: transaction.transactionAmount))
                                 .font(AppFonts.serif(size: 40, weight: .bold))
                                 .foregroundStyle(AppColors.gold)
                             
@@ -81,6 +85,43 @@ struct SATransactionDetailView: View {
                             }
                             
                             DetailRow(label: "Purpose", value: transaction.purpose)
+                            
+                            if isLoadingProducts {
+                                ProgressView()
+                                    .padding(.top, 8)
+                            } else if !purchasedProducts.isEmpty {
+                                Divider().background(AppColors.gold15)
+                                    .padding(.vertical, 8)
+                                
+                                VStack(alignment: .leading, spacing: 12) {
+                                    Text("Products")
+                                        .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                        .foregroundStyle(AppColors.secondary)
+                                    
+                                    ForEach(purchasedProducts, id: \.product.id) { item in
+                                        HStack(alignment: .top) {
+                                            Text("\(item.qty)x")
+                                                .font(AppFonts.sansSerif(size: 13, weight: .bold))
+                                                .foregroundStyle(AppColors.secondary)
+                                                
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                Text(item.product.name)
+                                                    .font(AppFonts.sansSerif(size: 13, weight: .semibold))
+                                                    .foregroundStyle(.white)
+                                                Text("S/N: \(item.product.barCode)")
+                                                    .font(AppFonts.sansSerif(size: 11))
+                                                    .foregroundStyle(AppColors.secondary)
+                                            }
+                                            
+                                            Spacer()
+                                            
+                                            Text(CurrencyManager.shared.format(amount: item.product.amount * Double(item.qty)))
+                                                .font(AppFonts.sansSerif(size: 13, weight: .semibold))
+                                                .foregroundStyle(.white)
+                                        }
+                                    }
+                                }
+                            }
                         }
                         .padding(24)
                     }
@@ -126,15 +167,81 @@ struct SATransactionDetailView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
+        .task {
+            await fetchProducts()
+        }
+    }
+    
+    private func fetchProducts() async {
+        do {
+            let dbItems: [PurchasedItem] = try await SupabaseManager.shared.client
+                .from("purchased_items")
+                .select()
+                .eq("transaction_id", value: transaction.id.uuidString)
+                .execute()
+                .value
+            
+            if !dbItems.isEmpty {
+                let productIds = dbItems.map { $0.productId }
+                let dbCatalogs: [CatalogEntity] = try await SupabaseManager.shared.client
+                    .from("catalogs")
+                    .select()
+                    .in("id", values: productIds.map { $0.uuidString })
+                    .execute()
+                    .value
+                
+                // Group by product
+                var grouped: [UUID: Int] = [:]
+                for item in dbItems {
+                    grouped[item.productId, default: 0] += 1
+                }
+                
+                let finalProducts = grouped.compactMap { dict in
+                    if let catalog = dbCatalogs.first(where: { $0.id == dict.key }) {
+                        return (qty: dict.value, product: catalog)
+                    }
+                    return nil
+                }
+                
+                await MainActor.run {
+                    self.purchasedProducts = finalProducts
+                    self.isLoadingProducts = false
+                }
+            } else {
+                await MainActor.run {
+                    self.isLoadingProducts = false
+                }
+            }
+        } catch {
+            print("Error fetching products for transaction: \(error)")
+            await MainActor.run {
+                self.isLoadingProducts = false
+            }
+        }
     }
     
     private func sendEmailReceipt() {
         guard !isEmailing else { return }
-        isEmailing = true
+        guard let email = transaction.client?.email else { return }
         
-        // Simulate API call for sending email
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            isEmailing = false
+        let subject = "Your RSMS Receipt"
+        var bodyStr = "Thank you for your purchase.\n\n"
+        bodyStr += "Transaction ID: \(transaction.id.uuidString.prefix(8).uppercased())\n"
+        bodyStr += "Total Paid: \(CurrencyManager.shared.format(amount: transaction.transactionAmount))\n\n"
+        
+        if !purchasedProducts.isEmpty {
+            bodyStr += "Products:\n"
+            for item in purchasedProducts {
+                bodyStr += "\(item.qty)x \(item.product.name) (S/N: \(item.product.barCode)) - \(CurrencyManager.shared.format(amount: item.product.amount * Double(item.qty)))\n"
+            }
+            bodyStr += "\n"
+        }
+        
+        let subjectEncoded = subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let bodyEncoded = bodyStr.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        
+        if let url = URL(string: "mailto:\(email)?subject=\(subjectEncoded)&body=\(bodyEncoded)") {
+            openURL(url)
             emailSent = true
         }
     }
