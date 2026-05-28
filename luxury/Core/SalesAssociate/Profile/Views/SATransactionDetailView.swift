@@ -17,6 +17,7 @@ struct SATransactionDetailView: View {
     @State private var purchasedProducts: [(qty: Int, product: CatalogEntity)] = []
     @State private var isLoadingProducts = true
     @State private var generatedPDFURL: URL? = nil
+    @State private var boutique: CorporateBoutique? = nil
     
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
@@ -136,7 +137,7 @@ struct SATransactionDetailView: View {
                         Button(action: sharePDF) {
                             HStack {
                                 Image(systemName: "square.and.arrow.up")
-                                Text("Share Invoice (Email/Text)")
+                                Text("Share / Save as PDF")
                             }
                             .font(AppFonts.sansSerif(size: 14, weight: .semibold))
                             .foregroundStyle(.white)
@@ -182,6 +183,17 @@ struct SATransactionDetailView: View {
                 .execute()
                 .value
             
+            var fetchedBoutique: CorporateBoutique? = nil
+            if let bId = transaction.boutiqueId {
+                fetchedBoutique = try? await SupabaseManager.shared.client
+                    .from("boutiques")
+                    .select()
+                    .eq("id", value: bId.uuidString)
+                    .single()
+                    .execute()
+                    .value
+            }
+            
             if !dbItems.isEmpty {
                 let productIds = dbItems.map { $0.productId }
                 let dbCatalogs: [CatalogEntity] = try await SupabaseManager.shared.client
@@ -207,12 +219,15 @@ struct SATransactionDetailView: View {
                 
                 await MainActor.run {
                     self.purchasedProducts = finalProducts
+                    self.boutique = fetchedBoutique
                     self.isLoadingProducts = false
                     self.generatedPDFURL = generatePDFURL()
                 }
             } else {
                 await MainActor.run {
+                    self.boutique = fetchedBoutique
                     self.isLoadingProducts = false
+                    self.generatedPDFURL = generatePDFURL()
                 }
             }
         } catch {
@@ -229,9 +244,9 @@ struct SATransactionDetailView: View {
         let cgst = subtotal * 0.09
         let sgst = subtotal * 0.09
         
-        let storeName = "Eezee Rentals"
-        let storeAddress = "331/C KIADB Industrial Area\nMysore - 18"
-        let storePhone = "+91-9663597666"
+        let storeName = boutique?.name ?? "Eezee Rentals"
+        let storeAddress = "\(boutique?.address ?? "331/C KIADB Industrial Area")\n\(boutique?.city ?? "Mysore") - \(boutique?.pinCode ?? "18")"
+        let storePhone = boutique?.managerPhone ?? "+91-9663597666"
         let gstin = "[29AAFFE1207N2ZC]"
         
         let clientName = transaction.client?.name ?? "Guest Checkout"

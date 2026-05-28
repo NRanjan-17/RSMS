@@ -114,7 +114,7 @@ struct ReceiptView: View {
                     }
                     
                     VStack(spacing: 12) {
-                        CustomButton(title: "Share Invoice (Email/Text)", icon: AnyView(Image(systemName: "square.and.arrow.up")), action: {
+                        CustomButton(title: "Share / Save as PDF", icon: AnyView(Image(systemName: "square.and.arrow.up")), action: {
                             if let url = generatedPDFURL {
                                 let activityVC = UIActivityViewController(activityItems: [url], applicationActivities: nil)
                                 if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
@@ -169,7 +169,7 @@ struct ReceiptView: View {
         let storeAddress = "\(boutique?.address ?? "331/C KIADB Industrial Area")\n\(boutique?.city ?? "Mysore") - \(boutique?.pinCode ?? "18")"
         
         // I will just use dummy GSTIN and phone since they aren't in BoutiqueEntity
-        let storePhone = "+91-9663597666"
+        let storePhone = boutique?.managerPhone ?? "+91-9663597666"
         let gstin = "[29AAFFE1207N2ZC]"
         
         let clientName = POSViewModel.shared.lastClient?.name ?? "Guest Checkout"
