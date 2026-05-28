@@ -142,46 +142,47 @@ struct SATransactionDetailView: View {
                                 Text("Share / Save as PDF")
                             }
                             .font(AppFonts.sansSerif(size: 14, weight: .semibold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(AppColors.background)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
-                            .background(AppColors.surface)
+                            .background(AppColors.gold)
                             .clipShape(Capsule())
-                            .overlay(Capsule().stroke(AppColors.gold, lineWidth: 1))
                         }
                         
-                        Button(action: printReceipt) {
-                            HStack {
-                                Image(systemName: "printer")
-                                Text("Print Invoice")
+                        HStack(spacing: 16) {
+                            Button(action: {
+                                if MFMailComposeViewController.canSendMail() {
+                                    showMailSheet = true
+                                } else {
+                                    showMailErrorAlert = true
+                                }
+                            }) {
+                                HStack {
+                                    Image(systemName: "envelope")
+                                    Text("Email")
+                                }
+                                .font(AppFonts.sansSerif(size: 14, weight: .semibold))
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(AppColors.surface)
+                                .clipShape(Capsule())
+                                .overlay(Capsule().stroke(AppColors.gold, lineWidth: 1))
                             }
-                            .font(AppFonts.sansSerif(size: 14, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(AppColors.surface)
-                            .clipShape(Capsule())
-                            .overlay(Capsule().stroke(AppColors.gold, lineWidth: 1))
-                        }
-                        
-                        Button(action: {
-                            if MFMailComposeViewController.canSendMail() {
-                                showMailSheet = true
-                            } else {
-                                showMailErrorAlert = true
+                            
+                            Button(action: printReceipt) {
+                                HStack {
+                                    Image(systemName: "printer")
+                                    Text("Print")
+                                }
+                                .font(AppFonts.sansSerif(size: 14, weight: .semibold))
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(AppColors.surface)
+                                .clipShape(Capsule())
+                                .overlay(Capsule().stroke(AppColors.gold, lineWidth: 1))
                             }
-                        }) {
-                            HStack {
-                                Image(systemName: "envelope")
-                                Text("Email Invoice")
-                            }
-                            .font(AppFonts.sansSerif(size: 14, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(AppColors.surface)
-                            .clipShape(Capsule())
-                            .overlay(Capsule().stroke(AppColors.gold, lineWidth: 1))
                         }
                     }
                     .padding(.horizontal, 24)

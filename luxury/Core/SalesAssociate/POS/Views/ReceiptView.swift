@@ -127,16 +127,18 @@ struct ReceiptView: View {
                                 }
                             }
                         })
-                        CustomOutlineButton(title: "Email Invoice", icon: AnyView(Image(systemName: "envelope")), action: {
-                            if MFMailComposeViewController.canSendMail() {
-                                showMailSheet = true
-                            } else {
-                                showMailErrorAlert = true
-                            }
-                        })
-                        CustomOutlineButton(title: "Print Invoice", icon: AnyView(Image(systemName: "printer")), action: {
-                            printReceipt()
-                        })
+                        HStack(spacing: 12) {
+                            CustomOutlineButton(title: "Email", icon: AnyView(Image(systemName: "envelope")), action: {
+                                if MFMailComposeViewController.canSendMail() {
+                                    showMailSheet = true
+                                } else {
+                                    showMailErrorAlert = true
+                                }
+                            })
+                            CustomOutlineButton(title: "Print", icon: AnyView(Image(systemName: "printer")), action: {
+                                printReceipt()
+                            })
+                        }
                     }
                     .padding(.horizontal, 24)
                 }
