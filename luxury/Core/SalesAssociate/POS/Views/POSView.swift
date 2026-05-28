@@ -273,8 +273,8 @@ struct POSView: View {
                         .background(RoundedRectangle(cornerRadius: 14).fill(AppColors.gold))
                     }
                     .buttonStyle(.plain)
-                    .disabled((viewModel.requiresApproval && viewModel.approvalState != .approved) || viewModel.isProcessingPayment)
-                    .opacity((viewModel.requiresApproval && viewModel.approvalState != .approved) || viewModel.isProcessingPayment ? 0.45 : 1)
+                    .disabled(viewModel.cartItems.isEmpty || (viewModel.requiresApproval && viewModel.approvalState != .approved) || viewModel.isProcessingPayment)
+                    .opacity(viewModel.cartItems.isEmpty || (viewModel.requiresApproval && viewModel.approvalState != .approved) || viewModel.isProcessingPayment ? 0.45 : 1)
                     .padding(.horizontal, 24)
                     .padding(.bottom, 40)
                 }
