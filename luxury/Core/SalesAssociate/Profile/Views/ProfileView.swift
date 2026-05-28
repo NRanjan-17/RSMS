@@ -75,6 +75,9 @@ struct ProfileView: View {
                         
                         HStack(spacing: 10) {
                             StatChip(value: viewModel.statClients, label: "Clients")
+                                .onTapGesture {
+                                    saAppState.selectedTab = .clients
+                                }
                             StatChip(value: viewModel.statTransactions, label: "Transactions")
                                 .onTapGesture {
                                     router.push(SARoute.transactionList(viewModel.recentTransactions))

@@ -158,6 +158,7 @@ final class SAProfileViewModel {
             }
             await MainActor.run {
                 self.recentClients = dashClients
+                self.statClients = "\(allClients.count)"
             }
         } catch {
             print("Failed to fetch recent clients: \(error)")
