@@ -13,6 +13,8 @@ struct ReceiptView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
     
+    @State private var generatedPDFURL: URL? = nil
+    
     var body: some View {
         ZStack {
             AppColors.background.ignoresSafeArea()
@@ -112,10 +114,16 @@ struct ReceiptView: View {
                     }
                     
                     VStack(spacing: 12) {
-                        CustomButton(title: "Email Receipt", icon: AnyView(Image(systemName: "envelope")), action: {
-                            sendEmailReceipt()
+                        CustomButton(title: "Share Invoice (Email/Text)", icon: AnyView(Image(systemName: "square.and.arrow.up")), action: {
+                            if let url = generatedPDFURL {
+                                let activityVC = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+                                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                                   let rootVC = windowScene.windows.first?.rootViewController {
+                                    rootVC.present(activityVC, animated: true, completion: nil)
+                                }
+                            }
                         })
-                        CustomOutlineButton(title: "Print Receipt", icon: AnyView(Image(systemName: "printer")), action: {
+                        CustomOutlineButton(title: "Print Invoice", icon: AnyView(Image(systemName: "printer")), action: {
                             printReceipt()
                         })
                     }
@@ -145,112 +153,70 @@ struct ReceiptView: View {
         .toolbar(.hidden, for: .navigationBar)
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .tabBar)
+        .onAppear {
+            self.generatedPDFURL = generatePDFURL()
+        }
+    }
+    
+    private func generatePDFURL() -> URL? {
+        let total = Double(POSViewModel.shared.lastTotalPaid ?? 0)
+        let subtotal = total / 1.18
+        let cgst = subtotal * 0.09
+        let sgst = subtotal * 0.09
+        
+        let boutique = POSViewModel.shared.lastBoutique
+        let storeName = boutique?.name ?? "Eezee Rentals"
+        let storeAddress = "\(boutique?.address ?? "331/C KIADB Industrial Area")\n\(boutique?.city ?? "Mysore") - \(boutique?.pinCode ?? "18")"
+        
+        // I will just use dummy GSTIN and phone since they aren't in BoutiqueEntity
+        let storePhone = "+91-9663597666"
+        let gstin = "[29AAFFE1207N2ZC]"
+        
+        let clientName = POSViewModel.shared.lastClient?.name ?? "Guest Checkout"
+        let clientDetails = POSViewModel.shared.lastClient?.email ?? "No Email"
+        let customerId = POSViewModel.shared.lastClient?.id.uuidString.prefix(5).uppercased() ?? "N/A"
+        
+        let items = POSViewModel.shared.lastPurchasedItems.map { item in
+            InvoicePDFGenerator.InvoiceData.Item(
+                description: item.product.name,
+                qty: item.qty,
+                rate: item.product.amount,
+                amount: item.product.amount * Double(item.qty)
+            )
+        }
+        
+        let data = InvoicePDFGenerator.InvoiceData(
+            storeName: storeName,
+            storeAddress: storeAddress,
+            storePhone: storePhone,
+            gstin: gstin,
+            date: Date(),
+            invoiceNumber: POSViewModel.shared.lastTransactionId ?? "Pending",
+            customerId: String(customerId),
+            clientName: clientName,
+            clientDetails: clientDetails,
+            items: items,
+            subtotal: subtotal,
+            cgst: cgst,
+            sgst: sgst,
+            total: total
+        )
+        
+        return InvoicePDFGenerator.generateInvoice(data: data)
     }
     
     @MainActor
     private func printReceipt() {
-        let receiptContent = VStack(spacing: 24) {
-            Text("Payment Successful")
-                .font(AppFonts.serif(size: 32, weight: .semibold))
-                .foregroundStyle(Color.black)
-            
-            Text("Transaction ID: \(POSViewModel.shared.lastTransactionId ?? "#TX-PENDING")")
-                .font(AppFonts.sansSerif(size: 13))
-                .foregroundStyle(Color.gray)
-            
-            VStack(spacing: 12) {
-                Text(POSViewModel.shared.formatCurrency(POSViewModel.shared.lastTotalPaid ?? 0))
-                    .font(AppFonts.serif(size: 40, weight: .bold))
-                    .foregroundStyle(Color.black)
-                
-                Text("Paid securely via Razorpay")
-                    .font(AppFonts.sansSerif(size: 12))
-                    .foregroundStyle(Color.gray)
-                    
-                if let boutique = POSViewModel.shared.lastBoutique {
-                    VStack(spacing: 4) {
-                        Text(boutique.name)
-                            .font(AppFonts.sansSerif(size: 13, weight: .semibold))
-                            .foregroundStyle(Color.black)
-                        Text("\(boutique.address), \(boutique.city) - \(boutique.pinCode)")
-                            .font(AppFonts.sansSerif(size: 11))
-                            .foregroundStyle(Color.gray)
-                    }
-                    .padding(.top, 8)
-                }
-            }
-            .padding(.vertical, 16)
-            
-            if !POSViewModel.shared.lastPurchasedItems.isEmpty {
-                VStack(alignment: .leading, spacing: 12) {
-                    ForEach(POSViewModel.shared.lastPurchasedItems, id: \.product.id) { item in
-                        HStack(alignment: .top) {
-                            Text("\(item.qty)x")
-                                .font(AppFonts.sansSerif(size: 13, weight: .bold))
-                                .foregroundStyle(Color.gray)
-                                
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(item.product.name)
-                                    .font(AppFonts.sansSerif(size: 13, weight: .semibold))
-                                    .foregroundStyle(Color.black)
-                                Text("S/N: \(item.product.barCode)")
-                                    .font(AppFonts.sansSerif(size: 11))
-                                    .foregroundStyle(Color.gray)
-                            }
-                            
-                            Spacer()
-                            
-                            Text(POSViewModel.shared.formatCurrency(Int(item.product.amount) * item.qty))
-                                .font(AppFonts.sansSerif(size: 13, weight: .semibold))
-                                .foregroundStyle(Color.black)
-                        }
-                        
-                        Divider()
-                            .background(Color.gray.opacity(0.3))
-                    }
-                }
-            }
-        }
-        .padding(40)
-        .background(Color.white)
-        .frame(width: 400)
-        
-        let renderer = ImageRenderer(content: receiptContent)
-        renderer.scale = UIScreen.main.scale
-        if let uiImage = renderer.uiImage {
+        guard let url = generatedPDFURL else { return }
+        if UIPrintInteractionController.canPrint(url) {
             let printInfo = UIPrintInfo(dictionary: nil)
-            printInfo.jobName = "Receipt"
+            printInfo.jobName = "Invoice"
             printInfo.outputType = .general
             
             let printController = UIPrintInteractionController.shared
             printController.printInfo = printInfo
-            printController.printingItem = uiImage
+            printController.printingItem = url
             printController.present(animated: true, completionHandler: nil)
-        }
-    }
-    
-    private func sendEmailReceipt() {
-        // Need client email from somewhere. In ReceiptView, POSViewModel.shared.selectedClient is cleared, but maybe we can just compose a blank email for now if we don't have it, or use a placeholder.
-        // Wait, POSViewModel.shared.selectedClient is nil. I will just open a blank email with the subject and body.
-        
-        let subject = "Your RSMS Receipt"
-        var body = "Thank you for your purchase.\n\n"
-        body += "Transaction ID: \(POSViewModel.shared.lastTransactionId ?? "Pending")\n"
-        body += "Total Paid: \(POSViewModel.shared.formatCurrency(POSViewModel.shared.lastTotalPaid ?? 0))\n\n"
-        
-        if !POSViewModel.shared.lastPurchasedItems.isEmpty {
-            body += "Products:\n"
-            for item in POSViewModel.shared.lastPurchasedItems {
-                body += "\(item.qty)x \(item.product.name) (S/N: \(item.product.barCode)) - \(POSViewModel.shared.formatCurrency(Int(item.product.amount) * item.qty))\n"
-            }
-            body += "\n"
-        }
-        
-        let subjectEncoded = subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let bodyEncoded = body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        
-        if let url = URL(string: "mailto:?subject=\(subjectEncoded)&body=\(bodyEncoded)") {
-            openURL(url)
         }
     }
 }

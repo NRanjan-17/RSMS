@@ -27,6 +27,7 @@ struct SATransactionEntity: Identifiable, Codable, Hashable {
     let boutiqueId: UUID?
     let staffId: UUID?
     let client: ClientEntity?
+    let paymentGatewayId: String?
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -37,5 +38,6 @@ struct SATransactionEntity: Identifiable, Codable, Hashable {
         case boutiqueId = "boutique_id"
         case staffId = "staff_id"
         case client
+        case paymentGatewayId = "payment_gateway_id"
     }
 }

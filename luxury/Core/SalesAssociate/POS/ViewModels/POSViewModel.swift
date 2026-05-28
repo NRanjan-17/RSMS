@@ -81,6 +81,7 @@ final class POSViewModel {
     var lastTransactionId: String? = nil
     var lastTotalPaid: Int? = nil
     var lastPurchasedItems: [POSCartRow] = []
+    var lastClient: StoreClient? = nil
     var lastBoutique: CorporateBoutique? = nil
     
     var isLoadingProducts = false
@@ -226,7 +227,8 @@ final class POSViewModel {
                 purpose: TransactionPurpose.purchase.rawValue,
                 clientId: selectedClient?.id,
                 boutiqueId: boutiqueId,
-                staffId: staffId
+                staffId: staffId,
+                paymentGatewayId: transactionIdStr
             )
             
             // Extract product IDs multiplied by qty
@@ -260,6 +262,7 @@ final class POSViewModel {
             self.lastTransactionId = transaction.id.uuidString
             self.lastPurchasedItems = self.cartItems
             self.lastBoutique = try? await ProfileService().fetchBoutique(id: boutiqueId)
+            self.lastClient = self.selectedClient
             self.offlineCartQueued = false
             self.isProcessingPayment = false
             self.cartItems.removeAll()

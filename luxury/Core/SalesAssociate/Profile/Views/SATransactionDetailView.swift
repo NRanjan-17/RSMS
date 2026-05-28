@@ -16,6 +16,7 @@ struct SATransactionDetailView: View {
     @State private var emailSent = false
     @State private var purchasedProducts: [(qty: Int, product: CatalogEntity)] = []
     @State private var isLoadingProducts = true
+    @State private var generatedPDFURL: URL? = nil
     
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
@@ -75,7 +76,7 @@ struct SATransactionDetailView: View {
                         
                         // Details Section
                         VStack(spacing: 16) {
-                            DetailRow(label: "Transaction ID", value: transaction.id.uuidString.prefix(8).uppercased())
+                            DetailRow(label: "Transaction ID", value: transaction.paymentGatewayId ?? transaction.id.uuidString.prefix(8).uppercased())
                             
                             if let client = transaction.client {
                                 DetailRow(label: "Client", value: client.name)
@@ -132,32 +133,32 @@ struct SATransactionDetailView: View {
                     
                     // Actions
                     VStack(spacing: 16) {
-                        Button(action: sendEmailReceipt) {
+                        Button(action: sharePDF) {
                             HStack {
-                                if isEmailing {
-                                    ProgressView().tint(.white)
-                                } else if emailSent {
-                                    Image(systemName: "checkmark")
-                                    Text("Receipt Emailed")
-                                } else {
-                                    Image(systemName: "envelope")
-                                    Text("Email Receipt to Client")
-                                }
+                                Image(systemName: "square.and.arrow.up")
+                                Text("Share Invoice (Email/Text)")
                             }
                             .font(AppFonts.sansSerif(size: 14, weight: .semibold))
-                            .foregroundStyle(emailSent ? AppColors.background : .white)
+                            .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
-                            .background(emailSent ? AppColors.gold : AppColors.surface)
+                            .background(AppColors.surface)
                             .clipShape(Capsule())
-                            .overlay(Capsule().stroke(emailSent ? Color.clear : AppColors.gold, lineWidth: 1))
+                            .overlay(Capsule().stroke(AppColors.gold, lineWidth: 1))
                         }
-                        .disabled(isEmailing || emailSent || transaction.client?.email == nil)
                         
-                        if transaction.client?.email == nil {
-                            Text("No email address associated with this client.")
-                                .font(AppFonts.sansSerif(size: 12))
-                                .foregroundStyle(AppColors.error)
+                        Button(action: printReceipt) {
+                            HStack {
+                                Image(systemName: "printer")
+                                Text("Print Invoice")
+                            }
+                            .font(AppFonts.sansSerif(size: 14, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(AppColors.surface)
+                            .clipShape(Capsule())
+                            .overlay(Capsule().stroke(AppColors.gold, lineWidth: 1))
                         }
                     }
                     .padding(.horizontal, 24)
@@ -203,9 +204,11 @@ struct SATransactionDetailView: View {
                     return nil
                 }
                 
+                
                 await MainActor.run {
                     self.purchasedProducts = finalProducts
                     self.isLoadingProducts = false
+                    self.generatedPDFURL = generatePDFURL()
                 }
             } else {
                 await MainActor.run {
@@ -220,29 +223,73 @@ struct SATransactionDetailView: View {
         }
     }
     
-    private func sendEmailReceipt() {
-        guard !isEmailing else { return }
-        guard let email = transaction.client?.email else { return }
+    private func generatePDFURL() -> URL? {
+        let total = transaction.transactionAmount
+        let subtotal = total / 1.18
+        let cgst = subtotal * 0.09
+        let sgst = subtotal * 0.09
         
-        let subject = "Your RSMS Receipt"
-        var bodyStr = "Thank you for your purchase.\n\n"
-        bodyStr += "Transaction ID: \(transaction.id.uuidString.prefix(8).uppercased())\n"
-        bodyStr += "Total Paid: \(CurrencyManager.shared.format(amount: transaction.transactionAmount))\n\n"
+        let storeName = "Eezee Rentals"
+        let storeAddress = "331/C KIADB Industrial Area\nMysore - 18"
+        let storePhone = "+91-9663597666"
+        let gstin = "[29AAFFE1207N2ZC]"
         
-        if !purchasedProducts.isEmpty {
-            bodyStr += "Products:\n"
-            for item in purchasedProducts {
-                bodyStr += "\(item.qty)x \(item.product.name) (S/N: \(item.product.barCode)) - \(CurrencyManager.shared.format(amount: item.product.amount * Double(item.qty)))\n"
-            }
-            bodyStr += "\n"
+        let clientName = transaction.client?.name ?? "Guest Checkout"
+        let clientDetails = transaction.client?.email ?? "No Email"
+        let customerId = transaction.client?.id.uuidString.prefix(5).uppercased() ?? "N/A"
+        
+        let items = purchasedProducts.map { item in
+            InvoicePDFGenerator.InvoiceData.Item(
+                description: item.product.name,
+                qty: item.qty,
+                rate: item.product.amount,
+                amount: item.product.amount * Double(item.qty)
+            )
         }
         
-        let subjectEncoded = subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let bodyEncoded = bodyStr.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let data = InvoicePDFGenerator.InvoiceData(
+            storeName: storeName,
+            storeAddress: storeAddress,
+            storePhone: storePhone,
+            gstin: gstin,
+            date: transaction.dateOfTransaction ?? Date(),
+            invoiceNumber: transaction.paymentGatewayId ?? transaction.id.uuidString.prefix(8).uppercased(),
+            customerId: String(customerId),
+            clientName: clientName,
+            clientDetails: clientDetails,
+            items: items,
+            subtotal: subtotal,
+            cgst: cgst,
+            sgst: sgst,
+            total: total
+        )
         
-        if let url = URL(string: "mailto:\(email)?subject=\(subjectEncoded)&body=\(bodyEncoded)") {
-            openURL(url)
-            emailSent = true
+        return InvoicePDFGenerator.generateInvoice(data: data)
+    }
+    
+    @MainActor
+    private func sharePDF() {
+        if let url = generatedPDFURL {
+            let activityVC = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let rootVC = windowScene.windows.first?.rootViewController {
+                rootVC.present(activityVC, animated: true, completion: nil)
+            }
+        }
+    }
+    
+    @MainActor
+    private func printReceipt() {
+        guard let url = generatedPDFURL else { return }
+        if UIPrintInteractionController.canPrint(url) {
+            let printInfo = UIPrintInfo(dictionary: nil)
+            printInfo.jobName = "Invoice"
+            printInfo.outputType = .general
+            
+            let printController = UIPrintInteractionController.shared
+            printController.printInfo = printInfo
+            printController.printingItem = url
+            printController.present(animated: true, completionHandler: nil)
         }
     }
 }

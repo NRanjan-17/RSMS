@@ -38,8 +38,8 @@ final class POSDataService {
         return first
     }
     
-    func createTransaction(amount: Double, purpose: String, clientId: UUID?, boutiqueId: UUID, staffId: UUID) async throws -> Transaction {
-        let payload: [String: AnyJSON] = [
+    func createTransaction(amount: Double, purpose: String, clientId: UUID?, boutiqueId: UUID, staffId: UUID, paymentGatewayId: String?) async throws -> Transaction {
+        var payload: [String: AnyJSON] = [
             "transaction_amount": .double(amount),
             "purpose": .string(purpose),
             "date_of_transaction": .string(ISO8601DateFormatter().string(from: Date())),
@@ -47,6 +47,9 @@ final class POSDataService {
             "boutique_id": .string(boutiqueId.uuidString),
             "staff_id": .string(staffId.uuidString)
         ]
+        if let pgId = paymentGatewayId {
+            payload["payment_gateway_id"] = .string(pgId)
+        }
         
         let txs: [Transaction] = try await client
             .from("transaction")
