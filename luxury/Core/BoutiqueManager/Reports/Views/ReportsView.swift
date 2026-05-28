@@ -41,7 +41,7 @@ struct ReportsView: View {
                                                 .fill(AppColors.gold08)
                                                 .frame(width: 44, height: 44)
                                             Image(systemName: report.icon)
-                                                .font(.system(size: 18))
+                                                .font(AppFonts.sansSerif(size: 18))
                                                 .foregroundStyle(AppColors.gold)
                                         }
                                         
@@ -57,7 +57,7 @@ struct ReportsView: View {
                                         Spacer()
                                         
                                         Image(systemName: "chevron.right")
-                                            .font(.system(size: 12))
+                                            .font(AppFonts.sansSerif(size: 12))
                                             .foregroundStyle(AppColors.tertiary)
                                     }
                                     .padding(20)
@@ -75,7 +75,7 @@ struct ReportsView: View {
                         
                         VStack(alignment: .center, spacing: 8) {
                             Image(systemName: "lock.shield")
-                                .font(.system(size: 24))
+                                .font(AppFonts.sansSerif(size: 24))
                                 .foregroundStyle(AppColors.tertiary)
                             Text("Data reflects the last synchronized state.\nSensitive PII is masked in aggregate views.")
                                 .font(AppFonts.sansSerif(size: 11))

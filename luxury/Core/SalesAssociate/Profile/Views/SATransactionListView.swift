@@ -28,7 +28,7 @@ struct SATransactionListView: View {
                         router.pop()
                     }) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .light))
+                            .font(AppFonts.sansSerif(size: 20, weight: .light))
                             .foregroundStyle(AppColors.text)
                     }
                     .frame(width: 44, height: 44)
@@ -58,7 +58,12 @@ struct SATransactionListView: View {
                     ScrollView {
                         LazyVStack(spacing: 12) {
                             ForEach(transactions, id: \.id) { tx in
-                                TransactionCard(transaction: tx)
+                                Button(action: {
+                                    router.push(SARoute.transactionDetail(tx))
+                                }) {
+                                    TransactionCard(transaction: tx)
+                                }
+                                .buttonStyle(PlainButtonStyle())
                             }
                         }
                         .padding(20)

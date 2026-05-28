@@ -12,6 +12,7 @@ enum SARoute: Hashable {
     case appointmentList
     case createAppointment
     case returns
+    case transactionDetail(SATransactionEntity)
     case afterSalesIntake(client: Client, serialNumber: String?, isWarrantyActive: Bool)
     case afterSalesTracking
     case remoteSelling

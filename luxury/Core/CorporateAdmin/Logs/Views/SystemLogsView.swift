@@ -112,7 +112,7 @@ private struct LogRow: View {
                     .fill(severityColor.opacity(0.1))
                     .frame(width: 40, height: 40)
                 Image(systemName: categoryIcon)
-                    .font(.system(size: 14))
+                    .font(AppFonts.sansSerif(size: 14))
                     .foregroundStyle(severityColor)
             }
             

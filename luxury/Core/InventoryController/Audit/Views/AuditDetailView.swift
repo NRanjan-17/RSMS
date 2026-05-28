@@ -20,7 +20,7 @@ struct AuditDetailView: View {
                 HStack(spacing: 16) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                             .foregroundStyle(AppColors.gold)
                     }
                     Text("Audit Details")

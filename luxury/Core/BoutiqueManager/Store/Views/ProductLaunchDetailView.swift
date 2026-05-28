@@ -108,7 +108,7 @@ struct ProductLaunchDetailView: View {
                 }) {
                     HStack(spacing: 6) {
                         Image(systemName: "paperplane.fill")
-                            .font(.system(size: 9, weight: .bold))
+                            .font(AppFonts.sansSerif(size: 9, weight: .bold))
                         Text("SEND REMINDERS")
                             .font(AppFonts.sansSerif(size: 9, weight: .bold))
                     }
@@ -156,7 +156,7 @@ struct ProductLaunchDetailView: View {
     private func detailLabel(icon: String, title: String, value: String) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: icon)
-                .font(.system(size: 16))
+                .font(AppFonts.sansSerif(size: 16))
                 .foregroundStyle(AppColors.gold)
                 .frame(width: 24, height: 24)
                 .background(AppColors.gold08)
@@ -293,7 +293,7 @@ struct ProductLaunchDetailView: View {
                             if guest.reminderSent {
                                 HStack(spacing: 4) {
                                     Image(systemName: "paperplane.fill")
-                                        .font(.system(size: 9))
+                                        .font(AppFonts.sansSerif(size: 9))
                                         .foregroundStyle(AppColors.gold)
                                     Text("Reminder sent")
                                         .font(AppFonts.sansSerif(size: 10))
@@ -371,7 +371,7 @@ struct ProductLaunchDetailView: View {
         return HStack(spacing: 4) {
             Text(status.uppercased())
             Image(systemName: "chevron.up.chevron.down")
-                .font(.system(size: 7, weight: .semibold))
+                .font(AppFonts.sansSerif(size: 7, weight: .semibold))
         }
         .font(AppFonts.sansSerif(size: 9, weight: .bold))
         .foregroundStyle(fg)
@@ -388,7 +388,7 @@ struct ProductLaunchDetailView: View {
             HStack {
                 Spacer()
                 Image(systemName: "trash.fill")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(AppFonts.sansSerif(size: 14, weight: .semibold))
                 Text("Cancel Product Launch")
                     .font(AppFonts.sansSerif(size: 14, weight: .semibold))
                 Spacer()

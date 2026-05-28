@@ -39,7 +39,7 @@ struct SFSVerificationView: View {
                 HStack(spacing: 16) {
                     Button(action: { router.pop() }) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                             .foregroundStyle(AppColors.gold)
                     }
                     Text("Verify & Match Item")
@@ -158,7 +158,7 @@ struct SFSVerificationView: View {
                                 if isVerified {
                                     VStack(spacing: 16) {
                                         Image(systemName: "checkmark.circle.fill")
-                                            .font(.system(size: 64))
+                                            .font(AppFonts.sansSerif(size: 64))
                                             .foregroundStyle(AppColors.success)
                                         
                                         Text("VERIFICATION MATCH SUCCESSFUL")
@@ -183,7 +183,7 @@ struct SFSVerificationView: View {
                                                 )
                                             
                                             Rectangle()
-                                                .fill(Color.red)
+                                                .fill(AppColors.error)
                                                 .frame(width: 220, height: 2)
                                                 .shadow(color: .red, radius: 4)
                                                 .offset(y: laserOffset)
@@ -194,7 +194,7 @@ struct SFSVerificationView: View {
                                                 }
                                             
                                             Image(systemName: "barcode.viewfinder")
-                                                .font(.system(size: 40))
+                                                .font(AppFonts.sansSerif(size: 40))
                                                 .foregroundStyle(AppColors.gold.opacity(0.3))
                                         }
                                         .frame(height: 180)

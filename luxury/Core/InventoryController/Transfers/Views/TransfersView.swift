@@ -58,7 +58,7 @@ struct TransfersView: View {
                                         }
                                         
                                         Image(systemName: "arrow.right")
-                                            .font(.system(size: 12))
+                                            .font(AppFonts.sansSerif(size: 12))
                                             .foregroundStyle(AppColors.tertiary)
                                         
                                         VStack(alignment: .leading, spacing: 2) {

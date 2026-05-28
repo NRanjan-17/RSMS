@@ -17,7 +17,7 @@ struct CustomHeader: View {
             if showBackButton, let action = backAction {
                 Button(action: action) {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                         .foregroundStyle(AppColors.gold)
                 }
             }

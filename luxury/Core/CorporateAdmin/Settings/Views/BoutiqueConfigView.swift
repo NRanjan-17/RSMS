@@ -53,7 +53,7 @@ struct BoutiqueConfigView: View {
                                         }
                                         Spacer()
                                         Image(systemName: "chevron.right")
-                                            .font(.system(size: 12))
+                                            .font(AppFonts.sansSerif(size: 12))
                                             .foregroundStyle(AppColors.tertiary)
                                     }
                                     .padding(18)

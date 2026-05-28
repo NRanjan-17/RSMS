@@ -27,7 +27,7 @@ struct SalesProductDetailView: View {
                 HStack(spacing: 16) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                             .foregroundStyle(AppColors.gold)
                     }
                     Text("Catalog")
@@ -105,7 +105,7 @@ struct SalesProductDetailView: View {
                                 Divider().background(AppColors.gold15).padding(.bottom, 12)
                                 CustomButton(
                                     title: "Add to Cart",
-                                    icon: AnyView(Image(systemName: "cart.badge.plus").font(.system(size: 14, weight: .semibold))),
+                                    icon: AnyView(Image(systemName: "cart.badge.plus").font(AppFonts.sansSerif(size: 14, weight: .semibold))),
                                     action: { 
                                         let item = CatalogItem(
                                             id: catalog.id,

@@ -17,7 +17,7 @@ struct MetricCard: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Image(systemName: icon)
-                    .font(.system(size: 20))
+                    .font(AppFonts.sansSerif(size: 20))
                     .foregroundStyle(AppColors.gold)
                 Spacer()
             }

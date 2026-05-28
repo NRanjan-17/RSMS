@@ -31,7 +31,7 @@ struct ActiveAuditView: View {
                         router.dismissModal()
                     }) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                             .foregroundStyle(AppColors.gold)
                     }
                     
@@ -84,7 +84,7 @@ struct ActiveAuditView: View {
                                         }) {
                                             HStack {
                                                 Image(systemName: "barcode.viewfinder")
-                                                    .font(.system(size: 14))
+                                                    .font(AppFonts.sansSerif(size: 14))
                                                 Text("Scan \(item.name)")
                                                     .font(AppFonts.sansSerif(size: 13, weight: .semibold))
                                             }

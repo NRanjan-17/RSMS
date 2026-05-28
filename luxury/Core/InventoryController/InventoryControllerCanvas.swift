@@ -98,7 +98,7 @@ struct InventoryControllerCanvas: View {
                     }) {
                         HStack(spacing: 12) {
                             Image(systemName: "shippingbox.fill")
-                                .font(.system(size: 20))
+                                .font(AppFonts.sansSerif(size: 20))
                                 .foregroundStyle(AppColors.gold)
                             
                             VStack(alignment: .leading, spacing: 2) {
@@ -111,7 +111,7 @@ struct InventoryControllerCanvas: View {
                             }
                             Spacer()
                             Image(systemName: "chevron.right")
-                                .font(.system(size: 14, weight: .bold))
+                                .font(AppFonts.sansSerif(size: 14, weight: .bold))
                                 .foregroundStyle(AppColors.tertiary)
                         }
                         .padding(16)

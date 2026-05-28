@@ -136,7 +136,7 @@ struct ClientelingView: View {
                                         Spacer()
                                         
                                         Image(systemName: "chevron.right")
-                                            .font(.system(size: 12))
+                                            .font(AppFonts.sansSerif(size: 12))
                                             .foregroundStyle(AppColors.tertiary)
                                     }
                                     .padding(.horizontal, 14)
@@ -190,7 +190,7 @@ struct ClientelingView: View {
                                 .shadow(color: AppColors.gold.opacity(0.3), radius: 10, y: 4)
                             
                             Image(systemName: "plus")
-                                .font(.system(size: 20, weight: .bold))
+                                .font(AppFonts.sansSerif(size: 20, weight: .bold))
                                 .foregroundStyle(AppColors.background)
                         }
                     }

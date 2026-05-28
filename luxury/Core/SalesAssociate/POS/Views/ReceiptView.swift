@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct ReceiptView: View {
-    @Environment(AppCoordinator.self) private var coordinator
+    @Environment(Router.self) private var router
+    @Environment(SalesAssociateAppState.self) private var saAppState
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -19,7 +20,7 @@ struct ReceiptView: View {
                 HStack(spacing: 16) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "xmark")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                             .foregroundStyle(AppColors.gold)
                     }
                     Spacer()
@@ -36,7 +37,7 @@ struct ReceiptView: View {
                             .frame(width: 80, height: 80)
                         
                         Image(systemName: "checkmark")
-                            .font(.system(size: 32, weight: .bold))
+                            .font(AppFonts.sansSerif(size: 32, weight: .bold))
                             .foregroundStyle(AppColors.success)
                     }
                     
@@ -72,10 +73,8 @@ struct ReceiptView: View {
                 Spacer()
                 
                 Button(action: {
-                    Task {
-                        let session = await AuthService().getCurrentSession()
-                        await coordinator.routingService.updateRoute(for: session)
-                    }
+                    router.popToRoot()
+                    saAppState.selectedTab = .clients
                 }) {
                     Text("Return to Dashboard")
                         .font(AppFonts.sansSerif(size: 14, weight: .semibold))

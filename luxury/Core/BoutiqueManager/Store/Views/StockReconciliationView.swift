@@ -66,7 +66,7 @@ struct StockReconciliationView: View {
                                     viewModel.submitManualLookup()
                                 }) {
                                     Image(systemName: "magnifyingglass")
-                                        .font(.system(size: 18, weight: .semibold))
+                                        .font(AppFonts.sansSerif(size: 18, weight: .semibold))
                                         .foregroundStyle(AppColors.background)
                                         .frame(width: 54, height: 54)
                                         .background(AppColors.gold)
@@ -190,7 +190,7 @@ private struct CountAdjustButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: systemName)
-                .font(.system(size: 18, weight: .bold))
+                .font(AppFonts.sansSerif(size: 18, weight: .bold))
                 .foregroundStyle(isEnabled ? AppColors.gold : AppColors.tertiary)
                 .frame(width: 54, height: 54)
                 .background(AppColors.surface2)

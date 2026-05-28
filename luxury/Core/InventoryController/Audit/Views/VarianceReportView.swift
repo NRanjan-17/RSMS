@@ -67,7 +67,7 @@ struct VarianceReportView: View {
                 HStack(spacing: 16) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                             .foregroundStyle(AppColors.gold)
                     }
                     Text("Variance Report")
@@ -336,7 +336,7 @@ private struct PDFReportView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             Text("INVENTORY VARIANCE REPORT")
-                .font(.system(size: 24, weight: .bold))
+                .font(AppFonts.sansSerif(size: 24, weight: .bold))
                 .foregroundStyle(.black)
             
             HStack {
@@ -345,24 +345,24 @@ private struct PDFReportView: View {
                     Text("Date: \(report.date.formatted())")
                     Text("Controller: \(report.controllerName)")
                 }
-                .font(.system(size: 12))
-                .foregroundStyle(.gray)
+                .font(AppFonts.sansSerif(size: 12))
+                .foregroundStyle(AppColors.secondary)
                 Spacer()
             }
             
             Divider()
             
             Text("Line Items")
-                .font(.system(size: 16, weight: .bold))
+                .font(AppFonts.sansSerif(size: 16, weight: .bold))
                 .foregroundStyle(.black)
             
             VStack(spacing: 8) {
                 HStack {
-                    Text("Item").font(.system(size: 11, weight: .bold)).frame(maxWidth: .infinity, alignment: .leading)
-                    Text("SKU").font(.system(size: 11, weight: .bold)).frame(width: 80, alignment: .leading)
-                    Text("Expected").font(.system(size: 11, weight: .bold)).frame(width: 60, alignment: .trailing)
-                    Text("Counted").font(.system(size: 11, weight: .bold)).frame(width: 60, alignment: .trailing)
-                    Text("Variance").font(.system(size: 11, weight: .bold)).frame(width: 60, alignment: .trailing)
+                    Text("Item").font(AppFonts.sansSerif(size: 11, weight: .bold)).frame(maxWidth: .infinity, alignment: .leading)
+                    Text("SKU").font(AppFonts.sansSerif(size: 11, weight: .bold)).frame(width: 80, alignment: .leading)
+                    Text("Expected").font(AppFonts.sansSerif(size: 11, weight: .bold)).frame(width: 60, alignment: .trailing)
+                    Text("Counted").font(AppFonts.sansSerif(size: 11, weight: .bold)).frame(width: 60, alignment: .trailing)
+                    Text("Variance").font(AppFonts.sansSerif(size: 11, weight: .bold)).frame(width: 60, alignment: .trailing)
                 }
                 .foregroundStyle(.black)
                 
@@ -376,15 +376,15 @@ private struct PDFReportView: View {
                                 Text("(Archived)")
                             }
                         }
-                        .font(.system(size: 10))
+                        .font(AppFonts.sansSerif(size: 10))
                         .lineLimit(1)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         
-                        Text(item.sku).font(.system(size: 10)).frame(width: 80, alignment: .leading)
-                        Text("\(item.expectedQty)").font(.system(size: 10)).frame(width: 60, alignment: .trailing)
-                        Text("\(item.countedQty)").font(.system(size: 10)).frame(width: 60, alignment: .trailing)
-                        Text("\(item.variance > 0 ? "+" : "")\(item.variance)").font(.system(size: 10, weight: .bold))
-                            .foregroundStyle(item.variance > 0 ? Color.green : (item.variance < 0 ? Color.red : Color.black))
+                        Text(item.sku).font(AppFonts.sansSerif(size: 10)).frame(width: 80, alignment: .leading)
+                        Text("\(item.expectedQty)").font(AppFonts.sansSerif(size: 10)).frame(width: 60, alignment: .trailing)
+                        Text("\(item.countedQty)").font(AppFonts.sansSerif(size: 10)).frame(width: 60, alignment: .trailing)
+                        Text("\(item.variance > 0 ? "+" : "")\(item.variance)").font(AppFonts.sansSerif(size: 10, weight: .bold))
+                            .foregroundStyle(item.variance > 0 ? AppColors.success : (item.variance < 0 ? AppColors.error : Color.black))
                             .frame(width: 60, alignment: .trailing)
                     }
                     .foregroundStyle(.black)

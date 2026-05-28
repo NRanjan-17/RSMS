@@ -14,7 +14,7 @@ struct EmployeeDetailView: View {
                         router.pop()
                     }) {
                         Image(systemName: "arrow.left")
-                            .font(.system(size: 20))
+                            .font(AppFonts.sansSerif(size: 20))
                             .foregroundStyle(.white)
                             .frame(width: 44, height: 44)
                             .background(AppColors.surface)

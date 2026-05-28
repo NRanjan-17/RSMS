@@ -42,7 +42,7 @@ struct ProductImageGalleryView: View {
             Rectangle().fill(AppColors.surface).frame(height: 300)
             VStack(spacing: 10) {
                 Image(systemName: "photo")
-                    .font(.system(size: 28))
+                    .font(AppFonts.sansSerif(size: 28))
                     .foregroundStyle(AppColors.gold.opacity(0.4))
                 Text("NO IMAGE")
                     .font(AppFonts.sansSerif(size: 10))
@@ -112,7 +112,7 @@ struct ZoomableImageView: View {
                 ZStack {
                     Rectangle().fill(AppColors.surface2)
                     Image(systemName: "photo")
-                        .font(.system(size: 28))
+                        .font(AppFonts.sansSerif(size: 28))
                         .foregroundStyle(AppColors.gold.opacity(0.4))
                 }
             @unknown default:

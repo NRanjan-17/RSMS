@@ -85,7 +85,7 @@ struct DamagedItemReportSheet: View {
                                     .overlay {
                                         VStack(spacing: 10) {
                                             Image(systemName: "camera.macro")
-                                                .font(.system(size: 30))
+                                                .font(AppFonts.sansSerif(size: 30))
                                                 .foregroundStyle(AppColors.gold)
                                             Text("Attach a clear damage photo")
                                                 .font(AppFonts.sansSerif(size: 13))

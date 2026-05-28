@@ -62,7 +62,7 @@ struct AccountRegistrationView: View {
         VStack(alignment: .leading, spacing: 0) {
             Button(action: onBack) {
                 Image(systemName: "chevron.left")
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                     .foregroundStyle(AppColors.gold)
                     .padding(.vertical, 20)
             }
@@ -152,7 +152,7 @@ struct AccountRegistrationView: View {
         Button(action: { viewModel.acceptedTerms.toggle() }) {
             HStack(alignment: .top, spacing: 12) {
                 Image(systemName: viewModel.acceptedTerms ? "checkmark.square.fill" : "square")
-                    .font(.system(size: 20))
+                    .font(AppFonts.sansSerif(size: 20))
                     .foregroundStyle(AppColors.gold)
                 
                 Text("I agree to the internal policies, data privacy agreement, and terms of service required for system access.")
@@ -238,7 +238,7 @@ private struct UploadButtonLabel: View {
             
             HStack(spacing: 12) {
                 Image(systemName: isUploaded ? "checkmark" : icon)
-                    .font(.system(size: 14))
+                    .font(AppFonts.sansSerif(size: 14))
                     .foregroundStyle(isUploaded ? AppColors.success : AppColors.gold)
                 
                 Text(isUploaded ? "Image attached successfully" : "Upload image")
@@ -248,7 +248,7 @@ private struct UploadButtonLabel: View {
                 Spacer()
                 
                 Image(systemName: "arrow.up.circle")
-                    .font(.system(size: 16))
+                    .font(AppFonts.sansSerif(size: 16))
                     .foregroundStyle(isUploaded ? AppColors.success : AppColors.gold.opacity(0.4))
             }
             .padding(.vertical, 12)

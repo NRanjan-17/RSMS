@@ -40,7 +40,7 @@ struct ApplicationStatusView: View {
                             .frame(width: 120, height: 120)
                         
                         Image(systemName: statusIcon)
-                            .font(.system(size: 48))
+                            .font(AppFonts.sansSerif(size: 48))
                             .foregroundStyle(statusColor)
                     }
                     

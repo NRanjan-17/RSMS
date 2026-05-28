@@ -26,7 +26,7 @@ struct ClientProfileView: View {
                 HStack(spacing: 16) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                             .foregroundStyle(AppColors.gold)
                     }
                     Text("Clients")
@@ -295,7 +295,7 @@ private struct ClientOverviewTab: View {
                                     }
                                     Spacer()
                                     Image(systemName: "chevron.right")
-                                        .font(.system(size: 12))
+                                        .font(AppFonts.sansSerif(size: 12))
                                         .foregroundStyle(AppColors.tertiary)
                                 }
                                 .padding(.horizontal, 14)
@@ -325,7 +325,7 @@ private struct ClientOverviewTab: View {
                                 .fill(AppColors.surface2)
                                 .frame(width: 42, height: 42)
                             Image(systemName: "circle.grid.cross")
-                                .font(.system(size: 16))
+                                .font(AppFonts.sansSerif(size: 16))
                                 .foregroundStyle(AppColors.gold)
                                 .opacity(0.4)
                         }
@@ -367,7 +367,7 @@ private struct ClientOverviewTab: View {
                                     .fill(AppColors.surface2)
                                     .frame(width: 42, height: 42)
                                 Image(systemName: "gift")
-                                    .font(.system(size: 16))
+                                    .font(AppFonts.sansSerif(size: 16))
                                     .foregroundStyle(AppColors.gold)
                                     .opacity(0.8)
                             }
@@ -397,7 +397,7 @@ private struct ClientOverviewTab: View {
                                     .fill(AppColors.surface2)
                                     .frame(width: 42, height: 42)
                                 Image(systemName: "heart")
-                                    .font(.system(size: 16))
+                                    .font(AppFonts.sansSerif(size: 16))
                                     .foregroundStyle(AppColors.gold)
                                     .opacity(0.8)
                             }
@@ -423,7 +423,7 @@ private struct ClientOverviewTab: View {
                                     .fill(AppColors.surface2)
                                     .frame(width: 42, height: 42)
                                 Image(systemName: "calendar.badge.exclamationmark")
-                                    .font(.system(size: 16))
+                                    .font(AppFonts.sansSerif(size: 16))
                                     .foregroundStyle(AppColors.secondary)
                                     .opacity(0.4)
                             }
@@ -499,7 +499,7 @@ private struct QuickActionButton: View {
         Button(action: action) {
             VStack(spacing: 5) {
                 Image(systemName: icon)
-                    .font(.system(size: 16))
+                    .font(AppFonts.sansSerif(size: 16))
                     .foregroundStyle(AppColors.background)
                 Text(label)
                     .font(AppFonts.sansSerif(size: 10, weight: .medium))
@@ -541,7 +541,7 @@ private struct ClientHistoryTab: View {
                                         .fill(AppColors.surface2)
                                         .frame(width: 36, height: 36)
                                     Image(systemName: "handbag")
-                                        .font(.system(size: 14))
+                                        .font(AppFonts.sansSerif(size: 14))
                                         .foregroundStyle(AppColors.gold)
                                         .opacity(0.4)
                                 }
@@ -593,7 +593,7 @@ private struct ClientWishlistTab: View {
                 if wishlist.isEmpty {
                     VStack(spacing: 12) {
                         Image(systemName: "heart.fill")
-                            .font(.system(size: 24))
+                            .font(AppFonts.sansSerif(size: 24))
                             .foregroundStyle(AppColors.gold.opacity(0.5))
                         
                         Text("No items in wishlist yet")
@@ -659,14 +659,14 @@ private struct ClientWishlistTab: View {
                                                     .clipShape(RoundedRectangle(cornerRadius: 10))
                                             default:
                                                 Image(systemName: "circle.grid.cross")
-                                                    .font(.system(size: 18))
+                                                    .font(AppFonts.sansSerif(size: 18))
                                                     .foregroundStyle(AppColors.gold)
                                                     .opacity(0.4)
                                             }
                                         }
                                     } else {
                                         Image(systemName: "circle.grid.cross")
-                                            .font(.system(size: 18))
+                                            .font(AppFonts.sansSerif(size: 18))
                                             .foregroundStyle(AppColors.gold)
                                             .opacity(0.4)
                                     }
@@ -725,8 +725,8 @@ private struct ClientWishlistTab: View {
                 }
             }) {
                 Image(systemName: w.quantity == 1 ? "trash" : "minus")
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundStyle(w.quantity == 1 ? Color.red.opacity(0.8) : AppColors.gold)
+                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                    .foregroundStyle(w.quantity == 1 ? AppColors.error.opacity(0.8) : AppColors.gold)
                     .frame(width: 26, height: 26)
                     .background(AppColors.surface)
                     .clipShape(Circle())
@@ -750,7 +750,7 @@ private struct ClientWishlistTab: View {
                 }
             }) {
                 Image(systemName: "plus")
-                    .font(.system(size: 10, weight: .bold))
+                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
                     .foregroundStyle(AppColors.gold)
                     .frame(width: 26, height: 26)
                     .background(AppColors.surface)
@@ -916,7 +916,7 @@ private struct ClientNotesTab: View {
             if notes.isEmpty {
                 VStack(spacing: 8) {
                     Image(systemName: "square.and.pencil")
-                        .font(.system(size: 24))
+                        .font(AppFonts.sansSerif(size: 24))
                         .foregroundStyle(AppColors.gold.opacity(0.5))
                     Text("No notes recorded yet")
                         .font(AppFonts.sansSerif(size: 13))
@@ -988,7 +988,7 @@ struct SwipeToDeleteNote: View {
                     RoundedRectangle(cornerRadius: 12)
                         .fill(AppColors.error)
                     Image(systemName: "trash.fill")
-                        .font(.system(size: 18, weight: .semibold))
+                        .font(AppFonts.sansSerif(size: 18, weight: .semibold))
                         .foregroundStyle(.white)
                 }
                 .frame(width: 70)
@@ -1085,7 +1085,7 @@ struct ClientProfileProductRowView: View {
                     .fill(AppColors.surface2)
                     .frame(width: 48, height: 48)
                 Image(systemName: "circle.grid.cross")
-                    .font(.system(size: 16))
+                    .font(AppFonts.sansSerif(size: 16))
                     .foregroundStyle(AppColors.gold)
                     .opacity(0.3)
             }
@@ -1104,7 +1104,7 @@ struct ClientProfileProductRowView: View {
             }
             Spacer()
             Image(systemName: "plus.circle.fill")
-                .font(.system(size: 20))
+                .font(AppFonts.sansSerif(size: 20))
                 .foregroundStyle(AppColors.gold)
         }
         .padding(12)

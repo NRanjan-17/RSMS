@@ -112,7 +112,7 @@ struct AfterSalesIntakeView: View {
                 HStack(spacing: 16) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                             .foregroundStyle(AppColors.gold)
                             .frame(width: 44, height: 44)
                     }
@@ -173,7 +173,7 @@ struct AfterSalesIntakeView: View {
                                             .foregroundStyle(selectedPurchase == nil ? AppColors.secondary : .white)
                                         Spacer()
                                         Image(systemName: isDropdownOpen ? "chevron.up" : "chevron.down")
-                                            .font(.system(size: 12, weight: .bold))
+                                            .font(AppFonts.sansSerif(size: 12, weight: .bold))
                                             .foregroundStyle(AppColors.gold)
                                     }
                                 }
@@ -215,7 +215,7 @@ struct AfterSalesIntakeView: View {
                                                         Spacer()
                                                         if selectedPurchase?.id == p.id {
                                                             Image(systemName: "checkmark")
-                                                                .font(.system(size: 12, weight: .bold))
+                                                                .font(AppFonts.sansSerif(size: 12, weight: .bold))
                                                                 .foregroundStyle(AppColors.gold)
                                                         }
                                                     }
@@ -292,7 +292,7 @@ struct AfterSalesIntakeView: View {
                                     }) {
                                         VStack(spacing: 8) {
                                             Image(systemName: "plus")
-                                                .font(.system(size: 20, weight: .medium))
+                                                .font(AppFonts.sansSerif(size: 20, weight: .medium))
                                                 .foregroundStyle(AppColors.gold)
                                             Text("Add Photo")
                                                 .font(AppFonts.sansSerif(size: 11, weight: .medium))
@@ -326,7 +326,7 @@ struct AfterSalesIntakeView: View {
                                             }) {
                                                 Image(systemName: "xmark.circle.fill")
                                                     .foregroundStyle(.white, AppColors.tertiary)
-                                                    .font(.system(size: 20))
+                                                    .font(AppFonts.sansSerif(size: 20))
                                                     .padding(4)
                                             }
                                         }
@@ -531,7 +531,7 @@ struct AfterSalesIntakeView: View {
                 AppColors.background.ignoresSafeArea()
                 VStack(spacing: 20) {
                     Image(systemName: "camera.fill")
-                        .font(.system(size: 50))
+                        .font(AppFonts.sansSerif(size: 50))
                         .foregroundStyle(AppColors.gold)
                     Text("Camera Modal (Placeholder)")
                         .font(AppFonts.serif(size: 20, weight: .semibold))
@@ -669,7 +669,7 @@ struct AfterSalesTrackingView: View {
                 HStack(spacing: 16) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                             .foregroundStyle(AppColors.gold)
                             .frame(width: 44, height: 44)
                     }

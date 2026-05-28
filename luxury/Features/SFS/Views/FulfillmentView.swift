@@ -26,7 +26,7 @@ struct FulfillmentView: View {
                 HStack(spacing: 16) {
                     Button(action: { router.pop() }) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                             .foregroundStyle(AppColors.gold)
                     }
                     Text("SFS Orders")
@@ -103,7 +103,7 @@ struct FulfillmentView: View {
                         Spacer()
                         VStack(spacing: 12) {
                             Image(systemName: viewModel.selectedSegment == 0 ? "shippingbox" : "checkmark.circle")
-                                .font(.system(size: 48))
+                                .font(AppFonts.sansSerif(size: 48))
                                 .foregroundStyle(AppColors.tertiary)
                             Text(viewModel.selectedSegment == 0 ? "No Pending SFS Orders" : "No Completed SFS Orders")
                                 .font(AppFonts.serif(size: 18, weight: .medium))

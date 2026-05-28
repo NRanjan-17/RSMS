@@ -25,7 +25,7 @@ struct StockView: View {
                     Spacer()
                     Button(action: { showingSettings = true }) {
                         Image(systemName: "gearshape")
-                            .font(.system(size: 20))
+                            .font(AppFonts.sansSerif(size: 20))
                             .foregroundStyle(AppColors.gold)
                     }
                 }

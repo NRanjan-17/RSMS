@@ -116,7 +116,7 @@ struct SecuritySettingsView: View {
                                 }) {
                                     HStack {
                                         Image(systemName: "plus.circle.fill")
-                                            .font(.system(size: 16))
+                                            .font(AppFonts.sansSerif(size: 16))
                                             .foregroundStyle(AppColors.gold)
                                         Text("Add Device")
                                             .font(AppFonts.sansSerif(size: 14, weight: .bold))
@@ -176,7 +176,7 @@ struct SecuritySettingsView: View {
                                 }) {
                                     HStack {
                                         Image(systemName: "plus.circle.fill")
-                                            .font(.system(size: 16))
+                                            .font(AppFonts.sansSerif(size: 16))
                                             .foregroundStyle(AppColors.gold)
                                         Text("Add Phone Number")
                                             .font(AppFonts.sansSerif(size: 14, weight: .bold))

@@ -45,7 +45,7 @@ struct SellingView: View {
                     .foregroundStyle(AppColors.text)
                 Button(action: { router.presentFullScreen(SARoute.barcodeScanner) }) {
                     Image(systemName: "barcode.viewfinder")
-                        .font(.system(size: 18))
+                        .font(AppFonts.sansSerif(size: 18))
                         .foregroundStyle(AppColors.gold)
                 }
             }
@@ -146,13 +146,13 @@ private struct CatalogGridCard: View {
                                 ProgressView().tint(AppColors.gold)
                             default:
                                 Image(systemName: "photo")
-                                    .font(.system(size: 28))
+                                    .font(AppFonts.sansSerif(size: 28))
                                     .foregroundStyle(AppColors.gold.opacity(0.35))
                             }
                         }
                     } else {
                         Image(systemName: "photo")
-                            .font(.system(size: 28))
+                            .font(AppFonts.sansSerif(size: 28))
                             .foregroundStyle(AppColors.gold.opacity(0.35))
                     }
                 }

@@ -21,7 +21,7 @@ struct StaffRequestsView: View {
                 } else if viewModel.pendingStaff.isEmpty {
                     VStack(spacing: 12) {
                         Image(systemName: "person.crop.circle.badge.questionmark")
-                            .font(.system(size: 40))
+                            .font(AppFonts.sansSerif(size: 40))
                             .foregroundStyle(AppColors.tertiary)
                         Text("No pending staff requests")
                             .font(AppFonts.sansSerif(size: 14))
@@ -96,7 +96,7 @@ struct StaffRequestsView: View {
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 12))
+                    .font(AppFonts.sansSerif(size: 12))
                     .foregroundStyle(AppColors.tertiary)
             }
             .padding(18)

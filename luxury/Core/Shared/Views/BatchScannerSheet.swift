@@ -57,7 +57,7 @@ struct BatchScannerSheet: View {
                     .frame(width: 250, height: 250)
                     .overlay(
                         Rectangle()
-                            .fill(Color.red)
+                            .fill(AppColors.error)
                             .frame(height: 2)
                             .offset(y: scanLineOffset)
                             .onAppear {
@@ -107,7 +107,7 @@ struct BatchScannerSheet: View {
                     }
                     .padding(.vertical, 12)
                     .padding(.horizontal, 24)
-                    .background(hudStatus == .success ? AppColors.success : (hudStatus == .duplicate ? AppColors.error : Color.orange))
+                    .background(hudStatus == .success ? AppColors.success : (hudStatus == .duplicate ? AppColors.error : AppColors.warning))
                     .clipShape(Capsule())
                     .transition(.move(edge: .top).combined(with: .opacity))
                     .shadow(radius: 5)
@@ -222,7 +222,7 @@ struct ScannedSerialsListView: View {
 
                         Button(action: submitManualEntry) {
                             Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 24))
+                                .font(AppFonts.sansSerif(size: 24))
                                 .foregroundStyle(manualEntry.isEmpty ? AppColors.tertiary : AppColors.gold)
                         }
                         .disabled(manualEntry.isEmpty)

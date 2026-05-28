@@ -30,7 +30,7 @@ struct CreateAppointmentView: View {
                 HStack(spacing: 16) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                             .foregroundStyle(AppColors.gold)
                     }
                     Text("Appointments")
@@ -73,7 +73,7 @@ struct CreateAppointmentView: View {
                                         Spacer()
                                         Image(systemName: "chevron.up.chevron.down")
                                             .foregroundStyle(AppColors.tertiary)
-                                            .font(.system(size: 12))
+                                            .font(AppFonts.sansSerif(size: 12))
                                     }
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                 }
@@ -118,7 +118,7 @@ struct CreateAppointmentView: View {
                                         Spacer()
                                         if isSelected {
                                             Image(systemName: "checkmark")
-                                                .font(.system(size: 12, weight: .bold))
+                                                .font(AppFonts.sansSerif(size: 12, weight: .bold))
                                                 .foregroundStyle(AppColors.gold)
                                         }
                                     }

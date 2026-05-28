@@ -21,7 +21,7 @@ public struct EndlessAisleWorkflowView: View {
                 HStack(spacing: 16) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                             .foregroundStyle(AppColors.gold)
                     }
                     
@@ -56,7 +56,7 @@ public struct EndlessAisleWorkflowView: View {
                                                 .fill(AppColors.surface2)
                                                 .frame(width: 48, height: 48)
                                             Image(systemName: "circle.grid.cross")
-                                                .font(.system(size: 18))
+                                                .font(AppFonts.sansSerif(size: 18))
                                                 .foregroundStyle(AppColors.gold)
                                                 .opacity(0.3)
                                         }
@@ -113,7 +113,7 @@ public struct EndlessAisleWorkflowView: View {
                                             HStack(spacing: 12) {
                                                 Image(systemName: "checkmark.circle.fill")
                                                     .foregroundStyle(AppColors.success)
-                                                    .font(.system(size: 20))
+                                                    .font(AppFonts.sansSerif(size: 20))
                                                 Text("This item is in stock at DLF Emporio, Delhi. Sourcing not required.")
                                                     .font(AppFonts.sansSerif(size: 13))
                                                     .foregroundStyle(AppColors.success)
@@ -123,7 +123,7 @@ public struct EndlessAisleWorkflowView: View {
                                             HStack(spacing: 12) {
                                                 Image(systemName: "exclamationmark.triangle.fill")
                                                     .foregroundStyle(AppColors.error)
-                                                    .font(.system(size: 20))
+                                                    .font(AppFonts.sansSerif(size: 20))
                                                 Text("Item out of stock at all regional locations.")
                                                     .font(AppFonts.sansSerif(size: 13))
                                                     .foregroundStyle(AppColors.error)
@@ -134,7 +134,7 @@ public struct EndlessAisleWorkflowView: View {
                                                 HStack(spacing: 12) {
                                                     Image(systemName: "exclamationmark.triangle.fill")
                                                         .foregroundStyle(AppColors.warning)
-                                                        .font(.system(size: 20))
+                                                        .font(AppFonts.sansSerif(size: 20))
                                                     VStack(alignment: .leading, spacing: 2) {
                                                         Text("Out of Stock Locally")
                                                             .font(AppFonts.sansSerif(size: 14, weight: .bold))

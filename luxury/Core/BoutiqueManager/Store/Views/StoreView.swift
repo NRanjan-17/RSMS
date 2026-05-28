@@ -177,7 +177,7 @@ struct StoreView: View {
                                             
                                             if isInteractive {
                                                 Image(systemName: "chevron.right")
-                                                    .font(.system(size: 14, weight: .semibold))
+                                                    .font(AppFonts.sansSerif(size: 14, weight: .semibold))
                                                     .foregroundStyle(AppColors.gold)
                                                     .padding(.leading, 8)
                                             }

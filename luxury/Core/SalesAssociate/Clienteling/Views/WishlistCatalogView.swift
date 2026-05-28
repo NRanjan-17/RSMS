@@ -219,13 +219,13 @@ private struct WishlistGridCard: View {
                                 ProgressView().tint(AppColors.gold)
                             default:
                                 Image(systemName: "photo")
-                                    .font(.system(size: 28))
+                                    .font(AppFonts.sansSerif(size: 28))
                                     .foregroundStyle(AppColors.gold.opacity(0.35))
                             }
                         }
                     } else {
                         Image(systemName: "photo")
-                            .font(.system(size: 28))
+                            .font(AppFonts.sansSerif(size: 28))
                             .foregroundStyle(AppColors.gold.opacity(0.35))
                     }
                 }

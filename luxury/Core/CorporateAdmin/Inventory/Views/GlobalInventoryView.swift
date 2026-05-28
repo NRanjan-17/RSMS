@@ -87,7 +87,7 @@ struct GlobalInventoryView: View {
                         }
                     } label: {
                         Image(systemName: "line.3.horizontal.decrease.circle")
-                            .font(.system(size: 20))
+                            .font(AppFonts.sansSerif(size: 20))
                             .foregroundStyle(viewModel.filterStatus == nil ? AppColors.secondary : AppColors.gold)
                             .frame(width: 48, height: 48)
                             .background(AppColors.surface)
@@ -120,7 +120,7 @@ struct GlobalInventoryView: View {
                 } else if viewModel.filteredSummaries.isEmpty {
                     Spacer()
                     Image(systemName: "shippingbox.fill")
-                        .font(.system(size: 40))
+                        .font(AppFonts.sansSerif(size: 40))
                         .foregroundStyle(AppColors.secondary)
                         .padding(.bottom, 16)
                     Text("No inventory records found.")
@@ -165,7 +165,7 @@ private struct InventoryKPIBox: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Image(systemName: icon)
-                    .font(.system(size: 14))
+                    .font(AppFonts.sansSerif(size: 14))
                     .foregroundStyle(color)
                 Spacer()
             }

@@ -50,7 +50,7 @@ struct RFIDView: View {
                         if viewModel.recentSessions.isEmpty {
                             VStack(spacing: 12) {
                                 Image(systemName: "doc.text.magnifyingglass")
-                                    .font(.system(size: 32))
+                                    .font(AppFonts.sansSerif(size: 32))
                                     .foregroundStyle(AppColors.secondary)
                                 
                                 Text("No recent scan sessions")

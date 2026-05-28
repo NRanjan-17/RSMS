@@ -43,7 +43,7 @@ struct AppointmentListView: View {
                 HStack(spacing: 16) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                             .foregroundStyle(AppColors.gold)
                     }
                     Text("Appointments")
@@ -135,7 +135,7 @@ struct AppointmentListView: View {
                                     
                                     Spacer()
                                     Image(systemName: "chevron.right")
-                                        .font(.system(size: 12))
+                                        .font(AppFonts.sansSerif(size: 12))
                                         .foregroundStyle(AppColors.tertiary)
                                 }
                                 .padding(.horizontal, 14)
@@ -167,7 +167,7 @@ struct AppointmentListView: View {
                                 .shadow(color: AppColors.gold.opacity(0.3), radius: 10, y: 4)
                             
                             Image(systemName: "plus")
-                                .font(.system(size: 20, weight: .bold))
+                                .font(AppFonts.sansSerif(size: 20, weight: .bold))
                                 .foregroundStyle(AppColors.background)
                         }
                     }
@@ -244,12 +244,12 @@ private struct AppointmentRowView: View {
                     ZStack {
                         Circle().fill(AppColors.success.opacity(0.15)).frame(width: 20, height: 20)
                         Image(systemName: "checkmark")
-                            .font(.system(size: 10, weight: .bold))
+                            .font(AppFonts.sansSerif(size: 10, weight: .bold))
                             .foregroundStyle(AppColors.success)
                     }
                 } else {
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 12))
+                        .font(AppFonts.sansSerif(size: 12))
                         .foregroundStyle(AppColors.tertiary)
                 }
             }

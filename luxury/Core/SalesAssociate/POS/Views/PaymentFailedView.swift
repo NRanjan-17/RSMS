@@ -24,7 +24,7 @@ struct PaymentFailedView: View {
                         .frame(width: 80, height: 80)
                     
                     Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 40))
+                        .font(AppFonts.sansSerif(size: 40))
                         .foregroundStyle(AppColors.error)
                 }
                 .padding(.bottom, 32)

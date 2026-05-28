@@ -47,7 +47,7 @@ struct UserManagementView: View {
                     } label: {
                         ZStack(alignment: .topTrailing) {
                             Image(systemName: "ellipsis")
-                                .font(.system(size: 24))
+                                .font(AppFonts.sansSerif(size: 24))
                                 .foregroundStyle(AppColors.gold)
                                 .frame(width: 44, height: 44)
                                 .background(.ultraThinMaterial, in: Circle())
@@ -228,7 +228,7 @@ private struct ApprovedBoutiquesListView: View {
             if viewModel.approvedBoutiques.isEmpty {
                 VStack(spacing: 12) {
                     Image(systemName: "house.fill")
-                        .font(.system(size: 40))
+                        .font(AppFonts.sansSerif(size: 40))
                         .foregroundStyle(AppColors.tertiary)
                     Text("No boutiques registered yet")
                         .font(AppFonts.sansSerif(size: 14))
@@ -239,7 +239,7 @@ private struct ApprovedBoutiquesListView: View {
             } else if viewModel.filteredApprovedBoutiques.isEmpty {
                 VStack(spacing: 12) {
                     Image(systemName: "magnifyingglass")
-                        .font(.system(size: 40))
+                        .font(AppFonts.sansSerif(size: 40))
                         .foregroundStyle(AppColors.tertiary)
                     Text("No results matching \"\(viewModel.searchText)\"")
                         .font(AppFonts.sansSerif(size: 14))
@@ -264,7 +264,7 @@ private struct ApprovedBoutiquesListView: View {
                                 }
                                 Spacer()
                                 Image(systemName: "chevron.right")
-                                    .font(.system(size: 12))
+                                    .font(AppFonts.sansSerif(size: 12))
                                     .foregroundStyle(AppColors.tertiary)
                             }
                             .padding(18)

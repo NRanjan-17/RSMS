@@ -20,7 +20,7 @@ struct NewTransferView: View {
                 HStack {
                     Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                             .foregroundStyle(AppColors.gold)
                     }
                     
@@ -81,7 +81,7 @@ struct NewTransferView: View {
                                                 .foregroundStyle(viewModel.destinationStore == nil ? AppColors.tertiary : .white)
                                                 .lineLimit(1)
                                             Image(systemName: "chevron.up.chevron.down")
-                                                .font(.system(size: 10))
+                                                .font(AppFonts.sansSerif(size: 10))
                                                 .foregroundStyle(AppColors.secondary)
                                         }
                                     }
@@ -138,7 +138,7 @@ struct NewTransferView: View {
                                             }) {
                                                 HStack {
                                                     Image(systemName: "barcode.viewfinder")
-                                                        .font(.system(size: 14))
+                                                        .font(AppFonts.sansSerif(size: 14))
                                                     Text("Scan \(product.name)")
                                                         .font(AppFonts.sansSerif(size: 13, weight: .semibold))
                                                 }

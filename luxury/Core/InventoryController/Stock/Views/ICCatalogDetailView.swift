@@ -68,7 +68,7 @@ struct ICCatalogDetailView: View {
                                             RoundedRectangle(cornerRadius: 12)
                                                 .fill(AppColors.surface)
                                                 .frame(width: 100, height: 100)
-                                                .overlay(Image(systemName: "photo").foregroundStyle(.gray))
+                                                .overlay(Image(systemName: "photo").foregroundStyle(AppColors.secondary))
                                         } else {
                                             RoundedRectangle(cornerRadius: 12)
                                                 .fill(AppColors.surface)
@@ -80,7 +80,7 @@ struct ICCatalogDetailView: View {
                                     RoundedRectangle(cornerRadius: 12)
                                         .fill(AppColors.surface)
                                         .frame(width: 100, height: 100)
-                                        .overlay(Image(systemName: "photo").foregroundStyle(.gray))
+                                        .overlay(Image(systemName: "photo").foregroundStyle(AppColors.secondary))
                                 }
                             }
                         }
@@ -100,7 +100,7 @@ struct ICCatalogDetailView: View {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: { dismiss() }) {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(AppFonts.sansSerif(size: 16, weight: .semibold))
                         .foregroundStyle(AppColors.gold)
                 }
             }

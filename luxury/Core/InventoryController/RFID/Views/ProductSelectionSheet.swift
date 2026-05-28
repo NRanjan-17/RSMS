@@ -100,7 +100,7 @@ struct ProductSelectionSheet: View {
                                             Spacer()
                                             Image(systemName: "chevron.right")
                                                 .foregroundStyle(AppColors.tertiary)
-                                                .font(.system(size: 14))
+                                                .font(AppFonts.sansSerif(size: 14))
                                         }
                                         .padding(16)
                                         .background(AppColors.surface)

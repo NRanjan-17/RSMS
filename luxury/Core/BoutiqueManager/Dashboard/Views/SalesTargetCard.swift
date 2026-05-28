@@ -82,7 +82,7 @@ struct SalesTargetCard: View {
     private var noTargetView: some View {
         HStack(spacing: 14) {
             Image(systemName: "target")
-                .font(.system(size: 22))
+                .font(AppFonts.sansSerif(size: 22))
                 .foregroundStyle(AppColors.tertiary)
             VStack(alignment: .leading, spacing: 4) {
                 Text("No target set")

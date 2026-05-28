@@ -33,7 +33,7 @@ struct PendingBoutiquesView: View {
                     } else if viewModel.pendingBoutiques.isEmpty {
                         VStack(spacing: 12) {
                             Image(systemName: "tray.fill")
-                                .font(.system(size: 40))
+                                .font(AppFonts.sansSerif(size: 40))
                                 .foregroundStyle(AppColors.tertiary)
                             Text("No pending requests")
                                 .font(AppFonts.sansSerif(size: 14))
@@ -60,7 +60,7 @@ struct PendingBoutiquesView: View {
                                             }
                                             Spacer()
                                             Image(systemName: "chevron.right")
-                                                .font(.system(size: 12))
+                                                .font(AppFonts.sansSerif(size: 12))
                                                 .foregroundStyle(AppColors.tertiary)
                                         }
                                         .padding(18)

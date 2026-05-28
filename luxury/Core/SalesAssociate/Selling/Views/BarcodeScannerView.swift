@@ -18,7 +18,7 @@ struct BarcodeScannerView: View {
                 HStack {
                     Button(action: { dismiss() }) {
                         Image(systemName: "xmark")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                             .foregroundStyle(.white)
                     }
                     Spacer()
@@ -27,7 +27,7 @@ struct BarcodeScannerView: View {
                         .foregroundStyle(.white)
                     Spacer()
                     Image(systemName: "bolt.fill")
-                        .font(.system(size: 20))
+                        .font(AppFonts.sansSerif(size: 20))
                         .foregroundStyle(AppColors.gold)
                 }
                 .padding(.horizontal, 24)

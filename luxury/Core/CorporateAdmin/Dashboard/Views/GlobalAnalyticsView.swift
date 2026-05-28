@@ -26,7 +26,7 @@ struct GlobalAnalyticsView: View {
                     Spacer()
                     Button(action: { showingSettings = true }) {
                         Image(systemName: "gearshape")
-                            .font(.system(size: 20))
+                            .font(AppFonts.sansSerif(size: 20))
                             .foregroundStyle(AppColors.gold)
                     }
                 }
@@ -114,7 +114,7 @@ struct GlobalAnalyticsView: View {
                                         }
                                         Spacer()
                                         Image(systemName: "chevron.right")
-                                            .font(.system(size: 12))
+                                            .font(AppFonts.sansSerif(size: 12))
                                             .foregroundStyle(AppColors.tertiary)
                                     }
                                     .padding(18)
@@ -195,7 +195,7 @@ struct GlobalMetricCard: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top) {
                 Image(systemName: kpi.icon)
-                    .font(.system(size: 18))
+                    .font(AppFonts.sansSerif(size: 18))
                     .foregroundStyle(AppColors.gold)
                     .frame(height: 20)
                 Spacer()

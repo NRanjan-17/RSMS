@@ -36,7 +36,7 @@ struct CatalogsView: View {
                         router.push(CARoute.catalogForm(editCatalog: nil))
                     }) {
                         Image(systemName: "plus")
-                            .font(.system(size: 20))
+                            .font(AppFonts.sansSerif(size: 20))
                             .foregroundStyle(AppColors.gold)
                             .frame(width: 44, height: 44)
                             .background(.ultraThinMaterial)
@@ -93,7 +93,7 @@ struct CatalogsView: View {
                 } else if viewModel.filteredCatalogs.isEmpty {
                     Spacer()
                     Image(systemName: "box.truck.badge.clock.fill")
-                        .font(.system(size: 40))
+                        .font(AppFonts.sansSerif(size: 40))
                         .foregroundStyle(AppColors.secondary)
                         .padding(.bottom, 16)
                     Text(viewModel.searchText.isEmpty ? "No catalogs found." : "No matching catalogs.")
@@ -160,7 +160,7 @@ struct CatalogItemRow: View {
             HStack {
                 HStack(spacing: 6) {
                     Image(systemName: "tag.fill")
-                        .font(.system(size: 10))
+                        .font(AppFonts.sansSerif(size: 10))
                         .foregroundStyle(AppColors.secondary)
                     Text(catalog.category.rawValue)
                         .font(AppFonts.sansSerif(size: 12))
@@ -171,7 +171,7 @@ struct CatalogItemRow: View {
                 
                 HStack(spacing: 6) {
                     Image(systemName: "shippingbox.fill")
-                        .font(.system(size: 10))
+                        .font(AppFonts.sansSerif(size: 10))
                         .foregroundStyle(availableStock > 0 ? AppColors.success : AppColors.error)
                     Text("\(availableStock) in stock")
                         .font(AppFonts.sansSerif(size: 12, weight: .semibold))

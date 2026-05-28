@@ -97,7 +97,7 @@ struct POSView: View {
                         if viewModel.cartItems.isEmpty {
                             VStack(spacing: 12) {
                                 Image(systemName: "cart")
-                                    .font(.system(size: 32))
+                                    .font(AppFonts.sansSerif(size: 32))
                                     .foregroundStyle(AppColors.gold.opacity(0.5))
                                 Text("Your cart is empty")
                                     .font(AppFonts.sansSerif(size: 14))
@@ -114,7 +114,7 @@ struct POSView: View {
                                             .fill(AppColors.surface2)
                                             .frame(width: 48, height: 48)
                                         Image(systemName: "circle.grid.cross")
-                                            .font(.system(size: 20))
+                                            .font(AppFonts.sansSerif(size: 20))
                                             .foregroundStyle(AppColors.gold)
                                             .opacity(0.3)
                                     }
@@ -140,7 +140,7 @@ struct POSView: View {
                                                 .stroke(AppColors.gold15, lineWidth: 0.5)
                                                 .background(AppColors.surface2)
                                                 .frame(width: 26, height: 26)
-                                                .overlay(Text("−").font(.system(size: 14)).foregroundStyle(AppColors.secondary))
+                                                .overlay(Text("−").font(AppFonts.sansSerif(size: 14)).foregroundStyle(AppColors.secondary))
                                         }
                                         
                                         Text("\(item.qty)")
@@ -152,7 +152,7 @@ struct POSView: View {
                                                 .stroke(AppColors.gold15, lineWidth: 0.5)
                                                 .background(AppColors.surface2)
                                                 .frame(width: 26, height: 26)
-                                                .overlay(Text("+").font(.system(size: 14)).foregroundStyle(AppColors.secondary))
+                                                .overlay(Text("+").font(AppFonts.sansSerif(size: 14)).foregroundStyle(AppColors.secondary))
                                         }
                                     }
                                 }
@@ -263,7 +263,7 @@ struct POSView: View {
                             } else {
                                 Text("Checkout · \(viewModel.formatCurrency(viewModel.total))")
                                 Image(systemName: "arrow.right")
-                                    .font(.system(size: 14, weight: .semibold))
+                                    .font(AppFonts.sansSerif(size: 14, weight: .semibold))
                             }
                         }
                         .font(AppFonts.sansSerif(size: 15, weight: .medium))
@@ -357,7 +357,7 @@ private struct CourtesyButton: View {
                     .foregroundStyle(AppColors.gold)
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(AppFonts.sansSerif(size: 12, weight: .semibold))
                     .foregroundStyle(AppColors.gold.opacity(0.5))
             }
             .padding()

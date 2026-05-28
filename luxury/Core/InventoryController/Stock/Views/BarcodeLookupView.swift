@@ -51,7 +51,7 @@ struct BarcodeLookupView: View {
                         viewModel.lookupItem(by: manualEntry)
                     }) {
                         Image(systemName: "magnifyingglass.circle.fill")
-                            .font(.system(size: 32))
+                            .font(AppFonts.sansSerif(size: 32))
                             .foregroundStyle(manualEntry.isEmpty ? AppColors.tertiary : AppColors.gold)
                     }
                     .disabled(manualEntry.isEmpty)
@@ -69,7 +69,7 @@ struct BarcodeLookupView: View {
                         } else if let error = viewModel.errorMessage {
                             VStack(spacing: 12) {
                                 Image(systemName: "exclamationmark.triangle")
-                                    .font(.system(size: 32))
+                                    .font(AppFonts.sansSerif(size: 32))
                                     .foregroundStyle(AppColors.error)
                                 Text(error)
                                     .font(AppFonts.sansSerif(size: 14))
@@ -142,7 +142,7 @@ struct BarcodeLookupView: View {
                             // Initial State
                             VStack(spacing: 12) {
                                 Image(systemName: "barcode.viewfinder")
-                                    .font(.system(size: 32))
+                                    .font(AppFonts.sansSerif(size: 32))
                                     .foregroundStyle(AppColors.tertiary)
                                 Text("Scan a barcode to see live stock details")
                                     .font(AppFonts.sansSerif(size: 14))

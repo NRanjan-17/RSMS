@@ -107,7 +107,7 @@ private struct SummaryKPIBox: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Image(systemName: icon)
-                .font(.system(size: 14))
+                .font(AppFonts.sansSerif(size: 14))
                 .foregroundStyle(color)
             Text(value)
                 .font(AppFonts.serif(size: 26, weight: .bold))
@@ -143,7 +143,7 @@ struct BoutiquePerformanceCard: View {
                 if boutique.isUnderperforming {
                     HStack(spacing: 5) {
                         Image(systemName: "exclamationmark.triangle.fill")
-                            .font(.system(size: 10))
+                            .font(AppFonts.sansSerif(size: 10))
                         Text("Underperforming")
                             .font(AppFonts.sansSerif(size: 10, weight: .bold))
                     }
@@ -155,7 +155,7 @@ struct BoutiquePerformanceCard: View {
                 } else {
                     HStack(spacing: 5) {
                         Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 10))
+                            .font(AppFonts.sansSerif(size: 10))
                         Text("On Target")
                             .font(AppFonts.sansSerif(size: 10, weight: .bold))
                     }
@@ -197,7 +197,7 @@ struct BoutiquePerformanceCard: View {
                         .font(AppFonts.sansSerif(size: 11, weight: .medium))
                         .foregroundStyle(AppColors.gold)
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 10, weight: .semibold))
+                        .font(AppFonts.sansSerif(size: 10, weight: .semibold))
                         .foregroundStyle(AppColors.gold)
                 }
             }

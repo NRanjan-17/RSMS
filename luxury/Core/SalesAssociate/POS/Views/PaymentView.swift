@@ -20,7 +20,7 @@ struct PaymentView: View {
                 HStack(spacing: 16) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                             .foregroundStyle(AppColors.gold)
                     }
                     Text("Cart")
@@ -209,7 +209,7 @@ struct PaymentView: View {
                     
                     HStack(spacing: 5) {
                         Image(systemName: "lock.fill")
-                            .font(.system(size: 10))
+                            .font(AppFonts.sansSerif(size: 10))
                             .foregroundStyle(AppColors.tertiary)
                         Text("Secure payment authorization · PCI-DSS ready")
                             .font(AppFonts.sansSerif(size: 11))

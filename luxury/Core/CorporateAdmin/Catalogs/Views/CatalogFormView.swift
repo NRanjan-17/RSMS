@@ -86,7 +86,7 @@ struct CatalogFormView: View {
                                         .foregroundStyle(AppColors.text)
                                     Spacer()
                                     Image(systemName: "chevron.up.chevron.down")
-                                        .font(.system(size: 12))
+                                        .font(AppFonts.sansSerif(size: 12))
                                         .foregroundStyle(AppColors.secondary)
                                 }
                                 .padding(.vertical, 16)
@@ -121,7 +121,7 @@ struct CatalogFormView: View {
                                             .foregroundStyle(viewModel.newStatus == .active ? AppColors.success : AppColors.gold)
                                         Spacer()
                                         Image(systemName: "chevron.up.chevron.down")
-                                            .font(.system(size: 12))
+                                            .font(AppFonts.sansSerif(size: 12))
                                             .foregroundStyle(AppColors.secondary)
                                     }
                                     .padding(.vertical, 16)
@@ -179,7 +179,7 @@ struct CatalogFormView: View {
                                                                 showDeleteImageAlert = true
                                                             }) {
                                                                 Image(systemName: "xmark.circle.fill")
-                                                                    .font(.system(size: 20))
+                                                                    .font(AppFonts.sansSerif(size: 20))
                                                                     .foregroundStyle(AppColors.error)
                                                                     .background(Circle().fill(Color.white).frame(width: 16, height: 16))
                                                                     .padding(4)
@@ -189,7 +189,7 @@ struct CatalogFormView: View {
                                                     RoundedRectangle(cornerRadius: 8)
                                                         .fill(AppColors.surface)
                                                         .frame(width: 80, height: 80)
-                                                        .overlay(Image(systemName: "photo").foregroundStyle(.gray))
+                                                        .overlay(Image(systemName: "photo").foregroundStyle(AppColors.secondary))
                                                 } else {
                                                     RoundedRectangle(cornerRadius: 8)
                                                         .fill(AppColors.surface)
@@ -201,7 +201,7 @@ struct CatalogFormView: View {
                                             RoundedRectangle(cornerRadius: 8)
                                                 .fill(AppColors.surface)
                                                 .frame(width: 80, height: 80)
-                                                .overlay(Image(systemName: "photo").foregroundStyle(.gray))
+                                                .overlay(Image(systemName: "photo").foregroundStyle(AppColors.secondary))
                                         }
                                     }
                                     
@@ -219,7 +219,7 @@ struct CatalogFormView: View {
                                                         showDeleteImageAlert = true
                                                     }) {
                                                         Image(systemName: "xmark.circle.fill")
-                                                            .font(.system(size: 20))
+                                                            .font(AppFonts.sansSerif(size: 20))
                                                             .foregroundStyle(AppColors.error)
                                                             .background(Circle().fill(Color.white).frame(width: 16, height: 16))
                                                             .padding(4)
@@ -316,7 +316,7 @@ struct CatalogFormView: View {
                     }
                 }) {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(AppFonts.sansSerif(size: 16, weight: .semibold))
                         .foregroundStyle(AppColors.gold)
                 }
             }

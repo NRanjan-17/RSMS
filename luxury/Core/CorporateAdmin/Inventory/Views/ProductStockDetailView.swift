@@ -88,7 +88,7 @@ struct ProductStockDetailView: View {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: { dismiss() }) {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(AppFonts.sansSerif(size: 16, weight: .semibold))
                         .foregroundStyle(AppColors.gold)
                 }
             }

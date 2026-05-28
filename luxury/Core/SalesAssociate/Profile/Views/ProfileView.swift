@@ -140,7 +140,7 @@ struct ProfileView: View {
                                             .foregroundStyle(AppColors.secondary)
                                             Spacer()
                                             Image(systemName: "chevron.right")
-                                                .font(.system(size: 12))
+                                                .font(AppFonts.sansSerif(size: 12))
                                                 .foregroundStyle(AppColors.tertiary)
                                         }
                                         .padding(.horizontal, 14)
@@ -168,14 +168,14 @@ struct ProfileView: View {
                             NavigationLink(destination: SecuritySettingsView()) {
                                 HStack {
                                     Image(systemName: "lock.shield.fill")
-                                        .font(.system(size: 18))
+                                        .font(AppFonts.sansSerif(size: 18))
                                         .foregroundStyle(AppColors.gold)
                                     Text("Security Settings")
                                         .font(AppFonts.sansSerif(size: 15))
                                         .foregroundStyle(.white)
                                     Spacer()
                                     Image(systemName: "chevron.right")
-                                        .font(.system(size: 12))
+                                        .font(AppFonts.sansSerif(size: 12))
                                         .foregroundStyle(AppColors.tertiary)
                                 }
                                 .padding(16)
@@ -201,14 +201,14 @@ struct ProfileView: View {
                             }) {
                                 HStack {
                                     Image(systemName: "doc.text.fill")
-                                        .font(.system(size: 18))
+                                        .font(AppFonts.sansSerif(size: 18))
                                         .foregroundStyle(AppColors.gold)
                                     Text("Exchange Policy")
                                         .font(AppFonts.sansSerif(size: 15))
                                         .foregroundStyle(.white)
                                     Spacer()
                                     Image(systemName: "chevron.right")
-                                        .font(.system(size: 12))
+                                        .font(AppFonts.sansSerif(size: 12))
                                         .foregroundStyle(AppColors.tertiary)
                                 }
                                 .padding(16)

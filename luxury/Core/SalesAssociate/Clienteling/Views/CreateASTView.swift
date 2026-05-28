@@ -48,14 +48,14 @@ struct CreateASTView: View {
                 if let errorMessage = viewModel.errorMessage {
                     Section {
                         Text(errorMessage)
-                            .foregroundColor(.red)
+                            .foregroundStyle(AppColors.error)
                     }
                 }
                 
                 if let successMessage = viewModel.successMessage {
                     Section {
                         Text(successMessage)
-                            .foregroundColor(.green)
+                            .foregroundStyle(AppColors.success)
                     }
                 }
             }

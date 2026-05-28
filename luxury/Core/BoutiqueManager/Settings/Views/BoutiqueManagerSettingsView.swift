@@ -50,7 +50,7 @@ struct BoutiqueManagerSettingsView: View {
                                         HStack {
                                             HStack(spacing: 6) {
                                                 Image(systemName: "target")
-                                                    .font(.system(size: 14))
+                                                    .font(AppFonts.sansSerif(size: 14))
                                                     .foregroundStyle(AppColors.gold)
                                                 Text("Active Target")
                                                     .font(AppFonts.sansSerif(size: 13))
@@ -110,10 +110,10 @@ struct BoutiqueManagerSettingsView: View {
                                     if showTargetSaved {
                                         HStack(spacing: 6) {
                                             Image(systemName: "checkmark.circle.fill")
-                                                .foregroundStyle(.green)
+                                                .foregroundStyle(AppColors.success)
                                             Text("Target updated successfully")
                                                 .font(AppFonts.sansSerif(size: 12))
-                                                .foregroundStyle(.green)
+                                                .foregroundStyle(AppColors.success)
                                         }
                                         .transition(.opacity.combined(with: .move(edge: .top)))
                                     }
@@ -136,7 +136,7 @@ struct BoutiqueManagerSettingsView: View {
                                 Button(action: { fetchAndEditBoutique() }) {
                                     HStack {
                                         Image(systemName: "building.2.fill")
-                                            .font(.system(size: 18))
+                                            .font(AppFonts.sansSerif(size: 18))
                                             .foregroundStyle(AppColors.gold)
                                         Text(isLoadingBoutique ? "Loading..." : "Edit Boutique")
                                             .font(AppFonts.sansSerif(size: 15))
@@ -146,7 +146,7 @@ struct BoutiqueManagerSettingsView: View {
                                             ProgressView().tint(AppColors.gold)
                                         } else {
                                             Image(systemName: "chevron.right")
-                                                .font(.system(size: 12))
+                                                .font(AppFonts.sansSerif(size: 12))
                                                 .foregroundStyle(AppColors.tertiary)
                                         }
                                     }
@@ -171,14 +171,14 @@ struct BoutiqueManagerSettingsView: View {
                                 NavigationLink(destination: SecuritySettingsView()) {
                                     HStack {
                                         Image(systemName: "lock.shield.fill")
-                                            .font(.system(size: 18))
+                                            .font(AppFonts.sansSerif(size: 18))
                                             .foregroundStyle(AppColors.gold)
                                         Text("Security Settings")
                                             .font(AppFonts.sansSerif(size: 15))
                                             .foregroundStyle(.white)
                                         Spacer()
                                         Image(systemName: "chevron.right")
-                                            .font(.system(size: 12))
+                                            .font(AppFonts.sansSerif(size: 12))
                                             .foregroundStyle(AppColors.tertiary)
                                     }
                                     .padding(16)

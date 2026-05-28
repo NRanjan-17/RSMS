@@ -56,7 +56,7 @@ struct ForgotPasswordView: View {
                     case .complete:
                         VStack(spacing: 16) {
                             Image(systemName: "checkmark.circle.fill")
-                                .font(.system(size: 64))
+                                .font(AppFonts.sansSerif(size: 64))
                                 .foregroundStyle(AppColors.success)
                             
                             Text("Password successfully updated. You can now log in.")

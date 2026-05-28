@@ -39,7 +39,7 @@ struct TeamView: View {
                         showInviteSheet = true
                     }) {
                         Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 24))
+                            .font(AppFonts.sansSerif(size: 24))
                             .foregroundStyle(AppColors.gold)
                             .frame(width: 44, height: 44)
                             .background(.ultraThinMaterial, in: Circle())
@@ -154,7 +154,7 @@ struct TeamView: View {
                                     Spacer()
                                     
                                     Image(systemName: "chevron.down")
-                                        .font(.system(size: 14, weight: .semibold))
+                                        .font(AppFonts.sansSerif(size: 14, weight: .semibold))
                                         .foregroundStyle(AppColors.secondary)
                                 }
                                 .padding()
@@ -243,7 +243,7 @@ private struct ActiveEmployeesListView: View {
             if viewModel.approvedStaff.isEmpty {
                 VStack(spacing: 12) {
                     Image(systemName: "person.3.fill")
-                        .font(.system(size: 40))
+                        .font(AppFonts.sansSerif(size: 40))
                         .foregroundStyle(AppColors.tertiary)
                     Text("No active employees yet")
                         .font(AppFonts.sansSerif(size: 14))
@@ -254,7 +254,7 @@ private struct ActiveEmployeesListView: View {
             } else if viewModel.filteredStaff.isEmpty {
                 VStack(spacing: 12) {
                     Image(systemName: "magnifyingglass")
-                        .font(.system(size: 40))
+                        .font(AppFonts.sansSerif(size: 40))
                         .foregroundStyle(AppColors.tertiary)
                     Text("No results matching \"\(viewModel.searchText)\"")
                         .font(AppFonts.sansSerif(size: 14))
@@ -288,7 +288,7 @@ private struct ActiveEmployeesListView: View {
                                 }
                                 Spacer()
                                 Image(systemName: "chevron.right")
-                                    .font(.system(size: 12))
+                                    .font(AppFonts.sansSerif(size: 12))
                                     .foregroundStyle(AppColors.tertiary)
                             }
                             .padding(18)

@@ -19,7 +19,7 @@ struct StockSearchView: View {
                 HStack(spacing: 16) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                             .foregroundStyle(AppColors.gold)
                     }
                     
@@ -72,13 +72,13 @@ struct StockSearchView: View {
                                     HStack(spacing: 4) {
                                         if item.rfid {
                                             Image(systemName: "antenna.radiowaves.left.and.right")
-                                                .font(.system(size: 10))
+                                                .font(AppFonts.sansSerif(size: 10))
                                                 .foregroundStyle(AppColors.success)
                                         }
                                         
                                         if item.alert {
                                             Image(systemName: "exclamationmark.triangle.fill")
-                                                .font(.system(size: 10))
+                                                .font(AppFonts.sansSerif(size: 10))
                                                 .foregroundStyle(AppColors.error)
                                         }
                                     }

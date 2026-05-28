@@ -57,7 +57,7 @@ struct AssociateMetricsView: View {
         HStack(spacing: 16) {
             Button(action: { dismiss() }) {
                 Image(systemName: "chevron.left")
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(AppFonts.sansSerif(size: 18, weight: .semibold))
                     .foregroundStyle(AppColors.gold)
                     .frame(width: 44, height: 44)
             }
@@ -72,7 +72,7 @@ struct AssociateMetricsView: View {
             Spacer()
             if boutique.isUnderperforming {
                 Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.system(size: 18))
+                    .font(AppFonts.sansSerif(size: 18))
                     .foregroundStyle(AppColors.error)
             }
         }
