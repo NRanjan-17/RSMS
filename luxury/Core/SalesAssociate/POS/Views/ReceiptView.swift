@@ -73,8 +73,15 @@ struct ReceiptView: View {
                 Spacer()
                 
                 Button(action: {
-                    router.popToRoot()
-                    saAppState.selectedTab = .clients
+                    Task {
+                        await MainActor.run {
+                            saAppState.selectedTab = .clients
+                        }
+                        try? await Task.sleep(nanoseconds: 100_000_000)
+                        await MainActor.run {
+                            router.popToRoot()
+                        }
+                    }
                 }) {
                     Text("Return to Dashboard")
                         .font(AppFonts.sansSerif(size: 14, weight: .semibold))

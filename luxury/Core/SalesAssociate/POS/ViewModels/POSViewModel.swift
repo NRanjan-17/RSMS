@@ -259,6 +259,7 @@ final class POSViewModel {
             self.offlineCartQueued = false
             self.isProcessingPayment = false
             self.cartItems.removeAll()
+            self.selectedClient = nil
             return true
         } catch {
             self.paymentError = error.localizedDescription
