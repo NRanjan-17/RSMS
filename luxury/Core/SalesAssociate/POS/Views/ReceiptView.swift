@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import MessageUI
 
 struct ReceiptView: View {
     @Environment(Router.self) private var router
@@ -13,7 +14,10 @@ struct ReceiptView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
     
-    @State private var generatedPDFURL: URL? = nil
+    @State private var generatedPDFURL: URL?
+    @State private var showMailSheet = false
+    @State private var mailResult: Result<MFMailComposeResult, Error>?
+    @State private var showMailErrorAlert = false
     
     var body: some View {
         ZStack {
@@ -123,6 +127,13 @@ struct ReceiptView: View {
                                 }
                             }
                         })
+                        CustomOutlineButton(title: "Email Invoice", icon: AnyView(Image(systemName: "envelope")), action: {
+                            if MFMailComposeViewController.canSendMail() {
+                                showMailSheet = true
+                            } else {
+                                showMailErrorAlert = true
+                            }
+                        })
                         CustomOutlineButton(title: "Print Invoice", icon: AnyView(Image(systemName: "printer")), action: {
                             printReceipt()
                         })
@@ -155,6 +166,26 @@ struct ReceiptView: View {
         .toolbar(.hidden, for: .tabBar)
         .onAppear {
             self.generatedPDFURL = generatePDFURL()
+        }
+        .sheet(isPresented: $showMailSheet) {
+            if let url = generatedPDFURL, let data = try? Data(contentsOf: url) {
+                MailView(
+                    result: $mailResult,
+                    subject: "Your Invoice from \(POSViewModel.shared.lastBoutique?.name ?? "Eezee Rentals")",
+                    toRecipients: [POSViewModel.shared.lastClient?.email ?? ""].filter { !$0.isEmpty },
+                    messageBody: "Thank you for your purchase! Please find your invoice attached.",
+                    attachmentData: data,
+                    attachmentMimeType: "application/pdf",
+                    attachmentFileName: "Invoice.pdf"
+                )
+            } else {
+                Text("Error generating PDF for email.")
+            }
+        }
+        .alert("Cannot Send Email", isPresented: $showMailErrorAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Your device is not configured to send emails. Please set up the Apple Mail app.")
         }
     }
     

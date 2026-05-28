@@ -7,13 +7,15 @@
 
 import SwiftUI
 import Supabase
+import MessageUI
 
 struct SATransactionDetailView: View {
     let transaction: SATransactionEntity
     @Environment(Router.self) private var router
     @Environment(\.openURL) private var openURL
-    @State private var isEmailing = false
-    @State private var emailSent = false
+    @State private var showMailSheet = false
+    @State private var mailResult: Result<MFMailComposeResult, Error>?
+    @State private var showMailErrorAlert = false
     @State private var purchasedProducts: [(qty: Int, product: CatalogEntity)] = []
     @State private var isLoadingProducts = true
     @State private var generatedPDFURL: URL? = nil
@@ -161,6 +163,26 @@ struct SATransactionDetailView: View {
                             .clipShape(Capsule())
                             .overlay(Capsule().stroke(AppColors.gold, lineWidth: 1))
                         }
+                        
+                        Button(action: {
+                            if MFMailComposeViewController.canSendMail() {
+                                showMailSheet = true
+                            } else {
+                                showMailErrorAlert = true
+                            }
+                        }) {
+                            HStack {
+                                Image(systemName: "envelope")
+                                Text("Email Invoice")
+                            }
+                            .font(AppFonts.sansSerif(size: 14, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(AppColors.surface)
+                            .clipShape(Capsule())
+                            .overlay(Capsule().stroke(AppColors.gold, lineWidth: 1))
+                        }
                     }
                     .padding(.horizontal, 24)
                     
@@ -171,6 +193,26 @@ struct SATransactionDetailView: View {
         .navigationBarBackButtonHidden(true)
         .task {
             await fetchProducts()
+        }
+        .sheet(isPresented: $showMailSheet) {
+            if let url = generatePDFURL(), let data = try? Data(contentsOf: url) {
+                MailView(
+                    result: $mailResult,
+                    subject: "Your Invoice from \(boutique?.name ?? "Eezee Rentals")",
+                    toRecipients: [transaction.client?.email ?? ""].filter { !$0.isEmpty },
+                    messageBody: "Thank you for your purchase! Please find your invoice attached.",
+                    attachmentData: data,
+                    attachmentMimeType: "application/pdf",
+                    attachmentFileName: "Invoice.pdf"
+                )
+            } else {
+                Text("Error generating PDF for email.")
+            }
+        }
+        .alert("Cannot Send Email", isPresented: $showMailErrorAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Your device is not configured to send emails. Please set up the Apple Mail app.")
         }
     }
     
