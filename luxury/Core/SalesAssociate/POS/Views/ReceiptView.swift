@@ -112,7 +112,9 @@ struct ReceiptView: View {
                     
                     VStack(spacing: 12) {
                         CustomButton(title: "Email Receipt", icon: AnyView(Image(systemName: "envelope")), action: {})
-                        CustomOutlineButton(title: "Print Receipt", icon: AnyView(Image(systemName: "printer")), action: {})
+                        CustomOutlineButton(title: "Print Receipt", icon: AnyView(Image(systemName: "printer")), action: {
+                            printReceipt()
+                        })
                     }
                     .padding(.horizontal, 24)
                 }
@@ -140,5 +142,87 @@ struct ReceiptView: View {
         .toolbar(.hidden, for: .navigationBar)
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .tabBar)
+    }
+    
+    @MainActor
+    private func printReceipt() {
+        let receiptContent = VStack(spacing: 24) {
+            Text("Payment Successful")
+                .font(AppFonts.serif(size: 32, weight: .semibold))
+                .foregroundStyle(Color.black)
+            
+            Text("Transaction ID: \(POSViewModel.shared.lastTransactionId ?? "#TX-PENDING")")
+                .font(AppFonts.sansSerif(size: 13))
+                .foregroundStyle(Color.gray)
+            
+            VStack(spacing: 12) {
+                Text(POSViewModel.shared.formatCurrency(POSViewModel.shared.lastTotalPaid ?? 0))
+                    .font(AppFonts.serif(size: 40, weight: .bold))
+                    .foregroundStyle(Color.black)
+                
+                Text("Paid securely via Razorpay")
+                    .font(AppFonts.sansSerif(size: 12))
+                    .foregroundStyle(Color.gray)
+                    
+                if let boutique = POSViewModel.shared.lastBoutique {
+                    VStack(spacing: 4) {
+                        Text(boutique.name)
+                            .font(AppFonts.sansSerif(size: 13, weight: .semibold))
+                            .foregroundStyle(Color.black)
+                        Text("\(boutique.address), \(boutique.city) - \(boutique.pinCode)")
+                            .font(AppFonts.sansSerif(size: 11))
+                            .foregroundStyle(Color.gray)
+                    }
+                    .padding(.top, 8)
+                }
+            }
+            .padding(.vertical, 16)
+            
+            if !POSViewModel.shared.lastPurchasedItems.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    ForEach(POSViewModel.shared.lastPurchasedItems, id: \.product.id) { item in
+                        HStack(alignment: .top) {
+                            Text("\(item.qty)x")
+                                .font(AppFonts.sansSerif(size: 13, weight: .bold))
+                                .foregroundStyle(Color.gray)
+                                
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(item.product.name)
+                                    .font(AppFonts.sansSerif(size: 13, weight: .semibold))
+                                    .foregroundStyle(Color.black)
+                                Text("S/N: \(item.product.barCode)")
+                                    .font(AppFonts.sansSerif(size: 11))
+                                    .foregroundStyle(Color.gray)
+                            }
+                            
+                            Spacer()
+                            
+                            Text(POSViewModel.shared.formatCurrency(Int(item.product.amount) * item.qty))
+                                .font(AppFonts.sansSerif(size: 13, weight: .semibold))
+                                .foregroundStyle(Color.black)
+                        }
+                        
+                        Divider()
+                            .background(Color.gray.opacity(0.3))
+                    }
+                }
+            }
+        }
+        .padding(40)
+        .background(Color.white)
+        .frame(width: 400)
+        
+        let renderer = ImageRenderer(content: receiptContent)
+        renderer.scale = UIScreen.main.scale
+        if let uiImage = renderer.uiImage {
+            let printInfo = UIPrintInfo(dictionary: nil)
+            printInfo.jobName = "Receipt"
+            printInfo.outputType = .general
+            
+            let printController = UIPrintInteractionController.shared
+            printController.printInfo = printInfo
+            printController.printingItem = uiImage
+            printController.present(animated: true, completionHandler: nil)
+        }
     }
 }

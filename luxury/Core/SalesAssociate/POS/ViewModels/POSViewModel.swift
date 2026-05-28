@@ -257,7 +257,7 @@ final class POSViewModel {
             )
             
             self.lastTotalPaid = self.total
-            self.lastTransactionId = transactionIdStr
+            self.lastTransactionId = transaction.id.uuidString
             self.lastPurchasedItems = self.cartItems
             self.lastBoutique = try? await ProfileService().fetchBoutique(id: boutiqueId)
             self.offlineCartQueued = false
