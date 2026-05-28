@@ -14,6 +14,12 @@ struct ProfileView: View {
     @State private var viewModel = SAProfileViewModel()
     @State private var showLogoutAlert = false
     
+    private var formattedDate: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEE d MMM"
+        return formatter.string(from: Date()).uppercased()
+    }
+    
     var body: some View {
         ZStack {
             AppColors.background.ignoresSafeArea()
@@ -22,7 +28,7 @@ struct ProfileView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 0) {
                         VStack(alignment: .leading, spacing: 5) {
-                            Text("\(viewModel.store) · TUE 13 MAY")
+                            Text("\(viewModel.store) · \(formattedDate)")
                                 .font(AppFonts.sansSerif(size: 10))
                                 .foregroundStyle(AppColors.gold)
                                 .kerning(2)

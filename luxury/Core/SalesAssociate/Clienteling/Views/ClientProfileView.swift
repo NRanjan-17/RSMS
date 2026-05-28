@@ -13,6 +13,7 @@ struct ClientProfileView: View {
     @State private var viewModel: ClientDetailViewModel
     @State private var showQuickNote = false
     @State private var quickNoteText = ""
+    @State private var showDeleteClientAlert = false
     
     init(client: Client = ClientDetailViewModel.defaultClient) {
         _viewModel = State(initialValue: ClientDetailViewModel(client: client))
@@ -34,6 +35,14 @@ struct ClientProfileView: View {
                         .foregroundStyle(AppColors.gold)
                     
                     Spacer()
+                    
+                    Button(action: {
+                        showDeleteClientAlert = true
+                    }) {
+                        Image(systemName: "trash")
+                            .font(AppFonts.sansSerif(size: 15))
+                            .foregroundStyle(AppColors.error)
+                    }
                     
                     Button("Edit") {
                         router.presentFullScreen(SARoute.editClient(viewModel.client))
