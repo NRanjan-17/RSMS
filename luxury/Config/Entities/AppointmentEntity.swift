@@ -1,18 +1,46 @@
 import Foundation
 
+enum AppointmentStatus: String, Codable, Hashable, CaseIterable {
+    case pending = "pending"
+    case upcoming = "upcoming"
+    case completed = "completed"
+    case cancelled = "cancelled"
+    case noShow = "no_show"
+}
+
+import SwiftUI
+
+extension AppointmentStatus {
+    var color: Color {
+        switch self {
+        case .pending: return .orange
+        case .upcoming: return .blue
+        case .completed: return .green
+        case .cancelled: return .red
+        case .noShow: return .gray
+        }
+    }
+}
+
+enum AppointmentType: String, Codable, Hashable, CaseIterable {
+    case watchConsultation = "Watch Consultation"
+    case jewelleryFitting = "Jewellery Fitting"
+    case leatherGoodsPreview = "Leather Goods Preview"
+    case videoConsult = "Video Consult"
+    case other = "other"
+}
+
 struct AppointmentEntity: Codable, Identifiable, Hashable {
     var id: UUID
     var clientId: UUID?
     var boutiqueId: UUID
     var timestamp: String
-    var appointmentType: String
+    var appointmentType: AppointmentType
     var assignedTo: UUID?
     var createdBy: UUID
-    var status: String
+    var status: AppointmentStatus
     var createdAt: String?
-    
-    // Optional client relationship (if we join with client)
-    var client: ClientEntity?
+    var remarks: String?
     
     var formattedTime: String {
         guard let date = ISO8601DateFormatter().date(from: timestamp) else { return timestamp }
@@ -38,6 +66,6 @@ struct AppointmentEntity: Codable, Identifiable, Hashable {
         case createdBy = "created_by"
         case status
         case createdAt = "created_at"
-        case client
+        case remarks
     }
 }

@@ -139,10 +139,12 @@ struct ClientProfileView: View {
                             if viewModel.selectedTab == "overview" {
                                 ClientOverviewTab(
                                     viewModel: viewModel,
-                                    onApptTap: { router.push(SARoute.appointmentList) },
+                                    onApptTap: { router.presentFullScreen(SARoute.createAppointment(viewModel.client)) },
                                     onNoteTap: { showQuickNote = true },
                                     onTicketTap: { router.push(SARoute.afterSalesTracking) }
                                 )
+                            } else if viewModel.selectedTab == "appointments" {
+                                ClientAppointmentsTab(viewModel: viewModel)
                             } else if viewModel.selectedTab == "history" {
                                 ClientHistoryTab(viewModel: viewModel)
                             } else if viewModel.selectedTab == "wishlist" {
@@ -360,7 +362,7 @@ private struct ClientOverviewTab: View {
                         .foregroundStyle(AppColors.secondary)
                         .kerning(1.5)
                     
-                    let upcomingAppts = viewModel.appointments.filter { $0.status != "Completed" && $0.status != "Cancelled" }.prefix(2)
+                    let upcomingAppts = viewModel.appointments.filter { $0.status != .completed && $0.status != .cancelled }.prefix(2)
                     
                     if upcomingAppts.isEmpty {
                         Text("No upcoming appointments")
@@ -380,7 +382,7 @@ private struct ClientOverviewTab: View {
                                     .clipShape(RoundedRectangle(cornerRadius: 7))
                                 
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(appt.appointmentType)
+                                    Text(appt.appointmentType.rawValue)
                                         .font(AppFonts.sansSerif(size: 13, weight: .medium))
                                         .foregroundStyle(.white)
                                     Text("In-Store · \(appt.formattedTime)")
@@ -428,6 +430,63 @@ private struct ClientOverviewTab: View {
                                 .font(AppFonts.sansSerif(size: 11))
                                 .foregroundStyle(AppColors.gold)
                         }
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 12)
+                    .background(AppColors.surface)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                }
+            }
+        }
+    }
+}
+
+private struct ClientAppointmentsTab: View {
+    let viewModel: ClientDetailViewModel
+    
+    var body: some View {
+        VStack(spacing: 10) {
+            let upcomingAppts = viewModel.appointments.filter { $0.status != .completed && $0.status != .cancelled }
+            
+            if upcomingAppts.isEmpty {
+                VStack(spacing: 12) {
+                    Image(systemName: "calendar")
+                        .font(.system(size: 24))
+                        .foregroundStyle(AppColors.gold.opacity(0.5))
+                    Text("No upcoming appointments")
+                        .font(AppFonts.sansSerif(size: 13))
+                        .foregroundStyle(AppColors.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 32)
+                .background(AppColors.surface)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+            } else {
+                ForEach(upcomingAppts) { appt in
+                    HStack(spacing: 10) {
+                        let timePrefix = String(appt.formattedDate.prefix(10))
+                        Text(timePrefix)
+                            .font(AppFonts.sansSerif(size: 10, weight: .medium))
+                            .foregroundStyle(AppColors.gold)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(AppColors.gold08)
+                            .clipShape(RoundedRectangle(cornerRadius: 7))
+                        
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(appt.appointmentType.rawValue)
+                                .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                .foregroundStyle(.white)
+                            Text("In-Store · \(appt.formattedTime)")
+                                .font(AppFonts.sansSerif(size: 11))
+                                .foregroundStyle(AppColors.secondary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12))
+                            .foregroundStyle(AppColors.tertiary)
                     }
                     .padding(.horizontal, 14)
                     .padding(.vertical, 12)

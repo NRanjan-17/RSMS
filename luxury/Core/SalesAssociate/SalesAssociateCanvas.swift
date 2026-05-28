@@ -106,8 +106,8 @@ struct SalesAssociateCanvas: View {
             ReceiptView()
         case .appointmentList:
             AppointmentListView()
-        case .createAppointment:
-            CreateAppointmentView()
+        case .createAppointment(let client):
+            CreateAppointmentView(client: client)
         case .returns:
             ReturnsView()
         case .afterSalesIntake(let clientName, let serialNumber, let isWarrantyActive):

@@ -9,7 +9,7 @@ enum SARoute: Hashable {
     case payment
     case receipt
     case appointmentList
-    case createAppointment
+    case createAppointment(Client?)
     case returns
     case afterSalesIntake(clientName: String?, serialNumber: String?, isWarrantyActive: Bool)
     case afterSalesTracking
