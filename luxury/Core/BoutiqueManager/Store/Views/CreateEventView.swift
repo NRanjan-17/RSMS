@@ -227,13 +227,8 @@ struct CreateEventView: View {
                                 .foregroundStyle(AppColors.gold)
                                 .kerning(2)
                             
-                            DatePicker("Select Date", selection: $eventDate)
-                                .datePickerStyle(.graphical)
-                                .tint(AppColors.gold)
-                                .padding(10)
-                                .background(AppColors.surface)
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
+                            RSMSCalendarView(selectedDate: $eventDate)
+                                .padding(.horizontal, 10)
                         }
                         .padding(.horizontal, 24)
                         

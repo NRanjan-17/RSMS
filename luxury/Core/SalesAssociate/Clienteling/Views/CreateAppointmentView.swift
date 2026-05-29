@@ -102,13 +102,8 @@ struct CreateAppointmentView: View {
                                 .foregroundStyle(AppColors.gold)
                                 .kerning(2)
                             
-                            DatePicker("Select Date", selection: $selectedDate, in: Date()..., displayedComponents: .date)
-                                .datePickerStyle(.graphical)
-                                .tint(AppColors.gold)
-                                .padding(10)
-                                .background(AppColors.surface)
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
+                            RSMSCalendarView(selectedDate: $selectedDate)
+                                .padding(.horizontal, 10)
                             
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 10) {
