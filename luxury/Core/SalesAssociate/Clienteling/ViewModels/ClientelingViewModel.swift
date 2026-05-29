@@ -20,7 +20,8 @@ final class ClientelingViewModel {
     var stats: [ClientStat] = [
         ClientStat(value: "0", label: "Total"),
         ClientStat(value: "0", label: "UHNW"),
-        ClientStat(value: "0", label: "VIP")
+        ClientStat(value: "0", label: "VIP"),
+        ClientStat(value: "0", label: "Standard")
     ]
     
     var clients: [Client] = []
@@ -65,11 +66,13 @@ final class ClientelingViewModel {
             let totalCount = self.clients.count
             let uhnwCount = self.clients.filter { $0.tier == .uhnw }.count
             let vipCount = self.clients.filter { $0.tier == .vip }.count
+            let standardCount = self.clients.filter { $0.tier == .standard }.count
             
             self.stats = [
                 ClientStat(value: "\(totalCount)", label: "Total"),
                 ClientStat(value: "\(uhnwCount)", label: "UHNW"),
-                ClientStat(value: "\(vipCount)", label: "VIP")
+                ClientStat(value: "\(vipCount)", label: "VIP"),
+                ClientStat(value: "\(standardCount)", label: "Standard")
             ]
             isLoading = false
         }

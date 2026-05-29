@@ -36,48 +36,32 @@ struct ClientelingView: View {
                             .stroke(AppColors.gold15, lineWidth: 0.5)
                     )
                     
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            ForEach(viewModel.filters, id: \.self) { filter in
-                                let isSelected = viewModel.selectedFilter == filter
-                                Text(filter)
-                                    .font(AppFonts.sansSerif(size: 11, weight: isSelected ? .medium : .light))
-                                    .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
-                                    .padding(.horizontal, 13)
-                                    .padding(.vertical, 6)
-                                    .background(isSelected ? AppColors.gold : Color.clear)
-                                    .clipShape(Capsule())
-                                    .overlay(
-                                        Capsule()
-                                            .stroke(isSelected ? Color.clear : AppColors.gold15, lineWidth: 0.5)
-                                    )
-                                    .onTapGesture {
-                                        withAnimation {
-                                            viewModel.selectedFilter = filter
-                                        }
-                                    }
-                            }
-                        }
-                    }
-                    
                     HStack(spacing: 6) {
                         ForEach(viewModel.stats) { stat in
+                            let filterValue = stat.label == "Total" ? "All" : stat.label
+                            let isSelected = viewModel.selectedFilter == filterValue
+                            
                             VStack(spacing: 2) {
                                 Text(stat.value)
                                     .font(AppFonts.serif(size: 20, weight: .medium))
-                                    .foregroundStyle(AppColors.text)
+                                    .foregroundStyle(isSelected ? AppColors.background : AppColors.text)
                                 Text(stat.label)
                                     .font(AppFonts.sansSerif(size: 10))
-                                    .foregroundStyle(AppColors.secondary)
+                                    .foregroundStyle(isSelected ? AppColors.background.opacity(0.8) : AppColors.secondary)
                             }
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 10)
-                            .background(AppColors.surface)
+                            .background(isSelected ? AppColors.gold : AppColors.surface)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 10)
-                                    .stroke(AppColors.gold15, lineWidth: 0.5)
+                                    .stroke(isSelected ? Color.clear : AppColors.gold15, lineWidth: 0.5)
                             )
+                            .onTapGesture {
+                                withAnimation {
+                                    viewModel.selectedFilter = filterValue
+                                }
+                            }
                         }
                     }
                 }
