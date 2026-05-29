@@ -19,7 +19,7 @@ struct SwipeActionView<Content: View>: View {
             // Background action buttons
             HStack(spacing: 0) {
                 // Leading side (Left-to-Right Swipe)
-                if let onConfirm = onConfirm {
+                if onConfirm != nil {
                     Button(action: {
                         showConfirmAlert = true
                     }) {
@@ -40,7 +40,7 @@ struct SwipeActionView<Content: View>: View {
                 Spacer()
                 
                 // Trailing side (Right-to-Left Swipe)
-                if let onDelete = onDelete {
+                if onDelete != nil {
                     Button(action: {
                         showDeleteAlert = true
                     }) {
