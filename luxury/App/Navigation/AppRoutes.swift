@@ -59,6 +59,8 @@ enum ICRoute: Hashable {
     case sfsVerification(PurchasedItemEntity)
     case endlessAisleSelection
     case alerts
+    case purchaseOrders
+    case poDetail(PurchaseOrder)
 }
 
 enum CARoute: Hashable {

@@ -383,4 +383,102 @@ final class FulfillmentViewModel {
             return false
         }
     }
+    
+    func dispatchOrder(order: PurchasedItemEntity, expectedQty: Int, deliveredQty: Int) async -> Bool {
+        do {
+            let profileService = ProfileService()
+            var staffName = "Inventory Controller"
+            var boutiqueId: UUID? = nil
+            var boutiqueName = "Main Vault"
+            
+            if let profileTuple = try? await profileService.fetchCurrentProfile(),
+               let staff = profileTuple.1 as? StaffModel {
+                staffName = staff.name
+                boutiqueId = staff.boutiqueId
+                if let bId = boutiqueId, let boutique = try? await profileService.fetchBoutique(id: bId) {
+                    boutiqueName = boutique.name
+                }
+            }
+            
+            let catalog: CatalogEntity = try await client
+                .from("catalogs")
+                .select()
+                .eq("id", value: order.productId.uuidString)
+                .single()
+                .execute()
+                .value
+            
+            var currentProductIds = catalog.productIds ?? []
+            var currentReserved = catalog.reserved ?? []
+            
+            let toDeduct = min(deliveredQty, currentProductIds.count)
+            if toDeduct > 0 {
+                currentProductIds.removeLast(toDeduct)
+            }
+            
+            let toRelease = expectedQty - deliveredQty
+            let totalReservedToRemove = min(expectedQty, currentReserved.count)
+            if totalReservedToRemove > 0 {
+                currentReserved.removeLast(totalReservedToRemove)
+            }
+            
+            try await client
+                .from("catalogs")
+                .update([
+                    "product_ids": currentProductIds,
+                    "reserved": currentReserved
+                ])
+                .eq("id", value: catalog.id.uuidString)
+                .execute()
+            
+            if let storeId = boutiqueId {
+                let inventory: [InventoryItem] = try await client
+                    .from("inventory")
+                    .select()
+                    .eq("sku_id", value: catalog.id.uuidString)
+                    .eq("store_id", value: storeId.uuidString)
+                    .execute()
+                    .value
+                
+                if let firstItem = inventory.first {
+                    let newQty = max(0, firstItem.quantity - deliveredQty)
+                    try await client
+                        .from("inventory")
+                        .update(["quantity": newQty])
+                        .eq("id", value: firstItem.id.uuidString)
+                        .execute()
+                }
+            }
+            
+            try await client
+                .from("purchased_items")
+                .update([
+                    "status": "Delivered",
+                    "delivery_date": ISO8601DateFormatter().string(from: Date())
+                ])
+                .eq("id", value: order.id.uuidString)
+                .execute()
+            
+            let logMsg = "Order \(order.id.uuidString.prefix(8).uppercased()) Dispatched: SKU \(catalog.catalogId), Expected: \(expectedQty), Delivered: \(deliveredQty), Released: \(toRelease). Confirmed by: \(staffName)."
+            SystemLogService.shared.logAction(
+                category: .inventory,
+                severity: .info,
+                message: logMsg,
+                boutiqueName: boutiqueName
+            )
+            
+            await MainActor.run {
+                if let idx = self.orders.firstIndex(where: { $0.id == order.id }) {
+                    self.orders[idx].status = "Delivered"
+                    self.orders[idx].deliveryDate = Date()
+                }
+            }
+            return true
+        } catch {
+            await MainActor.run {
+                self.errorMessage = error.localizedDescription
+            }
+            return false
+        }
+    }
 }

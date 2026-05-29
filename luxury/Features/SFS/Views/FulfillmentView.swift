@@ -11,6 +11,8 @@ struct FulfillmentView: View {
     @Environment(Router.self) private var router
     @Environment(FulfillmentViewModel.self) private var viewModel
     
+    @State private var dispatchingOrder: PurchasedItemEntity? = nil
+    
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
@@ -169,6 +171,19 @@ struct FulfillmentView: View {
                                                         .clipShape(RoundedRectangle(cornerRadius: 8))
                                                 }
                                                 .padding(.top, 8)
+                                            } else if order.status.lowercased() == "ready to pick" {
+                                                Button(action: {
+                                                    dispatchingOrder = order
+                                                }) {
+                                                    Text("Confirm Dispatch & Delivery")
+                                                        .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                                        .foregroundStyle(AppColors.background)
+                                                        .frame(maxWidth: .infinity)
+                                                        .padding(.vertical, 12)
+                                                        .background(AppColors.gold)
+                                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                }
+                                                .padding(.top, 8)
                                             }
                                         }
                                         .padding(16)
@@ -191,6 +206,12 @@ struct FulfillmentView: View {
         .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             viewModel.fetchOrders()
+        }
+        .sheet(item: $dispatchingOrder) { order in
+            SFSDispatchView(order: order)
+                .presentationDragIndicator(.visible)
+                .presentationDetents([.medium, .large])
+                .environment(viewModel)
         }
     }
 }

@@ -172,6 +172,10 @@ struct InventoryControllerCanvas: View {
             EndlessAisleWorkflowView()
         case .alerts:
             AlertsView()
+        case .purchaseOrders:
+            PurchaseOrdersView()
+        case .poDetail(let po):
+            PODetailView(po: po)
         }
     }
 }
