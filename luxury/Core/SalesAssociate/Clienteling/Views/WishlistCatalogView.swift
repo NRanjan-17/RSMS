@@ -10,80 +10,46 @@ struct WishlistCatalogView: View {
     @State private var toastMessage = ""
     
     var body: some View {
-        ZStack {
-            AppColors.background.ignoresSafeArea()
-            
-            VStack(spacing: 0) {
-                // Header & Top Navigation Bar
-                HStack {
-                    Button(action: {
-                        isPresented = false
-                    }) {
-                        Text("Cancel")
-                            .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                            .foregroundStyle(AppColors.gold)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(Color.clear)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(AppColors.gold.opacity(0.4), lineWidth: 1)
-                            )
-                    }
-                    .buttonStyle(.plain)
-                    
-                    Spacer()
-                    
-                    Text("Add to Wishlist")
-                        .font(AppFonts.serif(size: 18, weight: .semibold))
-                        .foregroundStyle(.white)
-                    
-                    Spacer()
-                    
-                    // Spacer button to balance header alignment
-                    Button("") {}
-                        .disabled(true)
-                        .opacity(0)
-                        .frame(width: 80)
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 16)
-                .padding(.bottom, 16)
+        NavigationStack {
+            ZStack {
+                AppColors.background.ignoresSafeArea()
                 
-                // Search Bar & Filter Section
-                VStack(spacing: 12) {
-                    HStack(spacing: 12) {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundStyle(AppColors.tertiary)
-                        
-                        TextField("Search by name, brand, or SKU...", text: $searchVM.searchText)
-                            .font(AppFonts.sansSerif(size: 14))
-                            .foregroundStyle(AppColors.text)
-                            .textFieldStyle(.plain)
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background(AppColors.surface)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
-                    
-                    // Category pills
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            categoryChip(title: "All", active: searchVM.selectedCategory == nil) {
-                                searchVM.selectedCategory = nil
-                            }
+                VStack(spacing: 0) {
+                    // Search Bar & Filter Section
+                    VStack(spacing: 12) {
+                        HStack(spacing: 12) {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundStyle(AppColors.tertiary)
                             
-                            ForEach(searchVM.categories, id: \.self) { cat in
-                                categoryChip(title: cat.rawValue, active: searchVM.selectedCategory == cat) {
-                                    searchVM.selectedCategory = cat
+                            TextField("Search by name, brand, or SKU...", text: $searchVM.searchText)
+                                .font(AppFonts.sansSerif(size: 14))
+                                .foregroundStyle(AppColors.text)
+                                .textFieldStyle(.plain)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .background(AppColors.surface)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                        
+                        // Category pills
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                categoryChip(title: "All", active: searchVM.selectedCategory == nil) {
+                                    searchVM.selectedCategory = nil
+                                }
+                                
+                                ForEach(searchVM.categories, id: \.self) { cat in
+                                    categoryChip(title: cat.rawValue, active: searchVM.selectedCategory == cat) {
+                                        searchVM.selectedCategory = cat
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 16)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 16)
+                    .padding(.top, 16)
                 
                 // Product Grid or Empty/Loading State
                 if searchVM.isLoading {
@@ -151,6 +117,20 @@ struct WishlistCatalogView: View {
                 }
                 .animation(.spring(), value: showToast)
             }
+        }
+        .navigationTitle("Add to Wishlist")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") {
+                    isPresented = false
+                }
+                .foregroundStyle(AppColors.gold)
+            }
+        }
         }
         .preferredColorScheme(.dark)
         .onAppear {

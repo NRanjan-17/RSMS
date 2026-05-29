@@ -513,100 +513,18 @@ struct AfterSalesIntakeView: View {
                     .padding(.vertical, 20)
                 }
             }
-            
-            // Dimmed background overlay + Custom Floating popup
-            if showMediaSourceMenu {
-                Color.black.opacity(0.45)
-                    .ignoresSafeArea()
-                    .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            showMediaSourceMenu = false
-                        }
-                    }
-                    .transition(.opacity)
-                
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("Select Media Source")
-                        .font(AppFonts.serif(size: 15, weight: .bold))
-                        .foregroundStyle(AppColors.gold)
-                        .padding(.horizontal, 16)
-                        .padding(.top, 16)
-                        .padding(.bottom, 8)
-                    
-                    Divider()
-                        .background(AppColors.border)
-                    
-                    Button(action: {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            showMediaSourceMenu = false
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            showCamera = true
-                        }
-                    }) {
-                        HStack(spacing: 12) {
-                            Image(systemName: "camera.fill")
-                                .foregroundStyle(AppColors.gold)
-                            Text("Take Photo")
-                                .font(AppFonts.sansSerif(size: 14, weight: .medium))
-                                .foregroundStyle(.white)
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 14)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    .buttonStyle(.plain)
-                    
-                    Divider()
-                        .background(AppColors.border)
-                    
-                    Button(action: {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            showMediaSourceMenu = false
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            showPhotosPicker = true
-                        }
-                    }) {
-                        HStack(spacing: 12) {
-                            Image(systemName: "photo.on.rectangle.angled")
-                                .foregroundStyle(AppColors.gold)
-                            Text("Choose from Library")
-                                .font(AppFonts.sansSerif(size: 14, weight: .medium))
-                                .foregroundStyle(.white)
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 14)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    .buttonStyle(.plain)
-                    
-                    Divider()
-                        .background(AppColors.border)
-                    
-                    Button(action: {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            showMediaSourceMenu = false
-                        }
-                    }) {
-                        Text("Cancel")
-                            .font(AppFonts.sansSerif(size: 14, weight: .semibold))
-                            .foregroundStyle(AppColors.secondary)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .padding(.vertical, 14)
-                    }
-                    .buttonStyle(.plain)
-                }
-                .frame(width: 280)
-                .background(AppColors.surface)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(AppColors.gold.opacity(0.35), lineWidth: 1.5)
-                )
-                .shadow(color: .black.opacity(0.5), radius: 15, x: 0, y: 10)
-                .transition(.scale(scale: 0.9).combined(with: .opacity))
+            // Removed custom popup, using native confirmationDialog instead
+        }
+        .confirmationDialog("Select Media Source", isPresented: $showMediaSourceMenu, titleVisibility: .hidden) {
+            Button("Take Photo") {
+                showCamera = true
             }
+            Button("Choose from Library") {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    showPhotosPicker = true
+                }
+            }
+            Button("Cancel", role: .cancel) {}
         }
         .onChange(of: selectedItems) { _, newItems in
             loadImages(from: newItems)
