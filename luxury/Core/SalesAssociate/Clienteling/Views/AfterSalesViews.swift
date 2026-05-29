@@ -15,10 +15,14 @@ struct AfterSalesIntakeView: View {
     let client: Client
     let serialNumber: String?
     let isWarrantyActive: Bool
+    let purchaseId: UUID?
     
     @State private var serial: String
     @State private var issue = ""
     @State private var created = false
+    @State private var isCreating = false
+    @State private var errorMessage: String? = nil
+    @State private var showSuccessAlert = false
     
     @State private var showCamera = false
     @State private var showPhotosPicker = false
@@ -38,18 +42,20 @@ struct AfterSalesIntakeView: View {
         return serialNumber != nil
     }
     
-    init(client: Client, serialNumber: String? = nil, isWarrantyActive: Bool = true) {
+    init(client: Client, serialNumber: String? = nil, isWarrantyActive: Bool = true, purchaseId: UUID? = nil) {
         self.client = client
         self.serialNumber = serialNumber
         self.isWarrantyActive = isWarrantyActive
+        self.purchaseId = purchaseId
         
         let localPurchases = PurchaseHistoryService.shared.fetchPurchases(clientId: client.id)
         self._clientPurchases = State(initialValue: localPurchases)
         
         if let sn = serialNumber {
             self._serial = State(initialValue: sn)
-            // Look up corresponding purchase
+            // Look up corresponding purchase by ID or Serial
             let matchingPurchase = localPurchases.first { p in
+                if let pid = purchaseId, p.id == pid { return true }
                 let prodId = "PRD-" + String(p.id.uuidString.prefix(8).uppercased())
                 return prodId == sn
             }
@@ -406,22 +412,102 @@ struct AfterSalesIntakeView: View {
                         
                         // Action Button
                         Button(action: {
-                            created = true
+                            guard !uploadedImages.isEmpty else {
+                                errorMessage = "Please attach at least one photo."
+                                return
+                            }
+                            guard !serial.isEmpty else { 
+                                errorMessage = "Serial number is missing"
+                                return 
+                            }
+                            isCreating = true
+                            errorMessage = nil
+                            
+                            Task {
+                                do {
+                                    guard let profile = try await ProfileService().fetchCurrentProfile() else {
+                                        await MainActor.run {
+                                            errorMessage = "Profile not found"
+                                            isCreating = false 
+                                        }
+                                        return
+                                    }
+                                    
+                                    let boutiqueId: UUID
+                                    if let staff = profile.1 as? StaffModel, let bid = staff.boutiqueId {
+                                        boutiqueId = bid
+                                    } else if let manager = profile.1 as? CorporateBoutique {
+                                        boutiqueId = manager.id
+                                    } else {
+                                        await MainActor.run { 
+                                            errorMessage = "Boutique ID not found on profile"
+                                            isCreating = false 
+                                        }
+                                        return
+                                    }
+                                    
+                                    guard let pid = selectedPurchase?.id ?? purchaseId else {
+                                        await MainActor.run {
+                                            errorMessage = "Purchase ID is missing"
+                                            isCreating = false
+                                        }
+                                        return
+                                    }
+                                    
+                                    let pItems = try await ASTService.shared.fetchPurchasedItems(for: client.id)
+                                    let match = pItems.first(where: { $0.id == pid })
+                                    let productId = match?.productId ?? pid
+                                    
+                                    _ = try await ASTService.shared.createAST(
+                                        productId: productId,
+                                        clientId: client.id,
+                                        boutiqueId: boutiqueId,
+                                        warrantyStatus: dynamicWarrantyText ?? "Valid",
+                                        description: issue,
+                                        remark: "Created via AST Intake UI. \(uploadedImages.count) photos."
+                                    )
+                                    
+                                    await MainActor.run {
+                                        created = true
+                                        isCreating = false
+                                        showSuccessAlert = true
+                                    }
+                                } catch {
+                                    print("Failed to create AST: \(error)")
+                                    await MainActor.run { 
+                                        errorMessage = error.localizedDescription
+                                        isCreating = false 
+                                    }
+                                }
+                            }
                         }) {
                             HStack(spacing: 10) {
-                                Image(systemName: "wrench.and.screwdriver")
-                                Text(created ? "Ticket RSMS-AS-1042 Created" : "Create Service Ticket")
+                                if isCreating {
+                                    ProgressView()
+                                        .tint(.white)
+                                } else {
+                                    Image(systemName: "wrench.and.screwdriver")
+                                }
+                                Text(created ? "Ticket Created" : "Create Service Ticket")
                             }
                             .font(AppFonts.sansSerif(size: 15, weight: .bold))
-                            .foregroundStyle(uploadedImages.isEmpty || serial.isEmpty ? Color.white.opacity(0.3) : AppColors.background)
+                            .foregroundStyle(uploadedImages.isEmpty || serial.isEmpty || isCreating ? Color.white.opacity(0.3) : AppColors.background)
                             .frame(maxWidth: .infinity)
                             .frame(height: 56)
                             .background(
                                 RoundedRectangle(cornerRadius: 14)
-                                    .fill(uploadedImages.isEmpty || serial.isEmpty ? Color.white.opacity(0.1) : AppColors.gold)
+                                    .fill(uploadedImages.isEmpty || serial.isEmpty || isCreating ? Color.white.opacity(0.1) : AppColors.gold)
                             )
                         }
-                        .disabled(uploadedImages.isEmpty || serial.isEmpty)
+                        .disabled(uploadedImages.isEmpty || serial.isEmpty || isCreating || created)
+                        
+                        if let errorMsg = errorMessage {
+                            Text(errorMsg)
+                                .font(AppFonts.sansSerif(size: 13))
+                                .foregroundStyle(AppColors.error)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .padding(.top, 4)
+                        }
                     }
                     .padding(.horizontal, 24)
                     .padding(.vertical, 20)
@@ -555,6 +641,13 @@ struct AfterSalesIntakeView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .alert("Ticket Created", isPresented: $showSuccessAlert) {
+            Button("OK") {
+                dismiss()
+            }
+        } message: {
+            Text("The After Sales Ticket has been successfully generated and synced.")
+        }
     }
     
     private func loadImages(from items: [PhotosPickerItem]) {

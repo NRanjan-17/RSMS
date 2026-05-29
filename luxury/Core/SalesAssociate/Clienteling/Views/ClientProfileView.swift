@@ -341,6 +341,66 @@ private struct ClientOverviewTab: View {
                     }
                 }
             }
+            
+            // ACTIVE SERVICES Section
+            VStack(alignment: .leading, spacing: 12) {
+                Text("ACTIVE SERVICES")
+                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                    .foregroundStyle(AppColors.secondary)
+                    .kerning(1.5)
+                
+                if viewModel.activeServices.isEmpty {
+                    Text("No active service tickets")
+                        .font(AppFonts.sansSerif(size: 12))
+                        .foregroundStyle(AppColors.secondary)
+                        .padding(.vertical, 4)
+                } else {
+                    VStack(spacing: 10) {
+                        ForEach(viewModel.activeServices.prefix(3), id: \.id) { ast in
+                            Button(action: onTicketTap) {
+                                HStack(spacing: 12) {
+                                    ZStack {
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .fill(AppColors.surface2)
+                                            .frame(width: 42, height: 42)
+                                        Image(systemName: "wrench.and.screwdriver")
+                                            .font(AppFonts.sansSerif(size: 16))
+                                            .foregroundStyle(AppColors.gold)
+                                            .opacity(0.8)
+                                    }
+                                    
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(ast.catalogs?.name ?? "Service Ticket")
+                                            .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                            .foregroundStyle(.white)
+                                        
+                                        HStack(spacing: 6) {
+                                            StatusBadge(
+                                                text: ast.status.capitalized,
+                                                status: ast.status.lowercased() == "ready" ? .success : .pending
+                                            )
+                                            Text(ast.catalogs?.catalogId ?? "Unknown ID")
+                                                .font(AppFonts.sansSerif(size: 11))
+                                                .foregroundStyle(AppColors.secondary)
+                                        }
+                                    }
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(AppFonts.sansSerif(size: 12, weight: .bold))
+                                        .foregroundStyle(AppColors.secondary)
+                                }
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 12)
+                                .background(AppColors.surface)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+            }
+            
             if let lastPurchase = viewModel.purchases.first {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("LAST PURCHASE")
