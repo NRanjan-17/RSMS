@@ -296,9 +296,14 @@ struct EditClientView: View {
             Button("Cancel", role: .cancel) { }
             Button("Delete", role: .destructive) {
                 Task {
-                    try? await clientService.deleteClient(id: client.id)
-                    NotificationCenter.default.post(name: NSNotification.Name("RefreshClients"), object: nil)
-                    dismiss()
+                    do {
+                        try await clientService.deleteClient(id: client.id)
+                        NotificationCenter.default.post(name: NSNotification.Name("ClientDeleted"), object: nil)
+                        NotificationCenter.default.post(name: NSNotification.Name("RefreshClients"), object: nil)
+                        dismiss()
+                    } catch {
+                        errorMessage = "Cannot delete client: Client has associated records (e.g. appointments, transactions)."
+                    }
                 }
             }
         } message: {

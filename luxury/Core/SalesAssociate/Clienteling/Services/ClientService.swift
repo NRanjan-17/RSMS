@@ -164,15 +164,11 @@ final class ClientService {
     }
     
     func deleteClient(id: UUID) async throws {
-        do {
-            try await client
-                .from("client")
-                .delete()
-                .eq("id", value: id.uuidString)
-                .execute()
-        } catch {
-            print("Database deleteClient failed: \(error).")
-        }
+        try await client
+            .from("client")
+            .delete()
+            .eq("id", value: id.uuidString)
+            .execute()
         
         var localClients = getLocalClients()
         localClients.removeAll(where: { $0.id == id })

@@ -181,6 +181,9 @@ struct ClientProfileView: View {
                 }
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ClientDeleted"))) { _ in
+            dismiss()
+        }
     }
 }
 
