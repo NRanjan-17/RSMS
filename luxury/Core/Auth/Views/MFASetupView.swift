@@ -135,13 +135,17 @@ struct MFASetupView: View {
                 
                 // Now enroll a new factor
                 let friendlyName = "\(UIDevice.current.name.replacingOccurrences(of: " ", with: ""))_\(Int(Date().timeIntervalSince1970) % 10000)"
-                let response = try await SupabaseManager.shared.client.auth.mfa.enroll(params: Auth.MFATotpEnrollParams(issuer: "LuxuryApp", friendlyName: friendlyName))
+                let response = try await SupabaseManager.shared.client.auth.mfa.enroll(params: Auth.MFATotpEnrollParams(issuer: "RSMS", friendlyName: friendlyName))
                 factorId = response.id
-                
-                if let qrString = response.totp?.uri {
-                    qrCodeImage = generateQRCode(from: qrString)
-                }
                 secret = response.totp?.secret ?? ""
+                
+                // Construct a clean, compliant URI to avoid MS Authenticator issues
+                let session = await authService.getCurrentSession()
+                let email = session?.user.email ?? "User"
+                let encodedEmail = email.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? email
+                let cleanUri = "otpauth://totp/RSMS:\(encodedEmail)?secret=\(secret)&issuer=RSMS"
+                
+                qrCodeImage = generateQRCode(from: cleanUri)
             } catch {
                 errorMessage = "Failed to load MFA setup: \(error.localizedDescription)"
             }
@@ -175,6 +179,8 @@ struct MFASetupView: View {
         
         if let filter = CIFilter(name: "CIQRCodeGenerator") {
             filter.setValue(data, forKey: "inputMessage")
+            // Use 'L' (Low) error correction for less dense, faster-scanning QR codes
+            filter.setValue("L", forKey: "inputCorrectionLevel")
             let transform = CGAffineTransform(scaleX: 10, y: 10)
             
             if let output = filter.outputImage?.transformed(by: transform) {
