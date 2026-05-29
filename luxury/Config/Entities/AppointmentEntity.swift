@@ -24,7 +24,7 @@ extension AppointmentStatus {
 
 enum AppointmentType: String, Codable, Hashable, CaseIterable {
     case online = "online"
-    case inStore = "in store"
+    case inStore = "in_store"
     
     public var displayName: String {
         switch self {
