@@ -20,6 +20,7 @@ final class ClientDetailViewModel {
             refreshSizes()
             refreshPurchases()
             refreshNotes()
+            refreshActiveServices()
         }
     }
     var selectedTab: String = "overview"
@@ -30,6 +31,7 @@ final class ClientDetailViewModel {
     var purchases: [ClientPurchase] = []
     var appointments: [AppointmentEntity] = []
     var notes: [ClientNote] = []
+    var activeServices: [ASTDetails] = []
     
     
     
@@ -58,6 +60,7 @@ final class ClientDetailViewModel {
         refreshPurchases()
         refreshAppointments()
         refreshNotes()
+        refreshActiveServices()
     }
     
     func refreshWishlist() {
@@ -102,6 +105,26 @@ final class ClientDetailViewModel {
                 }
             } catch {
                 print("Failed to fetch client appointments: \(error)")
+            }
+        }
+    }
+    
+    func refreshActiveServices() {
+        Task {
+            do {
+                let fetched: [ASTDetails] = try await SupabaseManager.shared.client
+                    .from("ast")
+                    .select("*, catalogs(*), client(*)")
+                    .eq("client_id", value: client.id)
+                    .order("id", ascending: false)
+                    .execute()
+                    .value
+                
+                await MainActor.run {
+                    self.activeServices = fetched
+                }
+            } catch {
+                print("Failed to fetch active services: \(error)")
             }
         }
     }
