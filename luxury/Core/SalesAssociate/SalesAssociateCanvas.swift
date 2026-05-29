@@ -110,8 +110,8 @@ struct SalesAssociateCanvas: View {
             AppointmentListView()
         case .transactionDetail(let tx):
             SATransactionDetailView(transaction: tx)
-        case .createAppointment:
-            CreateAppointmentView()
+        case .createAppointment(let client):
+            CreateAppointmentView(client: client)
         case .returns:
             ReturnsView()
         case .afterSalesIntake(let client, let serialNumber, let isWarrantyActive):

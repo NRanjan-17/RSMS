@@ -12,6 +12,7 @@ import Supabase
 @Observable
 final class AppointmentsViewModel {
     var appointments: [AppointmentEntity] = []
+    var clientsMap: [UUID: ClientEntity] = [:]
     var isLoading = false
     var errorMessage: String?
     
@@ -40,7 +41,87 @@ final class AppointmentsViewModel {
     }()
     
     var remainingCount: Int {
-        appointments.filter { $0.status != "completed" }.count
+        appointments.filter { $0.status != .completed }.count
+    }
+    
+    func monthYearString(for date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM yyyy"
+        return formatter.string(from: date)
+    }
+    
+    func weeksInMonth(for date: Date) -> [[Date?]] {
+        let calendar = Calendar.current
+        guard let monthInterval = calendar.dateInterval(of: .month, for: date),
+              let monthFirstWeek = calendar.dateInterval(of: .weekOfMonth, for: monthInterval.start) else {
+            return []
+        }
+        
+        var weeks: [[Date?]] = []
+        var currentWeekStart = monthFirstWeek.start
+        
+        while currentWeekStart < monthInterval.end {
+            var week: [Date?] = []
+            for dayOffset in 0..<7 {
+                if let day = calendar.date(byAdding: .day, value: dayOffset, to: currentWeekStart) {
+                    if calendar.isDate(day, equalTo: date, toGranularity: .month) {
+                        week.append(day)
+                    } else {
+                        week.append(nil)
+                    }
+                } else {
+                    week.append(nil)
+                }
+            }
+            weeks.append(week)
+            
+            guard let nextWeek = calendar.date(byAdding: .weekOfMonth, value: 1, to: currentWeekStart) else {
+                break
+            }
+            currentWeekStart = nextWeek
+        }
+        
+        return weeks
+    }
+    
+    func hasAppointments(on date: Date) -> Bool {
+        let calendar = Calendar.current
+        return appointments.contains { appt in
+            guard let apptDate = ISO8601DateFormatter().date(from: appt.timestamp) else { return false }
+            return calendar.isDate(apptDate, inSameDayAs: date)
+        }
+    }
+    
+    func appointmentsFor(date: Date) -> [(timeBlock: String, appointments: [AppointmentEntity])] {
+        let calendar = Calendar.current
+        
+        let filtered = appointments.filter { appt in
+            guard let apptDate = ISO8601DateFormatter().date(from: appt.timestamp) else { return false }
+            return calendar.isDate(apptDate, inSameDayAs: date)
+        }
+        
+        var morning: [AppointmentEntity] = []
+        var afternoon: [AppointmentEntity] = []
+        var evening: [AppointmentEntity] = []
+        
+        for appt in filtered {
+            guard let date = ISO8601DateFormatter().date(from: appt.timestamp) else { continue }
+            let hour = calendar.component(.hour, from: date)
+            if hour < 12 {
+                morning.append(appt)
+            } else if hour < 17 {
+                afternoon.append(appt)
+            } else {
+                evening.append(appt)
+            }
+        }
+        
+        var result: [(timeBlock: String, appointments: [AppointmentEntity])] = []
+        if !morning.isEmpty { result.append(("MORNING", morning.sorted { $0.timestamp < $1.timestamp })) }
+        if !afternoon.isEmpty { result.append(("AFTERNOON", afternoon.sorted { $0.timestamp < $1.timestamp })) }
+        if !evening.isEmpty { result.append(("EVENING", evening.sorted { $0.timestamp < $1.timestamp })) }
+        
+        return result
     }
     
     @MainActor
@@ -70,11 +151,45 @@ final class AppointmentsViewModel {
                 .value
             
             self.appointments = fetched
+            
+            // Fetch associated clients
+            let clientIds = Array(Set(fetched.compactMap { $0.clientId }))
+            if !clientIds.isEmpty {
+                let fetchedClients: [ClientEntity] = try await client.from("client")
+                    .select()
+                    .in("id", values: clientIds)
+                    .execute()
+                    .value
+                
+                for c in fetchedClients {
+                    self.clientsMap[c.id] = c
+                }
+            }
         } catch {
             print("Failed to fetch appointments: \(error)")
             self.errorMessage = error.localizedDescription
             self.appointments = []
         }
         isLoading = false
+    }
+    
+    @MainActor
+    func updateAppointmentStatus(appointmentId: UUID, newStatus: AppointmentStatus) async {
+        struct UpdateStatusRequest: Encodable {
+            let status: String
+        }
+        
+        do {
+            try await client.from("appointment")
+                .update(UpdateStatusRequest(status: newStatus.rawValue))
+                .eq("id", value: appointmentId)
+                .execute()
+            
+            // Refresh local data after update
+            await fetchAppointments()
+        } catch {
+            print("Failed to update status: \(error)")
+            self.errorMessage = error.localizedDescription
+        }
     }
 }

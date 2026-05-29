@@ -54,13 +54,13 @@ struct BMAppointmentDetailView: View {
                                     RoundedRectangle(cornerRadius: 12)
                                         .fill(AppColors.gold08)
                                         .frame(width: 50, height: 50)
-                                    Text(appointment.client?.name.prefix(1) ?? "U")
+                                    Text("U")
                                         .font(AppFonts.serif(size: 20, weight: .bold))
                                         .foregroundStyle(AppColors.gold)
                                 }
 
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text(appointment.client?.name ?? "Unknown Client")
+                                    Text("Unknown Client")
                                         .font(AppFonts.serif(size: 22, weight: .medium))
                                         .foregroundStyle(AppColors.text)
                                     Text(appointment.displayAppointmentType)

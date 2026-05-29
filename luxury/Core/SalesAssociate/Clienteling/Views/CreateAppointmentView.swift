@@ -11,16 +11,36 @@ import Auth
 
 struct CreateAppointmentView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var clients: [ClientEntity] = []
-    @State private var selectedClient: ClientEntity? = nil
-    @State private var isLoadingClients = false
-    @State private var selectedDateTime = Date()
-    @State private var selectedType = AppointmentType.inStore
+    var client: Client? = nil
+    
+    @State private var clientName: String = ""
+    @State private var selectedDate = Date()
+    @State private var selectedTime = "10:00 AM"
+    @State private var selectedType = "Watch Consultation"
+    @State private var remarks: String = ""
     @State private var isSaving = false
     @State private var errorMessage: String? = nil
     
     
     let types = AppointmentType.allCases
+    
+    var availableTimes: [String] {
+        if Calendar.current.isDateInToday(selectedDate) {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "hh:mm a"
+            let nowStr = formatter.string(from: Date())
+            guard let nowTime = formatter.date(from: nowStr) else { return times }
+            
+            let futureTimes = times.filter { timeStr in
+                if let t = formatter.date(from: timeStr) {
+                    return t > nowTime
+                }
+                return true
+            }
+            return futureTimes
+        }
+        return times
+    }
     
     var body: some View {
         ZStack {
@@ -57,25 +77,15 @@ struct CreateAppointmentView: View {
                             HStack(spacing: 12) {
                                 Image(systemName: "person.fill")
                                     .foregroundStyle(AppColors.tertiary)
-                                Menu {
-                                    ForEach(clients, id: \.id) { client in
-                                        Button(action: {
-                                            selectedClient = client
-                                        }) {
-                                            Text(client.name)
-                                        }
-                                    }
-                                } label: {
-                                    HStack {
-                                        Text(selectedClient?.name ?? "Select a client...")
-                                            .font(AppFonts.sansSerif(size: 14))
-                                            .foregroundStyle(selectedClient == nil ? AppColors.tertiary : .white)
-                                        Spacer()
-                                        Image(systemName: "chevron.up.chevron.down")
-                                            .foregroundStyle(AppColors.tertiary)
-                                            .font(AppFonts.sansSerif(size: 12))
-                                    }
-                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                if let client = client {
+                                    Text(client.name)
+                                        .font(AppFonts.sansSerif(size: 14))
+                                        .foregroundStyle(.white)
+                                    Spacer()
+                                } else {
+                                    TextField("Search for a client...", text: $clientName)
+                                        .font(AppFonts.sansSerif(size: 14))
+                                        .foregroundStyle(.white)
                                 }
                             }
                             .padding(.horizontal, 16)
@@ -92,64 +102,14 @@ struct CreateAppointmentView: View {
                                 .foregroundStyle(AppColors.gold)
                                 .kerning(2)
                             
-                            DatePicker("Select Date & Time", selection: $selectedDateTime, displayedComponents: [.date, .hourAndMinute])
+                            DatePicker("Select Date", selection: $selectedDate, in: Date()..., displayedComponents: .date)
                                 .datePickerStyle(.graphical)
                                 .tint(AppColors.gold)
                                 .padding(10)
                                 .background(AppColors.surface)
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
                                 .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
-                        }
-                        .padding(.horizontal, 24)
-                        
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("CONSULTATION TYPE")
-                                .font(AppFonts.sansSerif(size: 10))
-                                .foregroundStyle(AppColors.gold)
-                                .kerning(2)
-                            
-                            VStack(spacing: 1) {
-                                ForEach(types, id: \.self) { type in
-                                    let isSelected = selectedType == type
-                                    HStack {
-                                        Text(type.displayName)
-                                            .font(AppFonts.sansSerif(size: 14))
-                                            .foregroundStyle(isSelected ? AppColors.gold : AppColors.text)
-                                        Spacer()
-                                        if isSelected {
-                                            Image(systemName: "checkmark")
-                                                .font(AppFonts.sansSerif(size: 12, weight: .bold))
-                                                .foregroundStyle(AppColors.gold)
-                                        }
-                                    }
-                                    .padding(.horizontal, 20)
-                                    .frame(height: 52)
-                                    .background(AppColors.surface)
-                                    .onTapGesture { selectedType = type }
-                                }
-                            }
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
-                        }
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 60)
-                    }
-                }
-                
-                VStack(spacing: 0) {
-                    if let error = errorMessage {
-                        Text(error)
-                            .font(AppFonts.sansSerif(size: 12))
-                            .foregroundStyle(AppColors.error)
-                            .padding(.bottom, 8)
-                    }
-                    
-                    Button(action: {
-                        Task { await saveAppointment() }
-                    }) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(selectedClient == nil || isSaving ? AppColors.gold.opacity(0.5) : AppColors.gold)
+                                .fill(isDisabled ? AppColors.gold.opacity(0.5) : AppColors.gold)
                                 .frame(height: 52)
                             
                             if isSaving {
@@ -162,7 +122,7 @@ struct CreateAppointmentView: View {
                             }
                         }
                     }
-                    .disabled(selectedClient == nil || isSaving)
+                    .disabled(isDisabled)
                     .padding(.horizontal, 24)
                     .padding(.bottom, 40)
                 }
@@ -196,8 +156,8 @@ struct CreateAppointmentView: View {
         errorMessage = nil
         
         do {
-            let client = SupabaseManager.shared.client
-            guard (try? await client.auth.session) != nil else {
+            let clientDb = SupabaseManager.shared.client
+            guard let session = try? await clientDb.auth.session else {
                 throw NSError(domain: "Auth", code: 401, userInfo: [NSLocalizedDescriptionKey: "No session"])
             }
             
@@ -209,6 +169,18 @@ struct CreateAppointmentView: View {
             
             let timestampStr = ISO8601DateFormatter().string(from: selectedDateTime)
             
+            // Conflict Check
+            let existingAppointments: [AppointmentEntity] = try await clientDb.from("appointment")
+                .select()
+                .eq("created_by", value: staff.id)
+                .eq("timestamp", value: timestampStr)
+                .execute()
+                .value
+            
+            if !existingAppointments.isEmpty {
+                throw NSError(domain: "Appointment", code: 409, userInfo: [NSLocalizedDescriptionKey: "You already have an appointment scheduled for this time"])
+            }
+            
             guard let boutiqueId = staff.boutiqueId else {
                 throw NSError(domain: "Auth", code: 403, userInfo: [NSLocalizedDescriptionKey: "Staff does not have an assigned boutique"])
             }
@@ -217,17 +189,18 @@ struct CreateAppointmentView: View {
             
             let appointment = AppointmentEntity(
                 id: UUID(),
-                clientId: selectedClient?.id,
+                clientId: client?.id,
                 boutiqueId: boutiqueId,
                 timestamp: timestampStr,
-                appointmentType: dbAppointmentType,
+                appointmentType: AppointmentType(rawValue: selectedType) ?? .other,
                 assignedTo: staff.id,
                 createdBy: staff.id,
-                status: "pending",
-                createdAt: nil
+                status: .pending,
+                createdAt: nil,
+                remarks: remarks.isEmpty ? nil : remarks
             )
             
-            try await client.from("appointment").insert(appointment).execute()
+            try await clientDb.from("appointment").insert(appointment).execute()
             
             await MainActor.run {
                 dismiss()

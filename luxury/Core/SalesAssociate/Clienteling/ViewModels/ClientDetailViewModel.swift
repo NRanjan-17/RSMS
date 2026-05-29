@@ -23,7 +23,7 @@ final class ClientDetailViewModel {
         }
     }
     var selectedTab: String = "overview"
-    let tabs = [("overview", "Overview"), ("history", "History"), ("wishlist", "Wishlist"), ("notes", "Notes")]
+    let tabs = [("overview", "Overview"), ("appointments", "Appts"), ("history", "History"), ("wishlist", "Wishlist"), ("notes", "Notes")]
     
     var wishlistItems: [ClientWishlistItem] = []
     var sizes: ClientSizePreference = ClientSizePreference()
@@ -255,6 +255,8 @@ final class ClientDetailViewModel {
             let dateStr = formatter.string(from: apptDate)
             let isActive = appt.status != "Completed" && appt.status != "Cancelled"
             generatedTickets.append(ClientTicket(title: "Appointment - \(appt.displayAppointmentType)", status: appt.status, date: dateStr, isActive: isActive))
+            let isActive = appt.status != .completed && appt.status != .cancelled
+            generatedTickets.append(ClientTicket(title: "Appointment - \(appt.appointmentType.rawValue)", status: appt.status.rawValue, date: dateStr, isActive: isActive))
         }
         
         return generatedTickets

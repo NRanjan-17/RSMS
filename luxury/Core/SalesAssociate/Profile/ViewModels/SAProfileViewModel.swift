@@ -55,6 +55,7 @@ final class SAProfileViewModel {
                 let fetched: [AppointmentEntity] = try await SupabaseManager.shared.client
                     .from("appointment")
                     .select("*, client:client_id(*)")
+                    .select()
                     .eq("assigned_to", value: staff.id)
                     .order("timestamp", ascending: false)
                     .execute()

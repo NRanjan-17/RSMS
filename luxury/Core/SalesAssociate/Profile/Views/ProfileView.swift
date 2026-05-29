@@ -167,12 +167,111 @@ struct ProfileView: View {
                         
 
                         // MARK: - Security
+
+                        
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text("RECENT CLIENTS")
+                                    .font(AppFonts.sansSerif(size: 10))
+                                    .foregroundStyle(AppColors.secondary)
+                                    .kerning(1.8)
+                                Spacer()
+                                Button(action: {
+                                    withAnimation {
+                                        saAppState.selectedTab = .clients
+                                    }
+                                }) {
+                                    Text("See all")
+                                        .font(AppFonts.sansSerif(size: 11))
+                                        .foregroundStyle(AppColors.gold)
+                                }
+                            }
+                            .padding(.horizontal, 24)
+                            
+                            VStack(spacing: 0) {
+                                let clients = viewModel.recentClients
+                                ForEach(clients, id: \.id) { cl in
+                                    Button(action: {
+                                        let dummyClient = Client(name: cl.name, tier: cl.tier == "UHNW" ? .uhnw : .vip, lastVisit: cl.lastVisit, ltv: cl.ltv, initial: cl.initial)
+                                        router.push(SARoute.clientProfile(dummyClient))
+                                    }) {
+                                        HStack(spacing: 12) {
+                                            ZStack {
+                                                RoundedRectangle(cornerRadius: 11)
+                                                    .fill(AppColors.gold08)
+                                                    .frame(width: 38, height: 38)
+                                                Text(cl.initial)
+                                                    .font(AppFonts.serif(size: 13, weight: .semibold))
+                                                    .foregroundStyle(AppColors.gold)
+                                            }
+                                            
+                                            VStack(alignment: .leading, spacing: 3) {
+                                                HStack(spacing: 6) {
+                                                    Text(cl.name)
+                                                        .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                                        .foregroundStyle(AppColors.text)
+                                                    StatusBadge(text: cl.tier, status: cl.tier == "UHNW" ? .success : .neutral)
+                                                }
+                                                Text("Last visit \(cl.lastVisit) · LTV \(CurrencyManager.shared.formatCompact(amount: cl.ltv))")
+                                                    .font(AppFonts.sansSerif(size: 11))
+                                                    .foregroundStyle(AppColors.secondary)
+                                            }
+                                            Spacer()
+                                            Image(systemName: "chevron.right")
+                                                .font(.system(size: 12))
+                                                .foregroundStyle(AppColors.tertiary)
+                                        }
+                                        .padding(.horizontal, 14)
+                                        .padding(.vertical, 13)
+                                        .background(AppColors.surface)
+                                        .overlay(
+                                            VStack {
+                                                Spacer()
+                                                if cl.id != clients.last?.id {
+                                                    Divider().background(AppColors.gold08).padding(.horizontal, 14)
+                                                }
+                                            }
+                                        )
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                            .padding(.horizontal, 24)
+                        }
+                        .padding(.top, 18)
+                        
+                        // MARK: - Settings
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("SECURITY")
+                            Text("SETTINGS")
                                 .font(AppFonts.sansSerif(size: 11, weight: .bold))
                                 .foregroundStyle(AppColors.secondary)
                                 .kerning(1.5)
                                 .padding(.horizontal, 24)
+                            
+                            Button(action: {
+                                router.push(SARoute.appointmentList)
+                            }) {
+                                HStack {
+                                    Image(systemName: "calendar")
+                                        .font(.system(size: 18))
+                                        .foregroundStyle(AppColors.gold)
+                                    Text("My Appointments")
+                                        .font(AppFonts.sansSerif(size: 15))
+                                        .foregroundStyle(.white)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(AppColors.tertiary)
+                                }
+                                .padding(16)
+                                .background(AppColors.surface)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.horizontal, 24)
                             
                             NavigationLink(destination: SecuritySettingsView()) {
                                 HStack {
