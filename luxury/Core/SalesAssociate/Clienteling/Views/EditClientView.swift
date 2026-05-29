@@ -35,7 +35,6 @@ struct EditClientView: View {
     @State private var isLoading = false
     @State private var errorMessage: String? = nil
     @State private var showErrorAlert = false
-    @State private var showDeactivateAlert = false
     @State private var showDeleteAlert = false
     @State private var clientEntity: ClientEntity? = nil
     
@@ -265,20 +264,7 @@ struct EditClientView: View {
                         }
                         .padding(.horizontal, 24)
                         .padding(.bottom, 24)
-                        
-                        Button(action: {
-                            showDeactivateAlert = true
-                        }) {
-                            Text("Deactivate Client Profile")
-                                .font(AppFonts.sansSerif(size: 13))
-                                .foregroundStyle(AppColors.text)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
-                                .background(AppColors.surface)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
-                        }
-                        .padding(.horizontal, 24)
+
                         
                         Button(action: {
                             showDeleteAlert = true
@@ -305,11 +291,6 @@ struct EditClientView: View {
                 }
                 .background(AppColors.background)
             }
-        }
-        .alert("Deactivate Client", isPresented: $showDeactivateAlert) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text("Client deactivation is not currently supported by the backend.")
         }
         .alert("Delete Client", isPresented: $showDeleteAlert) {
             Button("Cancel", role: .cancel) { }

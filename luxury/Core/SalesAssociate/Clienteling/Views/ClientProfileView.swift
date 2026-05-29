@@ -124,17 +124,7 @@ struct ClientProfileView: View {
                         )
                         .padding(.bottom, 16)
                         
-                        HStack(spacing: 10) {
-                            CustomOutlineButton(title: "Service Intake", icon: AnyView(Image(systemName: "wrench.and.screwdriver")), action: {
-                                router.push(SARoute.afterSalesIntake(client: viewModel.client, serialNumber: nil, isWarrantyActive: true))
-                            })
-                            
-                            CustomOutlineButton(title: "Track Ticket", icon: AnyView(Image(systemName: "clock.badge.checkmark")), action: {
-                                router.push(SARoute.afterSalesTracking)
-                            })
-                        }
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 16)
+
                         
                         VStack(spacing: 0) {
                             if viewModel.selectedTab == "overview" {
@@ -265,54 +255,53 @@ private struct ClientOverviewTab: View {
                 }
             }
             
+
+            
+            // APPOINTMENTS Section
             VStack(alignment: .leading, spacing: 12) {
-                Text("Appointment Tracking")
+                Text("APPOINTMENTS")
                     .font(AppFonts.sansSerif(size: 10, weight: .bold))
                     .foregroundStyle(AppColors.secondary)
                     .kerning(1.5)
                 
-                if viewModel.tickets.isEmpty {
-                    Text("No active service tickets")
+                if viewModel.appointments.isEmpty {
+                    Text("No recorded appointments")
                         .font(AppFonts.sansSerif(size: 12))
                         .foregroundStyle(AppColors.secondary)
                         .padding(.vertical, 4)
                 } else {
                     VStack(spacing: 10) {
-                        let sortedTickets = viewModel.tickets.sorted { $0.isActive && !$1.isActive }
-                        ForEach(sortedTickets) { ticket in
-                            Button(action: onTicketTap) {
-                                HStack(spacing: 12) {
-                                    Circle()
-                                        .fill(ticket.isActive ? AppColors.gold : AppColors.tertiary)
-                                        .frame(width: 8, height: 8)
-                                    
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(ticket.title)
-                                            .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                                            .foregroundStyle(.white)
-                                        Text("\(ticket.status) · \(ticket.date)")
-                                            .font(AppFonts.sansSerif(size: 11))
-                                            .foregroundStyle(AppColors.secondary)
-                                    }
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .font(AppFonts.sansSerif(size: 12))
-                                        .foregroundStyle(AppColors.tertiary)
+                        ForEach(viewModel.appointments.prefix(3), id: \.id) { appt in
+                            HStack(spacing: 12) {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .fill(AppColors.surface2)
+                                        .frame(width: 42, height: 42)
+                                    Image(systemName: "calendar")
+                                        .font(AppFonts.sansSerif(size: 16))
+                                        .foregroundStyle(AppColors.gold)
+                                        .opacity(0.8)
                                 }
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 12)
-                                .background(AppColors.surface)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(appt.displayAppointmentType)
+                                        .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                        .foregroundStyle(.white)
+                                    Text("\(appt.formattedDate) · \(appt.formattedTime)")
+                                        .font(AppFonts.sansSerif(size: 11))
+                                        .foregroundStyle(AppColors.secondary)
+                                }
+                                Spacer()
                             }
-                            .buttonStyle(.plain)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 12)
+                            .background(AppColors.surface)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
                         }
                     }
                 }
             }
-            
-            // UPCOMING block removed
-            
             if let lastPurchase = viewModel.purchases.first {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("LAST PURCHASE")
