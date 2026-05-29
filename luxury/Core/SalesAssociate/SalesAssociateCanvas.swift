@@ -120,6 +120,8 @@ struct SalesAssociateCanvas: View {
             PurchaseDetailsView(client: client, purchase: purchase)
         case .exchangePolicy:
             ExchangePolicyView()
+        case .planogramGallery(let boutiqueId):
+            PlanogramGalleryView(boutiqueId: boutiqueId)
         }
     }
 }

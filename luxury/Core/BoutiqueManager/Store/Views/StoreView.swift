@@ -87,6 +87,29 @@ struct StoreView: View {
                                     .clipShape(RoundedRectangle(cornerRadius: 12))
                                 }
                                 .buttonStyle(.plain)
+                                
+                                Button(action: {
+                                    // VM route. For now, pass a dummy UUID until StoreViewModel includes the actual boutique ID.
+                                    router.push(BMRoute.planogramGallery(boutiqueId: UUID()))
+                                }) {
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text("Visual Merchandising")
+                                                .font(AppFonts.serif(size: 18, weight: .medium))
+                                                .foregroundStyle(.white)
+                                            Text("View active store planograms")
+                                                .font(AppFonts.sansSerif(size: 12))
+                                                .foregroundStyle(AppColors.secondary)
+                                        }
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .foregroundStyle(AppColors.gold)
+                                    }
+                                    .padding(20)
+                                    .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                }
+                                .buttonStyle(.plain)
                             }
                             .padding(.horizontal, 24)
                         }

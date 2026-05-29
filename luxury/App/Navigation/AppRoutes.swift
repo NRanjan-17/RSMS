@@ -16,6 +16,7 @@ enum SARoute: Hashable {
     case remoteSelling
     case purchaseDetails(client: Client, purchase: ClientPurchase)
     case exchangePolicy
+    case planogramGallery(boutiqueId: UUID)
 }
 
 
@@ -35,6 +36,7 @@ enum BMRoute: Hashable {
     case pendingStaff
     case staffDetail(StaffModel)
     case endlessAisleRequests
+    case planogramGallery(boutiqueId: UUID)
 }
 
 enum ICRoute: Hashable {
@@ -69,6 +71,7 @@ enum CARoute: Hashable {
     case staffDetail(StaffModel)
     case storePerformance
     case storePerformanceDetail(BoutiquePerformance)
+    case planograms
 }
 
 enum AppRoutes: Hashable {

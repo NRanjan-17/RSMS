@@ -125,6 +125,8 @@ struct BoutiqueManagerCanvas: View {
             StaffRequestsView()
         case .staffDetail(let employee):
             EmployeeDetailView(employee: employee)
+        case .planogramGallery(let boutiqueId):
+            PlanogramGalleryView(boutiqueId: boutiqueId)
         }
     }
 }
