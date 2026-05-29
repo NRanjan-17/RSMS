@@ -226,7 +226,7 @@ struct CreateAppointmentView: View {
         
         do {
             let clientDb = SupabaseManager.shared.client
-            guard let session = try? await clientDb.auth.session else {
+            guard let _ = try? await clientDb.auth.session else {
                 throw NSError(domain: "Auth", code: 401, userInfo: [NSLocalizedDescriptionKey: "No session"])
             }
             
