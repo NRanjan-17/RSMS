@@ -28,8 +28,8 @@ enum AppointmentType: String, Codable, Hashable, CaseIterable {
     
     public var displayName: String {
         switch self {
-        case .online: return "Online"
-        case .inStore: return "In Store"
+        case .online: return "ONLINE"
+        case .inStore: return "IN STORE"
         }
     }
 }

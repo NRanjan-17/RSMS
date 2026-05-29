@@ -13,7 +13,8 @@ struct CreateAppointmentView: View {
     @Environment(\.dismiss) private var dismiss
     var client: Client? = nil
     
-    @State private var clientName: String = ""
+    @State private var viewModel = ClientelingViewModel()
+    @State private var selectedClient: Client? = nil
     @State private var selectedDate = Date()
     @State private var selectedTime = "10:00 AM"
     @State private var selectedType: AppointmentType = .inStore
@@ -77,15 +78,39 @@ struct CreateAppointmentView: View {
                             HStack(spacing: 12) {
                                 Image(systemName: "person.fill")
                                     .foregroundStyle(AppColors.tertiary)
-                                if let client = client {
-                                    Text(client.name)
+                                if let selected = selectedClient {
+                                    Text(selected.name)
                                         .font(AppFonts.sansSerif(size: 14))
                                         .foregroundStyle(.white)
                                     Spacer()
+                                    if self.client == nil {
+                                        Button(action: { selectedClient = nil }) {
+                                            Image(systemName: "xmark.circle.fill")
+                                                .foregroundStyle(AppColors.secondary)
+                                        }
+                                    }
                                 } else {
-                                    TextField("Search for a client...", text: $clientName)
-                                        .font(AppFonts.sansSerif(size: 14))
-                                        .foregroundStyle(.white)
+                                    Menu {
+                                        if viewModel.isLoading {
+                                            Text("Loading clients...")
+                                        } else {
+                                            ForEach(viewModel.clients) { c in
+                                                Button(c.name) {
+                                                    selectedClient = c
+                                                }
+                                            }
+                                        }
+                                    } label: {
+                                        HStack {
+                                            Text("Select a client...")
+                                                .font(AppFonts.sansSerif(size: 14))
+                                                .foregroundStyle(AppColors.secondary)
+                                            Spacer()
+                                            Image(systemName: "chevron.up.chevron.down")
+                                                .font(.system(size: 12))
+                                                .foregroundStyle(AppColors.gold)
+                                        }
+                                    }
                                 }
                             }
                             .padding(.horizontal, 16)
@@ -189,7 +214,7 @@ struct CreateAppointmentView: View {
                             .padding(.bottom, 8)
                     }
                     
-                    let isDisabled = (client == nil && clientName.isEmpty) || isSaving
+                    let isDisabled = selectedClient == nil || isSaving
                     
                     Button(action: {
                         Task { await saveAppointment() }
@@ -214,6 +239,12 @@ struct CreateAppointmentView: View {
                     .padding(.bottom, 40)
                 }
                 .background(AppColors.background)
+            }
+        }
+        .task {
+            selectedClient = client
+            if client == nil {
+                await viewModel.loadClients()
             }
         }
         .toolbar(.hidden, for: .navigationBar)
@@ -268,7 +299,7 @@ struct CreateAppointmentView: View {
             
             let appointment = AppointmentEntity(
                 id: UUID(),
-                clientId: client?.id,
+                clientId: selectedClient?.id,
                 boutiqueId: boutiqueId,
                 timestamp: timestampStr,
                 appointmentType: selectedType,
