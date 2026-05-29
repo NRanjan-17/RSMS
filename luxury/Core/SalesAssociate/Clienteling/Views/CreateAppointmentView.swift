@@ -102,7 +102,7 @@ struct CreateAppointmentView: View {
                                 .foregroundStyle(AppColors.gold)
                                 .kerning(2)
                             
-                            RSMSCalendarView(selectedDate: $selectedDate)
+                            RSMSCalendarView(selectedDate: $selectedDate, disablePastDates: true)
                             
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 10) {

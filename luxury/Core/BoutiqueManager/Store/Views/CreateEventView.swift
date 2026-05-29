@@ -227,7 +227,7 @@ struct CreateEventView: View {
                                 .foregroundStyle(AppColors.gold)
                                 .kerning(2)
                             
-                            RSMSCalendarView(selectedDate: $eventDate)
+                            RSMSCalendarView(selectedDate: $eventDate, disablePastDates: true)
                         }
                         .padding(.horizontal, 24)
                         

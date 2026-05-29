@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RSMSCalendarView: View {
     @Binding var selectedDate: Date
+    var disablePastDates: Bool = false
     var hasAppointments: ((Date) -> Bool)? = nil
     
     // Helper to format the Month/Year string
@@ -103,6 +104,7 @@ struct RSMSCalendarView: View {
                                 let isSelected = Calendar.current.isDate(day, inSameDayAs: selectedDate)
                                 let hasAppt = hasAppointments?(day) ?? false
                                 let isToday = Calendar.current.isDateInToday(day)
+                                let isPastDate = disablePastDates && day < Calendar.current.startOfDay(for: Date())
                                 
                                 Button(action: {
                                     withAnimation {
@@ -112,7 +114,7 @@ struct RSMSCalendarView: View {
                                     VStack(spacing: 4) {
                                         Text("\(Calendar.current.component(.day, from: day))")
                                             .font(AppFonts.sansSerif(size: 14, weight: isSelected ? .semibold : .regular))
-                                            .foregroundStyle(isSelected ? AppColors.background : (isToday ? AppColors.gold : AppColors.text))
+                                            .foregroundStyle(isSelected ? AppColors.background : (isPastDate ? AppColors.secondary : (isToday ? AppColors.gold : AppColors.text)))
                                         
                                         if hasAppt {
                                             Circle()
@@ -130,6 +132,7 @@ struct RSMSCalendarView: View {
                                     .clipShape(RoundedRectangle(cornerRadius: 8))
                                 }
                                 .buttonStyle(.plain)
+                                .disabled(isPastDate)
                             } else {
                                 Color.clear
                                     .frame(maxWidth: .infinity)
