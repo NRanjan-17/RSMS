@@ -28,6 +28,10 @@ enum AppointmentType: String, Codable, Hashable, CaseIterable {
     case leatherGoodsPreview = "Leather Goods Preview"
     case videoConsult = "Video Consult"
     case other = "other"
+    
+    public var displayName: String {
+        return self.rawValue
+    }
 }
 
 struct AppointmentEntity: Codable, Identifiable, Hashable {
@@ -41,12 +45,10 @@ struct AppointmentEntity: Codable, Identifiable, Hashable {
     var status: AppointmentStatus
     var createdAt: String?
     var remarks: String?
+    var client: ClientEntity?
     
     var displayAppointmentType: String {
-        if let type = AppointmentType(rawValue: appointmentType) {
-            return type.displayName
-        }
-        return appointmentType.capitalized.replacingOccurrences(of: "_", with: " ")
+        return appointmentType.displayName
     }
     
     var formattedTime: String {
@@ -74,17 +76,8 @@ struct AppointmentEntity: Codable, Identifiable, Hashable {
         case status
         case createdAt = "created_at"
         case remarks
+        case client
     }
 }
 
-public enum AppointmentType: String, Codable, CaseIterable {
-    case inStore = "in_store"
-    case online = "online"
-    
-    public var displayName: String {
-        switch self {
-        case .inStore: return "In Store"
-        case .online: return "Online"
-        }
-    }
-}
+

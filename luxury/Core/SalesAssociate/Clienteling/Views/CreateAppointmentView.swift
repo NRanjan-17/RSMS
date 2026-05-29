@@ -21,8 +21,8 @@ struct CreateAppointmentView: View {
     @State private var isSaving = false
     @State private var errorMessage: String? = nil
     
-    
-    let types = AppointmentType.allCases
+    let times = ["10:00 AM", "11:30 AM", "01:00 PM", "02:30 PM", "04:00 PM", "05:30 PM"]
+    let types = ["Watch Consultation", "Jewellery Fitting", "Leather Goods Preview", "Video Consult"]
     
     var availableTimes: [String] {
         if Calendar.current.isDateInToday(selectedDate) {
@@ -50,7 +50,7 @@ struct CreateAppointmentView: View {
                 HStack(spacing: 16) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
-                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
+                            .font(.system(size: 20, weight: .semibold))
                             .foregroundStyle(AppColors.gold)
                     }
                     Text("Appointments")
@@ -109,6 +109,99 @@ struct CreateAppointmentView: View {
                                 .background(AppColors.surface)
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
                                 .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
+                            
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 10) {
+                                    ForEach(availableTimes, id: \.self) { time in
+                                        let isSelected = selectedTime == time
+                                        Text(time)
+                                            .font(AppFonts.sansSerif(size: 12, weight: isSelected ? .medium : .light))
+                                            .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
+                                            .padding(.horizontal, 16)
+                                            .padding(.vertical, 10)
+                                            .background(isSelected ? AppColors.gold : AppColors.surface)
+                                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                                            .overlay(RoundedRectangle(cornerRadius: 10).stroke(isSelected ? Color.clear : AppColors.gold15, lineWidth: 0.5))
+                                            .onTapGesture { selectedTime = time }
+                                    }
+                                }
+                            }
+                            .onChange(of: availableTimes) { _, newTimes in
+                                if !newTimes.contains(selectedTime) {
+                                    selectedTime = newTimes.first ?? "10:00 AM"
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                        
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("CONSULTATION TYPE")
+                                .font(AppFonts.sansSerif(size: 10))
+                                .foregroundStyle(AppColors.gold)
+                                .kerning(2)
+                            
+                            VStack(spacing: 1) {
+                                ForEach(types, id: \.self) { type in
+                                    let isSelected = selectedType == type
+                                    HStack {
+                                        Text(type)
+                                            .font(AppFonts.sansSerif(size: 14))
+                                            .foregroundStyle(isSelected ? AppColors.gold : AppColors.text)
+                                        Spacer()
+                                        if isSelected {
+                                            Image(systemName: "checkmark")
+                                                .font(.system(size: 12, weight: .bold))
+                                                .foregroundStyle(AppColors.gold)
+                                        }
+                                    }
+                                    .padding(.horizontal, 20)
+                                    .frame(height: 52)
+                                    .background(AppColors.surface)
+                                    .onTapGesture { selectedType = type }
+                                }
+                            }
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                        }
+                        .padding(.horizontal, 24)
+                        
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("REMARKS (OPTIONAL)")
+                                .font(AppFonts.sansSerif(size: 10))
+                                .foregroundStyle(AppColors.gold)
+                                .kerning(2)
+                            
+                            HStack {
+                                TextField("Any special requests or notes...", text: $remarks)
+                                    .font(AppFonts.sansSerif(size: 14))
+                                    .foregroundStyle(.white)
+                            }
+                            .padding(.horizontal, 16)
+                            .frame(height: 50)
+                            .background(AppColors.surface)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 60)
+                    }
+                }
+                
+                VStack(spacing: 0) {
+                    if let error = errorMessage {
+                        Text(error)
+                            .font(AppFonts.sansSerif(size: 12))
+                            .foregroundStyle(AppColors.error)
+                            .padding(.bottom, 8)
+                    }
+                    
+                    let isDisabled = (client == nil && clientName.isEmpty) || isSaving
+                    
+                    Button(action: {
+                        Task { await saveAppointment() }
+                    }) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
                                 .fill(isDisabled ? AppColors.gold.opacity(0.5) : AppColors.gold)
                                 .frame(height: 52)
                             
@@ -129,26 +222,7 @@ struct CreateAppointmentView: View {
                 .background(AppColors.background)
             }
         }
-        .task {
-            await fetchClients()
-        }
         .toolbar(.hidden, for: .navigationBar)
-    }
-    
-    private func fetchClients() async {
-        isLoadingClients = true
-        do {
-            let service = ClientService()
-            let fetched = try await service.fetchClients()
-            await MainActor.run {
-                self.clients = fetched
-            }
-        } catch {
-            print("Failed to fetch clients: \(error)")
-        }
-        await MainActor.run {
-            isLoadingClients = false
-        }
     }
     
     private func saveAppointment() async {
@@ -167,7 +241,20 @@ struct CreateAppointmentView: View {
                 throw NSError(domain: "Auth", code: 403, userInfo: [NSLocalizedDescriptionKey: "Staff profile not found"])
             }
             
-            let timestampStr = ISO8601DateFormatter().string(from: selectedDateTime)
+            let timeFormatter = DateFormatter()
+            timeFormatter.dateFormat = "HH:mm"
+            let timeDate = timeFormatter.date(from: selectedTime) ?? Date()
+            
+            let calendar = Calendar.current
+            let hour = calendar.component(.hour, from: timeDate)
+            let minute = calendar.component(.minute, from: timeDate)
+            
+            guard let combinedDate = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: selectedDate) else {
+                throw NSError(domain: "Auth", code: 400, userInfo: [NSLocalizedDescriptionKey: "Invalid date/time combination"])
+            }
+            
+            let isoFormatter = ISO8601DateFormatter()
+            let timestampStr = isoFormatter.string(from: combinedDate)
             
             // Conflict Check
             let existingAppointments: [AppointmentEntity] = try await clientDb.from("appointment")
@@ -184,8 +271,6 @@ struct CreateAppointmentView: View {
             guard let boutiqueId = staff.boutiqueId else {
                 throw NSError(domain: "Auth", code: 403, userInfo: [NSLocalizedDescriptionKey: "Staff does not have an assigned boutique"])
             }
-            
-            let dbAppointmentType = selectedType.rawValue
             
             let appointment = AppointmentEntity(
                 id: UUID(),

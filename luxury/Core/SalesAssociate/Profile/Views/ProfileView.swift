@@ -130,7 +130,7 @@ struct ProfileView: View {
                                             ZStack {
                                                 Circle()
                                                     .fill(AppColors.gold08)
-                                                Text(String(a.client?.name.prefix(1) ?? "U"))
+                                                Text(String(a.client?.name.first ?? Character("U")))
                                                     .font(AppFonts.serif(size: 16, weight: .bold))
                                                     .foregroundStyle(AppColors.gold)
                                             }

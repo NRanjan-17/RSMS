@@ -16,28 +16,6 @@ struct AppointmentListView: View {
     @State private var selectedAppointment: AppointmentEntity?
     @State private var isShowingDetail = false
     
-    private var filteredAppointments: [AppointmentEntity] {
-        let calendar = Calendar.current
-        let today = Date()
-        let year = calendar.component(.year, from: today)
-        let month = calendar.component(.month, from: today)
-        
-        return viewModel.appointments.filter { appt in
-            guard let apptDate = ISO8601DateFormatter().date(from: appt.timestamp) else { return false }
-            return calendar.component(.day, from: apptDate) == selectedDay &&
-                   calendar.component(.month, from: apptDate) == month &&
-                   calendar.component(.year, from: apptDate) == year
-        }
-    }
-    
-    private var isTodaySelected: Bool {
-        selectedDay == Calendar.current.component(.day, from: Date())
-    }
-    
-    private var activeFilteredCount: Int {
-        filteredAppointments.filter { $0.status != "completed" && $0.status != "cancelled" }.count
-    }
-    
     var body: some View {
         ZStack {
             AppColors.background.ignoresSafeArea()
@@ -46,7 +24,7 @@ struct AppointmentListView: View {
                 HStack(spacing: 16) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
-                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
+                            .font(.system(size: 20, weight: .semibold))
                             .foregroundStyle(AppColors.gold)
                     }
                     Text("Appointments")

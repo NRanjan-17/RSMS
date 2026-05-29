@@ -162,7 +162,7 @@ struct ClientelingView: View {
                         }
                         
                         Button(action: {
-                            router.presentFullScreen(SARoute.createAppointment)
+                            router.presentFullScreen(SARoute.createAppointment(nil))
                         }) {
                             Label("New Appointment", systemImage: "calendar.badge.plus")
                         }
