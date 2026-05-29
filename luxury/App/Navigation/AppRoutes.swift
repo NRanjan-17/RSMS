@@ -19,6 +19,7 @@ enum SARoute: Hashable {
     case purchaseDetails(client: Client, purchase: ClientPurchase)
     case exchangePolicy
     case transactionList([SATransactionEntity])
+    case editProfile
 }
 
 
@@ -42,6 +43,7 @@ enum BMRoute: Hashable {
     case vipPreviewDetail(StoreEvent)
     case trunkShowDetail(StoreEvent)
     case productLaunchDetail(StoreEvent)
+    case editProfile
 }
 
 enum ICRoute: Hashable {
@@ -61,10 +63,12 @@ enum ICRoute: Hashable {
     case alerts
     case purchaseOrders
     case poDetail(PurchaseOrder)
+    case editProfile
 }
 
 enum CARoute: Hashable {
     case globalAnalytics
+    case globalInventory
     case userManagement
     case catalogs
     case catalogForm(editCatalog: CatalogEntity?)
@@ -80,6 +84,7 @@ enum CARoute: Hashable {
     case staffDetail(StaffModel)
     case storePerformance
     case storePerformanceDetail(BoutiquePerformance)
+    case editProfile
 }
 
 enum AppRoutes: Hashable {

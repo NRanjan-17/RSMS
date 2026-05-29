@@ -13,6 +13,7 @@ struct ProfileView: View {
     @Environment(Router.self) private var router
     @State private var viewModel = SAProfileViewModel()
     @State private var showLogoutAlert = false
+    @State private var currencyManager = CurrencyManager.shared
     
     private var formattedDate: String {
         let formatter = DateFormatter()
@@ -27,18 +28,39 @@ struct ProfileView: View {
             VStack(spacing: 0) {
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 0) {
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text("\(viewModel.store) · \(formattedDate)")
-                                .font(AppFonts.sansSerif(size: 10))
-                                .foregroundStyle(AppColors.gold)
-                                .kerning(2)
-                                .textCase(.uppercase)
-                            Text(viewModel.greeting)
-                                .font(AppFonts.serif(size: 30, weight: .light).italic())
-                                .foregroundStyle(AppColors.text)
-                            Text(viewModel.name)
-                                .font(AppFonts.serif(size: 30, weight: .semibold))
-                                .foregroundStyle(AppColors.text)
+                        HStack(alignment: .top) {
+                            VStack(alignment: .leading, spacing: 5) {
+                                Text("\(viewModel.store) · \(formattedDate)")
+                                    .font(AppFonts.sansSerif(size: 10))
+                                    .foregroundStyle(AppColors.gold)
+                                    .kerning(2)
+                                    .textCase(.uppercase)
+                                Text(viewModel.greeting)
+                                    .font(AppFonts.serif(size: 30, weight: .light).italic())
+                                    .foregroundStyle(AppColors.text)
+                                Text(viewModel.name)
+                                    .font(AppFonts.serif(size: 30, weight: .semibold))
+                                    .foregroundStyle(AppColors.text)
+                            }
+                            
+                            Spacer()
+                            
+                            if let avatar = viewModel.avatarUrl, let url = URL(string: avatar) {
+                                AsyncImage(url: url) { image in
+                                    image.resizable()
+                                        .scaledToFill()
+                                } placeholder: {
+                                    ProgressView()
+                                }
+                                .frame(width: 60, height: 60)
+                                .clipShape(Circle())
+                            } else {
+                                Image(systemName: "person.circle.fill")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 60, height: 60)
+                                    .foregroundStyle(AppColors.gold)
+                            }
                         }
                         .padding(.horizontal, 24)
                         .padding(.top, 18)
@@ -104,6 +126,29 @@ struct ProfileView: View {
                                 .padding(.horizontal, 24)
                             
                             Button(action: {
+                                router.push(SARoute.editProfile)
+                            }) {
+                                HStack {
+                                    Image(systemName: "person.crop.circle")
+                                        .font(.system(size: 18))
+                                        .foregroundStyle(AppColors.gold)
+                                    Text("Edit Profile")
+                                        .font(AppFonts.sansSerif(size: 15))
+                                        .foregroundStyle(.white)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(AppColors.tertiary)
+                                }
+                                .padding(16)
+                                .background(AppColors.surface)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.horizontal, 24)
+                            
+                            Button(action: {
                                 router.push(SARoute.appointmentList)
                             }) {
                                 HStack {
@@ -148,6 +193,8 @@ struct ProfileView: View {
                             .padding(.horizontal, 24)
                         }
                         .padding(.top, 18)
+                        
+
                         
                         // MARK: - Support & Policies
                         VStack(alignment: .leading, spacing: 16) {

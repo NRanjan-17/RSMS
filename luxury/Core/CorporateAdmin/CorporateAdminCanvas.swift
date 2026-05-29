@@ -22,6 +22,8 @@ struct CorporateAdminCanvas: View {
     @State private var performanceRouter = Router()
     @State private var performanceViewModel = StorePerformanceViewModel()
     
+    @State private var profileRouter = Router()
+    
     var body: some View {
         TabView(selection: Binding(
             get: { caAppState.selectedTab },
@@ -61,36 +63,23 @@ struct CorporateAdminCanvas: View {
             .tabItem { Label("Catalogs", systemImage: "book.pages.fill") }
             .tag(CATab.catalogs)
             
-            NavigationStack(path: $logsRouter.path) {
-                SystemLogsView()
-                    .navigationDestination(for: CARoute.self) { route in
-                        destination(for: route, router: logsRouter)
-                    }
-            }
-            .environment(logsRouter)
-            .tabItem { Label("Logs", systemImage: "list.bullet.rectangle.portrait.fill") }
-            .tag(CATab.systemLogs)
+            // systemLogs, inventory, and storePerformance tabs have been moved into the Profile tab to reduce tab count.
             
-            NavigationStack(path: $inventoryRouter.path) {
-                GlobalInventoryView()
+            NavigationStack(path: $profileRouter.path) {
+                CorporateAdminProfileView()
                     .navigationDestination(for: CARoute.self) { route in
-                        destination(for: route, router: inventoryRouter)
+                        destination(for: route, router: profileRouter)
+                    }
+                    .fullScreenCover(item: $profileRouter.presentedFullScreen) { route in
+                        destination(for: route.value as! CARoute, router: profileRouter)
+                    }
+                    .sheet(item: $profileRouter.presentedSheet) { route in
+                        destination(for: route.value as! CARoute, router: profileRouter)
                     }
             }
-            .environment(inventoryRouter)
-            .environment(inventoryViewModel)
-            .tabItem { Label("Inventory", systemImage: "shippingbox.fill") }
-            .tag(CATab.inventory)
-            
-            NavigationStack(path: $performanceRouter.path) {
-                StorePerformanceView()
-                    .navigationDestination(for: CARoute.self) { route in
-                        destination(for: route, router: performanceRouter)
-                    }
-            }
-            .environment(performanceRouter)
-            .tabItem { Label("Performance", systemImage: "chart.bar.xaxis") }
-            .tag(CATab.storePerformance)
+            .environment(profileRouter)
+            .tabItem { Label("Profile", systemImage: "person.crop.circle") }
+            .tag(CATab.profile)
             
         }
         .tint(AppColors.gold)
@@ -101,6 +90,9 @@ struct CorporateAdminCanvas: View {
         switch route {
         case .globalAnalytics:
             GlobalAnalyticsView()
+        case .globalInventory:
+            GlobalInventoryView()
+                .environment(inventoryViewModel)
         case .userManagement:
             UserManagementView(viewModel: userManagementViewModel)
         case .catalogs:
@@ -143,6 +135,8 @@ struct CorporateAdminCanvas: View {
             StorePerformanceView()
         case .storePerformanceDetail(let boutique):
             AssociateMetricsView(boutique: boutique)
+        case .editProfile:
+            EditProfileView()
         @unknown default:
             // Fallback to a neutral view to satisfy exhaustiveness and aid forward-compatibility
             EmptyView()

@@ -90,7 +90,8 @@ final class ProfileService {
                 name: name,
                 email: email,
                 phone: "+910000000000",
-                createdAt: Date()
+                createdAt: Date(),
+                avatarUrl: nil
             )
             try await client.from("corporate_admins").upsert(admin).execute()
             
@@ -108,7 +109,8 @@ final class ProfileService {
                 status: .pending,
                 createdAt: Date(),
                 updatedAt: Date(),
-                onBoardingCompleted: false
+                onBoardingCompleted: false,
+                avatarUrl: nil
             )
             try await client.from("boutiques").upsert(boutique, onConflict: "manager_email").execute()
             

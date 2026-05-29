@@ -298,11 +298,11 @@ struct EditClientView: View {
                 Task {
                     do {
                         try await clientService.deleteClient(id: client.id)
-                        NotificationCenter.default.post(name: NSNotification.Name("ClientDeleted"), object: nil)
-                        NotificationCenter.default.post(name: NSNotification.Name("RefreshClients"), object: nil)
+                        NotificationCenter.default.post(name: NSNotification.Name("ClientDeleted"), object: nil, userInfo: ["clientId": client.id])
                         dismiss()
                     } catch {
-                        errorMessage = "Cannot delete client: Client has associated records (e.g. appointments, transactions)."
+                        errorMessage = "Cannot delete client: \(error.localizedDescription)"
+                        showErrorAlert = true
                     }
                 }
             }

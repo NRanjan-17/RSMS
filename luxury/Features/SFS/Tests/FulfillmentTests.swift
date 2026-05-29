@@ -8,7 +8,7 @@
 #if canImport(XCTest)
 import XCTest
 import Supabase
-@testable import luxury
+import luxury
 
 final class FulfillmentTests: XCTestCase {
     

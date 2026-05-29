@@ -14,6 +14,7 @@ final class SAProfileViewModel {
     var store: String = ""
     var greeting: String = ""
     var name: String = ""
+    var avatarUrl: String?
     
     var revenue: Double = 0.0
     var target: Double = 0.0
@@ -63,6 +64,7 @@ final class SAProfileViewModel {
                 await MainActor.run {
                     self.appointments = fetched
                     self.name = staff.name
+                    self.avatarUrl = staff.avatarUrl
                     
                     let hour = Calendar.current.component(.hour, from: Date())
                     if hour < 12 {

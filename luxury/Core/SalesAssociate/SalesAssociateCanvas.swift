@@ -126,6 +126,8 @@ struct SalesAssociateCanvas: View {
             ExchangePolicyView()
         case .transactionList(let txs):
             SATransactionListView(transactions: txs)
+        case .editProfile:
+            EditProfileView()
         }
     }
 }

@@ -30,15 +30,9 @@ struct StorePerformanceView: View {
     }
 
     private var header: some View {
-        HStack {
-            Text("Store Performance")
-                .font(AppFonts.serif(size: 28, weight: .semibold))
-                .foregroundStyle(.white)
-            Spacer()
+        CustomHeader(title: "Store Performance", showBackButton: true) {
+            router.pop()
         }
-        .padding(.horizontal, 24)
-        .padding(.top, 16)
-        .padding(.bottom, 20)
     }
 
     private var content: some View {

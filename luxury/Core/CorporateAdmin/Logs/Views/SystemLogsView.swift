@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SystemLogsView: View {
     @Environment(AppCoordinator.self) private var coordinator
+    @Environment(Router.self) private var router
     @State private var viewModel = SystemLogsViewModel()
     
     var body: some View {
@@ -16,7 +17,9 @@ struct SystemLogsView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                CustomHeader(title: "System Logs")
+                CustomHeader(title: "System Logs", showBackButton: true) {
+                    router.pop()
+                }
                 
                 VStack(spacing: 20) {
                     ScrollView(.horizontal, showsIndicators: false) {

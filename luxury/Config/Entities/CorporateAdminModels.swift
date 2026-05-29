@@ -13,10 +13,12 @@ struct CorporateAdmin: Identifiable, Hashable, Codable {
     let email: String
     let phone: String
     let createdAt: Date
+    let avatarUrl: String?
     
     enum CodingKeys: String, CodingKey {
         case id, name, email, phone
         case createdAt = "created_at"
+        case avatarUrl = "avatar_url"
     }
 }
 
@@ -34,6 +36,7 @@ struct CorporateBoutique: Identifiable, Hashable, Codable {
     let createdAt: Date
     let updatedAt: Date
     let onBoardingCompleted: Bool
+    let avatarUrl: String?
     
     enum CodingKeys: String, CodingKey {
         case id, name, address, city, provider, status
@@ -44,6 +47,7 @@ struct CorporateBoutique: Identifiable, Hashable, Codable {
         case createdAt = "created_at"
         case updatedAt = "updated_at"
         case onBoardingCompleted = "on_boarding_completed"
+        case avatarUrl = "avatar_url"
     }
 }
 

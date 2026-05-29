@@ -148,6 +148,9 @@ struct ClientelingView: View {
                         .padding(.bottom, 120)
                     }
                 }
+                .refreshable {
+                    await viewModel.loadClients()
+                }
             }
             
             VStack {
@@ -190,6 +193,11 @@ struct ClientelingView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshClients"))) { _ in
             Task {
                 await viewModel.loadClients()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ClientDeleted"))) { notification in
+            if let clientId = notification.userInfo?["clientId"] as? UUID {
+                viewModel.removeClient(id: clientId)
             }
         }
     }

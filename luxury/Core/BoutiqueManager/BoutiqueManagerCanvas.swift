@@ -7,6 +7,7 @@ struct BoutiqueManagerCanvas: View {
     @State private var teamRouter = Router()
     @State private var storeRouter = Router()
     @State private var reportsRouter = Router()
+    @State private var profileRouter = Router()
     
     var body: some View {
         TabView(selection: Binding(
@@ -76,6 +77,22 @@ struct BoutiqueManagerCanvas: View {
             .environment(reportsRouter)
             .tabItem { Label("Reports", systemImage: "doc.text") }
             .tag(BMTab.reports)
+            
+            NavigationStack(path: $profileRouter.path) {
+                BoutiqueManagerProfileView()
+                    .navigationDestination(for: BMRoute.self) { route in
+                        destination(for: route, router: profileRouter)
+                    }
+                    .fullScreenCover(item: $profileRouter.presentedFullScreen) { route in
+                        destination(for: route.value as! BMRoute, router: profileRouter)
+                    }
+                    .sheet(item: $profileRouter.presentedSheet) { route in
+                        destination(for: route.value as! BMRoute, router: profileRouter)
+                    }
+            }
+            .environment(profileRouter)
+            .tabItem { Label("Profile", systemImage: "person.crop.circle") }
+            .tag(BMTab.profile)
         }
         .tint(AppColors.gold)
     }
@@ -133,6 +150,8 @@ struct BoutiqueManagerCanvas: View {
             TrunkShowDetailView(event: event)
         case .productLaunchDetail(let event):
             ProductLaunchDetailView(event: event)
+        case .editProfile:
+            EditProfileView()
         }
     }
 }

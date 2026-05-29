@@ -176,6 +176,8 @@ struct InventoryControllerCanvas: View {
             PurchaseOrdersView()
         case .poDetail(let po):
             PODetailView(po: po)
+        case .editProfile:
+            EditProfileView()
         }
     }
 }

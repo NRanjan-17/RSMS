@@ -319,7 +319,8 @@ final class RegistrationViewModel {
             status: .pending,
             createdAt: Date(),
             updatedAt: Date(),
-            onBoardingCompleted: true
+            onBoardingCompleted: true,
+            avatarUrl: nil
         )
         
         let created: CorporateBoutique = try await client.from("boutiques")

@@ -44,10 +44,11 @@ struct CreateAppointmentView: View {
     }
     
     var body: some View {
-        ZStack {
-            AppColors.background.ignoresSafeArea()
-            
-            VStack(spacing: 0) {
+        NavigationStack {
+            ZStack {
+                AppColors.background.ignoresSafeArea()
+                
+                VStack(spacing: 0) {
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 32) {
                         Text("New Appointment")
@@ -227,18 +228,27 @@ struct CreateAppointmentView: View {
                 }
                 .background(AppColors.background)
             }
-        }
-        .task {
-            selectedClient = client
-            if client == nil {
-                await viewModel.loadClients()
+            .task {
+                selectedClient = client
+                if client == nil {
+                    await viewModel.loadClients()
+                }
+            }
+            .navigationTitle("Appointments")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(AppColors.background, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                    .foregroundStyle(AppColors.gold)
+                }
+            }
             }
         }
-        .navigationTitle("Appointments")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(AppColors.background, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
-        .toolbarColorScheme(.dark, for: .navigationBar)
     }
     
     private func saveAppointment() async {

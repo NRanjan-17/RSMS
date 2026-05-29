@@ -77,4 +77,21 @@ final class ClientelingViewModel {
             isLoading = false
         }
     }
+    
+    @MainActor
+    func removeClient(id: UUID) {
+        clients.removeAll { $0.id == id }
+        
+        let totalCount = self.clients.count
+        let uhnwCount = self.clients.filter { $0.tier == .uhnw }.count
+        let vipCount = self.clients.filter { $0.tier == .vip }.count
+        let standardCount = self.clients.filter { $0.tier == .standard }.count
+        
+        self.stats = [
+            ClientStat(value: "\(totalCount)", label: "Total"),
+            ClientStat(value: "\(uhnwCount)", label: "UHNW"),
+            ClientStat(value: "\(vipCount)", label: "VIP"),
+            ClientStat(value: "\(standardCount)", label: "Standard")
+        ]
+    }
 }

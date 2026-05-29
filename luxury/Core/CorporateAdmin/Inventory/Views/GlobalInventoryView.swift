@@ -18,16 +18,9 @@ struct GlobalInventoryView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Header
-                HStack {
-                    Text("Global Inventory")
-                        .font(AppFonts.serif(size: 28, weight: .light))
-                        .foregroundStyle(AppColors.text)
-                    Spacer()
+                CustomHeader(title: "Global Inventory", showBackButton: true) {
+                    router.pop()
                 }
-                .padding(.horizontal, 24)
-                .padding(.top, 16)
-                .padding(.bottom, 24)
                 
                 // KPI Summary
                 HStack(spacing: 16) {

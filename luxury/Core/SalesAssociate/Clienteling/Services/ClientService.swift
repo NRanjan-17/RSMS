@@ -164,10 +164,24 @@ final class ClientService {
     }
     
     func deleteClient(id: UUID) async throws {
-        try await client
+        let uuidStr = id.uuidString
+        
+        _ = try? await client.from("appointment").delete().eq("client_id", value: uuidStr).execute()
+        _ = try? await client.from("ast").delete().eq("client_id", value: uuidStr).execute()
+        _ = try? await client.from("cart").delete().eq("client_id", value: uuidStr).execute()
+        _ = try? await client.from("purchased_items").delete().eq("uid", value: uuidStr).execute()
+        _ = try? await client.from("transaction").delete().eq("client_id", value: uuidStr).execute()
+        _ = try? await client.from("wishlist").delete().eq("client_id", value: uuidStr).execute()
+        _ = try? await client.from("tickets").delete().eq("client_id", value: uuidStr).execute()
+        _ = try? await client.from("size_preferences").delete().eq("client_id", value: uuidStr).execute()
+        _ = try? await client.from("notes").delete().eq("client_id", value: uuidStr).execute()
+        
+        let _ = try await client
             .from("client")
             .delete()
-            .eq("id", value: id.uuidString)
+            .eq("id", value: uuidStr)
+            .select()
+            .single()
             .execute()
         
         var localClients = getLocalClients()
