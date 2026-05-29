@@ -354,6 +354,21 @@ struct PurchaseDetailsView: View {
                                 .offset(x: 16, y: -8)
                         }
                         
+                        Button(action: {
+                            router.push(SARoute.afterSalesIntake(client: client, serialNumber: displayProductSerial, isWarrantyActive: true, purchaseId: purchase.id))
+                        }) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                Text("Report Issue")
+                            }
+                            .font(AppFonts.sansSerif(size: 15, weight: .bold))
+                            .foregroundStyle(AppColors.background)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 54)
+                            .background(AppColors.gold)
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                        }
+                        .padding(.top, 8)
 
                     }
                     .padding(.horizontal, 24)
