@@ -83,17 +83,36 @@ struct MFAChallengeView: View {
             errorMessage = nil
             do {
                 let factors = try await SupabaseManager.shared.client.auth.mfa.listFactors()
-                if let factor = factors.totp.first(where: { $0.status == .verified }) {
-                    let challenge = try await SupabaseManager.shared.client.auth.mfa.challenge(params: Auth.MFAChallengeParams(factorId: factor.id))
-                    let _ = try await SupabaseManager.shared.client.auth.mfa.verify(params: Auth.MFAVerifyParams(factorId: factor.id, challengeId: challenge.id, code: verifyCode))
-                    
+                let verifiedFactors = factors.totp.filter { $0.status == .verified }
+                
+                if verifiedFactors.isEmpty {
+                    errorMessage = "No verified factor found."
+                    isLoading = false
+                    return
+                }
+                
+                var success = false
+                // Try each factor, starting from the most recently added
+                for factor in verifiedFactors.reversed() {
+                    do {
+                        let challenge = try await SupabaseManager.shared.client.auth.mfa.challenge(params: Auth.MFAChallengeParams(factorId: factor.id))
+                        let _ = try await SupabaseManager.shared.client.auth.mfa.verify(params: Auth.MFAVerifyParams(factorId: factor.id, challengeId: challenge.id, code: verifyCode))
+                        success = true
+                        break
+                    } catch {
+                        // Failed for this factor, continue to next
+                        continue
+                    }
+                }
+                
+                if success {
                     let session = await authService.getCurrentSession()
                     await coordinator.routingService.updateRoute(for: session)
                 } else {
-                    errorMessage = "No verified factor found."
+                    errorMessage = "Invalid code. Please try again."
                 }
             } catch {
-                errorMessage = "Invalid code. Please try again."
+                errorMessage = "Failed to list MFA factors. Please try again."
             }
             isLoading = false
         }
