@@ -228,7 +228,6 @@ struct CreateEventView: View {
                                 .kerning(2)
                             
                             RSMSCalendarView(selectedDate: $eventDate)
-                                .padding(.horizontal, 10)
                         }
                         .padding(.horizontal, 24)
                         

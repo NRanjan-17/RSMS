@@ -40,6 +40,7 @@ struct AppointmentListView: View {
                         RSMSCalendarView(selectedDate: $selectedDate) { date in
                             viewModel.hasAppointments(on: date)
                         }
+                        .padding(.horizontal, 24)
                         
                         let dayAppointments = viewModel.appointmentsFor(date: selectedDate)
                         

@@ -103,7 +103,6 @@ struct CreateAppointmentView: View {
                                 .kerning(2)
                             
                             RSMSCalendarView(selectedDate: $selectedDate)
-                                .padding(.horizontal, 10)
                             
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 10) {
