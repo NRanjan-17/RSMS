@@ -68,10 +68,17 @@ struct StockView: View {
                         .padding(.horizontal, 20)
                         
                         HStack(spacing: 12) {
+                            CustomOutlineButton(title: "Purchase Orders", icon: AnyView(Image(systemName: "shippingbox.and.arrow.backward")), action: {
+                                router.push(ICRoute.purchaseOrders)
+                            })
+                            
                             CustomOutlineButton(title: "Serialization", icon: AnyView(Image(systemName: "doc.badge.gearshape")), action: {
                                 router.push(ICRoute.serialCertificate)
                             })
-                            
+                        }
+                        .padding(.horizontal, 20)
+                        
+                        HStack(spacing: 12) {
                             CustomOutlineButton(title: "Endless Aisle", icon: AnyView(Image(systemName: "square.grid.3x3.fill")), action: {
                                 router.push(ICRoute.endlessAisleSelection)
                             })

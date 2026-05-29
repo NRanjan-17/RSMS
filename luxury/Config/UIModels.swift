@@ -641,3 +641,48 @@ struct CertificateRecord: Identifiable, Hashable {
     let certificate: String
     let status: String
 }
+
+enum POStatus: String, Codable, CaseIterable, Hashable {
+    case open = "Open"
+    case fullyReceived = "Fully Received"
+}
+
+struct POItem: Identifiable, Codable, Hashable {
+    let id: UUID
+    let brand: String
+    let name: String
+    let sku: String
+    let expectedQty: Int
+    var receivedQty: Int
+    var scannedSerials: [String]
+    
+    init(id: UUID = UUID(), brand: String, name: String, sku: String, expectedQty: Int, receivedQty: Int = 0, scannedSerials: [String] = []) {
+        self.id = id
+        self.brand = brand
+        self.name = name
+        self.sku = sku
+        self.expectedQty = expectedQty
+        self.receivedQty = receivedQty
+        self.scannedSerials = scannedSerials
+    }
+}
+
+struct PurchaseOrder: Identifiable, Codable, Hashable {
+    let id: UUID
+    let poNumber: String
+    let supplier: String
+    var status: POStatus
+    var items: [POItem]
+    let createdAt: Date
+    var receivedAt: Date?
+    
+    init(id: UUID = UUID(), poNumber: String, supplier: String, status: POStatus = .open, items: [POItem], createdAt: Date = Date(), receivedAt: Date? = nil) {
+        self.id = id
+        self.poNumber = poNumber
+        self.supplier = supplier
+        self.status = status
+        self.items = items
+        self.createdAt = createdAt
+        self.receivedAt = receivedAt
+    }
+}
