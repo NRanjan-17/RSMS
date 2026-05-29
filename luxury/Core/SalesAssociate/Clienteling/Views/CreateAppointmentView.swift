@@ -16,13 +16,13 @@ struct CreateAppointmentView: View {
     @State private var clientName: String = ""
     @State private var selectedDate = Date()
     @State private var selectedTime = "10:00 AM"
-    @State private var selectedType = "Watch Consultation"
+    @State private var selectedType = "in store"
     @State private var remarks: String = ""
     @State private var isSaving = false
     @State private var errorMessage: String? = nil
     
     let times = ["10:00 AM", "11:30 AM", "01:00 PM", "02:30 PM", "04:00 PM", "05:30 PM"]
-    let types = ["Watch Consultation", "Jewellery Fitting", "Leather Goods Preview", "Video Consult"]
+    let types = ["in store", "online"]
     
     var availableTimes: [String] {
         if Calendar.current.isDateInToday(selectedDate) {
@@ -277,7 +277,7 @@ struct CreateAppointmentView: View {
                 clientId: client?.id,
                 boutiqueId: boutiqueId,
                 timestamp: timestampStr,
-                appointmentType: AppointmentType(rawValue: selectedType) ?? .other,
+                appointmentType: AppointmentType(rawValue: selectedType) ?? .inStore,
                 assignedTo: staff.id,
                 createdBy: staff.id,
                 status: .pending,

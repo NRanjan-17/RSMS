@@ -23,14 +23,14 @@ extension AppointmentStatus {
 }
 
 enum AppointmentType: String, Codable, Hashable, CaseIterable {
-    case watchConsultation = "Watch Consultation"
-    case jewelleryFitting = "Jewellery Fitting"
-    case leatherGoodsPreview = "Leather Goods Preview"
-    case videoConsult = "Video Consult"
-    case other = "other"
+    case online = "online"
+    case inStore = "in store"
     
     public var displayName: String {
-        return self.rawValue
+        switch self {
+        case .online: return "Online"
+        case .inStore: return "In Store"
+        }
     }
 }
 
