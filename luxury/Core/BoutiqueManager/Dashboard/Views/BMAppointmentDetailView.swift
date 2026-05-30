@@ -27,19 +27,6 @@ struct BMAppointmentDetailView: View {
             AppColors.background.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                HStack(spacing: 16) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "chevron.left")
-                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
-                            .foregroundStyle(AppColors.gold)
-                    }
-                    Text("Dashboard")
-                        .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                        .foregroundStyle(AppColors.gold)
-                    Spacer()
-                }
-                .padding(.horizontal, 24)
-                .padding(.vertical, 16)
 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 32) {
@@ -74,6 +61,7 @@ struct BMAppointmentDetailView: View {
                             VStack(alignment: .leading, spacing: 16) {
                                 DetailRow(label: "TIME",    value: appointment.formattedTime,        icon: "clock")
                                 DetailRow(label: "ADVISOR", value: advisorName(for: selectedStaffId), icon: "person.fill")
+                                DetailRow(label: "CREATED BY", value: advisorName(for: appointment.createdBy), icon: "person.text.rectangle.fill")
                                 DetailRow(label: "STORE",   value: "Maison Mumbai",         icon: "building.2.fill")
                             }
                         }
@@ -153,7 +141,11 @@ struct BMAppointmentDetailView: View {
         .task {
             await fetchAvailableStaff()
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle("Dashboard")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
     }
     
     private func fetchAvailableStaff() async {

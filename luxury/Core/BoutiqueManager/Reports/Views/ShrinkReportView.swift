@@ -16,19 +16,6 @@ struct ShrinkReportView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                HStack(spacing: 16) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "chevron.left")
-                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
-                            .foregroundStyle(AppColors.gold)
-                    }
-                    Text("Shrink & Inventory")
-                        .font(AppFonts.serif(size: 24, weight: .semibold))
-                        .foregroundStyle(.white)
-                    Spacer()
-                }
-                .padding(.horizontal, 24)
-                .padding(.vertical, 16)
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 28) {
@@ -92,7 +79,11 @@ struct ShrinkReportView: View {
                 }
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle("Shrink & Inventory")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .onAppear {
             viewModel.fetchInventory()
         }

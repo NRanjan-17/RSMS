@@ -41,25 +41,17 @@ final class StorageService {
     }
     
     private func upload(image: PickedImageAsset, path: String) async throws {
-        let session = try await client.auth.session
-        var request = URLRequest(url: storageObjectURL(path: path))
-        request.httpMethod = "POST"
-        request.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
-        request.setValue(SupabaseConfig.anonKey, forHTTPHeaderField: "apikey")
-        request.setValue(image.contentType, forHTTPHeaderField: "Content-Type")
-        request.setValue("3600", forHTTPHeaderField: "Cache-Control")
-        request.setValue("false", forHTTPHeaderField: "x-upsert")
-        request.httpBody = image.data
-        
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw StorageUploadError(message: "Storage upload failed: invalid server response")
-        }
-        
-        guard (200..<300).contains(httpResponse.statusCode) else {
-            let message = storageErrorMessage(from: data, statusCode: httpResponse.statusCode)
-            throw StorageUploadError(message: message)
-        }
+        try await client.storage
+            .from(bucket)
+            .upload(
+                path: path,
+                file: image.data,
+                options: FileOptions(
+                    cacheControl: "3600",
+                    contentType: image.contentType,
+                    upsert: true
+                )
+            )
     }
     
     private func storageObjectURL(path: String) -> URL {

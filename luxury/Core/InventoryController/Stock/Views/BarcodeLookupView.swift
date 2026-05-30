@@ -16,10 +16,6 @@ struct BarcodeLookupView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                CustomHeader(title: "Barcode Lookup", showBackButton: true, backAction: {
-                    router.pop()
-                })
-                
                 // Camera View
                 ZStack {
                     QRScannerView(scannerService: scannerService)
@@ -154,7 +150,11 @@ struct BarcodeLookupView: View {
                 }
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle("Barcode Lookup")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .onAppear {
             scannerService.onScannedCode = { code in
                 scannerService.playSuccessFeedback()

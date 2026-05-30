@@ -95,27 +95,6 @@ struct EditClientView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                HStack(spacing: 16) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "chevron.left")
-                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
-                            .foregroundStyle(AppColors.gold)
-                    }
-                    Text("Client Profile")
-                        .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                        .foregroundStyle(AppColors.gold)
-                    
-                    Spacer()
-                    
-                    Button("Save") {
-                        updateClient()
-                    }
-                    .font(AppFonts.sansSerif(size: 13))
-                    .foregroundStyle(AppColors.gold)
-                    .disabled(isLoading)
-                }
-                .padding(.horizontal, 24)
-                .padding(.vertical, 16)
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 0) {
@@ -309,7 +288,11 @@ struct EditClientView: View {
         } message: {
             Text("Are you sure you want to delete \(client.name)? This action cannot be undone.")
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle("Client Profile")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .tabBar)
         .task {

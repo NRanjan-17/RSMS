@@ -82,17 +82,10 @@ struct ProductStockDetailView: View {
         .listStyle(.insetGrouped)
         .navigationTitle("Inventory Details")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden()
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .toolbar(.hidden, for: .tabBar)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(AppFonts.sansSerif(size: 16, weight: .semibold))
-                        .foregroundStyle(AppColors.gold)
-                }
-            }
-        }
     }
     
     private var statusColor: Color {

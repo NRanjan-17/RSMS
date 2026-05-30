@@ -23,11 +23,6 @@ struct VIPPreviewDetailView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Header with back button
-                CustomHeader(title: "VIP Preview Detail", showBackButton: true, backAction: {
-                    dismiss()
-                })
-                
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 24) {
                         
@@ -71,7 +66,11 @@ struct VIPPreviewDetailView: View {
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle("VIP Preview Detail")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
     }
     
     // MARK: - Components

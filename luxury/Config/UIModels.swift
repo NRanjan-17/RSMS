@@ -231,12 +231,16 @@ struct ClientPurchase: Identifiable, Hashable, Codable {
     let name: String
     let price: Double
     let date: String
+    var productId: UUID?
+    var imageUrl: String?
     
-    init(id: UUID = UUID(), name: String, price: Double, date: String) {
+    init(id: UUID = UUID(), name: String, price: Double, date: String, productId: UUID? = nil, imageUrl: String? = nil) {
         self.id = id
         self.name = name
         self.price = price
         self.date = date
+        self.productId = productId
+        self.imageUrl = imageUrl
     }
 }
 

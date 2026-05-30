@@ -50,7 +50,11 @@ struct RemoteSellingView: View {
                 }
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
     }
 }
 
@@ -59,19 +63,5 @@ private struct FlowHeader: View {
     let dismiss: DismissAction
     
     var body: some View {
-        HStack(spacing: 16) {
-            Button(action: { dismiss() }) {
-                Image(systemName: "chevron.left")
-                    .font(AppFonts.sansSerif(size: 20, weight: .semibold))
-                    .foregroundStyle(AppColors.gold)
-                    .frame(width: 44, height: 44)
-            }
-            Text(title)
-                .font(AppFonts.serif(size: 24, weight: .semibold))
-                .foregroundStyle(.white)
-            Spacer()
-        }
-        .padding(.horizontal, 20)
-        .padding(.top, 8)
     }
 }

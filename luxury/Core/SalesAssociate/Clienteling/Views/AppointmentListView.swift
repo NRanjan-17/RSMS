@@ -21,19 +21,6 @@ struct AppointmentListView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                HStack(spacing: 16) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(AppColors.gold)
-                    }
-                    Text("Appointments")
-                        .font(AppFonts.serif(size: 32, weight: .semibold))
-                        .foregroundStyle(.white)
-                    Spacer()
-                }
-                .padding(.horizontal, 24)
-                .padding(.top, 14)
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 20) {
@@ -143,7 +130,11 @@ struct AppointmentListView: View {
             
 
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle("Appointments")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .task {
             await viewModel.fetchAppointments()
         }

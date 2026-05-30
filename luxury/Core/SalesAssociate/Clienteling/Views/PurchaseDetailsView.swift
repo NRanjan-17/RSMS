@@ -119,20 +119,6 @@ struct PurchaseDetailsView: View {
             
             VStack(spacing: 0) {
                 // Header navigation
-                HStack(spacing: 16) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "chevron.left")
-                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
-                            .foregroundStyle(AppColors.gold)
-                            .frame(width: 44, height: 44)
-                    }
-                    Text("Purchase Details")
-                        .font(AppFonts.serif(size: 24, weight: .semibold))
-                        .foregroundStyle(.white)
-                    Spacer()
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 8)
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 24) {
@@ -354,19 +340,39 @@ struct PurchaseDetailsView: View {
                                 .offset(x: 16, y: -8)
                         }
                         
-                        Button(action: {
-                            router.push(SARoute.afterSalesIntake(client: client, serialNumber: displayProductSerial, isWarrantyActive: true, purchaseId: purchase.id))
-                        }) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "exclamationmark.triangle.fill")
-                                Text("Report Issue")
+                        VStack(spacing: 12) {
+                            if let catalog = details?.catalogs {
+                                Button(action: {
+                                    router.push(SARoute.catalogDetail(catalog))
+                                }) {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "bag.fill")
+                                        Text("View Product")
+                                    }
+                                    .font(AppFonts.sansSerif(size: 15, weight: .bold))
+                                    .foregroundStyle(AppColors.gold)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 54)
+                                    .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(AppColors.gold, lineWidth: 1))
+                                }
                             }
-                            .font(AppFonts.sansSerif(size: 15, weight: .bold))
-                            .foregroundStyle(AppColors.background)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 54)
-                            .background(AppColors.gold)
-                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                            
+                            Button(action: {
+                                router.push(SARoute.afterSalesIntake(client: client, serialNumber: displayProductSerial, isWarrantyActive: true, purchaseId: purchase.id))
+                            }) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "exclamationmark.triangle.fill")
+                                    Text("Report Issue")
+                                }
+                                .font(AppFonts.sansSerif(size: 15, weight: .bold))
+                                .foregroundStyle(AppColors.background)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 54)
+                                .background(AppColors.gold)
+                                .clipShape(RoundedRectangle(cornerRadius: 14))
+                            }
                         }
                         .padding(.top, 8)
 
@@ -377,7 +383,11 @@ struct PurchaseDetailsView: View {
                 }
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle("Purchase Details")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .onAppear {
             loadDetails()
         }

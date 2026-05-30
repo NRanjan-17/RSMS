@@ -26,11 +26,6 @@ struct TrunkShowDetailView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Header with back button
-                CustomHeader(title: "Trunk Show Detail", showBackButton: true, backAction: {
-                    dismiss()
-                })
-                
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 24) {
                         
@@ -76,7 +71,11 @@ struct TrunkShowDetailView: View {
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle("Trunk Show Detail")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .alert("Cancel Trunk Show?", isPresented: $showCancelAlert) {
             Button("Confirm Cancellation", role: .destructive) {
                 confirmCancellation()

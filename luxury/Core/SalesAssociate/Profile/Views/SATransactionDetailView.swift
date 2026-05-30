@@ -34,26 +34,6 @@ struct SATransactionDetailView: View {
             ScrollView {
                 VStack(spacing: 24) {
                     // Header
-                    HStack {
-                        Button(action: { router.pop() }) {
-                            Image(systemName: "chevron.left")
-                                .font(AppFonts.sansSerif(size: 16, weight: .semibold))
-                                .foregroundStyle(.white)
-                        }
-                        
-                        Spacer()
-                        
-                        Text("Transaction Details")
-                            .font(AppFonts.serif(size: 18, weight: .semibold))
-                            .foregroundStyle(.white)
-                        
-                        Spacer()
-                        
-                        // Placeholder for symmetry
-                        Image(systemName: "chevron.left").opacity(0)
-                    }
-                    .padding(.horizontal, 24)
-                    .padding(.top, 16)
                     
                     // Main Receipt Card
                     VStack(spacing: 0) {

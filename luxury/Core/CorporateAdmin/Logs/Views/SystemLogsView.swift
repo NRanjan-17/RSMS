@@ -17,10 +17,6 @@ struct SystemLogsView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                CustomHeader(title: "System Logs", showBackButton: true) {
-                    router.pop()
-                }
-                
                 VStack(spacing: 20) {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
@@ -77,6 +73,11 @@ struct SystemLogsView: View {
                 .padding(.top, 20)
             }
         }
+        .navigationTitle("System Logs")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .onAppear {
             viewModel.fetchData()
         }

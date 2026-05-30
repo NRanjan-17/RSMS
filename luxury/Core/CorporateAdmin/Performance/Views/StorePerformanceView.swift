@@ -15,7 +15,6 @@ struct StorePerformanceView: View {
         ZStack {
             AppColors.background.ignoresSafeArea()
             VStack(spacing: 0) {
-                header
                 if viewModel.isLoading {
                     Spacer()
                     ProgressView().tint(AppColors.gold)
@@ -25,15 +24,15 @@ struct StorePerformanceView: View {
                 }
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle("Store Performance")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .onAppear { viewModel.fetchData() }
     }
 
-    private var header: some View {
-        CustomHeader(title: "Store Performance", showBackButton: true) {
-            router.pop()
-        }
-    }
+
 
     private var content: some View {
         ScrollView(showsIndicators: false) {

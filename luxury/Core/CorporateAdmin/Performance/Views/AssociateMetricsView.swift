@@ -15,7 +15,6 @@ struct AssociateMetricsView: View {
         ZStack {
             AppColors.background.ignoresSafeArea()
             VStack(spacing: 0) {
-                header
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 0) {
                         boutiqueSnapshot
@@ -49,37 +48,23 @@ struct AssociateMetricsView: View {
                 }
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle(boutique.boutiqueName)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .toolbar(.hidden, for: .tabBar)
-    }
-
-    private var header: some View {
-        HStack(spacing: 16) {
-            Button(action: { dismiss() }) {
-                Image(systemName: "chevron.left")
-                    .font(AppFonts.sansSerif(size: 18, weight: .semibold))
-                    .foregroundStyle(AppColors.gold)
-                    .frame(width: 44, height: 44)
-            }
-            VStack(alignment: .leading, spacing: 2) {
-                Text(boutique.boutiqueName)
-                    .font(AppFonts.serif(size: 20, weight: .semibold))
-                    .foregroundStyle(.white)
-                Text(boutique.city)
-                    .font(AppFonts.sansSerif(size: 12))
-                    .foregroundStyle(AppColors.secondary)
-            }
-            Spacer()
-            if boutique.isUnderperforming {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .font(AppFonts.sansSerif(size: 18))
-                    .foregroundStyle(AppColors.error)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                if boutique.isUnderperforming {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(AppFonts.sansSerif(size: 18))
+                        .foregroundStyle(AppColors.error)
+                }
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 8)
-        .padding(.bottom, 16)
     }
+
 
     private var boutiqueSnapshot: some View {
         HStack(spacing: 0) {

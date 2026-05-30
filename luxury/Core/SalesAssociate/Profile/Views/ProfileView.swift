@@ -13,7 +13,7 @@ struct ProfileView: View {
     @Environment(Router.self) private var router
     @State private var viewModel = SAProfileViewModel()
     @State private var showLogoutAlert = false
-    @State private var currencyManager = CurrencyManager.shared
+
     
     private var formattedDate: String {
         let formatter = DateFormatter()

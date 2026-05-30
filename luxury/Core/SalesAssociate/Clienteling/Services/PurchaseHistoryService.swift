@@ -67,7 +67,8 @@ final class PurchaseHistoryService {
                     if let cat = dbCatalogs.first(where: { $0.id == item.productId }) {
                         let itemDate = item.reservedDate ?? item.createdAt ?? Date()
                         let dateStr = formatter.string(from: itemDate)
-                        return ClientPurchase(id: item.id, name: cat.name, price: cat.amount, date: dateStr)
+                        let imageUrl = cat.productImages?.first ?? ""
+                        return ClientPurchase(id: item.id, name: cat.name, price: cat.amount, date: dateStr, productId: cat.id, imageUrl: imageUrl)
                     }
                     return nil
                 }

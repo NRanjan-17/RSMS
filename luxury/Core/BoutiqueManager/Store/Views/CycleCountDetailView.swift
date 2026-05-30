@@ -17,10 +17,6 @@ struct CycleCountDetailView: View {
             AppColors.background.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                CustomHeader(title: "Audit Sign-off", showBackButton: true, backAction: {
-                    dismiss()
-                })
-
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 28) {
                         HStack(spacing: 12) {
@@ -79,7 +75,11 @@ struct CycleCountDetailView: View {
                 }
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle("Audit Sign-off")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
     }
 }
 

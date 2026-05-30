@@ -50,11 +50,15 @@ final class ImagePickerService {
         guard let data = try await item.loadTransferable(type: Data.self), !data.isEmpty else {
             throw ImagePickerServiceError.emptyData
         }
+        
+        guard let uiImage = UIImage(data: data), let compressedData = uiImage.jpegData(compressionQuality: 0.6) else {
+            throw ImagePickerServiceError.invalidImageData
+        }
 
         return PickedImageAsset(
-            data: data,
-            fileExtension: type.preferredFilenameExtension ?? "jpg",
-            contentType: type.preferredMIMEType ?? "image/jpeg"
+            data: compressedData,
+            fileExtension: "jpg",
+            contentType: "image/jpeg"
         )
     }
 

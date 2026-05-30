@@ -17,29 +17,6 @@ struct PurchaseOrdersView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                HStack(spacing: 16) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(AppColors.gold)
-                    }
-                    
-                    Text("Purchase Orders")
-                        .font(AppFonts.serif(size: 24, weight: .semibold))
-                        .foregroundStyle(.white)
-                    
-                    Spacer()
-                    
-                    Button(action: {
-                        viewModel.resetMockData()
-                    }) {
-                        Image(systemName: "arrow.counterclockwise")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(AppColors.gold)
-                    }
-                }
-                .padding(.horizontal, 24)
-                .padding(.vertical, 16)
                 
                 if viewModel.isLoading {
                     Spacer()
@@ -105,7 +82,11 @@ struct PurchaseOrdersView: View {
                 }
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle("Purchase Orders")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .onAppear {
             viewModel.loadPurchaseOrders()
         }

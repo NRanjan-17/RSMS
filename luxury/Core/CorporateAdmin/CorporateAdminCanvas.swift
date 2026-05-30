@@ -10,7 +10,6 @@ import SwiftUI
 struct CorporateAdminCanvas: View {
     @Environment(CorporateAdminAppState.self) private var caAppState
     
-    @State private var analyticsRouter = Router()
     @State private var usersRouter = Router()
     @State private var catalogsRouter = Router()
     @State private var logsRouter = Router()
@@ -29,16 +28,6 @@ struct CorporateAdminCanvas: View {
             get: { caAppState.selectedTab },
             set: { caAppState.selectedTab = $0 }
         )) {
-            NavigationStack(path: $analyticsRouter.path) {
-                GlobalAnalyticsView()
-                    .navigationDestination(for: CARoute.self) { route in
-                        destination(for: route, router: analyticsRouter)
-                    }
-            }
-            .environment(analyticsRouter)
-            .tabItem { Label("Analytics", systemImage: "globe") }
-            .tag(CATab.globalAnalytics)
-            
             NavigationStack(path: $usersRouter.path) {
                 UserManagementView(viewModel: userManagementViewModel)
                     .navigationDestination(for: CARoute.self) { route in
@@ -88,8 +77,6 @@ struct CorporateAdminCanvas: View {
     @ViewBuilder
     private func destination(for route: CARoute, router: Router) -> some View {
         switch route {
-        case .globalAnalytics:
-            GlobalAnalyticsView()
         case .globalInventory:
             GlobalInventoryView()
                 .environment(inventoryViewModel)

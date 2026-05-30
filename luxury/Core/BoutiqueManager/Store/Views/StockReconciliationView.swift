@@ -17,10 +17,6 @@ struct StockReconciliationView: View {
             AppColors.background.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                CustomHeader(title: "Stock Reconciliation", showBackButton: true, backAction: {
-                    dismiss()
-                })
-
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 24) {
                         ZStack {
@@ -171,7 +167,11 @@ struct StockReconciliationView: View {
                 }
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle("Stock Reconciliation")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .onAppear {
             viewModel.loadContext()
             scannerService.onScannedCode = { code in

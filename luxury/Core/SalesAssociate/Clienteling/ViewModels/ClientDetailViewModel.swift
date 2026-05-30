@@ -32,7 +32,7 @@ final class ClientDetailViewModel {
     var appointments: [AppointmentEntity] = []
     var notes: [ClientNote] = []
     var activeServices: [ASTDetails] = []
-    
+    var boutiqueName: String = "Maison Mumbai"
     
     
     var joinedDateText: String {
@@ -40,14 +40,15 @@ final class ClientDetailViewModel {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM yyyy"
         let dateStr = formatter.string(from: dateToUse)
-        return "Maison Mumbai · Since \(dateStr)"
+        return "\(boutiqueName) · Since \(dateStr)"
     }
     
     var stats: [(String, String)] {
         let countText = String(wishlistItems.count)
         let purchaseCountText = String(purchases.count)
+        let calculatedLtv = purchases.reduce(0.0) { $0 + $1.price }
         return [
-            (CurrencyManager.shared.formatCompact(amount: client.ltv), "Lifetime Value"),
+            (CurrencyManager.shared.formatCompact(amount: calculatedLtv), "Lifetime Value"),
             (purchaseCountText, "Purchases"),
             (countText, "Wishlist")
         ]
@@ -61,6 +62,25 @@ final class ClientDetailViewModel {
         refreshAppointments()
         refreshNotes()
         refreshActiveServices()
+        fetchBoutiqueName()
+    }
+    
+    func fetchBoutiqueName() {
+        Task {
+            do {
+                if let (_, profileAny) = try await ProfileService().fetchCurrentProfile() {
+                    if let staff = profileAny as? StaffModel, let bId = staff.boutiqueId {
+                        if let bq = try await ProfileService().fetchBoutique(id: bId) {
+                            await MainActor.run { self.boutiqueName = bq.name }
+                        }
+                    } else if let manager = profileAny as? CorporateBoutique {
+                        await MainActor.run { self.boutiqueName = manager.name }
+                    }
+                }
+            } catch {
+                print("Failed to fetch boutique name: \(error)")
+            }
+        }
     }
     
     func refreshWishlist() {
@@ -153,19 +173,15 @@ final class ClientDetailViewModel {
         let fullName = brand.isEmpty ? name : "\(brand) \(name)"
         PurchaseHistoryService.shared.addPurchase(clientId: client.id, name: fullName, price: price)
         
-        let currentLtvVal = client.ltv
-        let addedVal = price
-        let newLtvVal = currentLtvVal + addedVal
-        let newLtvStr = String(newLtvVal)
-        
-        UserDefaults.standard.set(newLtvStr, forKey: "luxury_ltv_\(client.id.uuidString)")
+        // Refresh purchases so stats recalculate correctly
+        self.refreshPurchases()
         
         let updatedClient = Client(
             id: client.id,
             name: client.name,
             tier: client.tier,
             lastVisit: "Today",
-            ltv: newLtvVal,
+            ltv: client.ltv,
             initial: client.initial,
             isHot: client.isHot,
             phone: client.phone,

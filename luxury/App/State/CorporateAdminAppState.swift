@@ -10,5 +10,5 @@ import Observation
 
 @Observable
 final class CorporateAdminAppState {
-    var selectedTab: CATab = .globalAnalytics
+    var selectedTab: CATab = .profile
 }

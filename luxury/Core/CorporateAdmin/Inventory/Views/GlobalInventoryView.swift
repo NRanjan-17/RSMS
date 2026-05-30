@@ -18,10 +18,6 @@ struct GlobalInventoryView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                CustomHeader(title: "Global Inventory", showBackButton: true) {
-                    router.pop()
-                }
-                
                 // KPI Summary
                 HStack(spacing: 16) {
                     InventoryKPIBox(
@@ -141,7 +137,11 @@ struct GlobalInventoryView: View {
                 }
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle("Global Inventory")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .onAppear {
             viewModel.fetchData()
         }

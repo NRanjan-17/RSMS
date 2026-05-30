@@ -44,7 +44,7 @@ struct CreateAppointmentView: View {
     }
     
     var body: some View {
-        NavigationStack {
+        Group {
             ZStack {
                 AppColors.background.ignoresSafeArea()
                 
@@ -304,7 +304,7 @@ struct CreateAppointmentView: View {
                 boutiqueId: boutiqueId,
                 timestamp: timestampStr,
                 appointmentType: selectedType,
-                assignedTo: staff.id,
+                assignedTo: nil,
                 createdBy: staff.id,
                 status: .pending,
                 createdAt: nil,

@@ -180,8 +180,6 @@ final class ClientService {
             .from("client")
             .delete()
             .eq("id", value: uuidStr)
-            .select()
-            .single()
             .execute()
         
         var localClients = getLocalClients()

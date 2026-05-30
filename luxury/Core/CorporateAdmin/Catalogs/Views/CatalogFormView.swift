@@ -262,7 +262,11 @@ struct CatalogFormView: View {
                 .padding(.horizontal, 28)
             }
         }
-        .toolbarBackground(.hidden, for: .navigationBar)
+        .navigationTitle(editCatalog != nil ? "Edit Catalog" : "New Catalog")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .navigationDestination(isPresented: $showingScanner) {
             ZStack {
                 Color.black.ignoresSafeArea()
@@ -315,9 +319,10 @@ struct CatalogFormView: View {
                         dismiss()
                     }
                 }) {
-                    Image(systemName: "chevron.left")
-                        .font(AppFonts.sansSerif(size: 16, weight: .semibold))
-                        .foregroundStyle(AppColors.gold)
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.backward")
+                        Text("Back")
+                    }
                 }
             }
         }

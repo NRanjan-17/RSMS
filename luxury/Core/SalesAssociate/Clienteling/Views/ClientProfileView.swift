@@ -14,6 +14,7 @@ struct ClientProfileView: View {
     @State private var showQuickNote = false
     @State private var quickNoteText = ""
     @State private var showDeleteClientAlert = false
+    @State private var showEditClient = false
     
     init(client: Client = ClientDetailViewModel.defaultClient) {
         _viewModel = State(initialValue: ClientDetailViewModel(client: client))
@@ -24,26 +25,6 @@ struct ClientProfileView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                HStack(spacing: 16) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "chevron.left")
-                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
-                            .foregroundStyle(AppColors.gold)
-                    }
-                    Text("Clients")
-                        .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                        .foregroundStyle(AppColors.gold)
-                    
-                    Spacer()
-                    
-                    Button("Edit") {
-                        router.presentFullScreen(SARoute.editClient(viewModel.client))
-                    }
-                    .font(AppFonts.sansSerif(size: 13))
-                    .foregroundStyle(AppColors.gold)
-                }
-                .padding(.horizontal, 24)
-                .padding(.vertical, 16)
                 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 0) {
@@ -167,7 +148,23 @@ struct ClientProfileView: View {
         } message: {
             Text("Add a quick note for \(viewModel.client.name)")
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle("Clients")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Edit") {
+                    showEditClient = true
+                }
+                .font(AppFonts.sansSerif(size: 14, weight: .semibold))
+                .foregroundStyle(AppColors.gold)
+            }
+        }
+        .fullScreenCover(isPresented: $showEditClient) {
+            EditClientView(client: viewModel.client)
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshClients"))) { _ in
             Task {
                 do {
@@ -262,42 +259,7 @@ private struct ClientOverviewTab: View {
             
 
             
-            // APPOINTMENTS Section
-            VStack(alignment: .leading, spacing: 12) {
-                Text("APPOINTMENTS")
-                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                    .foregroundStyle(AppColors.secondary)
-                    .kerning(1.5)
-                
-                if viewModel.appointments.isEmpty {
-                    Text("No recorded appointments")
-                        .font(AppFonts.sansSerif(size: 12))
-                        .foregroundStyle(AppColors.secondary)
-                        .padding(.vertical, 4)
-                } else {
-                    VStack(spacing: 10) {
-                        ForEach(viewModel.appointments.prefix(3), id: \.id) { appt in
-                            HStack(spacing: 12) {
-                                ZStack {
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .fill(AppColors.surface2)
-                                        .frame(width: 42, height: 42)
-                                    Image(systemName: "calendar")
-                                        .font(AppFonts.sansSerif(size: 16))
-                                        .foregroundStyle(AppColors.gold)
-                                        .opacity(0.8)
-                                }
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 12)
-                                .background(AppColors.surface)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                }
-            }
+            // APPOINTMENTS Section intentionally removed to avoid duplication with the dedicated tab
             
             if !viewModel.appointments.isEmpty {
                 VStack(alignment: .leading, spacing: 12) {
@@ -688,11 +650,22 @@ private struct ClientHistoryTab: View {
                                 ZStack {
                                     RoundedRectangle(cornerRadius: 9)
                                         .fill(AppColors.surface2)
-                                        .frame(width: 36, height: 36)
-                                    Image(systemName: "handbag")
-                                        .font(AppFonts.sansSerif(size: 14))
-                                        .foregroundStyle(AppColors.gold)
-                                        .opacity(0.4)
+                                        .frame(width: 48, height: 48)
+                                        
+                                    if let imageUrl = p.imageUrl, !imageUrl.isEmpty, let url = URL(string: imageUrl) {
+                                        AsyncImage(url: url) { image in
+                                            image.resizable().scaledToFill()
+                                        } placeholder: {
+                                            ProgressView()
+                                        }
+                                        .frame(width: 48, height: 48)
+                                        .clipShape(RoundedRectangle(cornerRadius: 9))
+                                    } else {
+                                        Image(systemName: "handbag")
+                                            .font(AppFonts.sansSerif(size: 14))
+                                            .foregroundStyle(AppColors.gold)
+                                            .opacity(0.4)
+                                    }
                                 }
                                 
                                 VStack(alignment: .leading, spacing: 2) {

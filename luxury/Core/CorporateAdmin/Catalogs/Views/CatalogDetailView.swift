@@ -181,17 +181,11 @@ struct CatalogDetailView: View {
         .listStyle(.insetGrouped)
         .navigationTitle("Catalog Details")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden()
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .toolbar(.hidden, for: .tabBar)
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(AppFonts.sansSerif(size: 16, weight: .semibold))
-                        .foregroundStyle(AppColors.gold)
-                }
-            }
-            
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Edit") {
                     router.push(CARoute.catalogForm(editCatalog: currentCatalog))
