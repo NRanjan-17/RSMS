@@ -12,14 +12,12 @@ struct SellingView: View {
     @State private var viewModel = SellingViewModel()
 
     var body: some View {
-        ZStack {
-            AppColors.background.ignoresSafeArea()
-            VStack(spacing: 0) {
+        VStack(spacing: 0) {
                 header
                 filters
                 catalogGrid
             }
-        }
+        .background(AppColors.background.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
         .onAppear { viewModel.fetchData() }
     }

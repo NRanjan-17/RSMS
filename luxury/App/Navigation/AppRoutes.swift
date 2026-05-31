@@ -67,7 +67,7 @@ enum ICRoute: Hashable {
 }
 
 enum CARoute: Hashable {
-    case globalAnalytics
+
     case globalInventory
     case userManagement
     case catalogs

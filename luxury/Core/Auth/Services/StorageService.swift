@@ -44,8 +44,8 @@ final class StorageService {
         try await client.storage
             .from(bucket)
             .upload(
-                path: path,
-                file: image.data,
+                path,
+                data: image.data,
                 options: FileOptions(
                     cacheControl: "3600",
                     contentType: image.contentType,

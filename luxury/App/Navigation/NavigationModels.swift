@@ -18,6 +18,6 @@ enum ICTab {
 }
 
 enum CATab {
-    case userManagement, catalogs, profile
+    case globalAnalytics, userManagement, catalogs, profile
 }
 

@@ -12,13 +12,11 @@ struct ClientelingView: View {
     @State private var viewModel = ClientelingViewModel()
     
     var body: some View {
-        ZStack {
-            AppColors.background.ignoresSafeArea()
-            
+        ZStack(alignment: .bottomTrailing) {
             VStack(spacing: 0) {
                 CustomHeader(title: "Clients")
-                
-                VStack(spacing: 12) {
+            
+            VStack(spacing: 12) {
                     HStack(spacing: 12) {
                         Image(systemName: "magnifyingglass")
                             .foregroundStyle(AppColors.tertiary)
@@ -152,12 +150,9 @@ struct ClientelingView: View {
                     await viewModel.loadClients()
                 }
             }
+            .background(AppColors.background.ignoresSafeArea())
             
-            VStack {
-                Spacer()
-                HStack {
-                    Spacer()
-                    Menu {
+            Menu {
                         Button(action: {
                             router.presentFullScreen(SARoute.newClient)
                         }) {
@@ -180,11 +175,9 @@ struct ClientelingView: View {
                                 .font(AppFonts.sansSerif(size: 20, weight: .bold))
                                 .foregroundStyle(AppColors.background)
                         }
-                    }
-                    .padding(.trailing, 20)
-                    .padding(.bottom, 20)
-                }
             }
+            .padding(.trailing, 20)
+            .padding(.bottom, 20)
         }
         .toolbar(.hidden, for: .navigationBar)
         .task {

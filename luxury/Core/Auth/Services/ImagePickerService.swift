@@ -43,7 +43,7 @@ final class ImagePickerService {
             throw ImagePickerServiceError.noSelection
         }
 
-        guard let type = item.supportedContentTypes.first(where: { $0.conforms(to: .image) }) else {
+        guard item.supportedContentTypes.contains(where: { $0.conforms(to: .image) }) else {
             throw ImagePickerServiceError.unsupportedType
         }
 
@@ -51,12 +51,25 @@ final class ImagePickerService {
             throw ImagePickerServiceError.emptyData
         }
         
-        guard let uiImage = UIImage(data: data), let compressedData = uiImage.jpegData(compressionQuality: 0.6) else {
+        guard let uiImage = UIImage(data: data) else {
+            throw ImagePickerServiceError.invalidImageData
+        }
+        
+        var compressionQuality: CGFloat = 0.8
+        var compressedData = uiImage.jpegData(compressionQuality: compressionQuality)
+        let maxByteCount = 2 * 1024 * 1024 // 2 MB
+        
+        while let currentData = compressedData, currentData.count > maxByteCount, compressionQuality > 0.1 {
+            compressionQuality -= 0.1
+            compressedData = uiImage.jpegData(compressionQuality: compressionQuality)
+        }
+        
+        guard let finalData = compressedData else {
             throw ImagePickerServiceError.invalidImageData
         }
 
         return PickedImageAsset(
-            data: compressedData,
+            data: finalData,
             fileExtension: "jpg",
             contentType: "image/jpeg"
         )

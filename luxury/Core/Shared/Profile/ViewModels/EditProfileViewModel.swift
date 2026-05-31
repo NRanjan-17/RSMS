@@ -91,13 +91,16 @@ final class EditProfileViewModel {
         }
         
         do {
+            let client = SupabaseManager.shared.client
+            let session = try await client.auth.session
+            let authUserId = session.user.id
+            
             var newAvatarUrl = self.avatarUrl
             if let newAsset = selectedPhotoAsset {
-                newAvatarUrl = try await storageService.uploadAvatar(image: newAsset, userId: userId)
+                newAvatarUrl = try await storageService.uploadAvatar(image: newAsset, userId: authUserId)
             }
             
             // Depending on role, update the correct table
-            let client = SupabaseManager.shared.client
             if role == .corporateAdmin {
                 let updates: [String: AnyJSON] = [
                     "name": .string(name),
