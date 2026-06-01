@@ -195,7 +195,7 @@ struct ClientProfileView: View {
                 productIds: product.productIds,
                 productImages: product.productImages
             )
-            SalesProductDetailView(catalog: catalogEntity)
+            SalesProductDetailView(catalog: catalogEntity, client: viewModel.client)
         }
     }
 }
@@ -539,7 +539,7 @@ private struct ClientAppointmentsTab: View {
                             .clipShape(RoundedRectangle(cornerRadius: 7))
                         
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(appt.appointmentType.rawValue)
+                            Text(appt.displayAppointmentType)
                                 .font(AppFonts.sansSerif(size: 13, weight: .medium))
                                 .foregroundStyle(.white)
                             Text("In-Store · \(appt.formattedTime)")

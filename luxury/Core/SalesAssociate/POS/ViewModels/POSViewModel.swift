@@ -73,6 +73,7 @@ final class POSViewModel {
     
     var courtesyRate: Double = 0.0
     var taxFree: Bool = false
+    var isGiftInvoice: Bool = false
     var approvalState: ApprovalState = .approved
     var offlineCartQueued: Bool = true
     
@@ -228,7 +229,9 @@ final class POSViewModel {
                 clientId: selectedClient?.id,
                 boutiqueId: boutiqueId,
                 staffId: staffId,
-                paymentGatewayId: transactionIdStr
+                paymentGatewayId: transactionIdStr,
+                isGift: isGiftInvoice,
+                isTax: taxFree
             )
             
             // Extract product IDs multiplied by qty

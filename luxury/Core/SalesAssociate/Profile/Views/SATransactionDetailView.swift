@@ -299,7 +299,8 @@ struct SATransactionDetailView: View {
             subtotal: subtotal,
             cgst: cgst,
             sgst: sgst,
-            total: total
+            total: transaction.transactionAmount,
+            isGiftInvoice: false
         )
         
         return InvoicePDFGenerator.generateInvoice(data: data)
