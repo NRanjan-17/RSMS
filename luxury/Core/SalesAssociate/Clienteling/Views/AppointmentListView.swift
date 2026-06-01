@@ -15,6 +15,8 @@ struct AppointmentListView: View {
     
     @State private var selectedAppointment: AppointmentEntity?
     @State private var isShowingDetail = false
+    @State private var showingAddSheet = false
+    @State private var appointmentToDelete: AppointmentEntity?
     
     var body: some View {
         ZStack {
@@ -40,96 +42,13 @@ struct AppointmentListView: View {
                         } else {
                             VStack(spacing: 30) {
                                 ForEach(dayAppointments, id: \.timeBlock) { group in
-                                    VStack(alignment: .leading, spacing: 10) {
-                                        Text(group.timeBlock)
-                                            .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                                            .foregroundStyle(AppColors.secondary)
-                                            .kerning(1.8)
-                                            .padding(.horizontal, 24)
-                                        
-                                        VStack(spacing: 10) {
-                                            ForEach(group.appointments, id: \.id) { a in
-                                                Button(action: {
-                                                    selectedAppointment = a
-                                                    isShowingDetail = true
-                                                }) {
-                                                    HStack(spacing: 12) {
-                                                        Text(a.formattedTime)
-                                                            .font(AppFonts.sansSerif(size: 10, weight: .medium))
-                                                            .foregroundStyle(AppColors.gold)
-                                                            .padding(.horizontal, 8)
-                                                            .padding(.vertical, 4)
-                                                            .background(AppColors.gold08)
-                                                            .clipShape(RoundedRectangle(cornerRadius: 7))
-                                                        
-                                                        ZStack {
-                                                            RoundedRectangle(cornerRadius: 10)
-                                                                .fill(AppColors.gold08)
-                                                                .frame(width: 34, height: 34)
-                                                            Text("U")
-                                                                .font(AppFonts.serif(size: 12, weight: .semibold))
-                                                                .foregroundStyle(AppColors.gold)
-                                                        }
-                                                        
-                                                        VStack(alignment: .leading, spacing: 2) {
-                                                            HStack(spacing: 6) {
-                                                                Circle()
-                                                                    .fill(a.status.color)
-                                                                    .frame(width: 8, height: 8)
-                                                                    
-                                                                if let cid = a.clientId, let ce = viewModel.clientsMap[cid] {
-                                                                    Text(Client(entity: ce).name)
-                                                                        .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                                                                        .foregroundStyle(AppColors.text)
-                                                                } else {
-                                                                    Text(a.clientId != nil ? "Client Appointment" : "Unknown Client")
-                                                                        .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                                                                        .foregroundStyle(AppColors.text)
-                                                                }
-                                                            }
-                                                            Text(a.appointmentType.rawValue)
-                                                                .font(AppFonts.sansSerif(size: 11))
-                                                                .foregroundStyle(AppColors.secondary)
-                                                        }
-                                                        
-                                                        Spacer()
-                                                        
-                                                        if a.status == .completed {
-                                                            ZStack {
-                                                                Circle().fill(AppColors.success.opacity(0.15)).frame(width: 20, height: 20)
-                                                                Image(systemName: "checkmark")
-                                                                    .font(.system(size: 10, weight: .bold))
-                                                                    .foregroundStyle(AppColors.success)
-                                                            }
-                                                        } else {
-                                                            Image(systemName: "chevron.right")
-                                                                .font(.system(size: 12))
-                                                                .foregroundStyle(AppColors.tertiary)
-                                                        }
-                                                    }
-                                                    .padding(.horizontal, 14)
-                                                    .padding(.vertical, 12)
-                                                    .background(a.status == .completed ? AppColors.surface.opacity(0.5) : AppColors.surface)
-                                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                                                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(a.status == .completed ? AppColors.gold08 : AppColors.gold15, lineWidth: 0.5))
-                                                    .opacity(a.status == .completed ? 0.5 : 1.0)
-                                                }
-                                                .buttonStyle(.plain)
-                                                .contextMenu {
-                                                    if a.createdBy == viewModel.currentStaffId && a.status == .pending {
-                                                        Button(role: .destructive, action: {
-                                                            Task {
-                                                                await viewModel.deleteAppointment(a.id)
-                                                            }
-                                                        }) {
-                                                            Label("Delete Appointment", systemImage: "trash")
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        .padding(.horizontal, 24)
-                                    }
+                                    AppointmentGroupView(
+                                        group: group,
+                                        viewModel: viewModel,
+                                        selectedAppointment: $selectedAppointment,
+                                        isShowingDetail: $isShowingDetail,
+                                        appointmentToDelete: $appointmentToDelete
+                                    )
                                 }
                             }
                         }
@@ -157,10 +76,67 @@ struct AppointmentListView: View {
         } message: {
             Text(viewModel.errorMessage ?? "")
         }
+        .sheet(isPresented: $showingAddSheet, onDismiss: {
+            Task { await viewModel.fetchAppointments() }
+        }) {
+            CreateAppointmentView()
+        }
+        .alert(item: $appointmentToDelete) { a in
+            Alert(
+                title: Text("Delete Appointment"),
+                message: Text("Are you sure you want to delete this appointment? This action cannot be undone."),
+                primaryButton: .destructive(Text("Delete")) {
+                    Task {
+                        await viewModel.deleteAppointment(a.id)
+                    }
+                },
+                secondaryButton: .cancel()
+            )
+        }
         .sheet(isPresented: $isShowingDetail) {
             if let appt = selectedAppointment {
                 AppointmentDetailSheet(appointment: appt, viewModel: viewModel)
             }
+        }
+    }
+}
+
+struct AppointmentGroupView: View {
+    let group: (timeBlock: String, appointments: [AppointmentEntity])
+    var viewModel: AppointmentsViewModel
+    @Binding var selectedAppointment: AppointmentEntity?
+    @Binding var isShowingDetail: Bool
+    @Binding var appointmentToDelete: AppointmentEntity?
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(group.timeBlock)
+                .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                .foregroundStyle(AppColors.secondary)
+                .kerning(1.8)
+                .padding(.horizontal, 24)
+            
+            VStack(spacing: 10) {
+                ForEach(group.appointments, id: \.id) { a in
+                    Button(action: {
+                        selectedAppointment = a
+                        isShowingDetail = true
+                    }) {
+                        AppointmentRowView(a: a, viewModel: viewModel)
+                    }
+                    .buttonStyle(.plain)
+                    .contextMenu {
+                        if a.createdBy == viewModel.currentStaffId && a.status == .pending {
+                            Button(role: .destructive, action: {
+                                appointmentToDelete = a
+                            }) {
+                                Label("Delete Appointment", systemImage: "trash")
+                            }
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal, 24)
         }
     }
 }
@@ -339,5 +315,73 @@ struct AppointmentDetailSheet: View {
                 .font(AppFonts.sansSerif(size: 14, weight: .medium))
                 .foregroundStyle(.white)
         }
+    }
+}
+
+struct AppointmentRowView: View {
+    let a: AppointmentEntity
+    var viewModel: AppointmentsViewModel
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Text(a.formattedTime)
+                .font(AppFonts.sansSerif(size: 10, weight: .medium))
+                .foregroundStyle(AppColors.gold)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(AppColors.gold08)
+                .clipShape(RoundedRectangle(cornerRadius: 7))
+            
+            ZStack {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(AppColors.gold08)
+                    .frame(width: 34, height: 34)
+                Text("U")
+                    .font(AppFonts.serif(size: 12, weight: .semibold))
+                    .foregroundStyle(AppColors.gold)
+            }
+            
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(a.status.color)
+                        .frame(width: 8, height: 8)
+                        
+                    if let cid = a.clientId, let ce = viewModel.clientsMap[cid] {
+                        Text(Client(entity: ce).name)
+                            .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                            .foregroundStyle(AppColors.text)
+                    } else {
+                        Text(a.clientId != nil ? "Client Appointment" : "Unknown Client")
+                            .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                            .foregroundStyle(AppColors.text)
+                    }
+                }
+                Text(a.appointmentType.rawValue)
+                    .font(AppFonts.sansSerif(size: 11))
+                    .foregroundStyle(AppColors.secondary)
+            }
+            
+            Spacer()
+            
+            if a.status == .completed {
+                ZStack {
+                    Circle().fill(AppColors.success.opacity(0.15)).frame(width: 20, height: 20)
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(AppColors.success)
+                }
+            } else {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12))
+                    .foregroundStyle(AppColors.tertiary)
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(a.status == .completed ? AppColors.surface.opacity(0.5) : AppColors.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(a.status == .completed ? AppColors.gold08 : AppColors.gold15, lineWidth: 0.5))
+        .opacity(a.status == .completed ? 0.5 : 1.0)
     }
 }

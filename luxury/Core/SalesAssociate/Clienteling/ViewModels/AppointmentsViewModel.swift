@@ -203,7 +203,7 @@ final class AppointmentsViewModel {
                 .delete()
                 .eq("id", value: id)
                 .execute()
-            
+            NotificationCenter.default.post(name: Notification.Name("RefreshAppointments"), object: nil)
             await fetchAppointments()
         } catch {
             print("Failed to delete appointment: \(error)")

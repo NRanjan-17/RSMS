@@ -12,7 +12,7 @@ struct DashboardView: View {
     @Environment(Router.self) private var router
     @State private var viewModel = DashboardViewModel()
 
-    @State private var showingSettings = false
+
     
     var body: some View {
         ZStack {
@@ -24,11 +24,6 @@ struct DashboardView: View {
                         .font(AppFonts.serif(size: 28, weight: .semibold))
                         .foregroundStyle(.white)
                     Spacer()
-                    Button(action: { showingSettings = true }) {
-                        Image(systemName: "gearshape")
-                            .font(AppFonts.sansSerif(size: 20))
-                            .foregroundStyle(AppColors.gold)
-                    }
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 16)
@@ -279,14 +274,12 @@ struct DashboardView: View {
                 .onDisappear {
                     viewModel.stopRealTimeUpdates()
                 }
+                .onReceive(NotificationCenter.default.publisher(for: Notification.Name("RefreshAppointments"))) { _ in
+                    viewModel.fetchAppointments()
+                }
             }
         }
         .toolbar(.hidden, for: .navigationBar)
-        .sheet(isPresented: $showingSettings, onDismiss: {
-            viewModel.fetchBoutiqueName()
-        }) {
-            BoutiqueManagerSettingsView()
-        }
     }
 }
 

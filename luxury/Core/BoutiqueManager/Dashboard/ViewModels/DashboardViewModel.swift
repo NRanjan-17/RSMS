@@ -277,6 +277,7 @@ final class DashboardViewModel {
                         
                     let fetched: [AppointmentEntity] = try await query
                         .order("timestamp", ascending: true)
+                        .limit(5)
                         .execute()
                         .value
                     

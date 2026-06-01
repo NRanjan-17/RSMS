@@ -16,6 +16,7 @@ struct BMAppointmentDetailView: View {
     @State private var availableStaff: [StaffModel] = []
     @State private var selectedStaffId: UUID?
     @State private var isSaving = false
+    @State private var showingDeleteAlert = false
     
     init(appointment: AppointmentEntity) {
         self.appointment = appointment
@@ -28,12 +29,12 @@ struct BMAppointmentDetailView: View {
 
             VStack(spacing: 0) {
 
+                CustomHeader(title: "Appointment Details", showBackButton: true, backAction: {
+                    dismiss()
+                })
+                
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 32) {
-                        Text("Appointment Details")
-                            .font(AppFonts.serif(size: 28, weight: .semibold))
-                            .foregroundStyle(AppColors.text)
-                            .padding(.horizontal, 24)
 
                         VStack(alignment: .leading, spacing: 20) {
                             HStack(spacing: 16) {
@@ -108,54 +109,69 @@ struct BMAppointmentDetailView: View {
                 }
 
                 VStack {
-                    Button(action: {
-                        Task {
-                            isSaving = true
-                            if let newStaffId = selectedStaffId {
-                                await assignStaff(to: appointment.id, staffId: newStaffId)
-                            }
-                            isSaving = false
-                            dismiss()
-                        }
-                    }) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(isSaving ? AppColors.gold.opacity(0.5) : AppColors.gold)
-                                .frame(height: 52)
-                            
-                            if isSaving {
-                                ProgressView().tint(AppColors.background)
-                            } else {
-                                Text("Confirm Changes")
+                    HStack(spacing: 16) {
+                        Button(action: {
+                            showingDeleteAlert = true
+                        }) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(AppColors.error, lineWidth: 1)
+                                    .background(RoundedRectangle(cornerRadius: 12).fill(AppColors.surface))
+                                    .frame(height: 52)
+                                
+                                Text("Delete")
                                     .font(AppFonts.sansSerif(size: 14, weight: .bold))
-                                    .foregroundStyle(AppColors.background)
+                                    .foregroundStyle(AppColors.error)
                             }
                         }
+                        .disabled(isSaving)
+                        
+                        Button(action: {
+                            Task {
+                                isSaving = true
+                                if let newStaffId = selectedStaffId, newStaffId != appointment.assignedTo {
+                                    await assignStaff(to: appointment.id, staffId: newStaffId)
+                                }
+                                isSaving = false
+                                dismiss()
+                            }
+                        }) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(isSaving ? AppColors.gold.opacity(0.5) : AppColors.gold)
+                                    .frame(height: 52)
+                                
+                                if isSaving {
+                                    ProgressView().tint(AppColors.background)
+                                } else {
+                                    Text("Save")
+                                        .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                        .foregroundStyle(AppColors.background)
+                                }
+                            }
+                        }
+                        .disabled(isSaving)
                     }
-                    .disabled(isSaving)
                     .padding(.horizontal, 24)
-                    .padding(.horizontal, 24)
+                    .padding(.bottom, 40)
                 }
                 .padding(.top, 20)
                 
-                Button(action: {
-                    Task {
-                        isSaving = true
-                        await deleteAppointment(appointmentId: appointment.id)
-                        isSaving = false
-                        dismiss()
-                    }
-                }) {
-                    Text("Delete Appointment")
-                        .font(AppFonts.sansSerif(size: 14, weight: .bold))
-                        .foregroundStyle(AppColors.error)
-                        .padding(.vertical, 16)
-                }
-                .disabled(isSaving)
-                .padding(.bottom, 40)
-                
             }
             .background(AppColors.background)
+        }
+        .alert("Delete Appointment", isPresented: $showingDeleteAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                Task {
+                    isSaving = true
+                    await deleteAppointment(appointmentId: appointment.id)
+                    isSaving = false
+                    dismiss()
+                }
+            }
+        } message: {
+            Text("Are you sure you want to delete this appointment? This action cannot be undone.")
         }
         .task {
             await fetchAvailableStaff()
@@ -217,6 +233,7 @@ struct BMAppointmentDetailView: View {
                 .delete()
                 .eq("id", value: appointmentId)
                 .execute()
+            NotificationCenter.default.post(name: Notification.Name("RefreshAppointments"), object: nil)
         } catch {
             print("Failed to delete appointment: \(error)")
         }
