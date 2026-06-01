@@ -29,6 +29,7 @@ final class InvoicePDFGenerator {
         let cgst: Double
         let sgst: Double
         let total: Double
+        var isGiftInvoice: Bool = false
     }
     
     static func generateInvoice(data: InvoiceData) -> URL? {
@@ -101,14 +102,19 @@ final class InvoicePDFGenerator {
                 
                 drawText("Description", at: CGPoint(x: col1 + 5, y: currentY + 5), font: storeFont)
                 drawText("Qty", at: CGPoint(x: col2 + 5, y: currentY + 5), font: storeFont)
-                drawText("Rate", at: CGPoint(x: col3 + 5, y: currentY + 5), font: storeFont)
-                drawText("Amount", at: CGPoint(x: col4 + 5, y: currentY + 5), font: storeFont)
+                
+                if !data.isGiftInvoice {
+                    drawText("Rate", at: CGPoint(x: col3 + 5, y: currentY + 5), font: storeFont)
+                    drawText("Amount", at: CGPoint(x: col4 + 5, y: currentY + 5), font: storeFont)
+                }
                 
                 // Draw table header borders
                 drawRect(CGRect(x: leftMargin, y: currentY, width: rightMargin - leftMargin, height: 25), context: cgContext)
                 drawLine(from: CGPoint(x: col2, y: currentY), to: CGPoint(x: col2, y: currentY + 25), context: cgContext)
-                drawLine(from: CGPoint(x: col3, y: currentY), to: CGPoint(x: col3, y: currentY + 25), context: cgContext)
-                drawLine(from: CGPoint(x: col4, y: currentY), to: CGPoint(x: col4, y: currentY + 25), context: cgContext)
+                if !data.isGiftInvoice {
+                    drawLine(from: CGPoint(x: col3, y: currentY), to: CGPoint(x: col3, y: currentY + 25), context: cgContext)
+                    drawLine(from: CGPoint(x: col4, y: currentY), to: CGPoint(x: col4, y: currentY + 25), context: cgContext)
+                }
                 
                 currentY += 25
                 let tableStartY = currentY
@@ -117,11 +123,14 @@ final class InvoicePDFGenerator {
                 for item in data.items {
                     drawText(item.description, at: CGPoint(x: col1 + 5, y: currentY + 5), font: storeFont)
                     drawText("\(item.qty)", at: CGPoint(x: col2 + 5, y: currentY + 5), font: storeFont)
-                    drawText(CurrencyManager.shared.format(amount: item.rate), at: CGPoint(x: col3 + 5, y: currentY + 5), font: storeFont)
-                    let amountText = CurrencyManager.shared.format(amount: item.amount)
                     
-                    let amountSize = amountText.size(withAttributes: [.font: storeFont])
-                    drawText(amountText, at: CGPoint(x: rightMargin - amountSize.width - 5, y: currentY + 5), font: storeFont)
+                    if !data.isGiftInvoice {
+                        drawText(CurrencyManager.shared.format(amount: item.rate), at: CGPoint(x: col3 + 5, y: currentY + 5), font: storeFont)
+                        let amountText = CurrencyManager.shared.format(amount: item.amount)
+                        
+                        let amountSize = amountText.size(withAttributes: [.font: storeFont])
+                        drawText(amountText, at: CGPoint(x: rightMargin - amountSize.width - 5, y: currentY + 5), font: storeFont)
+                    }
                     
                     currentY += 25
                 }
@@ -129,38 +138,42 @@ final class InvoicePDFGenerator {
                 // Draw table body borders
                 drawRect(CGRect(x: leftMargin, y: tableStartY, width: rightMargin - leftMargin, height: currentY - tableStartY), context: cgContext)
                 drawLine(from: CGPoint(x: col2, y: tableStartY), to: CGPoint(x: col2, y: currentY), context: cgContext)
-                drawLine(from: CGPoint(x: col3, y: tableStartY), to: CGPoint(x: col3, y: currentY), context: cgContext)
-                drawLine(from: CGPoint(x: col4, y: tableStartY), to: CGPoint(x: col4, y: currentY), context: cgContext)
+                if !data.isGiftInvoice {
+                    drawLine(from: CGPoint(x: col3, y: tableStartY), to: CGPoint(x: col3, y: currentY), context: cgContext)
+                    drawLine(from: CGPoint(x: col4, y: tableStartY), to: CGPoint(x: col4, y: currentY), context: cgContext)
+                }
                 
                 // Totals
-                let totalsYStart = currentY
-                let totalsLabelsX = col4 - 100
-                
-                drawText("Subtotal", at: CGPoint(x: totalsLabelsX, y: currentY + 5), font: storeFont)
-                drawTextRightAligned(CurrencyManager.shared.format(amount: data.subtotal), atY: currentY + 5, rightEdge: rightMargin - 5, font: storeFont)
-                currentY += 20
-                
-                drawText("CGST (9%)", at: CGPoint(x: totalsLabelsX, y: currentY + 5), font: storeFont)
-                drawTextRightAligned(CurrencyManager.shared.format(amount: data.cgst), atY: currentY + 5, rightEdge: rightMargin - 5, font: storeFont)
-                currentY += 20
-                
-                drawText("SGST (9%)", at: CGPoint(x: totalsLabelsX, y: currentY + 5), font: storeFont)
-                drawTextRightAligned(CurrencyManager.shared.format(amount: data.sgst), atY: currentY + 5, rightEdge: rightMargin - 5, font: storeFont)
-                currentY += 20
-                
-                drawText("Total", at: CGPoint(x: totalsLabelsX, y: currentY + 5), font: storeFont)
-                drawTextRightAligned(CurrencyManager.shared.format(amount: data.total), atY: currentY + 5, rightEdge: rightMargin - 5, font: storeFont)
-                currentY += 20
-                
-                // Borders for totals
-                drawLine(from: CGPoint(x: totalsLabelsX - 5, y: totalsYStart), to: CGPoint(x: rightMargin, y: totalsYStart), context: cgContext)
-                drawRect(CGRect(x: totalsLabelsX - 5, y: totalsYStart, width: rightMargin - totalsLabelsX + 5, height: currentY - totalsYStart), context: cgContext)
-                drawLine(from: CGPoint(x: col4, y: totalsYStart), to: CGPoint(x: col4, y: currentY), context: cgContext)
-                
-                // Internal lines for totals
-                for i in 1...3 {
-                    let y = totalsYStart + CGFloat(i * 20)
-                    drawLine(from: CGPoint(x: totalsLabelsX - 5, y: y), to: CGPoint(x: rightMargin, y: y), context: cgContext)
+                if !data.isGiftInvoice {
+                    let totalsYStart = currentY
+                    let totalsLabelsX = col4 - 100
+                    
+                    drawText("Subtotal", at: CGPoint(x: totalsLabelsX, y: currentY + 5), font: storeFont)
+                    drawTextRightAligned(CurrencyManager.shared.format(amount: data.subtotal), atY: currentY + 5, rightEdge: rightMargin - 5, font: storeFont)
+                    currentY += 20
+                    
+                    drawText("CGST (9%)", at: CGPoint(x: totalsLabelsX, y: currentY + 5), font: storeFont)
+                    drawTextRightAligned(CurrencyManager.shared.format(amount: data.cgst), atY: currentY + 5, rightEdge: rightMargin - 5, font: storeFont)
+                    currentY += 20
+                    
+                    drawText("SGST (9%)", at: CGPoint(x: totalsLabelsX, y: currentY + 5), font: storeFont)
+                    drawTextRightAligned(CurrencyManager.shared.format(amount: data.sgst), atY: currentY + 5, rightEdge: rightMargin - 5, font: storeFont)
+                    currentY += 20
+                    
+                    drawText("Total", at: CGPoint(x: totalsLabelsX, y: currentY + 5), font: storeFont)
+                    drawTextRightAligned(CurrencyManager.shared.format(amount: data.total), atY: currentY + 5, rightEdge: rightMargin - 5, font: storeFont)
+                    currentY += 20
+                    
+                    // Borders for totals
+                    drawLine(from: CGPoint(x: totalsLabelsX - 5, y: totalsYStart), to: CGPoint(x: rightMargin, y: totalsYStart), context: cgContext)
+                    drawRect(CGRect(x: totalsLabelsX - 5, y: totalsYStart, width: rightMargin - totalsLabelsX + 5, height: currentY - totalsYStart), context: cgContext)
+                    drawLine(from: CGPoint(x: col4, y: totalsYStart), to: CGPoint(x: col4, y: currentY), context: cgContext)
+                    
+                    // Internal lines for totals
+                    for i in 1...3 {
+                        let y = totalsYStart + CGFloat(i * 20)
+                        drawLine(from: CGPoint(x: totalsLabelsX - 5, y: y), to: CGPoint(x: rightMargin, y: y), context: cgContext)
+                    }
                 }
                 
                 // Footer

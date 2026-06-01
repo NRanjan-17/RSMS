@@ -179,7 +179,7 @@ struct AppointmentDetailSheet: View {
                 VStack(spacing: 16) {
                     detailRow(title: "Time", value: "\(appointment.formattedDate) at \(appointment.formattedTime)")
                     Divider().background(AppColors.border)
-                    detailRow(title: "Type", value: appointment.appointmentType.rawValue)
+                    detailRow(title: "Type", value: appointment.displayAppointmentType)
                     Divider().background(AppColors.border)
                     
                     HStack {
@@ -357,7 +357,7 @@ struct AppointmentRowView: View {
                             .foregroundStyle(AppColors.text)
                     }
                 }
-                Text(a.appointmentType.rawValue)
+                Text(a.displayAppointmentType)
                     .font(AppFonts.sansSerif(size: 11))
                     .foregroundStyle(AppColors.secondary)
             }

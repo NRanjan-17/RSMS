@@ -205,6 +205,13 @@ struct POSView: View {
                                 .font(AppFonts.sansSerif(size: 12))
                                 .foregroundStyle(AppColors.text)
                                 .toggleStyle(LuxuryToggleStyle())
+                                
+                            Divider().background(AppColors.gold15).padding(.vertical, 4)
+                            
+                            Toggle("Gift Invoice (Hide Prices)", isOn: $viewModel.isGiftInvoice)
+                                .font(AppFonts.sansSerif(size: 12))
+                                .foregroundStyle(AppColors.text)
+                                .toggleStyle(LuxuryToggleStyle())
                         }
                         .padding(14)
                         .background(AppColors.surface)
