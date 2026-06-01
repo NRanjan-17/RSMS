@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import Supabase
+import PostgREST
 
 struct AppointmentListView: View {
     @Environment(Router.self) private var router
@@ -149,11 +151,14 @@ struct AppointmentDetailSheet: View {
     @State private var clientEntity: ClientEntity?
     @State private var isLoadingClient = false
     @State private var currentStatus: AppointmentStatus
+    @State private var selectedDate: Date
     
     init(appointment: AppointmentEntity, viewModel: AppointmentsViewModel) {
         self.appointment = appointment
         self.viewModel = viewModel
         _currentStatus = State(initialValue: appointment.status)
+        let initialDate = ISO8601DateFormatter().date(from: appointment.timestamp) ?? Date()
+        _selectedDate = State(initialValue: initialDate)
     }
     
     var body: some View {
@@ -177,7 +182,22 @@ struct AppointmentDetailSheet: View {
                 
                 // Details Card
                 VStack(spacing: 16) {
-                    detailRow(title: "Time", value: "\(appointment.formattedDate) at \(appointment.formattedTime)")
+                    let canEdit = (viewModel.currentStaffId != nil && appointment.assignedTo == viewModel.currentStaffId)
+                    
+                    if canEdit {
+                        DatePicker("Date & Time", selection: $selectedDate)
+                            .datePickerStyle(.compact)
+                            .tint(AppColors.gold)
+                            .font(AppFonts.sansSerif(size: 14))
+                            .foregroundStyle(AppColors.secondary)
+                            .onChange(of: selectedDate) { _, newValue in
+                                Task {
+                                    await updateAppointmentDate(to: newValue)
+                                }
+                            }
+                    } else {
+                        detailRow(title: "Time", value: "\(appointment.formattedDate) at \(appointment.formattedTime)")
+                    }
                     Divider().background(AppColors.border)
                     detailRow(title: "Type", value: appointment.displayAppointmentType)
                     Divider().background(AppColors.border)
@@ -187,8 +207,6 @@ struct AppointmentDetailSheet: View {
                             .font(AppFonts.sansSerif(size: 14))
                             .foregroundStyle(AppColors.secondary)
                         Spacer()
-                        
-                        let canEdit = (viewModel.currentStaffId != nil && appointment.assignedTo == viewModel.currentStaffId)
                         
                         if canEdit {
                             Picker("Status", selection: $currentStatus) {
@@ -314,6 +332,29 @@ struct AppointmentDetailSheet: View {
             Text(value)
                 .font(AppFonts.sansSerif(size: 14, weight: .medium))
                 .foregroundStyle(.white)
+        }
+    }
+    
+    private func updateAppointmentDate(to newDate: Date) async {
+        struct UpdateDateRequest: Encodable {
+            let timestamp: String
+        }
+        
+        let dateString = ISO8601DateFormatter().string(from: newDate)
+        
+        do {
+            try await SupabaseManager.shared.client
+                .from("appointment")
+                .update(UpdateDateRequest(timestamp: dateString))
+                .eq("id", value: appointment.id)
+                .execute()
+            await MainActor.run {
+                Task {
+                    await viewModel.fetchAppointments()
+                }
+            }
+        } catch {
+            print("Failed to update appointment date: \(error)")
         }
     }
 }
