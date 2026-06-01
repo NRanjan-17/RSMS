@@ -1,5 +1,6 @@
 import SwiftUI
 import PhotosUI
+import Supabase
 
 struct CorporateAdminProfileView: View {
     @Environment(CorporateAdminAppState.self) private var caAppState
@@ -87,6 +88,27 @@ struct CorporateAdminProfileView: View {
                             VStack(spacing: 12) {
                                 adminToolRow(title: "Edit Profile", icon: "person.crop.circle", route: .editProfile)
                                 
+                                HStack {
+                                    Image(systemName: "banknote.fill")
+                                        .font(AppFonts.sansSerif(size: 18))
+                                        .foregroundStyle(AppColors.gold)
+                                        .frame(width: 24, alignment: .center)
+                                    Text("Global Currency")
+                                        .font(AppFonts.sansSerif(size: 15))
+                                        .foregroundStyle(.white)
+                                    Spacer()
+                                    Picker("Currency", selection: $currencyManager.currentCurrency) {
+                                        ForEach(currencyManager.availableCurrencies, id: \.self) { code in
+                                            Text("\(code) (\(currencyManager.symbol(for: code)))").tag(code)
+                                        }
+                                    }
+                                    .tint(AppColors.gold)
+                                }
+                                .padding(16)
+                                .background(AppColors.surface)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                
                                 NavigationLink(destination: SecuritySettingsView()) {
                                     HStack {
                                         Image(systemName: "lock.shield.fill")
@@ -112,36 +134,6 @@ struct CorporateAdminProfileView: View {
                         }
                         .padding(.top, 24)
                         
-                        // Preferences
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text("PREFERENCES")
-                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
-                                .foregroundStyle(AppColors.secondary)
-                                .kerning(1.5)
-                                .padding(.horizontal, 24)
-                            
-                            VStack(spacing: 0) {
-                                HStack {
-                                    Text("Global Currency")
-                                        .font(AppFonts.sansSerif(size: 14))
-                                        .foregroundStyle(.white)
-                                    Spacer()
-                                    Picker("Currency", selection: $currencyManager.currentCurrency) {
-                                        ForEach(currencyManager.availableCurrencies, id: \.self) { code in
-                                            Text("\(code) (\(currencyManager.symbol(for: code)))").tag(code)
-                                        }
-                                    }
-                                    .tint(AppColors.gold)
-                                }
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 12)
-                            }
-                            .background(AppColors.surface)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
-                            .padding(.horizontal, 24)
-                        }
-                        .padding(.top, 24)
                         
                         CustomButton(title: "Logout", action: { showLogoutAlert = true })
                             .padding(.horizontal, 24)
@@ -162,6 +154,49 @@ struct CorporateAdminProfileView: View {
         }
         .task {
             await viewModel.fetchProfile()
+            await fetchCurrency()
+        }
+        .onChange(of: currencyManager.currentCurrency) { _, newCurrency in
+            Task {
+                await updateAllBoutiquesCurrency(newCurrency)
+            }
+        }
+    }
+    
+    private func fetchCurrency() async {
+        do {
+            if let (_, profileData) = try await ProfileService().fetchCurrentProfile(),
+               let admin = profileData as? CorporateAdmin {
+                // For CA, maybe they don't have a currency field. If they do, fetch it.
+                // Otherwise leave it local.
+            }
+        } catch {
+            print("Failed to fetch currency: \(error)")
+        }
+    }
+    
+    private func updateAllBoutiquesCurrency(_ code: String) async {
+        do {
+            let boutiques: [CorporateBoutique] = try await SupabaseManager.shared.client
+                .from("boutiques")
+                .select()
+                .execute()
+                .value
+                
+            struct UpdateCurrencyRequest: Encodable {
+                let currency: String
+            }
+            
+            for boutique in boutiques {
+                try await SupabaseManager.shared.client
+                    .from("boutiques")
+                    .update(UpdateCurrencyRequest(currency: code))
+                    .eq("id", value: boutique.id)
+                    .execute()
+            }
+            print("Updated all boutiques to currency: \(code)")
+        } catch {
+            print("Failed to update boutiques currency: \(error)")
         }
     }
     

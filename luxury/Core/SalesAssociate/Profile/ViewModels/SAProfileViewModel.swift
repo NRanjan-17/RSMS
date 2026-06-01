@@ -18,7 +18,7 @@ final class SAProfileViewModel {
     
     var revenue: Double = 0.0
     var target: Double = 0.0
-    var progress: Double { target > 0 ? revenue / target : 0 }
+    var progress: Double { min(1.0, max(0.0, target > 0 ? revenue / target : 0)) }
     
     var statClients: String = "0"
     var statTransactions: String = "0"
@@ -41,15 +41,21 @@ final class SAProfileViewModel {
                 }
                 
                 if let boutiqueId = staff.boutiqueId {
-                    struct MinimalBoutique: Codable { let name: String }
+                    struct MinimalBoutique: Codable { 
+                        let name: String 
+                        let currency: String?
+                    }
                     if let boutiques: [MinimalBoutique] = try? await SupabaseManager.shared.client
                         .from("boutiques")
-                        .select("name")
+                        .select("name, currency")
                         .eq("id", value: boutiqueId)
                         .execute()
                         .value, let b = boutiques.first {
                         await MainActor.run {
                             self.store = b.name
+                            if let curr = b.currency, !curr.isEmpty {
+                                CurrencyManager.shared.currentCurrency = curr
+                            }
                         }
                     }
                 }
