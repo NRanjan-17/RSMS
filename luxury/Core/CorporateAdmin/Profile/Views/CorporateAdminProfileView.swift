@@ -104,7 +104,8 @@ struct CorporateAdminProfileView: View {
                                     }
                                     .tint(AppColors.gold)
                                 }
-                                .padding(16)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 12)
                                 .background(AppColors.surface)
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                                 .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))

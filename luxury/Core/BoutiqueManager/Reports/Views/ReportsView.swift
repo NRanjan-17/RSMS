@@ -18,9 +18,7 @@ struct ReportsView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                CustomHeader(title: "Analytical Reports", showBackButton: true, backAction: {
-                    dismiss()
-                })
+                CustomHeader(title: "Analytical Reports")
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 16) {
@@ -93,7 +91,11 @@ struct ReportsView: View {
                 }
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle("Profile")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
     }
     
     private func route(for title: String) -> BMRoute? {

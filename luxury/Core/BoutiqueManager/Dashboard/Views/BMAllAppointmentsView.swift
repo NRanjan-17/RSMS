@@ -22,9 +22,7 @@ struct BMAllAppointmentsView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                CustomHeader(title: "All Appointments", showBackButton: true, backAction: {
-                    dismiss()
-                })
+                CustomHeader(title: "All Appointments")
                 
                 if isLoading {
                     Spacer()
@@ -90,7 +88,11 @@ struct BMAllAppointmentsView: View {
                 }
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle("Dashboard")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .task {
             await fetchStaff()
             await fetchAppointments()
