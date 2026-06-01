@@ -31,18 +31,19 @@ struct NewClientView: View {
     private let clientService = ClientService()
     
     var body: some View {
-        ZStack {
-            AppColors.background.ignoresSafeArea()
-            
-            VStack(spacing: 0) {
+        NavigationStack {
+            ZStack {
+                AppColors.background.ignoresSafeArea()
                 
-                ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text("New Client")
-                            .font(AppFonts.serif(size: 28, weight: .semibold))
-                            .foregroundStyle(AppColors.text)
-                            .padding(.bottom, 20)
-                            .padding(.horizontal, 24)
+                VStack(spacing: 0) {
+                    
+                    ScrollView(showsIndicators: false) {
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text("New Client")
+                                .font(AppFonts.serif(size: 28, weight: .semibold))
+                                .foregroundStyle(AppColors.text)
+                                .padding(.bottom, 20)
+                                .padding(.horizontal, 24)
                         
                         VStack(alignment: .leading, spacing: 12) {
                             Text("PERSONAL INFORMATION")
@@ -182,6 +183,16 @@ struct NewClientView: View {
         .toolbarColorScheme(.dark, for: .navigationBar)
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .tabBar)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "xmark")
+                        .font(AppFonts.sansSerif(size: 16, weight: .semibold))
+                        .foregroundStyle(AppColors.gold)
+                }
+            }
+        }
+        }
         .alert("Error Saving Client", isPresented: $showErrorAlert) {
             Button("OK", role: .cancel) {}
         } message: {
