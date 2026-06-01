@@ -17,9 +17,13 @@ final class StockViewModel {
     
     var sfsOrdersCount: String = "0"
     
+    var resolvedSkus: Set<String> = []
     var alerts: [InventoryAlert] = []
     
     init() {
+        if let array = UserDefaults.standard.stringArray(forKey: "luxury_resolved_skus") {
+            self.resolvedSkus = Set(array)
+        }
         NotificationCenter.default.addObserver(forName: NSNotification.Name("SFSOrderReceived"), object: nil, queue: .main) { [weak self] _ in
             self?.fetchSFSCount()
         }
@@ -45,6 +49,10 @@ final class StockViewModel {
                     let available = totalCount - reservedCount
                     
                     total += available
+                    
+                    if resolvedSkus.contains(catalog.catalogId) {
+                        continue
+                    }
                     
                     if available == 0 {
                         outOfStock += 1
@@ -91,7 +99,19 @@ final class StockViewModel {
     }
     
     func resolveAlert(_ alert: InventoryAlert) {
+        resolvedSkus.insert(alert.sku)
+        UserDefaults.standard.set(Array(resolvedSkus), forKey: "luxury_resolved_skus")
         alerts.removeAll { $0.id == alert.id }
+        
+        if alert.currentQty == 0 {
+            if let count = Int(outOfStockCount), count > 0 {
+                outOfStockCount = "\(count - 1)"
+            }
+        } else if alert.currentQty < 3 {
+            if let count = Int(lowStockCount), count > 0 {
+                lowStockCount = "\(count - 1)"
+            }
+        }
     }
     
     func fetchSFSCount() {
