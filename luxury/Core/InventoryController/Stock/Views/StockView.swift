@@ -10,7 +10,7 @@ import SwiftUI
 struct StockView: View {
     @Environment(Router.self) private var router
     @Environment(AppCoordinator.self) private var coordinator
-    @State private var viewModel = StockViewModel()
+    @Environment(StockViewModel.self) private var viewModel
     @State private var showingSettings = false
     
     var body: some View {
@@ -137,7 +137,6 @@ struct StockView: View {
             viewModel.fetchSFSCount()
         }
         .toolbar(.hidden, for: .navigationBar)
-        .environment(viewModel)
         .onAppear {
             viewModel.fetchInventoryStats()
             viewModel.fetchSFSCount()
@@ -153,4 +152,5 @@ struct StockView: View {
     StockView()
         .environment(Router())
         .environment(AppCoordinator())
+        .environment(StockViewModel())
 }

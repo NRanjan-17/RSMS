@@ -16,6 +16,7 @@ struct InventoryControllerCanvas: View {
     @State private var auditRouter = Router()
     @State private var profileRouter = Router()
     @State private var sfsViewModel = FulfillmentViewModel()
+    @State private var stockViewModel = StockViewModel()
     @State private var notificationService = SFSNotificationService()
     
     var body: some View {
@@ -105,6 +106,7 @@ struct InventoryControllerCanvas: View {
             .tag(ICTab.profile)
         }
         .tint(AppColors.gold)
+        .environment(stockViewModel)
         .overlay(
             VStack {
                 if notificationService.hasNewOrder {
