@@ -21,15 +21,15 @@ struct StockDetailView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 32) {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text(alert.sku)
-                                .font(AppFonts.sansSerif(size: 12))
-                                .foregroundStyle(AppColors.gold)
-                                .kerning(2)
-                            
                             Text(alert.itemName)
                                 .font(AppFonts.serif(size: 32, weight: .semibold))
                                 .foregroundStyle(.white)
                                 .lineSpacing(4)
+                            
+                            Text(alert.sku)
+                                .font(AppFonts.sansSerif(size: 12))
+                                .foregroundStyle(AppColors.gold)
+                                .kerning(2)
                             
                             StatusBadge(text: alert.currentQty == 0 ? "Out of Stock" : "\(alert.currentQty) In Boutique", status: alert.status)
                                 .padding(.top, 4)
