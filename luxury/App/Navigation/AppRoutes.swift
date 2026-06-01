@@ -64,7 +64,7 @@ enum ICRoute: Hashable {
     case varianceReport(RSMSCycleCount)
     case serialCertificate
     case sfsOrders
-    case editProfile
+
     case sfsVerification(PurchasedItemEntity)
     case endlessAisleSelection
     case alerts
