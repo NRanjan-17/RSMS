@@ -77,36 +77,20 @@ final class ClientService {
     }
     
     func fetchClients() async throws -> [ClientEntity] {
-        var dbClients: [ClientEntity] = []
         do {
             let response = try await client
                 .from("client")
                 .select()
                 .execute()
             
-            dbClients = try localDecoder.decode([ClientEntity].self, from: response.data)
+            return try localDecoder.decode([ClientEntity].self, from: response.data)
         } catch {
             print("Database fetch clients failed with error: \(error). Raw error: \(String(describing: error))")
+            return []
         }
-        
-        let localClients = getLocalClients()
-        var merged: [ClientEntity] = localClients
-        
-        for dbClient in dbClients {
-            if !merged.contains(where: { $0.id == dbClient.id }) {
-                merged.append(dbClient)
-            }
-        }
-        
-        return merged
     }
     
     func fetchClient(id: UUID) async throws -> ClientEntity {
-        let localClients = getLocalClients()
-        if let local = localClients.first(where: { $0.id == id }) {
-            return local
-        }
-        
         let response = try await client
             .from("client")
             .select()
@@ -114,53 +98,22 @@ final class ClientService {
             .single()
             .execute()
             
-        let entity = try localDecoder.decode(ClientEntity.self, from: response.data)
-        return entity
+        return try localDecoder.decode(ClientEntity.self, from: response.data)
     }
     
     func createClient(_ clientEntity: ClientEntity) async throws {
-        do {
-            try await client
-                .from("client")
-                .insert(clientEntity)
-                .execute()
-        } catch {
-            print("Database createClient failed: \(error).")
-        }
-        
-        // Always cache created clients locally to guarantee local UI is updated immediately
-        // and acts as a local fallback database.
-        var localClients = getLocalClients()
-        if let index = localClients.firstIndex(where: { $0.id == clientEntity.id }) {
-            localClients[index] = clientEntity
-        } else {
-            localClients.append(clientEntity)
-        }
-        saveLocalClients(localClients)
+        try await client
+            .from("client")
+            .insert(clientEntity)
+            .execute()
     }
     
     func updateClient(_ clientEntity: ClientEntity) async throws {
-        do {
-            try await client
-                .from("client")
-                .update(clientEntity)
-                .eq("id", value: clientEntity.id.uuidString)
-                .execute()
-        } catch {
-            print("Database updateClient failed: \(error).")
-        }
-        
-        // Always cache the update locally so that:
-        // 1. Mock clients (which aren't in Supabase) are successfully updated and persist.
-        // 2. Newly created clients that failed DB insertion (and live only locally) are updated successfully.
-        // 3. Local view updates are immediate and match the user's edits.
-        var localClients = getLocalClients()
-        if let index = localClients.firstIndex(where: { $0.id == clientEntity.id }) {
-            localClients[index] = clientEntity
-        } else {
-            localClients.append(clientEntity)
-        }
-        saveLocalClients(localClients)
+        try await client
+            .from("client")
+            .update(clientEntity)
+            .eq("id", value: clientEntity.id.uuidString)
+            .execute()
     }
     
     func deleteClient(id: UUID) async throws {
@@ -176,14 +129,10 @@ final class ClientService {
         _ = try? await client.from("size_preferences").delete().eq("client_id", value: uuidStr).execute()
         _ = try? await client.from("notes").delete().eq("client_id", value: uuidStr).execute()
         
-        let _ = try await client
+        try await client
             .from("client")
             .delete()
             .eq("id", value: uuidStr)
             .execute()
-        
-        var localClients = getLocalClients()
-        localClients.removeAll(where: { $0.id == id })
-        saveLocalClients(localClients)
     }
 }

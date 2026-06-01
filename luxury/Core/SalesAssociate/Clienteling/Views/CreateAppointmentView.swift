@@ -307,7 +307,7 @@ struct CreateAppointmentView: View {
                 boutiqueId: boutiqueId,
                 timestamp: timestampStr,
                 appointmentType: selectedType,
-                assignedTo: nil,
+                assignedTo: staff.id,
                 createdBy: staff.id,
                 status: .pending,
                 createdAt: nil,

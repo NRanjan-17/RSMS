@@ -25,10 +25,10 @@ final class ActiveAuditViewModel {
         return Double(totalScanned) / Double(totalExpected)
     }
     
-    var fetchProfileHandler: () async throws -> (UserRole, Any)?
-    var fetchCatalogsHandler: () async throws -> [CatalogEntity]
-    var fetchInventoryHandler: (UUID) async throws -> [InventoryItem]
-    var fetchBoutiquesHandler: () async throws -> [CorporateBoutique]
+    @ObservationIgnored var fetchProfileHandler: () async throws -> (UserRole, Any)?
+    @ObservationIgnored var fetchCatalogsHandler: () async throws -> [CatalogEntity]
+    @ObservationIgnored var fetchInventoryHandler: (UUID) async throws -> [InventoryItem]
+    @ObservationIgnored var fetchBoutiquesHandler: () async throws -> [CorporateBoutique]
     
     init(audit: RSMSCycleCount) {
         self.audit = audit

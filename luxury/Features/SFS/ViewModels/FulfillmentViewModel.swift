@@ -18,14 +18,14 @@ final class FulfillmentViewModel {
     
     private let client = SupabaseManager.shared.client
     
-    var fetchPurchasedItemsHandler: () async throws -> [PurchasedItemEntity]
-    var fetchCatalogsHandler: () async throws -> [CatalogEntity]
-    var fetchProfileHandler: () async throws -> (UserRole, Any)?
-    var fetchBoutiqueHandler: (UUID) async throws -> CorporateBoutique?
-    var fetchInventoryHandler: (UUID, UUID) async throws -> [InventoryItem]
-    var fetchGlobalInventoryHandler: (UUID) async throws -> [InventoryItem]
-    var updateInventoryHandler: (UUID, Int, Int) async throws -> Void
-    var updatePurchasedItemHandler: (UUID, String, Date?) async throws -> Void
+    @ObservationIgnored var fetchPurchasedItemsHandler: () async throws -> [PurchasedItemEntity]
+    @ObservationIgnored var fetchCatalogsHandler: () async throws -> [CatalogEntity]
+    @ObservationIgnored var fetchProfileHandler: () async throws -> (UserRole, Any)?
+    @ObservationIgnored var fetchBoutiqueHandler: (UUID) async throws -> CorporateBoutique?
+    @ObservationIgnored var fetchInventoryHandler: (UUID, UUID) async throws -> [InventoryItem]
+    @ObservationIgnored var fetchGlobalInventoryHandler: (UUID) async throws -> [InventoryItem]
+    @ObservationIgnored var updateInventoryHandler: (UUID, Int, Int) async throws -> Void
+    @ObservationIgnored var updatePurchasedItemHandler: (UUID, String, Date?) async throws -> Void
     
     init() {
         self.fetchPurchasedItemsHandler = {
