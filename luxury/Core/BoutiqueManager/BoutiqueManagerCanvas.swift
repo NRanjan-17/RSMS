@@ -116,6 +116,8 @@ struct BoutiqueManagerCanvas: View {
             ClientInsightsView()
         case .transferApproval:
             TransferApprovalView()
+        case .newTransfer:
+            NewTransferView()
         case .cycleCountSignoff:
             CycleCountDetailView()
         case .stockReconciliation:

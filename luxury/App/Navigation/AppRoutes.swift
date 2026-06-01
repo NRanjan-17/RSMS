@@ -33,6 +33,7 @@ enum BMRoute: Hashable {
     case shrinkReport
     case clientInsights
     case transferApproval
+    case newTransfer
     case cycleCountSignoff
     case stockReconciliation
     case refundApproval

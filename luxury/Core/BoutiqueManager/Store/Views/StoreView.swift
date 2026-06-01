@@ -226,6 +226,7 @@ struct StoreView: View {
         }
         .onAppear {
             viewModel.loadLocalEvents()
+            viewModel.fetchPendingTransfersCount()
         }
         .toolbar(.hidden, for: .navigationBar)
     }
