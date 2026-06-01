@@ -2,7 +2,7 @@
 //  QRScannerView.swift
 //  luxury
 //
-//  Created by Gemini CLI on 21/05/26.
+//  Created by Nalinish Ranjan on 21/05/26.
 //
 
 import SwiftUI

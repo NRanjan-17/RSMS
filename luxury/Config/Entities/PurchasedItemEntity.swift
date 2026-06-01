@@ -2,7 +2,7 @@
 //  PurchasedItemEntity.swift
 //  luxury
 //
-//  Created by Antigravity on 22/05/26.
+//  Created by Nalinish Ranjan on 22/05/26.
 //
 
 import Foundation
