@@ -245,7 +245,7 @@ struct CreateEventView: View {
                         formatter.dateFormat = "dd MMMM yyyy"
                         let dateString = formatter.string(from: eventDate)
                         
-                        var guestsList: [VIPGuest]? = nil
+                        let guestsList: [VIPGuest]? = nil
                         var featured: String? = nil
                         var vVenue: String? = nil
                         var assignedHost: String? = nil

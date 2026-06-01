@@ -150,15 +150,36 @@ struct DashboardView: View {
                         }
 
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("UPCOMING APPOINTMENTS")
-                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
-                                .foregroundStyle(AppColors.secondary)
-                                .kerning(1.5)
-                                .padding(.horizontal, 24)
+                            HStack {
+                                Text(viewModel.showAllAppointments ? "ALL APPOINTMENTS" : "UPCOMING APPOINTMENTS")
+                                    .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                    .foregroundStyle(AppColors.secondary)
+                                    .kerning(1.5)
+                                Spacer()
+                                
+                                Picker("", selection: Binding(
+                                    get: { viewModel.showAllAppointments },
+                                    set: { viewModel.showAllAppointments = $0 }
+                                )) {
+                                    Text("Upcoming").tag(false)
+                                    Text("All").tag(true)
+                                }
+                                .pickerStyle(.menu)
+                                .tint(AppColors.gold)
+                            }
+                            .padding(.horizontal, 24)
 
                             VStack(spacing: 12) {
-                                ForEach(viewModel.appointments) { appointment in
-                                    Button(action: {
+                                if viewModel.appointments.isEmpty {
+                                    Text("No appointments found")
+                                        .font(AppFonts.sansSerif(size: 13))
+                                        .foregroundStyle(AppColors.secondary)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(.horizontal, 24)
+                                        .padding(.vertical, 8)
+                                } else {
+                                    ForEach(viewModel.appointments) { appointment in
+                                        Button(action: {
                                         router.presentFullScreen(BMRoute.appointmentDetail(appointment))
                                     }) {
                                         HStack(spacing: 16) {
@@ -167,7 +188,6 @@ struct DashboardView: View {
                                                     .font(AppFonts.sansSerif(size: 14, weight: .bold))
                                                     .foregroundStyle(AppColors.gold)
                                                 Text(appointment.displayAppointmentType.uppercased())
-                                                Text(appointment.appointmentType.rawValue.uppercased())
                                                     .font(AppFonts.sansSerif(size: 8, weight: .bold))
                                                     .foregroundStyle(AppColors.tertiary)
                                             }
@@ -197,6 +217,7 @@ struct DashboardView: View {
                                         )
                                     }
                                     .buttonStyle(.plain)
+                                }
                                 }
                             }
                             .padding(.horizontal, 24)
@@ -248,6 +269,9 @@ struct DashboardView: View {
                         }
                     }
                     .padding(.top, 20)
+                }
+                .refreshable {
+                    await viewModel.refreshAll()
                 }
                 .task {
                     viewModel.startRealTimeUpdates()

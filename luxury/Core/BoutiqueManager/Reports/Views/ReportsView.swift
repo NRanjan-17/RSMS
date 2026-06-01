@@ -10,6 +10,7 @@ import SwiftUI
 struct ReportsView: View {
     @Environment(AppCoordinator.self) private var coordinator
     @Environment(Router.self) private var router
+    @Environment(\.dismiss) private var dismiss
     @State private var viewModel = ReportsViewModel()
     
     var body: some View {
@@ -17,7 +18,9 @@ struct ReportsView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                CustomHeader(title: "Analytical Reports")
+                CustomHeader(title: "Analytical Reports", showBackButton: true, backAction: {
+                    dismiss()
+                })
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 16) {

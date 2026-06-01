@@ -36,6 +36,12 @@ final class DashboardViewModel {
     private var monitorTask: Task<Void, Never>?
     private var sfsPollingTask: Task<Void, Never>?
     var sfsFulfillments: [PurchasedItemEntity] = []
+    
+    var showAllAppointments: Bool = false {
+        didSet {
+            fetchAppointments()
+        }
+    }
 
 
     var salesTargetRaw: Double {
@@ -260,11 +266,16 @@ final class DashboardViewModel {
                     let isoFormatter = ISO8601DateFormatter()
                     let todayISO = isoFormatter.string(from: Date())
                     
-                    let fetched: [AppointmentEntity] = try await SupabaseManager.shared.client
+                    var query = SupabaseManager.shared.client
                         .from("appointment")
                         .select("*, client(*)")
                         .eq("boutique_id", value: boutique.id)
-                        .gte("timestamp", value: todayISO)
+                    
+                    if !showAllAppointments {
+                        query = query.gte("timestamp", value: todayISO)
+                    }
+                        
+                    let fetched: [AppointmentEntity] = try await query
                         .order("timestamp", ascending: true)
                         .execute()
                         .value
@@ -277,6 +288,12 @@ final class DashboardViewModel {
                 print("Failed to fetch appointments: \(error)")
             }
         }
+    }
+    
+    func refreshAll() async {
+        fetchAppointments()
+        fetchAvailableStaff()
+        await fetchSFSFulfillments()
     }
     
     func fetchAvailableStaff() {
