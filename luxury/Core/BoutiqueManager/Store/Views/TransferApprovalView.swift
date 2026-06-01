@@ -28,8 +28,6 @@ struct TransferApprovalView: View {
                 // Header with Back Button & Plus Action
                 CustomHeader(
                     title: "Stock Transfers",
-                    showBackButton: true,
-                    backAction: { dismiss() },
                     trailingIcon: "plus",
                     trailingAction: { showingNewTransfer = true }
                 )
@@ -194,7 +192,11 @@ struct TransferApprovalView: View {
                 }
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle("Store")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .onAppear {
             reloadTransfers()
         }
@@ -327,13 +329,8 @@ struct BMTransferDetailView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Header with Back Button
+                // Header
                 HStack(spacing: 16) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "chevron.left")
-                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
-                            .foregroundStyle(AppColors.gold)
-                    }
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text("TRANSFER DETAIL")
@@ -500,6 +497,11 @@ struct BMTransferDetailView: View {
         } message: {
             Text("Are you sure you want to reject this stock transfer request?")
         }
-        .toolbar(.hidden, for: .navigationBar)
+        }
+        .navigationTitle("Transfers")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
     }
 }
