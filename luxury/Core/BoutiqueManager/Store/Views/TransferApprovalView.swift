@@ -25,13 +25,6 @@ struct TransferApprovalView: View {
                 AppColors.background.ignoresSafeArea()
                 
                 VStack(spacing: 0) {
-                // Header with Back Button & Plus Action
-                CustomHeader(
-                    title: "Stock Transfers",
-                    trailingIcon: "plus",
-                    trailingAction: { showingNewTransfer = true }
-                )
-                
                 // Search Bar
                 HStack(spacing: 12) {
                     Image(systemName: "magnifyingglass")
@@ -191,33 +184,54 @@ struct TransferApprovalView: View {
                     }
                 }
             }
-        }
-        .navigationTitle("Store")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(AppColors.background, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
-        .toolbarColorScheme(.dark, for: .navigationBar)
-        .onAppear {
-            reloadTransfers()
-        }
-        .navigationDestination(isPresented: Binding(
-            get: { selectedTransfer != nil },
-            set: { if !$0 { selectedTransfer = nil } }
-        )) {
-            if let transfer = selectedTransfer {
-                BMTransferDetailView(
-                    transfer: transfer,
-                    onApprove: {
-                        approveTransfer(transfer)
-                    },
-                    onReject: {
-                        rejectTransfer(transfer)
+            .navigationTitle("Stock Transfers")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(AppColors.background, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
+                            .foregroundStyle(AppColors.gold)
                     }
-                )
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        showingNewTransfer = true
+                    }) {
+                        Image(systemName: "plus")
+                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
+                            .foregroundStyle(AppColors.gold)
+                    }
+                }
+            }
+            .navigationDestination(isPresented: Binding(
+                get: { selectedTransfer != nil },
+                set: { if !$0 { selectedTransfer = nil } }
+            )) {
+                if let transfer = selectedTransfer {
+                    BMTransferDetailView(
+                        transfer: transfer,
+                        onApprove: {
+                            approveTransfer(transfer)
+                        },
+                        onReject: {
+                            rejectTransfer(transfer)
+                        }
+                    )
+                }
+            }
+            .navigationDestination(isPresented: $showingNewTransfer) {
+                NewTransferView()
             }
         }
-        .navigationDestination(isPresented: $showingNewTransfer) {
-            NewTransferView()
+        .onAppear {
+            reloadTransfers()
         }
     } // Closes NavigationStack
 } // Closes body

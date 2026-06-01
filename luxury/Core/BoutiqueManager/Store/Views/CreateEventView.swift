@@ -27,10 +27,9 @@ struct CreateEventView: View {
     let reminderOptions = [12, 24, 48, 72]
     
     var body: some View {
-        ZStack {
-            AppColors.background.ignoresSafeArea()
-            
-            VStack(spacing: 0) {
+        NavigationStack {
+            ZStack(alignment: .bottom) {
+                AppColors.background.ignoresSafeArea()
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 32) {
@@ -167,14 +166,21 @@ struct CreateEventView: View {
                                     .foregroundStyle(AppColors.gold)
                                     .kerning(2)
                                 
-                                DatePicker("Select Deadline", selection: $rsvpDeadline, in: Date()...)
-                                    .datePickerStyle(.compact)
-                                    .tint(AppColors.gold)
-                                    .padding(.horizontal, 16)
-                                    .frame(height: 50)
-                                    .background(AppColors.surface)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                HStack {
+                                    Text("Select Deadline")
+                                        .font(AppFonts.sansSerif(size: 14))
+                                        .foregroundStyle(AppColors.text)
+                                    Spacer()
+                                    DatePicker("", selection: $rsvpDeadline, in: Date()...)
+                                        .labelsHidden()
+                                        .datePickerStyle(.compact)
+                                        .tint(AppColors.gold)
+                                }
+                                .padding(.horizontal, 16)
+                                .frame(height: 50)
+                                .background(AppColors.surface)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
                             }
                             .padding(.horizontal, 24)
                             
@@ -235,60 +241,81 @@ struct CreateEventView: View {
                                 .scrollContentBackground(.hidden)
                         }
                         .padding(.horizontal, 24)
-                        .padding(.bottom, 60)
+                        .padding(.bottom, 140)
                     }
                 }
                 
+                // Pinned bottom button with gradient overlay
                 VStack(spacing: 0) {
-                    CustomButton(title: "Launch Event", action: {
-                        let formatter = DateFormatter()
-                        formatter.dateFormat = "dd MMMM yyyy"
-                        let dateString = formatter.string(from: eventDate)
-                        
-                        let guestsList: [VIPGuest]? = nil
-                        var featured: String? = nil
-                        var vVenue: String? = nil
-                        var assignedHost: String? = nil
-                        var deadlineVal: Date? = nil
-                        var windowHoursVal: Int? = nil
-                        
-                        if selectedType == "VIP Preview" || selectedType == "Trunk Show" || selectedType == "Product Launch" {
-                            featured = featuredCollection.isEmpty ? (selectedType == "Trunk Show" ? "Exclusive Seasonal Collection" : (selectedType == "Product Launch" ? "Exclusive Product Launch" : "Exclusive Winter Preview")) : featuredCollection
-                            vVenue = venue
-                            assignedHost = hostAssociate
-                            deadlineVal = rsvpDeadline
-                            windowHoursVal = reminderWindowHours
-                        }
-                        
-                        let newEvent = StoreEvent(
-                            title: eventTitle.isEmpty ? (selectedType == "Trunk Show" ? "New Trunk Show" : (selectedType == "Product Launch" ? "New Product Launch" : "New VIP Preview")) : eventTitle,
-                            date: dateString,
-                            rsvpCount: 0,
-                            type: selectedType == "VIP Preview" ? "VIP PREVIEW" : (selectedType == "Trunk Show" ? "TRUNK SHOW" : (selectedType == "Product Launch" ? "PRODUCT LAUNCH" : selectedType.uppercased())),
-                            featuredCollection: featured,
-                            venue: vVenue,
-                            hostAssociate: assignedHost,
-                            guests: guestsList,
-                            deadline: deadlineVal,
-                            reminderWindowHours: windowHoursVal,
-                            remindersSent: false
-                        )
-                        
-                        let viewModel = StoreViewModel()
-                        viewModel.addEvent(newEvent)
-                        
-                        dismiss()
-                    })
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 40)
+                    LinearGradient(
+                        colors: [AppColors.background.opacity(0), AppColors.background],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .frame(height: 24)
+                    
+                    VStack(spacing: 0) {
+                        CustomButton(title: "Launch Event", action: {
+                            let formatter = DateFormatter()
+                            formatter.dateFormat = "dd MMMM yyyy"
+                            let dateString = formatter.string(from: eventDate)
+                            
+                            let guestsList: [VIPGuest]? = nil
+                            var featured: String? = nil
+                            var vVenue: String? = nil
+                            var assignedHost: String? = nil
+                            var deadlineVal: Date? = nil
+                            var windowHoursVal: Int? = nil
+                            
+                            if selectedType == "VIP Preview" || selectedType == "Trunk Show" || selectedType == "Product Launch" {
+                                featured = featuredCollection.isEmpty ? (selectedType == "Trunk Show" ? "Exclusive Seasonal Collection" : (selectedType == "Product Launch" ? "Exclusive Product Launch" : "Exclusive Winter Preview")) : featuredCollection
+                                vVenue = venue
+                                assignedHost = hostAssociate
+                                deadlineVal = rsvpDeadline
+                                windowHoursVal = reminderWindowHours
+                            }
+                            
+                            let newEvent = StoreEvent(
+                                title: eventTitle.isEmpty ? (selectedType == "Trunk Show" ? "New Trunk Show" : (selectedType == "Product Launch" ? "New Product Launch" : "New VIP Preview")) : eventTitle,
+                                date: dateString,
+                                rsvpCount: 0,
+                                type: selectedType == "VIP Preview" ? "VIP PREVIEW" : (selectedType == "Trunk Show" ? "TRUNK SHOW" : (selectedType == "Product Launch" ? "PRODUCT LAUNCH" : selectedType.uppercased())),
+                                featuredCollection: featured,
+                                venue: vVenue,
+                                hostAssociate: assignedHost,
+                                guests: guestsList,
+                                deadline: deadlineVal,
+                                reminderWindowHours: windowHoursVal,
+                                remindersSent: false
+                            )
+                            
+                            let viewModel = StoreViewModel()
+                            viewModel.addEvent(newEvent)
+                            
+                            dismiss()
+                        })
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 24)
+                    }
+                    .background(AppColors.background)
                 }
-                .background(AppColors.background)
+            }
+            .navigationTitle("Store Operations")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(AppColors.background, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
+                            .foregroundStyle(AppColors.gold)
+                    }
+                }
             }
         }
-        .navigationTitle("Store Operations")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(AppColors.background, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
-        .toolbarColorScheme(.dark, for: .navigationBar)
     }
 }
