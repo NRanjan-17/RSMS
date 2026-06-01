@@ -190,5 +190,43 @@ final class AuditTests: XCTestCase {
             XCTFail("Failed to submit count: \(error.localizedDescription)")
         }
     }
+    
+    func testBarcodeLookupScanSession() async {
+        let viewModel = BarcodeLookupViewModel()
+        
+        // Mock expected catalogs
+        viewModel.expectedItems = mockCatalogs
+        viewModel.expectedBarcodes = mockCatalogs.map { $0.barCode.trimmingCharacters(in: .whitespacesAndNewlines) }
+        
+        // 1. Initial State
+        XCTAssertEqual(viewModel.scannedBarcodes.count, 0)
+        XCTAssertEqual(viewModel.missingItems.count, 3)
+        
+        // 2. Scan valid item
+        viewModel.addScannedBarcode("BAR-1")
+        XCTAssertEqual(viewModel.scannedBarcodes.count, 1)
+        XCTAssertEqual(viewModel.scannedBarcodes.first, "BAR-1")
+        XCTAssertEqual(viewModel.missingItems.count, 2)
+        XCTAssertFalse(viewModel.missingItems.contains(where: { $0.barCode == "BAR-1" }))
+        
+        // 3. Scan duplicate item (should not be added again)
+        viewModel.addScannedBarcode("BAR-1")
+        XCTAssertEqual(viewModel.scannedBarcodes.count, 1)
+        XCTAssertEqual(viewModel.missingItems.count, 2)
+        
+        // 4. Scan unexpected item
+        viewModel.addScannedBarcode("BAR-UNKNOWN")
+        XCTAssertEqual(viewModel.scannedBarcodes.count, 2)
+        XCTAssertEqual(viewModel.unexpectedBarcodes.count, 1)
+        XCTAssertEqual(viewModel.unexpectedBarcodes.first, "BAR-UNKNOWN")
+        
+        // 5. Reset session
+        viewModel.resetSession()
+        XCTAssertEqual(viewModel.scannedBarcodes.count, 0)
+        XCTAssertEqual(viewModel.scannedItems.count, 0)
+        XCTAssertEqual(viewModel.unexpectedBarcodes.count, 0)
+        XCTAssertEqual(viewModel.missingItems.count, 3)
+    }
 }
 #endif
+
