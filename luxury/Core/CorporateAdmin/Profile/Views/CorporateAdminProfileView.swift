@@ -40,7 +40,7 @@ struct CorporateAdminProfileView: View {
                             
                             Spacer()
                             
-                            if let avatar = viewModel.avatarUrl, let url = URL(string: avatar) {
+                            if let avatar = viewModel.avatarUrl, !avatar.isEmpty, let url = URL(string: avatar) {
                                 AsyncImage(url: url) { image in
                                     image.resizable()
                                         .scaledToFill()
