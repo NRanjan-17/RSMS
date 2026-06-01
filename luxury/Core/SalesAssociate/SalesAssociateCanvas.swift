@@ -128,6 +128,8 @@ struct SalesAssociateCanvas: View {
             SATransactionListView(transactions: txs)
         case .editProfile:
             EditProfileView()
+        case .planogramGallery(let boutiqueId):
+            PlanogramGalleryView(boutiqueId: boutiqueId)
         }
     }
 }

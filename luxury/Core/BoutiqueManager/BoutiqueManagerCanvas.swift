@@ -152,6 +152,8 @@ struct BoutiqueManagerCanvas: View {
             ProductLaunchDetailView(event: event)
         case .editProfile:
             EditProfileView()
+        case .planogramGallery(let boutiqueId):
+            PlanogramGalleryView(boutiqueId: boutiqueId)
         }
     }
 }

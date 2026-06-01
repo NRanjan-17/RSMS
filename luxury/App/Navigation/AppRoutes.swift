@@ -20,6 +20,7 @@ enum SARoute: Hashable {
     case exchangePolicy
     case transactionList([SATransactionEntity])
     case editProfile
+    case planogramGallery(boutiqueId: UUID)
 }
 
 
@@ -44,6 +45,7 @@ enum BMRoute: Hashable {
     case trunkShowDetail(StoreEvent)
     case productLaunchDetail(StoreEvent)
     case editProfile
+    case planogramGallery(boutiqueId: UUID)
 }
 
 enum ICRoute: Hashable {
@@ -85,6 +87,7 @@ enum CARoute: Hashable {
     case storePerformance
     case storePerformanceDetail(BoutiquePerformance)
     case editProfile
+    case planograms
 }
 
 enum AppRoutes: Hashable {

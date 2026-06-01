@@ -171,6 +171,30 @@ struct ProfileView: View {
                             .buttonStyle(.plain)
                             .padding(.horizontal, 24)
                             
+                            Button(action: {
+                                // Pass a dummy UUID until SAProfileViewModel includes the actual boutique ID.
+                                router.push(SARoute.planogramGallery(boutiqueId: UUID()))
+                            }) {
+                                HStack {
+                                    Image(systemName: "photo.artframe")
+                                        .font(.system(size: 18))
+                                        .foregroundStyle(AppColors.gold)
+                                    Text("Visual Merchandising")
+                                        .font(AppFonts.sansSerif(size: 15))
+                                        .foregroundStyle(.white)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(AppColors.tertiary)
+                                }
+                                .padding(16)
+                                .background(AppColors.surface)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.horizontal, 24)
+                            
                             NavigationLink(destination: SecuritySettingsView()) {
                                 HStack {
                                     Image(systemName: "lock.shield.fill")

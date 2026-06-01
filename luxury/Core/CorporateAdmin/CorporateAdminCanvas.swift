@@ -24,6 +24,7 @@ struct CorporateAdminCanvas: View {
     @State private var performanceViewModel = StorePerformanceViewModel()
     
     @State private var profileRouter = Router()
+    @State private var planogramsRouter = Router()
     
     var body: some View {
         TabView(selection: Binding(
@@ -88,6 +89,16 @@ struct CorporateAdminCanvas: View {
             .tabItem { Label("Profile", systemImage: "person.crop.circle") }
             .tag(CATab.profile)
             
+            NavigationStack(path: $planogramsRouter.path) {
+                PlanogramManagementView()
+                    .navigationDestination(for: CARoute.self) { route in
+                        destination(for: route, router: planogramsRouter)
+                    }
+            }
+            .environment(planogramsRouter)
+            .tabItem { Label("Planograms", systemImage: "photo.artframe") }
+            .tag(CATab.planograms)
+            
         }
         .tint(AppColors.gold)
     }
@@ -142,6 +153,8 @@ struct CorporateAdminCanvas: View {
             AssociateMetricsView(boutique: boutique)
         case .editProfile:
             EditProfileView()
+        case .planograms:
+            PlanogramManagementView()
         @unknown default:
             // Fallback to a neutral view to satisfy exhaustiveness and aid forward-compatibility
             EmptyView()

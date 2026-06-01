@@ -18,6 +18,7 @@ enum ICTab {
 }
 
 enum CATab {
-    case globalAnalytics, userManagement, catalogs, profile
+    case globalAnalytics, userManagement, catalogs, systemLogs, inventory
+    case storePerformance, planograms, profile
 }
 
