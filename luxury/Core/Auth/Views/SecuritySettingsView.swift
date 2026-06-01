@@ -212,6 +212,9 @@ struct SecuritySettingsView: View {
         }
         .navigationTitle("Security")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .onAppear {
             viewModel.checkMFAStatus()
         }

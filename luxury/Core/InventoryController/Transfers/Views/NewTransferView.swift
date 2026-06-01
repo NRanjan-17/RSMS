@@ -36,6 +36,7 @@ struct NewTransferView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
+                CustomHeader(title: "New Transfer", showBackButton: true, backAction: { dismiss() })
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 32) {
@@ -260,6 +261,7 @@ struct NewTransferView: View {
         .toolbarBackground(AppColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             viewModel.fetchBoutiques()
             viewModel.fetchAvailableProducts()
