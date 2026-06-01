@@ -441,7 +441,7 @@ final class FulfillmentViewModel {
                     .value
                 
                 if let firstItem = inventory.first {
-                    let newQty = max(0, firstItem.quantity - deliveredQty)
+                    let newQty = max(0, firstItem.quantity + toRelease)
                     try await client
                         .from("inventory")
                         .update(["quantity": newQty])
