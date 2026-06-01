@@ -200,19 +200,28 @@ struct AppointmentDetailSheet: View {
                             .font(AppFonts.sansSerif(size: 14))
                             .foregroundStyle(AppColors.secondary)
                         Spacer()
-                        Picker("Status", selection: $currentStatus) {
-                            ForEach(AppointmentStatus.allCases, id: \.self) { status in
-                                Text(status.rawValue.capitalized).tag(status)
-                            }
-                        }
-                        .tint(AppColors.gold)
-                        .onChange(of: currentStatus) { _, newValue in
-                            Task {
-                                await viewModel.updateAppointmentStatus(appointmentId: appointment.id, newStatus: newValue)
-                                await MainActor.run {
-                                    dismiss()
+                        
+                        let canEdit = (viewModel.currentStaffId != nil && appointment.assignedTo == viewModel.currentStaffId)
+                        
+                        if canEdit {
+                            Picker("Status", selection: $currentStatus) {
+                                ForEach(AppointmentStatus.allCases, id: \.self) { status in
+                                    Text(status.rawValue.capitalized).tag(status)
                                 }
                             }
+                            .tint(AppColors.gold)
+                            .onChange(of: currentStatus) { _, newValue in
+                                Task {
+                                    await viewModel.updateAppointmentStatus(appointmentId: appointment.id, newStatus: newValue)
+                                    await MainActor.run {
+                                        dismiss()
+                                    }
+                                }
+                            }
+                        } else {
+                            Text(currentStatus.rawValue.capitalized)
+                                .font(AppFonts.sansSerif(size: 14, weight: .medium))
+                                .foregroundStyle(AppColors.gold)
                         }
                     }
                     

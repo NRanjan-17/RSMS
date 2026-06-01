@@ -15,6 +15,7 @@ final class AppointmentsViewModel {
     var clientsMap: [UUID: ClientEntity] = [:]
     var isLoading = false
     var errorMessage: String?
+    var currentStaffId: UUID?
     
     private let client = SupabaseManager.shared.client
     private let profileService = ProfileService()
@@ -141,6 +142,8 @@ final class AppointmentsViewModel {
                 .single()
                 .execute()
                 .value
+            
+            self.currentStaffId = staff.id
             
             // Fetch appointments where the SA is the creator OR the assigned staff
             let fetched: [AppointmentEntity] = try await client.from("appointment")

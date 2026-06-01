@@ -182,7 +182,7 @@ struct BMAppointmentDetailView: View {
         do {
             try await SupabaseManager.shared.client
                 .from("appointment")
-                .update(UpdateStaffRequest(assigned_to: staffId, status: "assigned"))
+                .update(UpdateStaffRequest(assigned_to: staffId, status: AppointmentStatus.upcoming.rawValue))
                 .eq("id", value: appointmentId)
                 .execute()
         } catch {
