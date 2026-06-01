@@ -190,6 +190,21 @@ struct ActiveAuditView: View {
         .toolbarBackground(AppColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: {
+                    dismiss()
+                }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 16, weight: .semibold))
+                        Text("Back")
+                            .font(AppFonts.sansSerif(size: 16))
+                    }
+                    .foregroundStyle(AppColors.gold)
+                }
+            }
+        }
         .task {
             await viewModel.startSession()
         }

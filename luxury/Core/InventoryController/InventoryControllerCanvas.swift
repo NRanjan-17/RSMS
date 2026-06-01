@@ -28,10 +28,14 @@ struct InventoryControllerCanvas: View {
                         destination(for: route)
                     }
                     .fullScreenCover(item: $stockRouter.presentedFullScreen) { route in
-                        destination(for: route.value as! ICRoute)
+                        NavigationStack {
+                            destination(for: route.value as! ICRoute)
+                        }
                     }
                     .sheet(item: $stockRouter.presentedSheet) { route in
-                        destination(for: route.value as! ICRoute)
+                        NavigationStack {
+                            destination(for: route.value as! ICRoute)
+                        }
                     }
             }
             .environment(stockRouter)
@@ -45,10 +49,14 @@ struct InventoryControllerCanvas: View {
                         destination(for: route)
                     }
                     .fullScreenCover(item: $rfidRouter.presentedFullScreen) { route in
-                        destination(for: route.value as! ICRoute)
+                        NavigationStack {
+                            destination(for: route.value as! ICRoute)
+                        }
                     }
                     .sheet(item: $rfidRouter.presentedSheet) { route in
-                        destination(for: route.value as! ICRoute)
+                        NavigationStack {
+                            destination(for: route.value as! ICRoute)
+                        }
                     }
             }
             .environment(rfidRouter)
@@ -61,10 +69,14 @@ struct InventoryControllerCanvas: View {
                         destination(for: route)
                     }
                     .fullScreenCover(item: $transfersRouter.presentedFullScreen) { route in
-                        destination(for: route.value as! ICRoute)
+                        NavigationStack {
+                            destination(for: route.value as! ICRoute)
+                        }
                     }
                     .sheet(item: $transfersRouter.presentedSheet) { route in
-                        destination(for: route.value as! ICRoute)
+                        NavigationStack {
+                            destination(for: route.value as! ICRoute)
+                        }
                     }
             }
             .environment(transfersRouter)
@@ -77,10 +89,14 @@ struct InventoryControllerCanvas: View {
                         destination(for: route)
                     }
                     .fullScreenCover(item: $auditRouter.presentedFullScreen) { route in
-                        destination(for: route.value as! ICRoute)
+                        NavigationStack {
+                            destination(for: route.value as! ICRoute)
+                        }
                     }
                     .sheet(item: $auditRouter.presentedSheet) { route in
-                        destination(for: route.value as! ICRoute)
+                        NavigationStack {
+                            destination(for: route.value as! ICRoute)
+                        }
                     }
             }
             .environment(auditRouter)

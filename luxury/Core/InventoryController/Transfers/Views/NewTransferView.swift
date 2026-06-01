@@ -260,6 +260,15 @@ struct NewTransferView: View {
         .toolbarBackground(AppColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button("Cancel") {
+                    dismiss()
+                }
+                .foregroundStyle(AppColors.gold)
+                .font(AppFonts.sansSerif(size: 16, weight: .semibold))
+            }
+        }
         .onAppear {
             viewModel.fetchBoutiques()
             viewModel.fetchAvailableProducts()
