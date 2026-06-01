@@ -36,7 +36,8 @@ final class AuditTests: XCTestCase {
             createdAt: Date(),
             updatedAt: Date(),
             lastLoginAt: nil,
-            onBoardingCompleted: true
+            onBoardingCompleted: true,
+            dailySalesTarget: nil
         )
     }
     

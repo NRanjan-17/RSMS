@@ -34,6 +34,7 @@ struct StaffModel: Identifiable, Hashable, Codable, Equatable {
     let updatedAt: Date
     let lastLoginAt: Date?
     let onBoardingCompleted: Bool
+    let dailySalesTarget: Double?
     
     enum CodingKeys: String, CodingKey {
         case id, name, email, phone, address, location, city, status, provider, role
@@ -48,6 +49,7 @@ struct StaffModel: Identifiable, Hashable, Codable, Equatable {
         case updatedAt = "updated_at"
         case lastLoginAt = "last_login_at"
         case onBoardingCompleted = "on_boarding_completed"
+        case dailySalesTarget = "daily_sales_target"
     }
     
     var isRegistrationIncomplete: Bool {

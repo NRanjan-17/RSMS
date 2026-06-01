@@ -127,7 +127,8 @@ final class TeamViewModel {
             createdAt: Date(),
             updatedAt: Date(),
             lastLoginAt: nil,
-            onBoardingCompleted: false
+            onBoardingCompleted: false,
+            dailySalesTarget: nil
         )
         try await SupabaseManager.shared.client.from("staff").upsert(staff, onConflict: "email").execute()
     }

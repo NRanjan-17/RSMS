@@ -110,7 +110,8 @@ final class ProfileService {
                 createdAt: Date(),
                 updatedAt: Date(),
                 onBoardingCompleted: false,
-                avatarUrl: nil
+                avatarUrl: nil,
+                dailySalesTarget: nil
             )
             try await client.from("boutiques").upsert(boutique, onConflict: "manager_email").execute()
             
@@ -137,7 +138,8 @@ final class ProfileService {
                 createdAt: Date(),
                 updatedAt: Date(),
                 lastLoginAt: nil,
-                onBoardingCompleted: false
+                onBoardingCompleted: false,
+                dailySalesTarget: nil
             )
             try await client.from("staff").upsert(staff, onConflict: "email").execute()
         }

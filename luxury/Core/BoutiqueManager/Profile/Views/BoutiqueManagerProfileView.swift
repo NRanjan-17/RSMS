@@ -7,6 +7,9 @@ struct BoutiqueManagerProfileView: View {
     @State private var viewModel = SharedProfileViewModel()
     @State private var showLogoutAlert = false
     @State private var currencyManager = CurrencyManager.shared
+    @State private var isLoadingBoutique = false
+    @State private var showEditBoutique = false
+    @State private var boutiqueToEdit: CorporateBoutique?
     
     private var formattedDate: String {
         let formatter = DateFormatter()
@@ -110,13 +113,15 @@ struct BoutiqueManagerProfileView: View {
                                 }
                                 .buttonStyle(.plain)
                                 
-                                NavigationLink(destination: BoutiqueManagerSettingsView()) {
+                                Button(action: {
+                                    router.push(BMRoute.salesTargets)
+                                }) {
                                     HStack {
-                                        Image(systemName: "gearshape.fill")
+                                        Image(systemName: "target")
                                             .font(AppFonts.sansSerif(size: 18))
                                             .foregroundStyle(AppColors.gold)
                                             .frame(width: 24, alignment: .center)
-                                        Text("General Settings")
+                                        Text("Sales Targets")
                                             .font(AppFonts.sansSerif(size: 15))
                                             .foregroundStyle(.white)
                                         Spacer()
@@ -130,6 +135,54 @@ struct BoutiqueManagerProfileView: View {
                                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
                                 }
                                 .buttonStyle(.plain)
+
+                                Button(action: { fetchAndEditBoutique() }) {
+                                    HStack {
+                                        Image(systemName: "building.2.fill")
+                                            .font(AppFonts.sansSerif(size: 18))
+                                            .foregroundStyle(AppColors.gold)
+                                            .frame(width: 24, alignment: .center)
+                                        Text(isLoadingBoutique ? "Loading..." : "Edit Boutique")
+                                            .font(AppFonts.sansSerif(size: 15))
+                                            .foregroundStyle(.white)
+                                        Spacer()
+                                        if isLoadingBoutique {
+                                            ProgressView().tint(AppColors.gold)
+                                        } else {
+                                            Image(systemName: "chevron.right")
+                                                .font(AppFonts.sansSerif(size: 12))
+                                                .foregroundStyle(AppColors.tertiary)
+                                        }
+                                    }
+                                    .padding(16)
+                                    .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                }
+                                .buttonStyle(.plain)
+                                .disabled(isLoadingBoutique)
+
+                                HStack {
+                                    Image(systemName: "banknote.fill")
+                                        .font(AppFonts.sansSerif(size: 18))
+                                        .foregroundStyle(AppColors.gold)
+                                        .frame(width: 24, alignment: .center)
+                                    Text("Global Currency")
+                                        .font(AppFonts.sansSerif(size: 15))
+                                        .foregroundStyle(.white)
+                                    Spacer()
+                                    Picker("Currency", selection: $currencyManager.currentCurrency) {
+                                        ForEach(currencyManager.availableCurrencies, id: \.self) { code in
+                                            Text("\(code) (\(currencyManager.symbol(for: code)))").tag(code)
+                                        }
+                                    }
+                                    .tint(AppColors.gold)
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 12)
+                                .background(AppColors.surface)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
                                 NavigationLink(destination: SecuritySettingsView()) {
                                     HStack {
                                         Image(systemName: "lock.shield.fill")
@@ -226,8 +279,34 @@ struct BoutiqueManagerProfileView: View {
         } message: {
             Text("Are you sure you want to logout?")
         }
+        .sheet(isPresented: $showEditBoutique) {
+            if let boutique = boutiqueToEdit {
+                EditBoutiqueView(viewModel: EditBoutiqueViewModel(boutique: boutique))
+                    .presentationDragIndicator(.visible)
+            }
+        }
         .task {
             await viewModel.fetchProfile()
+        }
+    }
+    
+    private func fetchAndEditBoutique() {
+        isLoadingBoutique = true
+        Task {
+            do {
+                if let (_, profileData) = try await ProfileService().fetchCurrentProfile(),
+                   let boutique = profileData as? CorporateBoutique {
+                    await MainActor.run {
+                        self.boutiqueToEdit = boutique
+                        self.isLoadingBoutique = false
+                        self.showEditBoutique = true
+                    }
+                } else {
+                    await MainActor.run { isLoadingBoutique = false }
+                }
+            } catch {
+                await MainActor.run { isLoadingBoutique = false }
+            }
         }
     }
 }

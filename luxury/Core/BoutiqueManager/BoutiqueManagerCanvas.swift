@@ -139,6 +139,8 @@ struct BoutiqueManagerCanvas: View {
             ProductLaunchDetailView(event: event)
         case .editProfile:
             EditProfileView()
+        case .salesTargets:
+            SalesTargetsView()
         case .planogramGallery(let boutiqueId):
             PlanogramGalleryView(boutiqueId: boutiqueId)
         }

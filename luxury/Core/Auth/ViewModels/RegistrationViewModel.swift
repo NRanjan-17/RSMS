@@ -320,7 +320,8 @@ final class RegistrationViewModel {
             createdAt: Date(),
             updatedAt: Date(),
             onBoardingCompleted: true,
-            avatarUrl: nil
+            avatarUrl: nil,
+            dailySalesTarget: nil
         )
         
         let created: CorporateBoutique = try await client.from("boutiques")

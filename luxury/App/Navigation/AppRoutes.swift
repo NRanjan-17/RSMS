@@ -46,6 +46,7 @@ enum BMRoute: Hashable {
     case trunkShowDetail(StoreEvent)
     case productLaunchDetail(StoreEvent)
     case editProfile
+    case salesTargets
     case planogramGallery(boutiqueId: UUID)
 }
 

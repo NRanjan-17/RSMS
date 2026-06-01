@@ -44,10 +44,7 @@ final class DashboardViewModel {
     }
 
 
-    var salesTargetRaw: Double {
-        get { UserDefaults.standard.double(forKey: "bm_daily_sales_target") }
-        set { UserDefaults.standard.set(newValue, forKey: "bm_daily_sales_target") }
-    }
+    var salesTargetRaw: Double = 0
 
     var isTargetConfigured: Bool { salesTargetRaw > 0 }
     var isOffline:          Bool = false
@@ -194,6 +191,7 @@ final class DashboardViewModel {
                     if let boutique = profile as? CorporateBoutique {
                         await MainActor.run {
                             self.boutiqueName = boutique.name.isEmpty ? "Dashboard" : boutique.name
+                            self.salesTargetRaw = boutique.dailySalesTarget ?? 0
                         }
                     }
                 }
