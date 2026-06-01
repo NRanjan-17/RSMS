@@ -26,6 +26,13 @@ final class EditProfileViewModel {
     var errorMessage: String? = nil
     var successMessage: String? = nil
     
+    var boutiqueName: String = ""
+    var boutiqueAddress: String = ""
+    var boutiqueCity: String = ""
+    var boutiquePinCode: String = ""
+    
+    var isBoutiqueManager: Bool { currentUserRole == .boutiqueManager }
+    
     private let profileService = ProfileService()
     private let storageService = StorageService()
     private let imagePickerService = ImagePickerService()
@@ -51,6 +58,10 @@ final class EditProfileViewModel {
                         self.phone = bm.managerPhone
                         self.currentUserId = bm.id
                         self.avatarUrl = bm.avatarUrl
+                        self.boutiqueName = bm.name
+                        self.boutiqueAddress = bm.address
+                        self.boutiqueCity = bm.city
+                        self.boutiquePinCode = bm.pinCode
                     } else if let staff = profile as? StaffModel {
                         self.name = staff.name
                         self.email = staff.email
@@ -115,7 +126,11 @@ final class EditProfileViewModel {
                 let updates: [String: AnyJSON] = [
                     "manager_name": .string(name),
                     "manager_phone": .string(phone),
-                    "avatar_url": .string(newAvatarUrl ?? "")
+                    "avatar_url": .string(newAvatarUrl ?? ""),
+                    "name": .string(boutiqueName),
+                    "address": .string(boutiqueAddress),
+                    "city": .string(boutiqueCity),
+                    "pin_code": .string(boutiquePinCode)
                 ]
                 try await client.from("boutiques")
                     .update(updates)

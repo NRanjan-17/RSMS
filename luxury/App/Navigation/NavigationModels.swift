@@ -14,7 +14,7 @@ enum BMTab {
 }
 
 enum ICTab {
-    case stock, rfid, transfers, audit
+    case stock, rfid, transfers, audit, profile
 }
 
 enum CATab {

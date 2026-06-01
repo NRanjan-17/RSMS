@@ -60,6 +60,29 @@ struct EditProfileView: View {
                     }
                     .padding(.horizontal, 24)
                     
+                    if viewModel.isBoutiqueManager {
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("BOUTIQUE DETAILS")
+                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                .foregroundStyle(AppColors.secondary)
+                                .kerning(1.5)
+                            
+                            VStack(spacing: 16) {
+                                LabeledTextField(label: "Boutique Name", text: $viewModel.boutiqueName)
+                                LabeledTextField(label: "Address", text: $viewModel.boutiqueAddress)
+                                LabeledTextField(label: "City", text: $viewModel.boutiqueCity)
+                                LabeledTextField(label: "Pin Code", text: $viewModel.boutiquePinCode)
+                                    .keyboardType(.numberPad)
+                            }
+                            .padding(16)
+                            .background(AppColors.surface)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.top, 16)
+                    }
+                    
                     if let error = viewModel.errorMessage {
                         Text(error)
                             .font(AppFonts.sansSerif(size: 14))
