@@ -37,7 +37,7 @@ struct SalesAnalyticsView: View {
                                 .kerning(1.5)
                                 .padding(.horizontal, 24)
                             
-                            VStack(spacing: 1) {
+                            VStack(spacing: 12) {
                                 ForEach(viewModel.categories, id: \.id) { category in
                                     HStack {
                                         VStack(alignment: .leading, spacing: 4) {
@@ -53,11 +53,16 @@ struct SalesAnalyticsView: View {
                                             .font(AppFonts.sansSerif(size: 15, weight: .bold))
                                             .foregroundStyle(AppColors.gold)
                                     }
-                                    .padding(.horizontal, 24)
-                                    .padding(.vertical, 18)
+                                    .padding(20)
                                     .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .stroke(AppColors.gold15, lineWidth: 0.5)
+                                    )
                                 }
                             }
+                            .padding(.horizontal, 24)
                         }
                     }
                     .padding(.top, 12)

@@ -144,6 +144,8 @@ struct CorporateAdminCanvas: View {
             EditProfileView()
         case .planograms:
             PlanogramManagementView()
+        case .clientInsights:
+            ClientInsightsView()
         @unknown default:
             // Fallback to a neutral view to satisfy exhaustiveness and aid forward-compatibility
             EmptyView()

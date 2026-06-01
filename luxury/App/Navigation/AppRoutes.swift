@@ -91,6 +91,7 @@ enum CARoute: Hashable {
     case storePerformanceDetail(BoutiquePerformance)
     case editProfile
     case planograms
+    case clientInsights
 }
 
 enum AppRoutes: Hashable {
