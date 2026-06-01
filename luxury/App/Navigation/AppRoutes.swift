@@ -21,6 +21,7 @@ enum SARoute: Hashable {
     case transactionList([SATransactionEntity])
     case editProfile
     case planogramGallery(boutiqueId: UUID)
+    case sfsHandover
 }
 
 
@@ -63,6 +64,7 @@ enum ICRoute: Hashable {
     case varianceReport(RSMSCycleCount)
     case serialCertificate
     case sfsOrders
+    case editProfile
     case sfsVerification(PurchasedItemEntity)
     case endlessAisleSelection
     case alerts

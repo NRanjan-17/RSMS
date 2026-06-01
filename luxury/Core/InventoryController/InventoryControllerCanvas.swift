@@ -14,6 +14,7 @@ struct InventoryControllerCanvas: View {
     @State private var rfidRouter = Router()
     @State private var transfersRouter = Router()
     @State private var auditRouter = Router()
+    @State private var profileRouter = Router()
     @State private var sfsViewModel = FulfillmentViewModel()
     @State private var notificationService = SFSNotificationService()
     
@@ -86,6 +87,22 @@ struct InventoryControllerCanvas: View {
             .environment(auditRouter)
             .tabItem { Label("Audit", systemImage: "checkmark.shield") }
             .tag(ICTab.audit)
+            
+            NavigationStack(path: $profileRouter.path) {
+                ICProfileView()
+                    .navigationDestination(for: ICRoute.self) { route in
+                        destination(for: route)
+                    }
+                    .fullScreenCover(item: $profileRouter.presentedFullScreen) { route in
+                        destination(for: route.value as! ICRoute)
+                    }
+                    .sheet(item: $profileRouter.presentedSheet) { route in
+                        destination(for: route.value as! ICRoute)
+                    }
+            }
+            .environment(profileRouter)
+            .tabItem { Label("Profile", systemImage: "person.crop.circle") }
+            .tag(ICTab.profile)
         }
         .tint(AppColors.gold)
         .overlay(

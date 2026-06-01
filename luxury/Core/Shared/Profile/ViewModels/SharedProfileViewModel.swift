@@ -23,12 +23,12 @@ final class SharedProfileViewModel {
                         self.name = admin.name
                         self.email = admin.email
                         self.phone = admin.phone
-                        self.avatarUrl = nil // No avatarUrl on admin for now
+                        self.avatarUrl = admin.avatarUrl
                     } else if let bm = profile as? CorporateBoutique {
                         self.name = bm.managerName
                         self.email = bm.managerEmail
                         self.phone = bm.managerPhone
-                        self.avatarUrl = nil
+                        self.avatarUrl = bm.avatarUrl
                     } else if let staff = profile as? StaffModel {
                         self.name = staff.name
                         self.email = staff.email

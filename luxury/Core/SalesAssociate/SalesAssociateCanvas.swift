@@ -130,6 +130,8 @@ struct SalesAssociateCanvas: View {
             EditProfileView()
         case .planogramGallery(let boutiqueId):
             PlanogramGalleryView(boutiqueId: boutiqueId)
+        case .sfsHandover:
+            SAHandoverView()
         }
     }
 }
