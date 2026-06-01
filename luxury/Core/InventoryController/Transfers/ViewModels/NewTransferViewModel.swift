@@ -26,11 +26,11 @@ final class NewTransferViewModel {
     
     var availableProducts: [CatalogEntity] = []
     
-    var fetchBoutiquesHandler: () async throws -> [CorporateBoutique]
-    var fetchProfileHandler: () async throws -> (UserRole, Any)?
-    var fetchCatalogsHandler: () async throws -> [CatalogEntity]
-    var fetchInventoryHandler: (UUID, UUID) async throws -> [InventoryItem]
-    var updateInventoryHandler: (UUID, Int, Int) async throws -> Void
+    @ObservationIgnored var fetchBoutiquesHandler: () async throws -> [CorporateBoutique]
+    @ObservationIgnored var fetchProfileHandler: () async throws -> (UserRole, Any)?
+    @ObservationIgnored var fetchCatalogsHandler: () async throws -> [CatalogEntity]
+    @ObservationIgnored var fetchInventoryHandler: (UUID, UUID) async throws -> [InventoryItem]
+    @ObservationIgnored var updateInventoryHandler: (UUID, Int, Int) async throws -> Void
     
     init() {
         self.fetchBoutiquesHandler = {
