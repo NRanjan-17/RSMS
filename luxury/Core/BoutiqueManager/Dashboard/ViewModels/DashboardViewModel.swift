@@ -89,7 +89,7 @@ final class DashboardViewModel {
         return f.localizedString(for: lastSyncedAt, relativeTo: Date())
     }
 
-    var pendingApprovals: [ApprovalRequest] = []
+    var pendingAppointments: [AppointmentEntity] = []
 
     var appointments: [AppointmentEntity] = []
     var availableStaff: [StaffModel] = []
@@ -111,14 +111,6 @@ final class DashboardViewModel {
         monitorTask = nil
         sfsPollingTask?.cancel()
         sfsPollingTask = nil
-    }
-
-    func approve(_ request: ApprovalRequest) {
-        pendingApprovals.removeAll { $0.id == request.id }
-    }
-
-    func reject(_ request: ApprovalRequest) {
-        pendingApprovals.removeAll { $0.id == request.id }
     }
 
     // MARK: – Live Sales Fetch
@@ -266,23 +258,34 @@ final class DashboardViewModel {
                     let isoFormatter = ISO8601DateFormatter()
                     let todayISO = isoFormatter.string(from: Date())
                     
+                    let pending: [AppointmentEntity] = try await SupabaseManager.shared.client
+                        .from("appointment")
+                        .select("*, client(*)")
+                        .eq("boutique_id", value: boutique.id)
+                        .eq("status", value: "pending")
+                        .order("timestamp", ascending: true)
+                        .execute()
+                        .value
+                    
                     var query = SupabaseManager.shared.client
                         .from("appointment")
                         .select("*, client(*)")
                         .eq("boutique_id", value: boutique.id)
+                        .neq("status", value: "pending")
                     
                     if !showAllAppointments {
                         query = query.gte("timestamp", value: todayISO)
                     }
                         
-                    let fetched: [AppointmentEntity] = try await query
+                    let upcoming: [AppointmentEntity] = try await query
                         .order("timestamp", ascending: true)
                         .limit(5)
                         .execute()
                         .value
                     
                     await MainActor.run {
-                        self.appointments = fetched
+                        self.pendingAppointments = pending
+                        self.appointments = upcoming
                     }
                 }
             } catch {

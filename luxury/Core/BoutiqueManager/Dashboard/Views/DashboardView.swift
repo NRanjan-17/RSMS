@@ -68,66 +68,73 @@ struct DashboardView: View {
 
                         VStack(alignment: .leading, spacing: 16) {
                             HStack {
-                                Text("PENDING APPROVALS")
+                                Text("PENDING APPOINTMENTS")
                                     .font(AppFonts.sansSerif(size: 11, weight: .bold))
                                     .foregroundStyle(AppColors.secondary)
                                     .kerning(1.5)
                                 Spacer()
-                                StatusBadge(text: "\(viewModel.pendingApprovals.count) Pending", status: .warning)
-                            }
-                            .padding(.horizontal, 24)
-
-                            VStack(spacing: 12) {
-                                ForEach(viewModel.pendingApprovals) { request in
-                                    VStack(alignment: .leading, spacing: 14) {
-                                        HStack {
-                                            VStack(alignment: .leading, spacing: 2) {
-                                                Text(request.clientName)
-                                                    .font(AppFonts.serif(size: 18, weight: .medium))
-                                                    .foregroundStyle(AppColors.text)
-                                                Text("Requested by \(request.associateName)")
-                                                    .font(AppFonts.sansSerif(size: 12))
-                                                    .foregroundStyle(AppColors.secondary)
-                                            }
-                                            Spacer()
-                                            VStack(alignment: .trailing, spacing: 2) {
-                                                Text(request.amount)
-                                                    .font(AppFonts.sansSerif(size: 15, weight: .bold))
-                                                    .foregroundStyle(AppColors.gold)
-                                                Text("\(request.discount) OFF")
-                                                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                                                    .foregroundStyle(AppColors.error)
-                                            }
-                                        }
-
-                                        HStack(spacing: 12) {
-                                            Button("Reject") { viewModel.reject(request) }
-                                                .font(AppFonts.sansSerif(size: 13, weight: .bold))
-                                                .foregroundStyle(AppColors.error)
-                                                .frame(maxWidth: .infinity)
-                                                .padding(.vertical, 10)
-                                                .background(AppColors.error.opacity(0.1))
-                                                .clipShape(RoundedRectangle(cornerRadius: 8))
-
-                                            Button("Approve") { viewModel.approve(request) }
-                                                .font(AppFonts.sansSerif(size: 13, weight: .bold))
-                                                .foregroundStyle(AppColors.background)
-                                                .frame(maxWidth: .infinity)
-                                                .padding(.vertical, 10)
-                                                .background(AppColors.gold)
-                                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                                        }
-                                    }
-                                    .padding(20)
-                                    .background(AppColors.surface)
-                                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 16)
-                                            .stroke(AppColors.gold15, lineWidth: 0.5)
-                                    )
+                                if !viewModel.pendingAppointments.isEmpty {
+                                    StatusBadge(text: "\(viewModel.pendingAppointments.count) Pending", status: .warning)
                                 }
                             }
                             .padding(.horizontal, 24)
+
+                            if viewModel.pendingAppointments.isEmpty {
+                                Text("No pending appointments")
+                                    .font(AppFonts.sansSerif(size: 13))
+                                    .foregroundStyle(AppColors.secondary)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.horizontal, 24)
+                                    .padding(.vertical, 8)
+                            } else {
+                                VStack(spacing: 12) {
+                                    ForEach(viewModel.pendingAppointments) { appointment in
+                                        Button(action: {
+                                            router.push(BMRoute.appointmentDetail(appointment))
+                                        }) {
+                                            HStack(spacing: 16) {
+                                                VStack(alignment: .leading, spacing: 4) {
+                                                    Text(appointment.formattedTime)
+                                                        .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                                        .foregroundStyle(AppColors.gold)
+                                                    Text(appointment.displayAppointmentType.uppercased())
+                                                        .font(AppFonts.sansSerif(size: 8, weight: .bold))
+                                                        .foregroundStyle(AppColors.tertiary)
+                                                }
+                                                .frame(width: 70, alignment: .leading)
+                                                
+                                                VStack(alignment: .leading, spacing: 2) {
+                                                    Text(appointment.client?.name ?? "Unknown Client")
+                                                        .font(AppFonts.serif(size: 17, weight: .medium))
+                                                        .foregroundStyle(AppColors.text)
+                                                    Text("Unassigned - Needs Approval")
+                                                        .font(AppFonts.sansSerif(size: 12))
+                                                        .foregroundStyle(AppColors.warning)
+                                                }
+                                                
+                                                Spacer()
+                                                
+                                                Text("Review")
+                                                    .font(AppFonts.sansSerif(size: 12, weight: .bold))
+                                                    .foregroundStyle(AppColors.background)
+                                                    .padding(.horizontal, 12)
+                                                    .padding(.vertical, 6)
+                                                    .background(AppColors.gold)
+                                                    .clipShape(Capsule())
+                                            }
+                                            .padding(20)
+                                            .background(AppColors.surface)
+                                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 16)
+                                                    .stroke(AppColors.gold15, lineWidth: 0.5)
+                                            )
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                                .padding(.horizontal, 24)
+                            }
 
                             HStack(spacing: 10) {
                                 CustomOutlineButton(
@@ -151,16 +158,13 @@ struct DashboardView: View {
                                     .foregroundStyle(AppColors.secondary)
                                     .kerning(1.5)
                                 Spacer()
-                                
-                                Picker("", selection: Binding(
-                                    get: { viewModel.showAllAppointments },
-                                    set: { viewModel.showAllAppointments = $0 }
-                                )) {
-                                    Text("Upcoming").tag(false)
-                                    Text("All").tag(true)
+                                Button(action: {
+                                    router.push(BMRoute.allAppointments)
+                                }) {
+                                    Text("View All")
+                                        .font(AppFonts.sansSerif(size: 12, weight: .medium))
+                                        .foregroundStyle(AppColors.gold)
                                 }
-                                .pickerStyle(.menu)
-                                .tint(AppColors.gold)
                             }
                             .padding(.horizontal, 24)
 

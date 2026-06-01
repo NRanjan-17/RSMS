@@ -85,6 +85,8 @@ struct BoutiqueManagerCanvas: View {
     @ViewBuilder
     private func destination(for route: BMRoute, router: Router) -> some View {
         switch route {
+        case .allAppointments:
+            BMAllAppointmentsView()
         case .appointmentDetail(let appt):
             BMAppointmentDetailView(appointment: appt)
         case .staffPerformanceDetail(let member):

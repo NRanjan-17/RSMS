@@ -110,6 +110,26 @@ struct BoutiqueManagerProfileView: View {
                                 }
                                 .buttonStyle(.plain)
                                 
+                                NavigationLink(destination: BoutiqueManagerSettingsView()) {
+                                    HStack {
+                                        Image(systemName: "gearshape.fill")
+                                            .font(AppFonts.sansSerif(size: 18))
+                                            .foregroundStyle(AppColors.gold)
+                                            .frame(width: 24, alignment: .center)
+                                        Text("General Settings")
+                                            .font(AppFonts.sansSerif(size: 15))
+                                            .foregroundStyle(.white)
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .font(AppFonts.sansSerif(size: 12))
+                                            .foregroundStyle(AppColors.tertiary)
+                                    }
+                                    .padding(16)
+                                    .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                }
+                                .buttonStyle(.plain)
                                 NavigationLink(destination: SecuritySettingsView()) {
                                     HStack {
                                         Image(systemName: "lock.shield.fill")
