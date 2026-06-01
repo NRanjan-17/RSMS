@@ -44,7 +44,7 @@ struct CreateAppointmentView: View {
     }
     
     var body: some View {
-        Group {
+        NavigationStack {
             ZStack {
                 AppColors.background.ignoresSafeArea()
                 
@@ -241,10 +241,13 @@ struct CreateAppointmentView: View {
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancel") {
+                    Button(action: {
                         dismiss()
+                    }) {
+                        Image(systemName: "xmark")
+                            .font(AppFonts.sansSerif(size: 16, weight: .medium))
+                            .foregroundStyle(AppColors.gold)
                     }
-                    .foregroundStyle(AppColors.gold)
                 }
             }
             }

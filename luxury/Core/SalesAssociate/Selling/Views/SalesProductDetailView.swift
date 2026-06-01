@@ -129,6 +129,17 @@ struct SalesProductDetailView: View {
         .toolbarColorScheme(.dark, for: .navigationBar)
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .tabBar)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button(action: {
+                    dismiss()
+                }) {
+                    Image(systemName: "chevron.backward")
+                        .font(AppFonts.sansSerif(size: 16, weight: .medium))
+                        .foregroundStyle(AppColors.gold)
+                }
+            }
+        }
         .onAppear {
             viewModel.fetchRecommendations(for: catalog)
         }
