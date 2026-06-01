@@ -164,6 +164,12 @@ struct ClientelingView: View {
                         }) {
                             Label("New Appointment", systemImage: "calendar.badge.plus")
                         }
+                        
+                        Button(action: {
+                            router.push(SARoute.sfsHandover)
+                        }) {
+                            Label("SFS Handover", systemImage: "shippingbox.fill")
+                        }
                     } label: {
                         ZStack {
                             RoundedRectangle(cornerRadius: 14)
