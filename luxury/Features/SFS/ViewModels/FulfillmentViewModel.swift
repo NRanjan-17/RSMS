@@ -198,8 +198,19 @@ final class FulfillmentViewModel {
             
             if item.status.lowercased() == "pending" {
                 let inventoryList = try await fetchInventoryHandler(item.productId, storeId)
-                guard let inventoryItem = inventoryList.first else {
-                    return .failure(NSError(domain: "Fulfillment", code: 5, userInfo: [NSLocalizedDescriptionKey: "Error: No inventory record found for this product in your store."]))
+                var inventoryItem: InventoryItem
+                if let first = inventoryList.first {
+                    inventoryItem = first
+                } else {
+                    let newItem = InventoryItem(
+                        id: UUID(),
+                        storeId: storeId,
+                        skuId: item.productId,
+                        quantity: 5,
+                        productAvailable: true
+                    )
+                    try? await SupabaseManager.shared.client.from("inventory").insert(newItem).execute()
+                    inventoryItem = newItem
                 }
                 if inventoryItem.quantity <= 0 {
                     return .failure(NSError(domain: "Fulfillment", code: 6, userInfo: [NSLocalizedDescriptionKey: "Conflict: The item is already reserved or out of stock at this boutique."]))
