@@ -203,9 +203,18 @@ final class DashboardViewModel {
 
     func fetchSFSFulfillments() async {
         do {
+            var boutiqueId: UUID? = nil
+            if let (_, profile) = try await ProfileService().fetchCurrentProfile(),
+               let boutique = profile as? CorporateBoutique {
+                boutiqueId = boutique.id
+            }
+            
+            guard let bId = boutiqueId else { return }
+            
             let items: [PurchasedItemEntity] = try await SupabaseManager.shared.client
                 .from("purchased_items")
                 .select()
+                .eq("boutique_id", value: bId.uuidString)
                 .execute()
                 .value
             
