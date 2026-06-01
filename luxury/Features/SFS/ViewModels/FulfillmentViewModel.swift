@@ -29,7 +29,11 @@ final class FulfillmentViewModel {
     
     init() {
         self.fetchPurchasedItemsHandler = {
-            try await SupabaseManager.shared.client.from("purchased_items").select().execute().value
+            if let (_, profile) = try? await ProfileService().fetchCurrentProfile(),
+               let staff = profile as? StaffModel, let bId = staff.boutiqueId {
+                return try await SupabaseManager.shared.client.from("purchased_items").select().eq("boutique_id", value: bId.uuidString).execute().value
+            }
+            return try await SupabaseManager.shared.client.from("purchased_items").select().execute().value
         }
         self.fetchCatalogsHandler = {
             try await SupabaseManager.shared.client.from("catalogs").select().execute().value
@@ -157,7 +161,8 @@ final class FulfillmentViewModel {
             guard let staff = profile.1 as? StaffModel, let storeId = staff.boutiqueId else {
                 return .failure(NSError(domain: "Fulfillment", code: 3, userInfo: [NSLocalizedDescriptionKey: "Boutique association not found for user profile."]))
             }
-            
+            let icId = staff.id.uuidString
+
             let item: PurchasedItemEntity
             if let existing = orders.first(where: { $0.id == orderId }) {
                 item = existing
@@ -217,20 +222,26 @@ final class FulfillmentViewModel {
                 }
                 try await updateInventoryHandler(inventoryItem.id, inventoryItem.quantity - 1, inventoryItem.quantity)
             }
+
+            var payload: [String: String] = [
+                "status": "Ready to Pick",
+                "delivery_date": ISO8601DateFormatter().string(from: Date()),
+                "inventory_manager_id": icId
+            ]
             
             let updatedItems: [PurchasedItemEntity] = try await SupabaseManager.shared.client
                 .from("purchased_items")
-                .update(["status": "Ready to Pick", "delivery_date": ISO8601DateFormatter().string(from: Date())])
+                .update(payload)
                 .eq("id", value: orderId.uuidString)
                 .eq("status", value: item.status)
                 .select()
                 .execute()
                 .value
-            
+
             guard !updatedItems.isEmpty else {
                 return .failure(NSError(domain: "Fulfillment", code: 9, userInfo: [NSLocalizedDescriptionKey: "Conflict: The item status has been modified by another process. Please retry."]))
             }
-            
+
             Task {
                 do {
                     let ordersRes: [OrderEntity] = try await SupabaseManager.shared.client
@@ -239,7 +250,7 @@ final class FulfillmentViewModel {
                         .eq("transaction_id", value: item.transactionId)
                         .execute()
                         .value
-                    
+
                     if let firstOrder = ordersRes.first {
                         NotificationCenter.default.post(
                             name: NSNotification.Name("SalesAssociateNotification"),
@@ -260,6 +271,7 @@ final class FulfillmentViewModel {
                 if let index = self.orders.firstIndex(where: { $0.id == orderId }) {
                     self.orders[index].status = "Ready to Pick"
                     self.orders[index].deliveryDate = Date()
+                    self.orders[index].inventoryManagerId = UUID(uuidString: icId)
                 }
             }
             return .success(())
@@ -343,47 +355,28 @@ final class FulfillmentViewModel {
     
     func updateStatusToReadyToPick(orderId: UUID) async -> Bool {
         do {
-            let item: PurchasedItemEntity
-            if let existing = orders.first(where: { $0.id == orderId }) {
-                item = existing
-            } else {
-                let items = try await fetchPurchasedItemsHandler()
-                guard let found = items.first(where: { $0.id == orderId }) else {
-                    return false
-                }
-                item = found
+            let profileTuple = try? await fetchProfileHandler()
+            var icId: String? = nil
+            if let staff = profileTuple?.1 as? StaffModel {
+                icId = staff.id.uuidString
             }
             
-            try await updatePurchasedItemHandler(orderId, "Ready to Pick", nil)
-            
-            Task {
-                do {
-                    let ordersRes: [OrderEntity] = try await SupabaseManager.shared.client
-                        .from("order")
-                        .select()
-                        .eq("transaction_id", value: item.transactionId)
-                        .execute()
-                        .value
-                    
-                    if let firstOrder = ordersRes.first {
-                        NotificationCenter.default.post(
-                            name: NSNotification.Name("SalesAssociateNotification"),
-                            object: nil,
-                            userInfo: [
-                                "salesAssociateId": firstOrder.rsmsUserId.uuidString,
-                                "orderId": orderId.uuidString,
-                                "status": "Ready to Pick"
-                            ]
-                        )
-                    }
-                } catch {
-                    print("Sales Associate notification failed: \(error.localizedDescription)")
-                }
+            var payload: [String: String] = ["status": "Ready to Pick"]
+            if let id = icId {
+                payload["inventory_manager_id"] = id
             }
+            
+            try await SupabaseManager.shared.client.from("purchased_items")
+                .update(payload)
+                .eq("id", value: orderId.uuidString)
+                .execute()
             
             await MainActor.run {
                 if let index = self.orders.firstIndex(where: { $0.id == orderId }) {
                     self.orders[index].status = "Ready to Pick"
+                    if let newId = icId {
+                        self.orders[index].inventoryManagerId = UUID(uuidString: newId)
+                    }
                 }
             }
             return true

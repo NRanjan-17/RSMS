@@ -11,6 +11,9 @@ struct PurchasedItemEntity: Identifiable, Codable, Hashable, Equatable {
     let id: UUID
     let uid: UUID
     let productId: UUID
+    let salesAssociateId: UUID? = nil
+    var inventoryManagerId: UUID? = nil
+    let boutiqueId: UUID? = nil
     let reservedDate: Date
     var deliveryDate: Date?
     let transactionId: String
@@ -26,6 +29,9 @@ struct PurchasedItemEntity: Identifiable, Codable, Hashable, Equatable {
     enum CodingKeys: String, CodingKey {
         case id, uid, status
         case productId = "product_id"
+        case salesAssociateId = "sales_associate_id"
+        case inventoryManagerId = "inventory_manager_id"
+        case boutiqueId = "boutique_id"
         case reservedDate = "reserved_date"
         case deliveryDate = "delivery_date"
         case transactionId = "transaction_id"

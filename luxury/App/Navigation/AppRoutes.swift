@@ -21,6 +21,7 @@ enum SARoute: Hashable {
     case transactionList([SATransactionEntity])
     case editProfile
     case planogramGallery(boutiqueId: UUID)
+    case sfsHandover
 }
 
 

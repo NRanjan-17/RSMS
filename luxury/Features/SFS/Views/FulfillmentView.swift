@@ -156,7 +156,22 @@ struct FulfillmentView: View {
                                                 }
                                             }
                                             
-                                            if order.status.lowercased() == "secured" {
+                                            if order.status.lowercased() == "pending" {
+                                                Button(action: {
+                                                    Task {
+                                                        _ = await viewModel.updateStatusToReadyToPick(orderId: order.id)
+                                                    }
+                                                }) {
+                                                    Text("Mark Ready to Pick")
+                                                        .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                                        .foregroundStyle(AppColors.background)
+                                                        .frame(maxWidth: .infinity)
+                                                        .padding(.vertical, 12)
+                                                        .background(AppColors.gold)
+                                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                }
+                                                .padding(.top, 8)
+                                            } else if order.status.lowercased() == "secured" {
                                                 Button(action: {
                                                     Task {
                                                         await viewModel.updateStatusToReadyToPick(orderId: order.id)
