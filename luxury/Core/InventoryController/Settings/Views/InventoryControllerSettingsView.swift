@@ -7,6 +7,7 @@ import SwiftUI
 
 struct InventoryControllerSettingsView: View {
     @Environment(AppCoordinator.self) private var coordinator
+    @Environment(\.dismiss) private var dismiss
     @State private var showLogoutAlert = false
     
     var body: some View {
@@ -15,8 +16,6 @@ struct InventoryControllerSettingsView: View {
                 AppColors.background.ignoresSafeArea()
                 
                 VStack(spacing: 0) {
-                    CustomHeader(title: "Settings")
-                    
                     ScrollView(showsIndicators: false) {
                         VStack(spacing: 32) {
                             
@@ -57,6 +56,20 @@ struct InventoryControllerSettingsView: View {
                     }
                 }
             }
+            .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Close") {
+                        dismiss()
+                    }
+                    .foregroundStyle(AppColors.gold)
+                    .font(AppFonts.sansSerif(size: 16))
+                }
+            }
+            .toolbarBackground(AppColors.background, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .alert("Logout", isPresented: $showLogoutAlert) {
                 Button("Logout", role: .destructive) {
                     coordinator.logout()

@@ -20,8 +20,8 @@ struct ClientInsightsView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 28) {
                         HStack(spacing: 12) {
-                            MetricCard(title: "Total VIPs", value: "\(viewModel.totalVIPs)", subtitle: "Active Profiles", icon: "person.2.fill")
-                            MetricCard(title: "Avg LTV", value: viewModel.avgLTV, subtitle: "Lifetime Value", icon: "chart.line.uptrend.xyaxis")
+                            MetricCard(title: "Total Clients", value: "\(viewModel.totalClients)", subtitle: "Active Profiles", icon: "person.2.fill")
+                            MetricCard(title: "Avg Lifetime Value", value: viewModel.avgLTV, subtitle: "Per Client Average", icon: "chart.line.uptrend.xyaxis")
                         }
                         .padding(.horizontal, 24)
                         
@@ -32,7 +32,7 @@ struct ClientInsightsView: View {
                                 .kerning(1.5)
                                 .padding(.horizontal, 24)
                             
-                            VStack(spacing: 1) {
+                            VStack(spacing: 12) {
                                 ForEach(viewModel.tierBreakdown, id: \.id) { metric in
                                     HStack {
                                         VStack(alignment: .leading, spacing: 4) {
@@ -48,11 +48,16 @@ struct ClientInsightsView: View {
                                             .font(AppFonts.sansSerif(size: 14, weight: .bold))
                                             .foregroundStyle(AppColors.gold)
                                     }
-                                    .padding(.horizontal, 24)
-                                    .padding(.vertical, 18)
+                                    .padding(20)
                                     .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .stroke(AppColors.gold15, lineWidth: 0.5)
+                                    )
                                 }
                             }
+                            .padding(.horizontal, 24)
                         }
                     }
                     .padding(.top, 12)
@@ -65,5 +70,8 @@ struct ClientInsightsView: View {
         .toolbarBackground(AppColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .task {
+            viewModel.fetchData()
+        }
     }
 }

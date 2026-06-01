@@ -232,7 +232,8 @@ struct ReceiptView: View {
             subtotal: subtotal,
             cgst: cgst,
             sgst: sgst,
-            total: total
+            total: total,
+            isGiftInvoice: POSViewModel.shared.isGiftInvoice
         )
         
         return InvoicePDFGenerator.generateInvoice(data: data)

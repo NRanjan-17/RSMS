@@ -12,6 +12,7 @@ struct SFSVerificationView: View {
     @Environment(Router.self) private var router
     @Environment(FulfillmentViewModel.self) private var viewModel
     
+    @State private var scannerService = ScannerService()
     @State private var inputSku: String = ""
     @State private var isVerified: Bool = false
     @State private var scanError: String? = nil
@@ -29,6 +30,14 @@ struct SFSVerificationView: View {
     
     private var allChecked: Bool {
         check1 && check2 && check3
+    }
+    
+    private var isSimulator: Bool {
+        #if targetEnvironment(simulator)
+        return true
+        #else
+        return false
+        #endif
     }
     
     var body: some View {
@@ -141,44 +150,236 @@ struct SFSVerificationView: View {
                         .disabled(isUpdating)
                         .padding(.horizontal, 24)
                         
-                        if userRole == .inventoryController {
-                            Button(action: {
-                                isUpdating = true
-                                Task {
-                                    let success = await viewModel.updateStatusToSecured(orderId: order.id)
-                                    if success {
-                                        router.pop()
-                                    } else {
-                                        await MainActor.run {
-                                            alertMessage = viewModel.errorMessage ?? "An unknown error occurred."
-                                            showAlert = true
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("SCANNER MODULE")
+                                .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                                .foregroundStyle(AppColors.secondary)
+                                .kerning(1.5)
+                            
+                            ZStack {
+                                AppColors.surface
+                                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 20)
+                                            .stroke(isVerified ? AppColors.success.opacity(0.4) : AppColors.gold15, lineWidth: 1)
+                                    )
+                                
+                                if isVerified {
+                                    VStack(spacing: 16) {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .font(AppFonts.sansSerif(size: 64))
+                                            .foregroundStyle(AppColors.success)
+                                        
+                                        Text("VERIFICATION MATCH SUCCESSFUL")
+                                            .font(AppFonts.sansSerif(size: 12, weight: .bold))
+                                            .foregroundStyle(AppColors.success)
+                                            .kerning(1)
+                                        
+                                        Text("SKU matches order target: \(order.productSku ?? "")")
+                                            .font(AppFonts.sansSerif(size: 13))
+                                            .foregroundStyle(AppColors.secondary)
+                                    }
+                                    .padding(40)
+                                } else {
+                                    VStack(spacing: 20) {
+                                        ZStack {
+                                            if isSimulator {
+                                                VStack(spacing: 12) {
+                                                    Image(systemName: "watch.analog")
+                                                        .font(.system(size: 40))
+                                                        .foregroundStyle(AppColors.gold.opacity(0.6))
+                                                    Text("iOS Simulator — Camera Unavailable")
+                                                        .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                                        .foregroundStyle(AppColors.secondary)
+                                                }
+                                                .frame(width: 240, height: 160)
+                                                .background(Color.black.opacity(0.6))
+                                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 12)
+                                                        .stroke(AppColors.gold50, lineWidth: 1.5)
+                                                )
+                                            } else {
+                                                QRScannerView(scannerService: scannerService)
+                                                    .frame(width: 240, height: 160)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                                    .overlay(
+                                                        RoundedRectangle(cornerRadius: 12)
+                                                            .stroke(AppColors.gold50, lineWidth: 1.5)
+                                                    )
+                                            }
+                                            
+                                            Rectangle()
+                                                .fill(AppColors.error)
+                                                .frame(width: 220, height: 2)
+                                                .shadow(color: .red, radius: 4)
+                                                .offset(y: laserOffset)
+                                                .onAppear {
+                                                    withAnimation(Animation.easeInOut(duration: 1.8).repeatForever(autoreverses: true)) {
+                                                        laserOffset = 70
+                                                    }
+                                                }
+                                        }
+                                        .frame(height: 180)
+                                        
+                                        if let scanError = scanError {
+                                            Text(scanError)
+                                                .font(AppFonts.sansSerif(size: 13))
+                                                .foregroundStyle(AppColors.error)
+                                        }
+                                        
+                                        if isSimulator {
+                                            HStack(spacing: 12) {
+                                                Button(action: {
+                                                    handleScannedCode(order.productSku ?? "")
+                                                }) {
+                                                    Text("Scan Correct SKU")
+                                                        .font(AppFonts.sansSerif(size: 13, weight: .bold))
+                                                        .foregroundStyle(AppColors.background)
+                                                        .padding(.horizontal, 16)
+                                                        .padding(.vertical, 10)
+                                                        .background(AppColors.gold)
+                                                        .clipShape(Capsule())
+                                                }
+                                                
+                                                Button(action: {
+                                                    handleScannedCode("MISMATCH-SKU-\(Int.random(in: 100...999))")
+                                                }) {
+                                                    Text("Scan Mismatch")
+                                                        .font(AppFonts.sansSerif(size: 13, weight: .bold))
+                                                        .foregroundStyle(.white)
+                                                        .padding(.horizontal, 16)
+                                                        .padding(.vertical, 10)
+                                                        .background(AppColors.error.opacity(0.8))
+                                                        .clipShape(Capsule())
+                                                }
+                                            }
                                         }
                                     }
-                                    isUpdating = false
+                                    .padding(.vertical, 24)
                                 }
-                            }) {
-                                HStack {
-                                    if isUpdating {
-                                        ProgressView()
-                                            .tint(AppColors.background)
-                                            .controlSize(.small)
-                                    } else {
-                                        Text("Mark as Secured")
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                        
+                        if !isVerified {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("TORN / UNREADABLE LABEL MANUAL ENTRY")
+                                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                                    .foregroundStyle(AppColors.secondary)
+                                    .kerning(1.5)
+                                
+                                HStack(spacing: 12) {
+                                    TextField("Enter SKU or Product Code", text: $inputSku)
+                                        .font(AppFonts.sansSerif(size: 14))
+                                        .foregroundStyle(AppColors.text)
+                                        .padding()
+                                        .background(AppColors.surface)
+                                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .stroke(AppColors.border, lineWidth: 1)
+                                        )
+                                        .autocorrectionDisabled()
+                                        .textInputAutocapitalization(.characters)
+                                    
+                                    Button(action: {
+                                        handleScannedCode(inputSku)
+                                    }) {
+                                        Text("Verify")
+                                            .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                            .foregroundStyle(AppColors.background)
+                                            .padding(.horizontal, 20)
+                                            .padding(.vertical, 14)
+                                            .background(AppColors.gold)
+                                            .clipShape(RoundedRectangle(cornerRadius: 10))
                                     }
                                 }
-                                .font(AppFonts.sansSerif(size: 15, weight: .bold))
-                                .foregroundStyle(AppColors.background)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 56)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 14)
-                                        .fill(AppColors.gold)
-                                )
-                                .opacity(isUpdating ? 0.5 : 1.0)
                             }
-                            .disabled(isUpdating)
                             .padding(.horizontal, 24)
-                            .padding(.top, 16)
+                        } else {
+                            VStack(alignment: .leading, spacing: 16) {
+                                Text("VERIFICATION CHECKLIST")
+                                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                                    .foregroundStyle(AppColors.secondary)
+                                    .kerning(1.5)
+                                
+                                VStack(alignment: .leading, spacing: 16) {
+                                    Toggle(isOn: $check1) {
+                                        Text("Confirm timepiece matches requested model specifications")
+                                            .font(AppFonts.sansSerif(size: 13))
+                                            .foregroundStyle(AppColors.text)
+                                    }
+                                    .toggleStyle(LuxuryToggleStyle())
+                                    
+                                    Divider().background(AppColors.border)
+                                    
+                                    Toggle(isOn: $check2) {
+                                        Text("Confirm physical watch shows zero defects or scratches")
+                                            .font(AppFonts.sansSerif(size: 13))
+                                            .foregroundStyle(AppColors.text)
+                                    }
+                                    .toggleStyle(LuxuryToggleStyle())
+                                    
+                                    Divider().background(AppColors.border)
+                                    
+                                    Toggle(isOn: $check3) {
+                                        Text("Confirm certificates, warranty card, and luxury box are complete")
+                                            .font(AppFonts.sansSerif(size: 13))
+                                            .foregroundStyle(AppColors.text)
+                                    }
+                                    .toggleStyle(LuxuryToggleStyle())
+                                }
+                                .padding(20)
+                                .background(AppColors.surface)
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                                .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
+                                
+                                if userRole == .inventoryController {
+                                    Button(action: {
+                                        guard userRole == .inventoryController else {
+                                            alertMessage = "Unauthorized: Action is restricted to Inventory Controllers."
+                                            showAlert = true
+                                            return
+                                        }
+                                        isUpdating = true
+                                        Task {
+                                            let success = await viewModel.updateStatusToSecured(orderId: order.id)
+                                            if success {
+                                                router.pop()
+                                            } else {
+                                                await MainActor.run {
+                                                    alertMessage = viewModel.errorMessage ?? "An unknown conflict occurred."
+                                                    showAlert = true
+                                                }
+                                            }
+                                            isUpdating = false
+                                        }
+                                    }) {
+                                        HStack {
+                                            if isUpdating {
+                                                ProgressView()
+                                                    .tint(AppColors.background)
+                                                    .controlSize(.small)
+                                            } else {
+                                                Text("Mark as Secured")
+                                            }
+                                        }
+                                        .font(AppFonts.sansSerif(size: 15, weight: .bold))
+                                        .foregroundStyle(AppColors.background)
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 56)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 14)
+                                                .fill(AppColors.gold)
+                                        )
+                                        .opacity(allChecked && !isUpdating ? 1.0 : 0.5)
+                                    }
+                                    .disabled(!allChecked || isUpdating)
+                                    .padding(.top, 8)
+                                }
+                            }
+                            .padding(.horizontal, 24)
                         }
                     }
                     .padding(.vertical, 20)
@@ -193,9 +394,33 @@ struct SFSVerificationView: View {
                 dismissButton: .default(Text("OK"))
             )
         }
+        .onAppear {
+            scannerService.onScannedCode = { code in
+                handleScannedCode(code)
+            }
+        }
         .task {
             if let profile = try? await ProfileService().fetchCurrentProfile() {
                 userRole = profile.0
+            }
+        }
+    }
+    
+    private func handleScannedCode(_ code: String) {
+        let trimmed = code.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        let result = viewModel.verifyScannedSku(orderSku: order.productSku, scannedCode: trimmed)
+        switch result {
+        case .success:
+            scannerService.playSuccessFeedback()
+            withAnimation {
+                isVerified = true
+                scanError = nil
+            }
+        case .failure(let error):
+            scannerService.playErrorFeedback()
+            withAnimation {
+                scanError = error.localizedDescription
             }
         }
     }

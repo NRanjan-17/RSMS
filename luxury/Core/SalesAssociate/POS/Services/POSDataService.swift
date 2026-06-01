@@ -38,7 +38,7 @@ final class POSDataService {
         return first
     }
     
-    func createTransaction(amount: Double, purpose: String, clientId: UUID?, boutiqueId: UUID, staffId: UUID, paymentGatewayId: String?) async throws -> Transaction {
+    func createTransaction(amount: Double, purpose: String, clientId: UUID?, boutiqueId: UUID, staffId: UUID, paymentGatewayId: String?, isGift: Bool? = nil, isTax: Bool? = nil) async throws -> Transaction {
         var payload: [String: AnyJSON] = [
             "transaction_amount": .double(amount),
             "purpose": .string(purpose),
@@ -49,6 +49,12 @@ final class POSDataService {
         ]
         if let pgId = paymentGatewayId {
             payload["payment_gateway_id"] = .string(pgId)
+        }
+        if let isGift = isGift {
+            payload["is_gift"] = .bool(isGift)
+        }
+        if let isTax = isTax {
+            payload["is_tax"] = .bool(isTax)
         }
         
         let txs: [Transaction] = try await client

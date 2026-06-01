@@ -38,6 +38,7 @@ struct CorporateBoutique: Identifiable, Hashable, Codable {
     let onBoardingCompleted: Bool
     let avatarUrl: String?
     let dailySalesTarget: Double?
+    let currency: String?
     
     enum CodingKeys: String, CodingKey {
         case id, name, address, city, provider, status
@@ -50,6 +51,7 @@ struct CorporateBoutique: Identifiable, Hashable, Codable {
         case onBoardingCompleted = "on_boarding_completed"
         case avatarUrl = "avatar_url"
         case dailySalesTarget = "daily_sales_target"
+        case currency
     }
 }
 

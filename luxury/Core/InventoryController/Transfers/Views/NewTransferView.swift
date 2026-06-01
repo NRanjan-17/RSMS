@@ -11,12 +11,32 @@ struct NewTransferView: View {
     @Environment(Router.self) private var router
     @State private var viewModel = NewTransferViewModel()
     @Environment(\.dismiss) private var dismiss
+    @State private var showConfirmationAlert = false
+    
+    private func submitTransfer() {
+        Task {
+            let result = await viewModel.confirmTransfer()
+            switch result {
+            case .success:
+                await MainActor.run {
+                    dismiss()
+                }
+            case .failure(let error):
+                await MainActor.run {
+                    viewModel.alertTitle = "Transfer Blocked"
+                    viewModel.alertMessage = error.localizedDescription
+                    viewModel.showAlert = true
+                }
+            }
+        }
+    }
     
     var body: some View {
         ZStack {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
+                CustomHeader(title: "New Transfer", showBackButton: true, backAction: { dismiss() })
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 32) {
@@ -207,23 +227,27 @@ struct NewTransferView: View {
                 VStack {
                     HStack(spacing: 10) {
                         CustomButton(title: "Submit Request", action: {
-                            Task {
-                                let result = await viewModel.confirmTransfer()
-                                switch result {
-                                case .success:
-                                    await MainActor.run {
-                                        dismiss()
-                                    }
-                                case .failure(let error):
-                                    await MainActor.run {
-                                        viewModel.alertTitle = "Transfer Blocked"
-                                        viewModel.alertMessage = error.localizedDescription
-                                        viewModel.showAlert = true
-                                    }
-                                }
+                            if viewModel.destinationStore == nil {
+                                viewModel.alertTitle = "Destination Required"
+                                viewModel.alertMessage = "Please select a destination store."
+                                viewModel.showAlert = true
+                                return
                             }
+                            if viewModel.items.isEmpty {
+                                viewModel.alertTitle = "No Items"
+                                viewModel.alertMessage = "Please scan or add at least one item to transfer."
+                                viewModel.showAlert = true
+                                return
+                            }
+                            if viewModel.hasStockError {
+                                viewModel.alertTitle = "Insufficient Stock"
+                                viewModel.alertMessage = "One or more items in the transfer exceed available stock levels. Please correct the quantities before submitting."
+                                viewModel.showAlert = true
+                                return
+                            }
+                            showConfirmationAlert = true
                         })
-                        .disabled(viewModel.items.isEmpty || viewModel.hasStockError || viewModel.destinationStore == nil)
+                        .disabled(viewModel.items.isEmpty)
                     }
                     .padding(.horizontal, 24)
                 }
@@ -237,6 +261,7 @@ struct NewTransferView: View {
         .toolbarBackground(AppColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             viewModel.fetchBoutiques()
             viewModel.fetchAvailableProducts()
@@ -251,6 +276,26 @@ struct NewTransferView: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text(viewModel.alertMessage)
+        }
+        .alert(
+            "Confirm Transfer Details",
+            isPresented: $showConfirmationAlert
+        ) {
+            Button("Cancel", role: .cancel) {}
+            Button("Confirm & Submit", role: .none) {
+                submitTransfer()
+            }
+        } message: {
+            if let source = viewModel.sourceStore?.name,
+               let dest = viewModel.destinationStore?.name {
+                Text("Please confirm the following transfer details before final submission:\n\n" +
+                     "• Source: \(source)\n" +
+                     "• Destination: \(dest)\n\n" +
+                     "Items:\n" +
+                     viewModel.items.map { "• \($0.name) (Qty: \($0.qty))" }.joined(separator: "\n"))
+            } else {
+                Text("Are you sure you want to submit this transfer request?")
+            }
         }
     }
 }

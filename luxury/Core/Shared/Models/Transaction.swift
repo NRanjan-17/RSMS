@@ -12,6 +12,8 @@ struct Transaction: Codable, Identifiable {
     var dateOfTransaction: Date?
     var purpose: TransactionPurpose
     var paymentGatewayId: String?
+    var isGift: Bool?
+    var isTax: Bool?
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -19,5 +21,7 @@ struct Transaction: Codable, Identifiable {
         case dateOfTransaction = "date_of_transaction"
         case purpose
         case paymentGatewayId = "payment_gateway_id"
+        case isGift = "is_gift"
+        case isTax = "is_tax"
     }
 }

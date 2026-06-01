@@ -23,7 +23,12 @@ final class SalesTargetsViewModel {
                 
                 await MainActor.run {
                     self.boutique = corporateBoutique
-                    self.editedBoutiqueTarget = corporateBoutique.dailySalesTarget != nil ? String(format: "%.0f", corporateBoutique.dailySalesTarget!) : ""
+                    if let target = corporateBoutique.dailySalesTarget {
+                        let localTarget = CurrencyManager.shared.convertedAmount(fromINR: target)
+                        self.editedBoutiqueTarget = String(format: "%.0f", localTarget)
+                    } else {
+                        self.editedBoutiqueTarget = ""
+                    }
                 }
                 
                 let fetchedStaff: [StaffModel] = try await SupabaseManager.shared.client
@@ -37,7 +42,8 @@ final class SalesTargetsViewModel {
                     self.staffMembers = fetchedStaff
                     for staff in fetchedStaff {
                         if let target = staff.dailySalesTarget {
-                            self.editedStaffTargets[staff.id] = String(format: "%.0f", target)
+                            let localTarget = CurrencyManager.shared.convertedAmount(fromINR: target)
+                            self.editedStaffTargets[staff.id] = String(format: "%.0f", localTarget)
                         } else {
                             self.editedStaffTargets[staff.id] = ""
                         }
@@ -58,7 +64,8 @@ final class SalesTargetsViewModel {
         isSaving = true
         
         do {
-            let bTarget = Double(editedBoutiqueTarget.replacingOccurrences(of: ",", with: ""))
+            let bTargetLocal = Double(editedBoutiqueTarget.replacingOccurrences(of: ",", with: ""))
+            let bTarget = bTargetLocal != nil ? CurrencyManager.shared.baseAmount(fromConverted: bTargetLocal!) : nil
             
             struct UpdateBoutiqueTarget: Codable {
                 let daily_sales_target: Double?
@@ -73,7 +80,8 @@ final class SalesTargetsViewModel {
             
             for staff in staffMembers {
                 let sTargetText = editedStaffTargets[staff.id] ?? ""
-                let sTarget = Double(sTargetText.replacingOccurrences(of: ",", with: ""))
+                let sTargetLocal = Double(sTargetText.replacingOccurrences(of: ",", with: ""))
+                let sTarget = sTargetLocal != nil ? CurrencyManager.shared.baseAmount(fromConverted: sTargetLocal!) : nil
                 
                 struct UpdateStaffTarget: Codable {
                     let daily_sales_target: Double?

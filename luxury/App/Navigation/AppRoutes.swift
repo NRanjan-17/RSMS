@@ -35,6 +35,7 @@ enum BMRoute: Hashable {
     case shrinkReport
     case clientInsights
     case transferApproval
+    case newTransfer
     case cycleCountSignoff
     case stockReconciliation
     case refundApproval
@@ -91,6 +92,7 @@ enum CARoute: Hashable {
     case storePerformanceDetail(BoutiquePerformance)
     case editProfile
     case planograms
+    case clientInsights
 }
 
 enum AppRoutes: Hashable {

@@ -111,7 +111,8 @@ final class ProfileService {
                 updatedAt: Date(),
                 onBoardingCompleted: false,
                 avatarUrl: nil,
-                dailySalesTarget: nil
+                dailySalesTarget: nil,
+                currency: nil
             )
             try await client.from("boutiques").upsert(boutique, onConflict: "manager_email").execute()
             

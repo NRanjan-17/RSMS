@@ -27,6 +27,7 @@ final class ClientDetailViewModel {
     let tabs = [("overview", "Overview"), ("appointments", "Appts"), ("history", "History"), ("wishlist", "Wishlist"), ("notes", "Notes")]
     
     var wishlistItems: [ClientWishlistItem] = []
+    var wishlistCatalogs: [CatalogItem] = []
     var sizes: ClientSizePreference = ClientSizePreference()
     var purchases: [ClientPurchase] = []
     var appointments: [AppointmentEntity] = []
@@ -88,8 +89,44 @@ final class ClientDetailViewModel {
         Task {
             await WishlistService.shared.syncWishlist(clientId: client.id)
             let updated = WishlistService.shared.fetchWishlist(clientId: client.id)
+            
+            // Fetch full CatalogItems for the updated wishlist
+            let productIds = updated.map { $0.id }
+            var fullItems: [CatalogItem] = []
+            if !productIds.isEmpty {
+                do {
+                    let dbCatalogs: [CatalogEntity] = try await SupabaseManager.shared.client
+                        .from("catalogs")
+                        .select()
+                        .in("id", values: productIds.map { $0.uuidString })
+                        .execute()
+                        .value
+                    
+                    fullItems = dbCatalogs.map { cat in
+                        CatalogItem(
+                            id: cat.id,
+                            catalogId: cat.catalogId,
+                            name: cat.name,
+                            description: cat.description,
+                            brand: cat.brand,
+                            category: cat.category.rawValue,
+                            amount: cat.amount,
+                            barCode: cat.barCode,
+                            status: cat.status.rawValue,
+                            reserved: cat.reserved,
+                            productIds: cat.productIds,
+                            createdAt: nil,
+                            productImages: cat.productImages
+                        )
+                    }
+                } catch {
+                    print("Error fetching full catalog items for wishlist: \(error)")
+                }
+            }
+            
             await MainActor.run {
                 self.wishlistItems = updated
+                self.wishlistCatalogs = fullItems
             }
         }
     }

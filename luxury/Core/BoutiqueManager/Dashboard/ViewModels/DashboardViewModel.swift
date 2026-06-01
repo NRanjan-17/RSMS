@@ -57,7 +57,7 @@ final class DashboardViewModel {
 
     var salesProgress: Double {
         guard isTargetConfigured, salesTargetRaw > 0 else { return 0 }
-        return salesActualRaw / salesTargetRaw
+        return min(1.0, max(0.0, salesActualRaw / salesTargetRaw))
     }
 
     var pacingProgress: Double {
@@ -176,12 +176,7 @@ final class DashboardViewModel {
     }
 
     private func formatCurrency(_ value: Double) -> String {
-        let f                   = NumberFormatter()
-        f.numberStyle           = .currency
-        f.currencySymbol = CurrencyManager.shared.symbol
-        f.maximumFractionDigits = 0
-        f.locale                = Locale(identifier: "en_IN")
-        return f.string(from: NSNumber(value: value)) ?? "\(CurrencyManager.shared.symbol)0"
+        return CurrencyManager.shared.format(amount: value)
     }
 
     func fetchBoutiqueName() {

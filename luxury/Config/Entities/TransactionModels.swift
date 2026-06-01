@@ -28,6 +28,8 @@ struct SATransactionEntity: Identifiable, Codable, Hashable {
     let staffId: UUID?
     let client: ClientEntity?
     let paymentGatewayId: String?
+    let isGift: Bool?
+    let isTax: Bool?
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -39,5 +41,7 @@ struct SATransactionEntity: Identifiable, Codable, Hashable {
         case staffId = "staff_id"
         case client
         case paymentGatewayId = "payment_gateway_id"
+        case isGift = "is_gift"
+        case isTax = "is_tax"
     }
 }

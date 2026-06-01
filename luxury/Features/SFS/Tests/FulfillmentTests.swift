@@ -199,5 +199,13 @@ final class FulfillmentTests: XCTestCase {
         XCTAssertEqual(dashboardVM.sfsFulfillments.count, 1)
         XCTAssertEqual(dashboardVM.sfsFulfillments.first?.status, "Ready to Pick")
     }
+    
+    func testDispatchOrderWithInvalidBoutiqueGracefulFailure() async {
+        let viewModel = FulfillmentViewModel()
+        let item = mockPurchasedItem
+        let success = await viewModel.dispatchOrder(order: item, expectedQty: 3, deliveredQty: 1)
+        XCTAssertFalse(success)
+    }
 }
 #endif
+

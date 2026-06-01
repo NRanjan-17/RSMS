@@ -17,10 +17,16 @@ struct BMAppointmentDetailView: View {
     @State private var selectedStaffId: UUID?
     @State private var isSaving = false
     @State private var showingDeleteAlert = false
+    @State private var currentStatus: AppointmentStatus
+    @State private var selectedDate: Date
     
     init(appointment: AppointmentEntity) {
         self.appointment = appointment
         _selectedStaffId = State(initialValue: appointment.assignedTo)
+        _currentStatus = State(initialValue: appointment.status)
+        
+        let initialDate = ISO8601DateFormatter().date(from: appointment.timestamp) ?? Date()
+        _selectedDate = State(initialValue: initialDate)
     }
 
     var body: some View {
@@ -29,9 +35,7 @@ struct BMAppointmentDetailView: View {
 
             VStack(spacing: 0) {
 
-                CustomHeader(title: "Appointment Details", showBackButton: true, backAction: {
-                    dismiss()
-                })
+                CustomHeader(title: "Appointment Details", showBackButton: true, backAction: { dismiss() })
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 32) {
@@ -62,6 +66,7 @@ struct BMAppointmentDetailView: View {
                             Divider().background(AppColors.gold15)
 
                             VStack(alignment: .leading, spacing: 16) {
+                                DetailRow(label: "STATUS",  value: currentStatus.rawValue.capitalized, icon: "circle.fill")
                                 DetailRow(label: "TIME",    value: appointment.formattedTime,        icon: "clock")
                                 DetailRow(label: "ADVISOR", value: advisorName(for: selectedStaffId), icon: "person.fill")
                                 DetailRow(label: "CREATED BY", value: advisorName(for: appointment.createdBy), icon: "person.text.rectangle.fill")
@@ -74,6 +79,24 @@ struct BMAppointmentDetailView: View {
                         .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
                         .padding(.horizontal, 24)
 
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("CHANGE DATE & TIME")
+                                .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                                .foregroundStyle(AppColors.secondary)
+                                .kerning(1.5)
+                                .padding(.horizontal, 24)
+
+                            DatePicker("Date & Time", selection: $selectedDate)
+                                .datePickerStyle(.compact)
+                                .tint(AppColors.gold)
+                                .font(AppFonts.sansSerif(size: 14))
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 14)
+                                .background(AppColors.surface)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                .padding(.horizontal, 24)
+                        }
                         VStack(alignment: .leading, spacing: 16) {
                             Text("REASSIGN ADVISOR")
                                 .font(AppFonts.sansSerif(size: 10, weight: .bold))
@@ -129,6 +152,13 @@ struct BMAppointmentDetailView: View {
                         Button(action: {
                             Task {
                                 isSaving = true
+                                let initialDate = ISO8601DateFormatter().date(from: appointment.timestamp)
+                                if let initial = initialDate, selectedDate != initial {
+                                    await updateAppointmentDate(to: selectedDate)
+                                } else if initialDate == nil {
+                                    await updateAppointmentDate(to: selectedDate)
+                                }
+                                
                                 if let newStaffId = selectedStaffId, newStaffId != appointment.assignedTo {
                                     await assignStaff(to: appointment.id, staffId: newStaffId)
                                 }
@@ -144,7 +174,7 @@ struct BMAppointmentDetailView: View {
                                 if isSaving {
                                     ProgressView().tint(AppColors.background)
                                 } else {
-                                    Text("Save")
+                                    Text("Assign")
                                         .font(AppFonts.sansSerif(size: 14, weight: .bold))
                                         .foregroundStyle(AppColors.background)
                                 }
@@ -220,8 +250,34 @@ struct BMAppointmentDetailView: View {
                 .update(UpdateStaffRequest(assigned_to: staffId, status: AppointmentStatus.upcoming.rawValue))
                 .eq("id", value: appointmentId)
                 .execute()
+            
+            await MainActor.run {
+                self.currentStatus = .upcoming
+            }
+            
+            NotificationCenter.default.post(name: Notification.Name("RefreshAppointments"), object: nil)
         } catch {
             print("Failed to assign staff: \(error)")
+        }
+    }
+    
+    private func updateAppointmentDate(to newDate: Date) async {
+        struct UpdateDateRequest: Encodable {
+            let timestamp: String
+        }
+        
+        let dateString = ISO8601DateFormatter().string(from: newDate)
+        
+        do {
+            try await SupabaseManager.shared.client
+                .from("appointment")
+                .update(UpdateDateRequest(timestamp: dateString))
+                .eq("id", value: appointment.id)
+                .execute()
+            
+            NotificationCenter.default.post(name: Notification.Name("RefreshAppointments"), object: nil)
+        } catch {
+            print("Failed to update appointment date: \(error)")
         }
     }
 

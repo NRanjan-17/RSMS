@@ -79,8 +79,12 @@ final class NewTransferViewModel {
             do {
                 let boutiques = try await fetchBoutiquesHandler()
                 let profileTuple = try? await fetchProfileHandler()
-                let staff = profileTuple?.1 as? StaffModel
-                let storeId = staff?.boutiqueId
+                var storeId: UUID? = nil
+                if let staff = profileTuple?.1 as? StaffModel {
+                    storeId = staff.boutiqueId
+                } else if let managerBoutique = profileTuple?.1 as? CorporateBoutique {
+                    storeId = managerBoutique.id
+                }
                 
                 await MainActor.run {
                     if let sId = storeId {

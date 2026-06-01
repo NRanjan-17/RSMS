@@ -12,6 +12,7 @@ struct SalesProductDetailView: View {
     @Environment(SalesAssociateAppState.self) private var saAppState
     @Environment(Router.self) private var router
     let catalog: CatalogEntity
+    var client: Client? = nil
     
     @State private var viewModel = SalesProductDetailViewModel()
     
@@ -108,6 +109,20 @@ struct SalesProductDetailView: View {
                                             createdAt: nil,
                                             productImages: catalog.productImages
                                         )
+                                        if let attachedClient = client {
+                                            let storeClient = StoreClient(
+                                                id: attachedClient.id,
+                                                name: attachedClient.name,
+                                                email: attachedClient.email ?? "",
+                                                phone: attachedClient.phone,
+                                                dob: nil,
+                                                tier: attachedClient.tier.rawValue,
+                                                productsPurchased: nil,
+                                                createdAt: attachedClient.createdAt,
+                                                updatedAt: nil
+                                            )
+                                            POSViewModel.shared.attachClient(storeClient)
+                                        }
                                         POSViewModel.shared.addToCart(item)
                                         saAppState.selectedTab = .pos
                                         dismiss()

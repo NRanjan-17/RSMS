@@ -64,6 +64,7 @@ struct VarianceReportView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
+                CustomHeader(title: "Variance Report", showBackButton: true, backAction: { dismiss() })
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 28) {
@@ -199,6 +200,7 @@ struct VarianceReportView: View {
         .toolbarBackground(AppColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showShareSheet) {
             if let url = shareURL {
                 ShareSheet(activityItems: [url])

@@ -7,6 +7,7 @@ import SwiftUI
 
 struct BarcodeLookupView: View {
     @Environment(Router.self) private var router
+    @Environment(\.dismiss) private var dismiss
     @State private var viewModel = BarcodeLookupViewModel()
     @State private var scannerService = ScannerService()
     @State private var manualEntry: String = ""
@@ -27,24 +28,48 @@ struct BarcodeLookupView: View {
         case success, duplicate, unexpected
     }
     
+    private var isSimulator: Bool {
+        #if targetEnvironment(simulator)
+        return true
+        #else
+        return false
+        #endif
+    }
+    
     var body: some View {
         ZStack {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
+                CustomHeader(title: "Barcode Lookup", showBackButton: true, backAction: { dismiss() })
+                
                 // Camera / Scanner View
                 ZStack {
-                    QRScannerView(scannerService: scannerService)
+                    if isSimulator {
+                        VStack(spacing: 12) {
+                            Image(systemName: "watch.analog")
+                                .font(.system(size: 40))
+                                .foregroundStyle(AppColors.gold.opacity(0.6))
+                            Text("iOS Simulator — Camera Unavailable")
+                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                .foregroundStyle(AppColors.secondary)
+                        }
+                        .frame(maxWidth: .infinity)
                         .frame(height: 240)
+                        .background(AppColors.surface)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                         .padding()
+                    } else {
+                        QRScannerView(scannerService: scannerService)
+                            .frame(height: 240)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .padding()
+                    }
                     
-                    // Center Targeting Box
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(AppColors.gold, lineWidth: 2)
                         .frame(width: 160, height: 160)
                     
-                    // HUD Message Overlay
                     if let message = hudMessage {
                         VStack {
                             HStack(spacing: 8) {
@@ -64,7 +89,6 @@ struct BarcodeLookupView: View {
                     }
                 }
                 
-                // Manual Entry
                 HStack {
                     TextField("Enter Barcode Manually...", text: $manualEntry)
                         .font(AppFonts.sansSerif(size: 16))
@@ -93,6 +117,58 @@ struct BarcodeLookupView: View {
                 .padding(.horizontal, 24)
                 .padding(.bottom, 16)
                 
+                if isSimulator {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("SIMULATED SCANNING ACTIONS")
+                            .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                            .foregroundStyle(AppColors.secondary)
+                            .kerning(1.5)
+                            .padding(.horizontal, 24)
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 12) {
+                                ForEach(viewModel.expectedItems) { item in
+                                    Button(action: {
+                                        handleScannedCode(item.barCode)
+                                    }) {
+                                        HStack {
+                                            Image(systemName: "barcode.viewfinder")
+                                                .font(AppFonts.sansSerif(size: 12))
+                                            Text("Scan \(item.name)")
+                                                .font(AppFonts.sansSerif(size: 12, weight: .semibold))
+                                        }
+                                        .padding(.horizontal, 14)
+                                        .padding(.vertical, 8)
+                                        .background(AppColors.surface)
+                                        .foregroundStyle(AppColors.gold)
+                                        .clipShape(Capsule())
+                                        .overlay(Capsule().stroke(AppColors.gold50, lineWidth: 0.5))
+                                    }
+                                }
+                                
+                                Button(action: {
+                                    handleScannedCode("UNKNOWN-BARCODE-\(Int.random(in: 100...999))")
+                                }) {
+                                    HStack {
+                                        Image(systemName: "exclamationmark.triangle")
+                                            .font(AppFonts.sansSerif(size: 12))
+                                        Text("Scan Unexpected")
+                                            .font(AppFonts.sansSerif(size: 12, weight: .semibold))
+                                    }
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 8)
+                                    .background(AppColors.surface)
+                                    .foregroundStyle(AppColors.error)
+                                    .clipShape(Capsule())
+                                    .overlay(Capsule().stroke(AppColors.error.opacity(0.5), lineWidth: 0.5))
+                                }
+                            }
+                            .padding(.horizontal, 24)
+                        }
+                    }
+                    .padding(.bottom, 16)
+                }
+                
                 ScrollView {
                     VStack(spacing: 20) {
                         if viewModel.isLoading {
@@ -110,7 +186,6 @@ struct BarcodeLookupView: View {
                             }
                             .padding(.top, 20)
                         } else if let item = viewModel.scannedItem {
-                            // Results View
                             VStack(spacing: 16) {
                                 HStack {
                                     VStack(alignment: .leading, spacing: 4) {
@@ -172,7 +247,6 @@ struct BarcodeLookupView: View {
                             .padding(.horizontal, 24)
                         }
                         
-                        // Count Session Stats Dashboard Card
                         VStack(alignment: .leading, spacing: 14) {
                             Text("COUNT SESSION STATISTICS")
                                 .font(AppFonts.sansSerif(size: 10, weight: .bold))
@@ -202,7 +276,6 @@ struct BarcodeLookupView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .padding(.horizontal, 24)
                         
-                        // List of Scanned Items in Session
                         if !viewModel.scannedItems.isEmpty {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("SCANNED ITEMS (\(viewModel.scannedItems.count))")
@@ -236,7 +309,6 @@ struct BarcodeLookupView: View {
                             }
                         }
                         
-                        // List of Unexpected Items in Session
                         if !viewModel.unexpectedBarcodes.isEmpty {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("UNEXPECTED SKU ITEMS (\(viewModel.unexpectedBarcodes.count))")
@@ -279,6 +351,7 @@ struct BarcodeLookupView: View {
         .toolbarBackground(AppColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             viewModel.loadExpectedItems()
             scannerService.onScannedCode = { code in
@@ -327,7 +400,6 @@ struct BarcodeLookupView: View {
         let trimmed = code.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         
-        // 1. Check for Duplicate
         if viewModel.scannedBarcodes.contains(trimmed) {
             scannerService.playErrorFeedback()
             showHUD(message: "Duplicate: \(trimmed)", status: .duplicate)
@@ -336,7 +408,6 @@ struct BarcodeLookupView: View {
             return
         }
         
-        // 2. Check for Unexpected
         if !viewModel.expectedBarcodes.contains(trimmed) {
             scannerService.playErrorFeedback()
             showHUD(message: "Unexpected: \(trimmed)", status: .unexpected)
@@ -345,7 +416,6 @@ struct BarcodeLookupView: View {
             return
         }
         
-        // 3. Valid Scan
         withAnimation {
             viewModel.addScannedBarcode(trimmed)
         }
@@ -386,7 +456,6 @@ struct SessionSummarySheet: View {
                 VStack(spacing: 0) {
                     ScrollView {
                         VStack(spacing: 24) {
-                            // Summary Cards
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("SESSION TOTALS")
                                     .font(AppFonts.sansSerif(size: 10, weight: .bold))
@@ -406,7 +475,6 @@ struct SessionSummarySheet: View {
                             .padding(.horizontal, 24)
                             .padding(.top, 16)
                             
-                            // Missing Items Section
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("MISSING EXPECTED ITEMS (\(missingItems.count))")
                                     .font(AppFonts.sansSerif(size: 10, weight: .bold))

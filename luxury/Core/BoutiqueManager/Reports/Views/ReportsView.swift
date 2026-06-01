@@ -18,10 +18,7 @@ struct ReportsView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                CustomHeader(title: "Analytical Reports", showBackButton: true, backAction: {
-                    dismiss()
-                })
-                
+
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 16) {
                         Text("AVAILABLE MODULES")
@@ -75,25 +72,15 @@ struct ReportsView: View {
                             }
                         }
                         .padding(.horizontal, 24)
-                        
-                        VStack(alignment: .center, spacing: 8) {
-                            Image(systemName: "lock.shield")
-                                .font(AppFonts.sansSerif(size: 24))
-                                .foregroundStyle(AppColors.tertiary)
-                            Text("Data reflects the last synchronized state.\nSensitive PII is masked in aggregate views.")
-                                .font(AppFonts.sansSerif(size: 11))
-                                .foregroundStyle(AppColors.tertiary)
-                                .multilineTextAlignment(.center)
-                                .lineSpacing(4)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 40)
-                        .padding(.bottom, 40)
                     }
                 }
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle("Reports & Analytics")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
     }
     
     private func route(for title: String) -> BMRoute? {

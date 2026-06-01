@@ -1,4 +1,6 @@
 import SwiftUI
+import Supabase
+import PostgREST
 
 struct BoutiqueManagerProfileView: View {
     @Environment(BoutiqueManagerAppState.self) private var bmAppState
@@ -41,7 +43,7 @@ struct BoutiqueManagerProfileView: View {
                             
                             Spacer()
                             
-                            if let avatar = viewModel.avatarUrl, let url = URL(string: avatar) {
+                            if let avatar = viewModel.avatarUrl, !avatar.isEmpty, let url = URL(string: avatar) {
                                 AsyncImage(url: url) { image in
                                     image.resizable()
                                         .scaledToFill()
@@ -231,42 +233,15 @@ struct BoutiqueManagerProfileView: View {
                         }
                         .padding(.top, 24)
                         
-                        // Preferences
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text("PREFERENCES")
-                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
-                                .foregroundStyle(AppColors.secondary)
-                                .kerning(1.5)
-                                .padding(.horizontal, 24)
-                            
-                            VStack(spacing: 0) {
-                                HStack {
-                                    Text("Global Currency")
-                                        .font(AppFonts.sansSerif(size: 14))
-                                        .foregroundStyle(.white)
-                                    Spacer()
-                                    Picker("Currency", selection: $currencyManager.currentCurrency) {
-                                        ForEach(currencyManager.availableCurrencies, id: \.self) { code in
-                                            Text("\(code) (\(currencyManager.symbol(for: code)))").tag(code)
-                                        }
-                                    }
-                                    .tint(AppColors.gold)
-                                }
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 12)
-                            }
-                            .background(AppColors.surface)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
-                            .padding(.horizontal, 24)
-                        }
-                        .padding(.top, 24)
-                        
+                        // Removed redundant PREFERENCES section
                         CustomButton(title: "Logout", action: { showLogoutAlert = true })
                             .padding(.horizontal, 24)
                             .padding(.top, 40)
                             .padding(.bottom, 60)
                     }
+                }
+                .refreshable {
+                    await viewModel.fetchProfile()
                 }
             }
         }
@@ -287,6 +262,12 @@ struct BoutiqueManagerProfileView: View {
         }
         .task {
             await viewModel.fetchProfile()
+            await fetchCurrency()
+        }
+        .onChange(of: currencyManager.currentCurrency) { _, newCurrency in
+            Task {
+                await saveCurrency(newCurrency)
+            }
         }
     }
     
@@ -307,6 +288,39 @@ struct BoutiqueManagerProfileView: View {
             } catch {
                 await MainActor.run { isLoadingBoutique = false }
             }
+        }
+    }
+    
+    private func fetchCurrency() async {
+        do {
+            if let (_, profileData) = try await ProfileService().fetchCurrentProfile(),
+               let boutique = profileData as? CorporateBoutique {
+                if let currencyCode = boutique.currency, !currencyCode.isEmpty {
+                    await MainActor.run {
+                        currencyManager.currentCurrency = currencyCode
+                    }
+                }
+            }
+        } catch {
+            print("Failed to fetch currency: \(error)")
+        }
+    }
+    
+    private func saveCurrency(_ code: String) async {
+        do {
+            if let (_, profileData) = try await ProfileService().fetchCurrentProfile(),
+               let boutique = profileData as? CorporateBoutique {
+                struct UpdateCurrencyRequest: Encodable {
+                    let currency: String
+                }
+                try await SupabaseManager.shared.client
+                    .from("boutiques")
+                    .update(UpdateCurrencyRequest(currency: code))
+                    .eq("id", value: boutique.id)
+                    .execute()
+            }
+        } catch {
+            print("Failed to save currency: \(error)")
         }
     }
 }

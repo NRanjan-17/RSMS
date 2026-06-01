@@ -2,6 +2,7 @@ import SwiftUI
 import PhotosUI
 
 struct PlanogramManagementView: View {
+    @Environment(\.dismiss) private var dismiss
     @State private var viewModel = PlanogramManagementViewModel()
     @State private var isShowingCreateSheet = false
     
@@ -10,7 +11,12 @@ struct PlanogramManagementView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(alignment: .leading, spacing: 0) {
-                HStack {
+                HStack(spacing: 12) {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "chevron.left")
+                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
+                            .foregroundStyle(AppColors.gold)
+                    }
                     Text("Planograms")
                         .font(AppFonts.serif(size: 32, weight: .medium))
                         .foregroundStyle(AppColors.text)

@@ -45,7 +45,7 @@ struct ProfileView: View {
                             
                             Spacer()
                             
-                            if let avatar = viewModel.avatarUrl, let url = URL(string: avatar) {
+                            if let avatar = viewModel.avatarUrl, !avatar.isEmpty, let url = URL(string: avatar) {
                                 AsyncImage(url: url) { image in
                                     image.resizable()
                                         .scaledToFill()
@@ -258,6 +258,9 @@ struct ProfileView: View {
                             .padding(.top, 30)
                             .padding(.bottom, 60)
                     }
+                }
+                .refreshable {
+                    await viewModel.fetchAppointments()
                 }
             }
         }

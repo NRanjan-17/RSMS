@@ -25,7 +25,7 @@ struct StaffPerformanceReportView: View {
                             .kerning(1.5)
                             .padding(.horizontal, 24)
                         
-                        VStack(spacing: 1) {
+                        VStack(spacing: 12) {
                             ForEach(viewModel.staffMetrics, id: \.id) { metric in
                                 VStack(alignment: .leading, spacing: 12) {
                                     HStack {
@@ -59,11 +59,16 @@ struct StaffPerformanceReportView: View {
                                         Spacer()
                                     }
                                 }
-                                .padding(.horizontal, 24)
-                                .padding(.vertical, 18)
+                                .padding(20)
                                 .background(AppColors.surface)
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .stroke(AppColors.gold15, lineWidth: 0.5)
+                                )
                             }
                         }
+                        .padding(.horizontal, 24)
                     }
                     .padding(.top, 12)
                     .padding(.bottom, 40)
