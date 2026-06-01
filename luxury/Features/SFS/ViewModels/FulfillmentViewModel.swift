@@ -86,7 +86,10 @@ final class FulfillmentViewModel {
         if selectedSegment == 0 {
             return orders.filter { $0.status.lowercased() == "pending" }
         } else {
-            return orders.filter { $0.status.lowercased() == "secured" || $0.status.lowercased() == "ready to pick" }
+            return orders.filter { 
+                let status = $0.status.lowercased()
+                return status == "secured" || status == "ready to pick" || status == "delivered" 
+            }
         }
     }
     

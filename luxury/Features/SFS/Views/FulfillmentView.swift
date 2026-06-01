@@ -147,7 +147,9 @@ struct FulfillmentView: View {
                                                 
                                                 Spacer()
                                                 
-                                                if order.status.lowercased() == "ready to pick" {
+                                                if order.status.lowercased() == "delivered" {
+                                                    StatusBadge(text: "Delivered", status: .success)
+                                                } else if order.status.lowercased() == "ready to pick" {
                                                     StatusBadge(text: "Ready to Pick", status: .success)
                                                 } else if order.status.lowercased() == "secured" {
                                                     StatusBadge(text: "Secured", status: .neutral)
