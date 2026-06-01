@@ -214,7 +214,7 @@ final class FulfillmentViewModel {
                         quantity: 5,
                         productAvailable: true
                     )
-                    try? await SupabaseManager.shared.client.from("inventory").insert(newItem).execute()
+                    _ = try? await SupabaseManager.shared.client.from("inventory").insert(newItem).execute()
                     inventoryItem = newItem
                 }
                 if inventoryItem.quantity <= 0 {
