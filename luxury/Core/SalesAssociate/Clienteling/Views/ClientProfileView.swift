@@ -73,6 +73,7 @@ struct ClientProfileView: View {
                                 }
                             }
                         }
+                        .background(AppColors.surface)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
                         .padding(.horizontal, 24)
@@ -111,8 +112,6 @@ struct ClientProfileView: View {
                             if viewModel.selectedTab == "overview" {
                                 ClientOverviewTab(
                                     viewModel: viewModel,
-                                    onApptTap: { router.presentFullScreen(SARoute.createAppointment(viewModel.client)) },
-                                    onNoteTap: { showQuickNote = true },
                                     onTicketTap: { router.push(SARoute.afterSalesTracking) }
                                 )
                             } else if viewModel.selectedTab == "appointments" {
@@ -181,20 +180,32 @@ struct ClientProfileView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ClientDeleted"))) { _ in
             dismiss()
         }
+        .navigationDestination(for: CatalogItem.self) { product in
+            let catalogEntity = CatalogEntity(
+                id: product.id,
+                catalogId: product.catalogId,
+                name: product.name,
+                description: product.description,
+                brand: product.brand,
+                category: CatalogCategory(rawValue: product.category) ?? .other,
+                amount: product.amount,
+                barCode: product.barCode,
+                status: CatalogStatus(rawValue: product.status) ?? .active,
+                reserved: product.reserved,
+                productIds: product.productIds,
+                productImages: product.productImages
+            )
+            SalesProductDetailView(catalog: catalogEntity)
+        }
     }
 }
 
 private struct ClientOverviewTab: View {
     let viewModel: ClientDetailViewModel
-    var onApptTap: () -> Void
-    var onNoteTap: () -> Void
     var onTicketTap: () -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            HStack(spacing: 8) {
-                QuickActionButton(label: "Note", icon: "square.and.pencil", action: onNoteTap)
-            }
             let client = viewModel.client
             let hasAdditionalInfo = (client.dob != nil && !client.dob!.isEmpty) || 
                                     (client.maritalStatus != nil && !client.maritalStatus!.isEmpty) || 
@@ -254,56 +265,6 @@ private struct ClientOverviewTab: View {
                     .background(AppColors.surface)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
-                }
-            }
-            
-
-            
-            // APPOINTMENTS Section intentionally removed to avoid duplication with the dedicated tab
-            
-            if !viewModel.appointments.isEmpty {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("UPCOMING")
-                        .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                        .foregroundStyle(AppColors.secondary)
-                        .kerning(1.5)
-                    
-                    let upcomingAppts = viewModel.appointments.filter { $0.status != .completed && $0.status != .cancelled }.prefix(2)
-                    
-                    if upcomingAppts.isEmpty {
-                        Text("No upcoming appointments")
-                            .font(AppFonts.sansSerif(size: 12))
-                            .foregroundStyle(AppColors.secondary)
-                            .padding(.vertical, 4)
-                    } else {
-                        ForEach(upcomingAppts) { appt in
-                            HStack(spacing: 10) {
-                                let timePrefix = String(appt.formattedDate.prefix(10))
-                                Text(timePrefix)
-                                    .font(AppFonts.sansSerif(size: 10, weight: .medium))
-                                    .foregroundStyle(AppColors.gold)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(AppColors.gold08)
-                                    .clipShape(RoundedRectangle(cornerRadius: 7))
-                                
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(appt.appointmentType.rawValue)
-                                        .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                                        .foregroundStyle(.white)
-                                    Text("\(appt.formattedDate) · \(appt.formattedTime)")
-                                        .font(AppFonts.sansSerif(size: 11))
-                                        .foregroundStyle(AppColors.secondary)
-                                }
-                                Spacer()
-                            }
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 12)
-                            .background(AppColors.surface)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
-                        }
-                    }
                 }
             }
             
@@ -701,6 +662,8 @@ private struct ClientWishlistTab: View {
     let viewModel: ClientDetailViewModel
     @State private var showWishlistCatalog = false
     @State private var isLoading = false
+    @State private var showingDeleteConfirmation = false
+    @State private var itemToDelete: GroupedWishlistItem? = nil
     
     var body: some View {
         VStack {
@@ -763,62 +726,104 @@ private struct ClientWishlistTab: View {
                         }
                         .padding(.bottom, 6)
                         
-                        ForEach(wishlist, id: \.id) { w in
-                            HStack(spacing: 12) {
+                        List {
+                            ForEach(wishlist, id: \.id) { w in
+                                let clickedProduct = viewModel.wishlistCatalogs.first(where: { $0.id == w.id }) ?? CatalogItem(
+                                    id: w.id,
+                                    catalogId: "",
+                                    name: w.name,
+                                    description: "",
+                                    brand: w.brand,
+                                    category: "Other",
+                                    amount: w.price,
+                                    barCode: "",
+                                    status: "Active",
+                                    reserved: [],
+                                    productIds: [],
+                                    createdAt: nil,
+                                    productImages: w.productImages
+                                )
+                                
                                 ZStack {
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .fill(AppColors.surface2)
-                                        .frame(width: 44, height: 44)
+                                    NavigationLink(value: clickedProduct) {
+                                        EmptyView()
+                                    }
+                                    .opacity(0)
                                     
-                                    if let imgStr = w.productImages?.first, let imgURL = URL(string: imgStr) {
-                                        AsyncImage(url: imgURL) { phase in
-                                            switch phase {
-                                            case .success(let image):
-                                                image
-                                                    .resizable()
-                                                    .scaledToFill()
-                                                    .frame(width: 44, height: 44)
-                                                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                                            default:
+                                    HStack(spacing: 12) {
+                                        ZStack {
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .fill(AppColors.surface2)
+                                                .frame(width: 44, height: 44)
+                                            
+                                            if let imgStr = w.productImages?.first, let imgURL = URL(string: imgStr) {
+                                                AsyncImage(url: imgURL) { phase in
+                                                    switch phase {
+                                                    case .success(let image):
+                                                        image
+                                                            .resizable()
+                                                            .scaledToFill()
+                                                            .frame(width: 44, height: 44)
+                                                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                                                    default:
+                                                        Image(systemName: "circle.grid.cross")
+                                                            .font(AppFonts.sansSerif(size: 18))
+                                                            .foregroundStyle(AppColors.gold)
+                                                            .opacity(0.4)
+                                                    }
+                                                }
+                                            } else {
                                                 Image(systemName: "circle.grid.cross")
                                                     .font(AppFonts.sansSerif(size: 18))
                                                     .foregroundStyle(AppColors.gold)
                                                     .opacity(0.4)
                                             }
                                         }
-                                    } else {
-                                        Image(systemName: "circle.grid.cross")
-                                            .font(AppFonts.sansSerif(size: 18))
-                                            .foregroundStyle(AppColors.gold)
-                                            .opacity(0.4)
+                                        .frame(width: 44, height: 44)
+                                        
+                                        VStack(alignment: .leading, spacing: 3) {
+                                            Text(w.brand.uppercased())
+                                                .font(AppFonts.sansSerif(size: 10))
+                                                .foregroundStyle(AppColors.gold)
+                                                .kerning(1)
+                                            Text(w.name)
+                                                .font(AppFonts.serif(size: 14, weight: .medium))
+                                                .foregroundStyle(.white)
+                                                .multilineTextAlignment(.leading)
+                                            Text(CurrencyManager.shared.format(amount: w.price))
+                                                .font(AppFonts.serif(size: 15, weight: .semibold))
+                                                .foregroundStyle(AppColors.gold)
+                                        }
+                                        
+                                        Spacer()
                                     }
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 12)
+                                    .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
                                 }
-                                .frame(width: 44, height: 44)
-                                
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text(w.brand.uppercased())
-                                        .font(AppFonts.sansSerif(size: 10))
-                                        .foregroundStyle(AppColors.gold)
-                                        .kerning(1)
-                                    Text(w.name)
-                                        .font(AppFonts.serif(size: 14, weight: .medium))
-                                        .foregroundStyle(.white)
-                                    Text(CurrencyManager.shared.format(amount: w.price))
-                                        .font(AppFonts.serif(size: 15, weight: .semibold))
-                                        .foregroundStyle(AppColors.gold)
+                                .listRowBackground(Color.clear)
+                                .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
+                                .listRowSeparator(.hidden)
+                                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                    Button(role: .destructive) {
+                                        itemToDelete = w
+                                        showingDeleteConfirmation = true
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
+                                    }
+                                    .tint(.red)
                                 }
-                                
-                                Spacer()
-                                
-                                clientWishlistQuantityControls(for: w)
                             }
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 12)
-                            .background(AppColors.surface)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
                         }
+                        .listStyle(.plain)
+                        .scrollContentBackground(.hidden)
+                        .background(Color.clear)
+                        .scrollDisabled(true)
+                        .frame(height: CGFloat(wishlist.count) * 78 + 10)
                     }
+                    .padding(.bottom, 80)
                 }
             }
         }
@@ -833,59 +838,30 @@ private struct ClientWishlistTab: View {
                 loadWishlist()
             }
         }
-    }
-    
-    @ViewBuilder
-    private func clientWishlistQuantityControls(for w: GroupedWishlistItem) -> some View {
-        HStack(spacing: 8) {
-            Button(action: {
-                if let lastItem = w.originalItems.last {
+        .alert("Remove Item?", isPresented: $showingDeleteConfirmation) {
+            Button("Remove", role: .destructive) {
+                if let item = itemToDelete {
                     Task {
-                        await viewModel.removeProductFromWishlist(itemId: lastItem.id)
-                        loadWishlist()
+                        // Pop out all matching items
+                        for origItem in item.originalItems {
+                            await viewModel.removeProductFromWishlist(itemId: origItem.id)
+                        }
+                        withAnimation(.default) {
+                            loadWishlist()
+                        }
                     }
                 }
-            }) {
-                Image(systemName: w.quantity == 1 ? "trash" : "minus")
-                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                    .foregroundStyle(w.quantity == 1 ? AppColors.error.opacity(0.8) : AppColors.gold)
-                    .frame(width: 26, height: 26)
-                    .background(AppColors.surface)
-                    .clipShape(Circle())
             }
-            .buttonStyle(.plain)
-            
-            Text("\(w.quantity)")
-                .font(AppFonts.sansSerif(size: 13, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(minWidth: 16)
-                .multilineTextAlignment(.center)
-            
-            Button(action: {
-                Task {
-                    do {
-                        try await viewModel.addProductToWishlist(productId: w.id, brand: w.brand, name: w.name, price: w.price)
-                        loadWishlist()
-                    } catch {
-                        print("Wishlist Tab Quantity Add Error: \(error)")
-                    }
-                }
-            }) {
-                Image(systemName: "plus")
-                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                    .foregroundStyle(AppColors.gold)
-                    .frame(width: 26, height: 26)
-                    .background(AppColors.surface)
-                    .clipShape(Circle())
+            Button("Cancel", role: .cancel) {
+                itemToDelete = nil
             }
-            .buttonStyle(.plain)
+        } message: {
+            if let item = itemToDelete {
+                Text("Are you sure you want to remove \(item.name) from this client's wishlist?")
+            }
         }
-        .padding(.horizontal, 4)
-        .padding(.vertical, 4)
-        .background(AppColors.surface2)
-        .clipShape(Capsule())
-        .overlay(Capsule().stroke(AppColors.gold15, lineWidth: 0.5))
     }
+
     
     private func loadWishlist() {
         isLoading = true
@@ -898,6 +874,8 @@ private struct ClientWishlistTab: View {
         }
     }
 }
+
+
 
 private struct WishlistProductSelectionView: View {
     let viewModel: ClientDetailViewModel
