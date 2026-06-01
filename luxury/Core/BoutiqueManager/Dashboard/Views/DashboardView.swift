@@ -174,7 +174,7 @@ struct DashboardView: View {
                                             .frame(width: 70, alignment: .leading)
                                             
                                             VStack(alignment: .leading, spacing: 2) {
-                                                Text("Unknown Client")
+                                                Text(appointment.client?.name ?? "Unknown Client")
                                                     .font(AppFonts.serif(size: 17, weight: .medium))
                                                     .foregroundStyle(AppColors.text)
                                                 Text("Advisor: \(viewModel.advisorName(for: appointment.assignedTo))")

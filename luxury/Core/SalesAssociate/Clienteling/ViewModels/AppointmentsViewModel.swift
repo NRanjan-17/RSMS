@@ -195,4 +195,19 @@ final class AppointmentsViewModel {
             self.errorMessage = error.localizedDescription
         }
     }
+    
+    @MainActor
+    func deleteAppointment(_ id: UUID) async {
+        do {
+            try await client.from("appointment")
+                .delete()
+                .eq("id", value: id)
+                .execute()
+            
+            await fetchAppointments()
+        } catch {
+            print("Failed to delete appointment: \(error)")
+            self.errorMessage = error.localizedDescription
+        }
+    }
 }

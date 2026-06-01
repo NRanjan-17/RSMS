@@ -10,7 +10,7 @@ enum SATab {
 }
 
 enum BMTab {
-    case dashboard, team, store, reports, profile
+    case dashboard, team, store, profile
 }
 
 enum ICTab {

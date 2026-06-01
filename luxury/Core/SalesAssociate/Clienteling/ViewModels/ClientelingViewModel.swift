@@ -7,6 +7,8 @@
 
 import Foundation
 import Observation
+import Supabase
+import PostgREST
 
 @Observable
 final class ClientelingViewModel {
@@ -40,7 +42,7 @@ final class ClientelingViewModel {
                 (client.email?.localizedCaseInsensitiveContains(searchText) ?? false)
             }
         }
-        return filtered
+        return filtered.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
     
     func loadClients() async {
@@ -49,7 +51,30 @@ final class ClientelingViewModel {
         
         do {
             let entities = try await clientService.fetchClients()
-            let dbClients = entities.map { Client(entity: $0) }
+            var dbClients = entities.map { Client(entity: $0) }
+            
+            // Fetch upcoming appointments to determine isHot
+            do {
+                struct ClientAppt: Codable { let client_id: UUID }
+                let isoFormatter = ISO8601DateFormatter()
+                let todayISO = isoFormatter.string(from: Date())
+                
+                let upcomingAppts: [ClientAppt] = try await SupabaseManager.shared.client
+                    .from("appointment")
+                    .select("client_id")
+                    .gte("timestamp", value: todayISO)
+                    .execute()
+                    .value
+                
+                let hotClientIds = Set(upcomingAppts.map { $0.client_id })
+                for i in 0..<dbClients.count {
+                    if hotClientIds.contains(dbClients[i].id) {
+                        dbClients[i].isHot = true
+                    }
+                }
+            } catch {
+                print("Could not fetch appointments for isHot flag: \(error)")
+            }
             
             await MainActor.run {
                 self.clients = dbClients

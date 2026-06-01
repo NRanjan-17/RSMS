@@ -41,13 +41,15 @@ struct BMAppointmentDetailView: View {
                                     RoundedRectangle(cornerRadius: 12)
                                         .fill(AppColors.gold08)
                                         .frame(width: 50, height: 50)
-                                    Text("U")
+                                    let clientInitial = appointment.client?.name.prefix(1).uppercased() ?? "U"
+                                    Text(clientInitial)
                                         .font(AppFonts.serif(size: 20, weight: .bold))
                                         .foregroundStyle(AppColors.gold)
                                 }
 
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text("Unknown Client")
+                                    let clientName = appointment.client?.name ?? "Unknown Client"
+                                    Text(clientName)
                                         .font(AppFonts.serif(size: 22, weight: .medium))
                                         .foregroundStyle(AppColors.text)
                                     Text(appointment.displayAppointmentType)
@@ -132,11 +134,28 @@ struct BMAppointmentDetailView: View {
                     }
                     .disabled(isSaving)
                     .padding(.horizontal, 24)
+                    .padding(.horizontal, 24)
                 }
                 .padding(.top, 20)
+                
+                Button(action: {
+                    Task {
+                        isSaving = true
+                        await deleteAppointment(appointmentId: appointment.id)
+                        isSaving = false
+                        dismiss()
+                    }
+                }) {
+                    Text("Delete Appointment")
+                        .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                        .foregroundStyle(AppColors.error)
+                        .padding(.vertical, 16)
+                }
+                .disabled(isSaving)
                 .padding(.bottom, 40)
-                .background(AppColors.background)
+                
             }
+            .background(AppColors.background)
         }
         .task {
             await fetchAvailableStaff()
@@ -187,6 +206,19 @@ struct BMAppointmentDetailView: View {
                 .execute()
         } catch {
             print("Failed to assign staff: \(error)")
+        }
+    }
+
+    
+    private func deleteAppointment(appointmentId: UUID) async {
+        do {
+            try await SupabaseManager.shared.client
+                .from("appointment")
+                .delete()
+                .eq("id", value: appointmentId)
+                .execute()
+        } catch {
+            print("Failed to delete appointment: \(error)")
         }
     }
 }

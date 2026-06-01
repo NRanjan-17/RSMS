@@ -257,11 +257,15 @@ final class DashboardViewModel {
                 if let (_, profile) = try await ProfileService().fetchCurrentProfile(),
                    let boutique = profile as? CorporateBoutique {
                     
+                    let isoFormatter = ISO8601DateFormatter()
+                    let todayISO = isoFormatter.string(from: Date())
+                    
                     let fetched: [AppointmentEntity] = try await SupabaseManager.shared.client
                         .from("appointment")
-                        .select()
+                        .select("*, client(*)")
                         .eq("boutique_id", value: boutique.id)
-                        .order("created_at", ascending: false)
+                        .gte("timestamp", value: todayISO)
+                        .order("timestamp", ascending: true)
                         .execute()
                         .value
                     
@@ -311,7 +315,7 @@ final class DashboardViewModel {
         do {
             try await SupabaseManager.shared.client
                 .from("appointment")
-                .update(UpdateStaffRequest(assigned_to: staffId, status: "assigned"))
+                .update(UpdateStaffRequest(assigned_to: staffId, status: AppointmentStatus.upcoming.rawValue))
                 .eq("id", value: appointmentId)
                 .execute()
             

@@ -115,6 +115,17 @@ struct AppointmentListView: View {
                                                     .opacity(a.status == .completed ? 0.5 : 1.0)
                                                 }
                                                 .buttonStyle(.plain)
+                                                .contextMenu {
+                                                    if a.createdBy == viewModel.currentStaffId && a.status == .pending {
+                                                        Button(role: .destructive, action: {
+                                                            Task {
+                                                                await viewModel.deleteAppointment(a.id)
+                                                            }
+                                                        }) {
+                                                            Label("Delete Appointment", systemImage: "trash")
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
                                         .padding(.horizontal, 24)
@@ -206,7 +217,7 @@ struct AppointmentDetailSheet: View {
                         if canEdit {
                             Picker("Status", selection: $currentStatus) {
                                 ForEach(AppointmentStatus.allCases, id: \.self) { status in
-                                    Text(status.rawValue.capitalized).tag(status)
+                                    Text(status.displayStatus).tag(status)
                                 }
                             }
                             .tint(AppColors.gold)
@@ -219,7 +230,7 @@ struct AppointmentDetailSheet: View {
                                 }
                             }
                         } else {
-                            Text(currentStatus.rawValue.capitalized)
+                            Text(currentStatus.displayStatus)
                                 .font(AppFonts.sansSerif(size: 14, weight: .medium))
                                 .foregroundStyle(AppColors.gold)
                         }

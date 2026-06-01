@@ -20,6 +20,10 @@ extension AppointmentStatus {
         case .noShow: return .gray
         }
     }
+    
+    var displayStatus: String {
+        return self.rawValue.replacingOccurrences(of: "_", with: " ").capitalized
+    }
 }
 
 enum AppointmentType: String, Codable, Hashable, CaseIterable {

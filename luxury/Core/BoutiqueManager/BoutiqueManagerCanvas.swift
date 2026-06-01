@@ -6,7 +6,7 @@ struct BoutiqueManagerCanvas: View {
     @State private var dashRouter = Router()
     @State private var teamRouter = Router()
     @State private var storeRouter = Router()
-    @State private var reportsRouter = Router()
+
     @State private var profileRouter = Router()
     
     var body: some View {
@@ -62,22 +62,7 @@ struct BoutiqueManagerCanvas: View {
             .tabItem { Label("Store", systemImage: "building.2") }
             .tag(BMTab.store)
             
-            NavigationStack(path: $reportsRouter.path) {
-                ReportsView()
-                    .navigationDestination(for: BMRoute.self) { route in
-                        destination(for: route, router: reportsRouter)
-                    }
-                    .fullScreenCover(item: $reportsRouter.presentedFullScreen) { route in
-                        destination(for: route.value as! BMRoute, router: reportsRouter)
-                    }
-                    .sheet(item: $reportsRouter.presentedSheet) { route in
-                        destination(for: route.value as! BMRoute, router: reportsRouter)
-                    }
-            }
-            .environment(reportsRouter)
-            .tabItem { Label("Reports", systemImage: "doc.text") }
-            .tag(BMTab.reports)
-            
+
             NavigationStack(path: $profileRouter.path) {
                 BoutiqueManagerProfileView()
                     .navigationDestination(for: BMRoute.self) { route in

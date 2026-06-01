@@ -148,7 +148,7 @@ struct Client: Identifiable, Hashable {
     let lastVisit: String
     let ltv: Double
     let initial: String
-    let isHot: Bool
+    var isHot: Bool
     let phone: String?
     let email: String?
     var dob: String?
@@ -209,7 +209,8 @@ extension Client {
         let lastInit = parts.count > 1 ? (parts.last?.prefix(1) ?? "") : ""
         self.initial = "\(firstInit)\(lastInit)".uppercased()
         
-        self.isHot = (clientTier == .uhnw && hasPurchases)
+        // isHot is now managed dynamically by ViewModels based on upcoming appointments
+        self.isHot = false
         self.phone = entity.phone
         self.email = entity.email
         self.dob = entity.dob
