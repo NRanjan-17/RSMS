@@ -37,6 +37,7 @@ final class SAProfileViewModel {
                 await MainActor.run {
                     self.name = staff.name
                     self.greeting = self.getGreeting() + ","
+                    self.target = staff.dailySalesTarget ?? 0.0
                 }
                 
                 if let boutiqueId = staff.boutiqueId {

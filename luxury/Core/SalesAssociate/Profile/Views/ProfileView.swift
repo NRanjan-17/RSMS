@@ -259,6 +259,9 @@ struct ProfileView: View {
                             .padding(.bottom, 60)
                     }
                 }
+                .refreshable {
+                    await viewModel.fetchAppointments()
+                }
             }
         }
         .task {

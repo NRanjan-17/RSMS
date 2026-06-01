@@ -144,7 +144,7 @@ struct BMAppointmentDetailView: View {
                                 if isSaving {
                                     ProgressView().tint(AppColors.background)
                                 } else {
-                                    Text("Save")
+                                    Text("Assign")
                                         .font(AppFonts.sansSerif(size: 14, weight: .bold))
                                         .foregroundStyle(AppColors.background)
                                 }
@@ -220,6 +220,8 @@ struct BMAppointmentDetailView: View {
                 .update(UpdateStaffRequest(assigned_to: staffId, status: AppointmentStatus.upcoming.rawValue))
                 .eq("id", value: appointmentId)
                 .execute()
+            
+            NotificationCenter.default.post(name: Notification.Name("RefreshAppointments"), object: nil)
         } catch {
             print("Failed to assign staff: \(error)")
         }
