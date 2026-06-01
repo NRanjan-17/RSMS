@@ -10,7 +10,7 @@ import Observation
 
 @Observable
 final class StoreViewModel {
-    var pendingTransfersCount: Int = 3
+    var pendingTransfersCount: Int = 0
     var pendingCycleCountsCount: Int = 1
     
     var events: [StoreEvent] = []
@@ -19,6 +19,14 @@ final class StoreViewModel {
     
     init() {
         loadLocalEvents()
+        fetchPendingTransfersCount()
+    }
+    
+    func fetchPendingTransfersCount() {
+        let transfers = TransferPersistence.shared.loadTransfers()
+        self.pendingTransfersCount = transfers.filter { 
+            $0.status.lowercased() == "submitted" || $0.status.lowercased() == "pending approval"
+        }.count
     }
     
     func loadLocalEvents() {

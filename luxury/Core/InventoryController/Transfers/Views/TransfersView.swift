@@ -36,7 +36,7 @@ struct TransfersView: View {
                 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 12) {
-                        ForEach(viewModel.pendingTransfers) { transfer in
+                        ForEach(filteredTransfers()) { transfer in
                             Button(action: { router.presentFullScreen(ICRoute.transferDetail(transfer)) }) {
                                 VStack(alignment: .leading, spacing: 12) {
                                     HStack {
@@ -91,6 +91,38 @@ struct TransfersView: View {
         .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             viewModel.fetchTransfers()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("StockTransferUpdated"))) { _ in
+            viewModel.fetchTransfers()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("StockTransferReceived"))) { _ in
+            viewModel.fetchTransfers()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("StockTransferApproved"))) { _ in
+            viewModel.fetchTransfers()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("StockTransferRejected"))) { _ in
+            viewModel.fetchTransfers()
+        }
+    }
+    
+    private func filteredTransfers() -> [TransferRequest] {
+        let allTransfers = viewModel.pendingTransfers
+        switch selectedFilter {
+        case 0: // Pending
+            return allTransfers.filter {
+                let s = $0.status.lowercased()
+                return s == "submitted" || s == "approved" || s == "pending approval"
+            }
+        case 1: // In Transit
+            return allTransfers.filter { $0.status.lowercased() == "in transit" }
+        case 2: // Completed / Received
+            return allTransfers.filter {
+                let s = $0.status.lowercased()
+                return s == "completed" || s == "received" || s == "rejected"
+            }
+        default:
+            return allTransfers
         }
     }
 }

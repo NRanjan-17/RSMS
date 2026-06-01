@@ -3,6 +3,7 @@
 //  luxury
 //
 //  Created by Aditya Chauhan on 15/05/26.
+//  Modified by Antigravity on 01/06/26.
 //
 
 import SwiftUI
@@ -11,6 +12,8 @@ struct CustomHeader: View {
     let title: String
     var showBackButton: Bool = false
     var backAction: (() -> Void)? = nil
+    var trailingIcon: String? = nil
+    var trailingAction: (() -> Void)? = nil
     
     var body: some View {
         HStack(spacing: 12) {
@@ -24,7 +27,16 @@ struct CustomHeader: View {
             Text(title)
                 .font(AppFonts.serif(size: 28, weight: .semibold))
                 .foregroundStyle(.white)
+            
             Spacer()
+            
+            if let icon = trailingIcon, let action = trailingAction {
+                Button(action: action) {
+                    Image(systemName: icon)
+                        .font(AppFonts.sansSerif(size: 20, weight: .semibold))
+                        .foregroundStyle(AppColors.gold)
+                }
+            }
         }
         .padding(.horizontal, 24)
         .padding(.top, 16)
