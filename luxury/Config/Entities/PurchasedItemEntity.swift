@@ -11,9 +11,9 @@ struct PurchasedItemEntity: Identifiable, Codable, Hashable, Equatable {
     let id: UUID
     let uid: UUID
     let productId: UUID
-    let salesAssociateId: UUID?
-    var inventoryManagerId: UUID?
-    let boutiqueId: UUID?
+    let salesAssociateId: UUID? = nil
+    var inventoryManagerId: UUID? = nil
+    let boutiqueId: UUID? = nil
     let reservedDate: Date
     var deliveryDate: Date?
     let transactionId: String
