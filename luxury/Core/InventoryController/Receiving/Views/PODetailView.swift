@@ -49,6 +49,7 @@ struct PODetailView: View {
             
             if let po = po {
                 VStack(spacing: 0) {
+                    CustomHeader(title: "PO Details", showBackButton: true, backAction: { dismiss() })
                     
                     ScrollView(showsIndicators: false) {
                         VStack(spacing: 24) {
@@ -283,6 +284,7 @@ struct PODetailView: View {
         .toolbarBackground(AppColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             viewModel.loadPurchaseOrders()
         }

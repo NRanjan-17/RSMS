@@ -7,6 +7,7 @@ import SwiftUI
 
 struct BarcodeLookupView: View {
     @Environment(Router.self) private var router
+    @Environment(\.dismiss) private var dismiss
     @State private var viewModel = BarcodeLookupViewModel()
     @State private var scannerService = ScannerService()
     @State private var manualEntry: String = ""
@@ -40,6 +41,9 @@ struct BarcodeLookupView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
+                CustomHeader(title: "Barcode Lookup", showBackButton: true, backAction: { dismiss() })
+                
+                // Camera / Scanner View
                 ZStack {
                     if isSimulator {
                         VStack(spacing: 12) {
@@ -347,6 +351,7 @@ struct BarcodeLookupView: View {
         .toolbarBackground(AppColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             viewModel.loadExpectedItems()
             scannerService.onScannedCode = { code in

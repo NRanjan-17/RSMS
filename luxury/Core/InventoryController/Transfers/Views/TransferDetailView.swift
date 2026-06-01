@@ -151,6 +151,7 @@ struct TransferDetailView: View {
         .toolbarBackground(AppColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar(.hidden, for: .navigationBar)
         .alert(
             "Transfer Error",
             isPresented: $showAlert

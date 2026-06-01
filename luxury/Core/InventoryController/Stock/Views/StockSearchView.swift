@@ -16,6 +16,7 @@ struct StockSearchView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
+                CustomHeader(title: "Stock Search", showBackButton: true, backAction: { dismiss() })
                 
                 HStack(spacing: 12) {
                     Image(systemName: "magnifyingglass")
@@ -83,6 +84,7 @@ struct StockSearchView: View {
         .toolbarBackground(AppColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             viewModel.fetchItems()
         }
