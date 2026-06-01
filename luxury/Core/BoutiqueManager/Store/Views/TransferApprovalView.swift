@@ -497,7 +497,6 @@ struct BMTransferDetailView: View {
         } message: {
             Text("Are you sure you want to reject this stock transfer request?")
         }
-        }
         .navigationTitle("Transfers")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(AppColors.background, for: .navigationBar)
