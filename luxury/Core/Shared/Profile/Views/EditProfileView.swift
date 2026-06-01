@@ -114,3 +114,24 @@ struct EditProfileView: View {
         }
     }
 }
+
+private struct LabeledTextField: View {
+    let label: String
+    @Binding var text: String
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(label)
+                .font(AppFonts.sansSerif(size: 12, weight: .medium))
+                .foregroundStyle(AppColors.secondary)
+            
+            TextField("", text: $text)
+                .font(AppFonts.sansSerif(size: 15))
+                .foregroundStyle(AppColors.text)
+                .padding()
+                .background(AppColors.background)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .overlay(RoundedRectangle(cornerRadius: 10).stroke(AppColors.border, lineWidth: 1))
+        }
+    }
+}
