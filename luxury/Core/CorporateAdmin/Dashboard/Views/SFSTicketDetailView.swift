@@ -76,3 +76,20 @@ struct SFSTicketDetailView: View {
         .toolbar(.hidden, for: .tabBar)
     }
 }
+
+private struct DetailRow: View {
+    let label: String
+    let value: String
+    
+    var body: some View {
+        HStack {
+            Text(label)
+                .font(AppFonts.sansSerif(size: 14))
+                .foregroundStyle(AppColors.secondary)
+            Spacer()
+            Text(value)
+                .font(AppFonts.sansSerif(size: 14, weight: .medium))
+                .foregroundStyle(.white)
+        }
+    }
+}
