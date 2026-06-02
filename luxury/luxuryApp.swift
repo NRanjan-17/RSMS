@@ -49,6 +49,7 @@ struct luxuryApp: App {
                 .environment(caAppState)
                 .environment(languageManager)
                 .environment(\.locale, languageManager.currentLocale)
+                .id(languageManager.selectedLanguage)
                 .preferredColorScheme(.dark)
         }
     }

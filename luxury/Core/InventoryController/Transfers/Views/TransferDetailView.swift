@@ -52,7 +52,7 @@ struct TransferDetailView: View {
                                     .foregroundStyle(AppColors.gold)
                                     .kerning(1.5)
                                 Spacer()
-                                StatusBadge(text: transfer.status, status: transfer.badgeStatus)
+                                StatusBadge(text: LocalizedStringKey(transfer.status), status: transfer.badgeStatus)
                             }
                             
                             Text("Inter-store Movement")

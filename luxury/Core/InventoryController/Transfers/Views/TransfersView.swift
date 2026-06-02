@@ -44,7 +44,7 @@ struct TransfersView: View {
                                             .font(AppFonts.sansSerif(size: 12, weight: .bold))
                                             .foregroundStyle(AppColors.gold)
                                         Spacer()
-                                        StatusBadge(text: transfer.status, status: transfer.badgeStatus)
+                                        StatusBadge(text: LocalizedStringKey(transfer.status), status: transfer.badgeStatus)
                                     }
                                     
                                     HStack(spacing: 12) {

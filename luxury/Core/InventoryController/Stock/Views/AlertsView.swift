@@ -48,7 +48,7 @@ struct AlertsView: View {
                                 }) {
                                     VStack(alignment: .leading, spacing: 12) {
                                         HStack {
-                                            StatusBadge(text: alert.urgency.rawValue, status: alert.status)
+                                            StatusBadge(text: LocalizedStringKey(alert.urgency.rawValue), status: alert.status)
                                             Spacer()
                                             Text(alert.timeRaised)
                                                 .font(AppFonts.sansSerif(size: 11))

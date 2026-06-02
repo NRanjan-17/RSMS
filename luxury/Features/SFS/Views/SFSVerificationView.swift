@@ -185,7 +185,7 @@ struct SFSVerificationView: View {
                                                     .lineLimit(2)
                                             }
                                             Spacer()
-                                            StatusBadge(text: request.status.rawValue, status: request.status == .dispatched ? .success : .pending)
+                                            StatusBadge(text: LocalizedStringKey(request.status.rawValue), status: request.status == .dispatched ? .success : .pending)
                                         }
                                         
                                         if request.status == .dispatched && (request.history.last?.contains("Delivered") == true || request.history.contains(where: { $0.contains("Delivered") })) {

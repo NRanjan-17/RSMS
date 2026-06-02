@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct CustomButton: View {
-    let title: String
+    let title: LocalizedStringKey
     let icon: AnyView?
     let isLoading: Bool
     let action: () -> Void
     
-    init(title: String, icon: AnyView? = nil, isLoading: Bool = false, action: @escaping () -> Void) {
+    init(title: LocalizedStringKey, icon: AnyView? = nil, isLoading: Bool = false, action: @escaping () -> Void) {
         self.title = title
         self.icon = icon
         self.isLoading = isLoading

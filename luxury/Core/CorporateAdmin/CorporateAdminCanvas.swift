@@ -114,7 +114,7 @@ struct CorporateAdminCanvas: View {
             SystemLogsView()
         case .boutiqueRequestDetail(let boutique):
             RequestDetailSheet(
-                title: boutique.name,
+                title: LocalizedStringKey(boutique.name),
                 subtitle: "Boutique Registration",
                 details: [
                     ("Manager", boutique.managerName),

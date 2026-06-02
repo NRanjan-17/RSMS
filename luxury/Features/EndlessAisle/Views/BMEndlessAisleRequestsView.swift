@@ -172,7 +172,7 @@ public struct BMEndlessAisleRequestsView: View {
                                             }
                                             Spacer()
                                             StatusBadge(
-                                                text: request.status.rawValue,
+                                                text: LocalizedStringKey(request.status.rawValue),
                                                 status: request.status == .dispatched ? .success : .neutral
                                             )
                                         }

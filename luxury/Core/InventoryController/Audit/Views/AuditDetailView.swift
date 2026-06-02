@@ -28,7 +28,7 @@ struct AuditDetailView: View {
                                     .foregroundStyle(AppColors.gold)
                                     .kerning(1.5)
                                 Spacer()
-                                StatusBadge(text: audit.status, status: audit.badgeStatus)
+                                StatusBadge(text: LocalizedStringKey(audit.status), status: audit.badgeStatus)
                             }
                             
                             Text(audit.title)

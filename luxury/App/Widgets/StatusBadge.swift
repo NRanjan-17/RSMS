@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct StatusBadge: View {
-    let text: String
+    let text: LocalizedStringKey
     let status: BadgeStatus
     
     private var color: Color {
@@ -22,7 +22,8 @@ struct StatusBadge: View {
     }
     
     var body: some View {
-        Text(text.uppercased())
+        Text(text)
+            .textCase(.uppercase)
             .font(AppFonts.sansSerif(size: 10, weight: .bold))
             .foregroundStyle(color)
             .padding(.horizontal, 8)

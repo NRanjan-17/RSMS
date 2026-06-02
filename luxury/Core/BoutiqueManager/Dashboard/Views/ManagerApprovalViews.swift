@@ -38,9 +38,9 @@ struct WriteOffApprovalView: View {
 }
 
 private struct ManagerDecisionView: View {
-    let title:   String
-    let heading: String
-    let detail:  String
+    let title:   LocalizedStringKey
+    let heading: LocalizedStringKey
+    let detail:  LocalizedStringKey
     @Binding var state: ApprovalState
     let dismiss: DismissAction
 
@@ -53,7 +53,7 @@ private struct ManagerDecisionView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 18) {
                         StatusBadge(
-                            text:   state.rawValue,
+                            text:   LocalizedStringKey(state.rawValue),
                             status: state == .approved ? .success : state == .rejected ? .error : .pending
                         )
 

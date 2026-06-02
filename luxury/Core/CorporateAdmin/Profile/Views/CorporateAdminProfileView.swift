@@ -225,7 +225,7 @@ struct CorporateAdminProfileView: View {
     }
     
     @ViewBuilder
-    private func adminToolRow(title: String, icon: String, route: CARoute) -> some View {
+    private func adminToolRow(title: LocalizedStringKey, icon: String, route: CARoute) -> some View {
         Button(action: {
             router.push(route)
         }) {

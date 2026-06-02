@@ -6,21 +6,24 @@ final class LanguageManager {
     static let shared = LanguageManager()
     
     var selectedLanguage: String {
-        get { UserDefaults.standard.string(forKey: "selectedLanguage") ?? "" }
-        set {
-            UserDefaults.standard.set(newValue, forKey: "selectedLanguage")
-            // To trigger SwiftUI updates, we can just use a regular stored property
-            // or rely on the environment refresh. 
-            // For @Observable, it's easiest to have a published tracker variable.
-            trigger = UUID()
+        didSet {
+            UserDefaults.standard.set(selectedLanguage, forKey: "selectedLanguage")
+            
+            // Apply global override so String(localized:) in ViewModels also works
+            if selectedLanguage.isEmpty {
+                UserDefaults.standard.removeObject(forKey: "AppleLanguages")
+            } else {
+                UserDefaults.standard.set([selectedLanguage], forKey: "AppleLanguages")
+            }
+            UserDefaults.standard.synchronize()
         }
     }
     
-    // Hidden property just to trigger @Observable updates
-    private var trigger = UUID()
+    init() {
+        self.selectedLanguage = UserDefaults.standard.string(forKey: "selectedLanguage") ?? ""
+    }
     
     var currentLocale: Locale {
-        _ = trigger // depend on trigger
         if selectedLanguage.isEmpty {
             return Locale.current
         } else {

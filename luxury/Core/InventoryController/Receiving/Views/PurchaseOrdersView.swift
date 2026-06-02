@@ -57,7 +57,7 @@ struct PurchaseOrdersView: View {
                                         
                                         VStack(alignment: .trailing, spacing: 8) {
                                             StatusBadge(
-                                                text: po.status.rawValue,
+                                                text: LocalizedStringKey(po.status.rawValue),
                                                 status: po.status == .fullyReceived ? .success : .warning
                                             )
                                             

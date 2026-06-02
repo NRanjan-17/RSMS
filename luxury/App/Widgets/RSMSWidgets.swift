@@ -185,9 +185,9 @@ private struct BlurView: UIViewRepresentable {
 }
 
 struct RequestDetailSheet: View {
-    let title: String
-    let subtitle: String
-    let details: [(String, String)]
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey
+    let details: [(LocalizedStringKey, String)]
     var avatarUrl: String? = nil
     var resumeUrl: String? = nil
     var isApproving = false
@@ -221,7 +221,8 @@ struct RequestDetailSheet: View {
                             }
                             
                             VStack(alignment: .leading, spacing: 4) {
-                                Text(subtitle.uppercased())
+                                Text(subtitle)
+                                    .textCase(.uppercase)
                                     .font(AppFonts.sansSerif(size: 10, weight: .bold))
                                     .foregroundStyle(AppColors.gold)
                                     .kerning(2)
@@ -317,7 +318,7 @@ struct RequestDetailSheet: View {
 }
 
 struct RSMSDatePicker: View {
-    let label: String
+    let label: LocalizedStringKey
     @Binding var date: Date
     @Binding var isSet: Bool
     
@@ -389,7 +390,7 @@ struct RSMSDatePicker: View {
 }
 
 struct CalendarPickerSheet: View {
-    let label: String
+    let label: LocalizedStringKey
     @Binding var selectedDate: Date
     var onSave: () -> Void
     var onDismiss: () -> Void

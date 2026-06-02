@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct CustomOutlineButton: View {
-    let title: String
+    let title: LocalizedStringKey
     let icon: AnyView?
     let action: () -> Void
     
-    init(title: String, icon: AnyView? = nil, action: @escaping () -> Void) {
+    init(title: LocalizedStringKey, icon: AnyView? = nil, action: @escaping () -> Void) {
         self.title = title
         self.icon = icon
         self.action = action

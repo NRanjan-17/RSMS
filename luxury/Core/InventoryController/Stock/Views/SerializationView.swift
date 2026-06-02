@@ -70,7 +70,7 @@ struct SerializationView: View {
                                             .foregroundStyle(AppColors.secondary)
                                     }
                                     Spacer()
-                                    StatusBadge(text: record.status, status: .success)
+                                    StatusBadge(text: LocalizedStringKey(record.status), status: .success)
                                 }
                                 .padding(14)
                                 .background(AppColors.surface)

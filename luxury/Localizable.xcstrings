@@ -280,6 +280,9 @@
     "Advisor: %@" : {
 
     },
+    "After Sales Ticket submitted successfully." : {
+
+    },
     "After-Sales Intake" : {
 
     },
@@ -520,6 +523,9 @@
     "Boutique ID" : {
 
     },
+    "Boutique ID not found on profile" : {
+
+    },
     "Boutique Management" : {
 
     },
@@ -573,6 +579,9 @@
 
     },
     "Cancel Trunk Show?" : {
+
+    },
+    "Cannot delete client: %@" : {
 
     },
     "Cannot Send Email" : {
@@ -747,6 +756,9 @@
 
     },
     "CONVERSION" : {
+
+    },
+    "Corporate admin registration is not available." : {
 
     },
     "Could not load client details." : {
@@ -933,6 +945,9 @@
     "DONE" : {
 
     },
+    "Duplicate catalog detected! A catalog with this barcode already exists." : {
+
+    },
     "Duplicate Item" : {
 
     },
@@ -970,6 +985,9 @@
 
     },
     "Email" : {
+
+    },
+    "Email is required." : {
 
     },
     "Email: %@" : {
@@ -1035,6 +1053,9 @@
     "Enter the SKU manually to continue the count." : {
 
     },
+    "Enter the SKU manually to continue." : {
+
+    },
     "Enter your credentials to continue." : {
 
     },
@@ -1095,7 +1116,94 @@
     "Export PDF" : {
 
     },
+    "Failed to add catalog: %@" : {
+
+    },
+    "Failed to add products: %@" : {
+
+    },
+    "Failed to complete delivery intake: %@" : {
+
+    },
+    "Failed to delete catalog: %@" : {
+
+    },
+    "Failed to fetch boutiques: %@" : {
+
+    },
+    "Failed to fetch logs: %@" : {
+
+    },
+    "Failed to fetch staff: %@" : {
+
+    },
+    "Failed to fetch team data: %@" : {
+
+    },
+    "Failed to fetch user management data: %@" : {
+
+    },
     "Failed to generate recommendations." : {
+
+    },
+    "Failed to list MFA factors. Please try again." : {
+
+    },
+    "Failed to load approved boutiques." : {
+
+    },
+    "Failed to load catalogs: %@" : {
+
+    },
+    "Failed to load data: %@" : {
+
+    },
+    "Failed to load expected products: %@" : {
+
+    },
+    "Failed to load image." : {
+
+    },
+    "Failed to load inventory: %@" : {
+
+    },
+    "Failed to load MFA setup: %@" : {
+
+    },
+    "Failed to load products: %@" : {
+
+    },
+    "Failed to load purchased items: %@" : {
+
+    },
+    "Failed to remove authenticator: %@" : {
+
+    },
+    "Failed to remove image: %@" : {
+
+    },
+    "Failed to remove products: %@" : {
+
+    },
+    "Failed to send SMS: %@" : {
+
+    },
+    "Failed to submit ticket: %@" : {
+
+    },
+    "Failed to update boutique: %@" : {
+
+    },
+    "Failed to update catalog: %@" : {
+
+    },
+    "Failed to update password: %@" : {
+
+    },
+    "Failed to update staff request: %@" : {
+
+    },
+    "Failed to verify code: %@" : {
 
     },
     "FAULT DESCRIPTION" : {
@@ -1105,6 +1213,9 @@
 
     },
     "Filter" : {
+
+    },
+    "First name is required." : {
 
     },
     "Flag Item as Missing" : {
@@ -1215,6 +1326,15 @@
     "Internal Remarks" : {
 
     },
+    "Invalid amount." : {
+
+    },
+    "Invalid code. Please try again." : {
+
+    },
+    "Invalid or expired OTP: %@" : {
+
+    },
     "Inventory / Serial Numbers" : {
 
     },
@@ -1232,6 +1352,16 @@
     },
     "Inventory Details" : {
 
+    },
+    "Inventory updated by %@ at %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Inventory updated by %1$@ at %2$@."
+          }
+        }
+      }
     },
     "INVENTORY VARIANCE REPORT" : {
 
@@ -1255,6 +1385,9 @@
 
     },
     "Item Name" : {
+
+    },
+    "Item not found for barcode: %@" : {
 
     },
     "Item out of stock at all regional locations." : {
@@ -1303,6 +1436,9 @@
 
     },
     "LIVE INVENTORY ALERTS" : {
+
+    },
+    "Loading boutique context. Try the scan again." : {
 
     },
     "Loading catalogs..." : {
@@ -1416,6 +1552,9 @@
     "New Password" : {
 
     },
+    "New passwords do not match" : {
+
+    },
     "New Planogram" : {
 
     },
@@ -1459,6 +1598,9 @@
 
     },
     "No Completed SFS Orders" : {
+
+    },
+    "No factor ID found. Please try again." : {
 
     },
     "NO IMAGE" : {
@@ -1599,6 +1741,9 @@
     "No upcoming occasions" : {
 
     },
+    "No verified factor found." : {
+
+    },
     "No VIP guests invited yet." : {
 
     },
@@ -1671,7 +1816,16 @@
     "Paid securely via Razorpay" : {
 
     },
+    "Password must be at least 6 characters" : {
+
+    },
     "Password successfully updated. You can now log in." : {
+
+    },
+    "Password updated successfully" : {
+
+    },
+    "Passwords do not match" : {
 
     },
     "Payment" : {
@@ -1716,6 +1870,9 @@
     "PHONE NUMBER (with country code)" : {
 
     },
+    "Phone number is required" : {
+
+    },
     "Phone Setup" : {
 
     },
@@ -1725,16 +1882,52 @@
     "Planograms" : {
 
     },
+    "Please accept the terms and conditions." : {
+
+    },
+    "Please attach at least one photo." : {
+
+    },
+    "Please attach both profile and resume images." : {
+
+    },
+    "Please complete all boutique details." : {
+
+    },
+    "Please complete all required profile fields." : {
+
+    },
     "Please enter both email and password." : {
+
+    },
+    "Please enter the 6-digit code" : {
 
     },
     "Please enter the 6-digit code from your authenticator app." : {
 
     },
+    "Please enter the OTP sent to your email" : {
+
+    },
+    "Please enter your email" : {
+
+    },
     "Please enter your email address." : {
 
     },
+    "Please enter your PIN code." : {
+
+    },
+    "Please fill in all fields" : {
+
+    },
     "Please select a destination boutique to unlock scanner." : {
+
+    },
+    "Please select a product" : {
+
+    },
+    "Please select an approved boutique." : {
 
     },
     "Point device at QR or Barcodes to track" : {
@@ -1800,16 +1993,25 @@
     "Profile" : {
 
     },
+    "Profile not found" : {
+
+    },
     "Projected EOD: %@" : {
 
     },
     "Purchase Details" : {
 
     },
+    "Purchase ID is missing" : {
+
+    },
     "Purchase Order not found" : {
 
     },
     "Purchase Orders" : {
+
+    },
+    "QR/Barcode string is required." : {
 
     },
     "Qty: %lld" : {
@@ -2179,6 +2381,9 @@
 
     },
     "Serial Number" : {
+
+    },
+    "Serial number is missing" : {
 
     },
     "Serial:" : {

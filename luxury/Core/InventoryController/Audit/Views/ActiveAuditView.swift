@@ -26,7 +26,7 @@ struct ActiveAuditView: View {
             AppColors.background.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                CustomHeader(title: audit.title, showBackButton: true, backAction: { dismiss() })
+                CustomHeader(title: LocalizedStringKey(audit.title), showBackButton: true, backAction: { dismiss() })
 
                 VStack(spacing: 8) {
                     HStack {

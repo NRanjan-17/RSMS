@@ -46,7 +46,7 @@ struct AuditView: View {
                                         .foregroundStyle(AppColors.secondary)
                                     }
                                     Spacer()
-                                    StatusBadge(text: count.status, status: count.badgeStatus)
+                                    StatusBadge(text: LocalizedStringKey(count.status), status: count.badgeStatus)
                                 }
                             }
                             .listRowBackground(AppColors.surface)
@@ -71,7 +71,7 @@ struct AuditView: View {
                                             .foregroundStyle(AppColors.secondary)
                                     }
                                     Spacer()
-                                    StatusBadge(text: count.status, status: count.badgeStatus)
+                                    StatusBadge(text: LocalizedStringKey(count.status), status: count.badgeStatus)
                                 }
                             }
                             .listRowBackground(AppColors.surface)

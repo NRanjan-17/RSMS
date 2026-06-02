@@ -184,7 +184,7 @@ public struct EndlessAisleWorkflowView: View {
                                                 }
                                                 Spacer()
                                                 StatusBadge(
-                                                    text: request.status.rawValue,
+                                                    text: LocalizedStringKey(request.status.rawValue),
                                                     status: badgeStatusFor(request.status)
                                                 )
                                             }

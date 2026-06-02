@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct MetricCard: View {
-    let title: String
+    let title: LocalizedStringKey
     let value: String
-    let subtitle: String?
+    let subtitle: LocalizedStringKey?
     let icon: String
     
     var body: some View {
@@ -27,7 +27,8 @@ struct MetricCard: View {
                     .font(AppFonts.serif(size: 24, weight: .bold))
                     .foregroundStyle(AppColors.text)
                 
-                Text(title.uppercased())
+                Text(title)
+                    .textCase(.uppercase)
                     .font(AppFonts.sansSerif(size: 10, weight: .semibold))
                     .foregroundStyle(AppColors.secondary)
                     .kerning(1)

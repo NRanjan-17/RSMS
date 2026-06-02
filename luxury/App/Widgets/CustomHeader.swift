@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct CustomHeader: View {
-    let title: String
+    let title: LocalizedStringKey
     var showBackButton: Bool = false
     var backAction: (() -> Void)? = nil
     var trailingIcon: String? = nil
