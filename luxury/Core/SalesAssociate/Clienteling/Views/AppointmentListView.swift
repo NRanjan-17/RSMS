@@ -348,11 +348,7 @@ struct AppointmentDetailSheet: View {
                 .update(UpdateDateRequest(timestamp: dateString))
                 .eq("id", value: appointment.id)
                 .execute()
-            await MainActor.run {
-                Task {
-                    await viewModel.fetchAppointments()
-                }
-            }
+            await viewModel.fetchAppointments()
         } catch {
             print("Failed to update appointment date: \(error)")
         }
