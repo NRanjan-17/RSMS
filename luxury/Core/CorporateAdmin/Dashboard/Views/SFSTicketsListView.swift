@@ -112,8 +112,10 @@ struct SFSTicketsListView: View {
                                             Spacer()
                                             
                                             let displayStatus = item.status.lowercased() == "ready to pick" ? "Ready" : item.status.capitalized
-                                            let statusType: BadgeStatus = item.status.lowercased() == "ready to pick" ? .success :
-                                                                          item.status.lowercased() == "secured" ? .neutral : .warning
+                                            let statusString = item.status.lowercased()
+                                            let statusType: BadgeStatus = (statusString == "ready to pick" || statusString == "delivered") ? .success :
+                                                                          (statusString == "secured") ? .neutral :
+                                                                          (statusString == "pending") ? .pending : .warning
                                             
                                             StatusBadge(text: displayStatus, status: statusType)
                                             
@@ -125,7 +127,9 @@ struct SFSTicketsListView: View {
                                         .padding(18)
                                         .background(AppColors.surface)
                                         .clipShape(RoundedRectangle(cornerRadius: 12))
-                                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .stroke(AppColors.gold15, lineWidth: 0.5))
                                     }
                                 }
                             }

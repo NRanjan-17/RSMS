@@ -278,20 +278,23 @@ struct DashboardView: View {
                                                 Spacer()
                                                 
                                                 let displayStatus = item.status.lowercased() == "ready to pick" ? "Ready" : item.status.capitalized
-                                                let statusType: BadgeStatus = item.status.lowercased() == "ready to pick" ? .success :
-                                                                              item.status.lowercased() == "secured" ? .neutral : .warning
+                                                let statusString = item.status.lowercased()
+                                                let statusType: BadgeStatus = (statusString == "ready to pick" || statusString == "delivered") ? .success :
+                                                                              (statusString == "secured") ? .neutral :
+                                                                              (statusString == "pending") ? .pending : .warning
                                                 
                                                 StatusBadge(text: displayStatus, status: statusType)
                                                 
                                                 Image(systemName: "chevron.right")
-                                                    .font(AppFonts.sansSerif(size: 12))
+                                                    .font(.system(size: 14, weight: .semibold))
                                                     .foregroundStyle(AppColors.tertiary)
+                                                    .padding(.leading, 8)
                                             }
-                                            .padding(20)
+                                            .padding(18)
                                             .background(AppColors.surface)
-                                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                                            .clipShape(RoundedRectangle(cornerRadius: 12))
                                             .overlay(
-                                                RoundedRectangle(cornerRadius: 16)
+                                                RoundedRectangle(cornerRadius: 12)
                                                     .stroke(AppColors.gold15, lineWidth: 0.5)
                                             )
                                         }
