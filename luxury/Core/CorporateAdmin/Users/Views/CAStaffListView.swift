@@ -27,6 +27,44 @@ struct CAStaffListView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
+                // Header & Custom Search
+                VStack(spacing: 16) {
+                    HStack {
+                        Text("Global Staff")
+                            .font(AppFonts.serif(size: 34, weight: .bold))
+                            .foregroundStyle(.white)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.top, 16)
+                    
+                    HStack(spacing: 10) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundStyle(AppColors.secondary)
+                            .font(.system(size: 16, weight: .medium))
+                        
+                        TextField("Search Staff", text: $searchText)
+                            .font(AppFonts.sansSerif(size: 16))
+                            .foregroundStyle(.white)
+                            .tint(AppColors.gold)
+                        
+                        if !searchText.isEmpty {
+                            Button(action: { searchText = "" }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(AppColors.secondary)
+                                    .font(.system(size: 16))
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
+                    .background(AppColors.surface)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 8)
+                }
+                .background(AppColors.background)
+                
                 if viewModel.isLoading {
                     Spacer()
                     ProgressView().tint(AppColors.gold)
@@ -82,9 +120,7 @@ struct CAStaffListView: View {
                 }
             }
         }
-        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search by name, email, or boutique")
-        .navigationTitle("Global Staff")
-        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             viewModel.fetchStaff()
         }
