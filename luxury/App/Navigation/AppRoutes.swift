@@ -97,6 +97,7 @@ enum CARoute: Hashable {
     case globalRevenue
     case transactionDetail(SATransactionEntity)
     case sfsTicketDetail(PurchasedItemEntity)
+    case sfsTicketsList([PurchasedItemEntity])
 }
 
 enum AppRoutes: Hashable {

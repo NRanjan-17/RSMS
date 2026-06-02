@@ -4,6 +4,18 @@ import Charts
 struct GlobalRevenueView: View {
     @Environment(Router.self) private var router
     @State private var viewModel = GlobalRevenueViewModel()
+    @State private var searchText = ""
+    
+    var filteredTransactions: [SATransactionEntity] {
+        if searchText.isEmpty {
+            return viewModel.transactions
+        } else {
+            return viewModel.transactions.filter {
+                $0.id.uuidString.localizedCaseInsensitiveContains(searchText) ||
+                ($0.client?.name?.localizedCaseInsensitiveContains(searchText) == true)
+            }
+        }
+    }
     
     var body: some View {
         ZStack {
@@ -120,20 +132,47 @@ struct GlobalRevenueView: View {
                             
                             // Transactions List
                             VStack(alignment: .leading, spacing: 16) {
-                                Text("RECENT TRANSACTIONS")
+                                HStack(spacing: 10) {
+                                    Image(systemName: "magnifyingglass")
+                                        .foregroundStyle(AppColors.secondary)
+                                        .font(.system(size: 16, weight: .medium))
+                                    
+                                    TextField("Search Transactions", text: $searchText)
+                                        .font(AppFonts.sansSerif(size: 16))
+                                        .foregroundStyle(.white)
+                                        .tint(AppColors.gold)
+                                    
+                                    if !searchText.isEmpty {
+                                        Button(action: {
+                                            searchText = ""
+                                        }) {
+                                            Image(systemName: "xmark.circle.fill")
+                                                .foregroundStyle(AppColors.tertiary)
+                                                .font(.system(size: 16))
+                                        }
+                                    }
+                                }
+                                .padding(.vertical, 12)
+                                .padding(.horizontal, 16)
+                                .background(AppColors.surface)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 1))
+                                .padding(.horizontal, 24)
+                                
+                                Text("TRANSACTIONS")
                                     .font(AppFonts.sansSerif(size: 11, weight: .bold))
                                     .foregroundStyle(AppColors.secondary)
                                     .kerning(1.5)
                                     .padding(.horizontal, 24)
                                 
-                                if viewModel.transactions.isEmpty {
-                                    Text("No recent transactions.")
+                                if filteredTransactions.isEmpty {
+                                    Text("No transactions found.")
                                         .font(AppFonts.sansSerif(size: 14))
                                         .foregroundStyle(AppColors.tertiary)
                                         .padding(.horizontal, 24)
                                 } else {
                                     LazyVStack(spacing: 12) {
-                                        ForEach(viewModel.transactions) { tx in
+                                        ForEach(filteredTransactions) { tx in
                                             Button(action: {
                                                 router.push(CARoute.transactionDetail(tx))
                                             }) {

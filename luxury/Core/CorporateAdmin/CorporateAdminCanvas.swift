@@ -152,6 +152,8 @@ struct CorporateAdminCanvas: View {
             SATransactionDetailView(transaction: tx)
         case .sfsTicketDetail(let ticket):
             SFSTicketDetailView(ticket: ticket)
+        case .sfsTicketsList(let tickets):
+            SFSTicketsListView(tickets: tickets)
         @unknown default:
             // Fallback to a neutral view to satisfy exhaustiveness and aid forward-compatibility
             EmptyView()
