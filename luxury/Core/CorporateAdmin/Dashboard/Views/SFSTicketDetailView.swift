@@ -16,6 +16,12 @@ struct SFSTicketDetailView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
+                CustomHeader(
+                    title: "Ticket Details",
+                    showBackButton: true,
+                    backAction: { router.pop() }
+                )
+                
                 ScrollView {
                     VStack(spacing: 24) {
                         
@@ -36,9 +42,9 @@ struct SFSTicketDetailView: View {
                         Divider().background(AppColors.gold15)
                         
                         VStack(spacing: 16) {
-                            DetailRow(label: "Order ID", value: ticket.id.uuidString.uppercased())
+                            DetailRow(label: "Order ID", value: String(ticket.id.uuidString.uppercased()))
                             DetailRow(label: "Transaction ID", value: ticket.transactionId)
-                            DetailRow(label: "Product ID", value: ticket.productId.uuidString.uppercased())
+                            DetailRow(label: "Product ID", value: String(ticket.productId.uuidString.uppercased()))
                             
                             if let name = ticket.productName {
                                 DetailRow(label: "Product Name", value: name)
@@ -68,11 +74,7 @@ struct SFSTicketDetailView: View {
                 }
             }
         }
-        .navigationTitle("Ticket Details")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(AppColors.background, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
-        .toolbarColorScheme(.dark, for: .navigationBar)
+        .navigationBarHidden(true)
         .toolbar(.hidden, for: .tabBar)
     }
 }
@@ -90,6 +92,7 @@ private struct DetailRow: View {
             Text(value)
                 .font(AppFonts.sansSerif(size: 14, weight: .medium))
                 .foregroundStyle(.white)
+                .multilineTextAlignment(.trailing)
         }
     }
 }
