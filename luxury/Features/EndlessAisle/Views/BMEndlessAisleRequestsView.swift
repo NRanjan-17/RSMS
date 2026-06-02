@@ -64,7 +64,7 @@ public struct BMEndlessAisleRequestsView: View {
                                                         .foregroundStyle(AppColors.secondary)
                                                 }
                                                 Spacer()
-                                                StatusBadge(text: "Pending", status: .pending)
+                                                StatusBadge(text: LocalizedStringKey("Pending"), status: .pending)
                                             }
                                             
                                             HStack(spacing: 12) {
@@ -118,7 +118,7 @@ public struct BMEndlessAisleRequestsView: View {
                                                         .foregroundStyle(AppColors.secondary)
                                                 }
                                                 Spacer()
-                                                StatusBadge(text: "Action Needed", status: .warning)
+                                                StatusBadge(text: LocalizedStringKey("Action Needed"), status: .warning)
                                             }
                                             
                                             HStack(spacing: 12) {

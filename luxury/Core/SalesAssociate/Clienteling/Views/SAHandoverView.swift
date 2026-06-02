@@ -105,7 +105,7 @@ struct SAHandoverView: View {
                                             
                                             Spacer()
                                             
-                                            StatusBadge(text: "Ready for Pickup", status: .success)
+                                            StatusBadge(text: LocalizedStringKey("Ready for Pickup"), status: .success)
                                         }
                                         
                                         Button(action: {

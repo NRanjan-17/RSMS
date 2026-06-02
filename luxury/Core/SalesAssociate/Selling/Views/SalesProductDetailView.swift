@@ -55,7 +55,7 @@ struct SalesProductDetailView: View {
                             .padding(.bottom, 14)
                             
                             HStack(spacing: 8) {
-                                StatusBadge(text: inStock ? "● In Stock" : "● Out of Stock", status: inStock ? .success : .warning)
+                                StatusBadge(text: inStock ? LocalizedStringKey("● In Stock") : LocalizedStringKey("● Out of Stock"), status: inStock ? .success : .warning)
                             }
                             .padding(.bottom, 16)
                             

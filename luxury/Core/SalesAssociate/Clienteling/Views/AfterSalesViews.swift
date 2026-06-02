@@ -119,7 +119,7 @@ struct AfterSalesIntakeView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 16) {
                         StatusBadge(
-                            text: created ? "Ticket Created" : (uploadedImages.isEmpty ? "Photo Required" : "Ready to Create"),
+                            text: created ? LocalizedStringKey("Ticket Created") : (uploadedImages.isEmpty ? LocalizedStringKey("Photo Required") : LocalizedStringKey("Ready to Create")),
                             status: created ? .success : (uploadedImages.isEmpty ? .warning : .pending)
                         )
                         
@@ -677,7 +677,7 @@ struct AfterSalesTrackingView: View {
                             Text("\(fetchedAST?.client?.name ?? "Unknown Client") · \(fetchedAST?.catalogs?.catalogId ?? ticket.serial)")
                                 .font(AppFonts.sansSerif(size: 12))
                                 .foregroundStyle(AppColors.secondary)
-                            StatusBadge(text: displayStatusText, status: badgeStatus)
+                            StatusBadge(text: LocalizedStringKey(displayStatusText), status: badgeStatus)
                         }
                         .padding(16)
                         .background(AppColors.surface)

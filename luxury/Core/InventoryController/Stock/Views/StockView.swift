@@ -110,7 +110,7 @@ struct StockView: View {
                                             Spacer()
                                             
                                             VStack(alignment: .trailing, spacing: 6) {
-                                                StatusBadge(text: alert.currentQty == 0 ? "Out of Stock" : "\(alert.currentQty) Left", status: alert.status)
+                                                StatusBadge(text: alert.currentQty == 0 ? LocalizedStringKey("Out of Stock") : LocalizedStringKey("\(alert.currentQty) Left"), status: alert.status)
                                             }
                                         }
                                         .padding(16)

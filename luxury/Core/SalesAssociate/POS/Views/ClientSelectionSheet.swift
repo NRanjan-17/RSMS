@@ -53,7 +53,7 @@ struct ClientSelectionSheet: View {
                                             }
                                             Spacer()
                                             if let tier = client.tier {
-                                                StatusBadge(text: tier, status: .success)
+                                                StatusBadge(text: LocalizedStringKey(tier), status: .success)
                                             }
                                         }
                                         .padding()

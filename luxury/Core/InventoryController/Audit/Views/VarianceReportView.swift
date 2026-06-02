@@ -114,7 +114,7 @@ struct VarianceReportView: View {
                                         .font(AppFonts.sansSerif(size: 11, weight: .bold))
                                         .foregroundStyle(AppColors.secondary)
                                     Spacer()
-                                    StatusBadge(text: "\(discrepantItems.count) Items", status: .warning)
+                                    StatusBadge(text: LocalizedStringKey("\(discrepantItems.count) Items"), status: .warning)
                                 }
                             }
                             .padding(20)
@@ -143,7 +143,7 @@ struct VarianceReportView: View {
                                         .font(AppFonts.sansSerif(size: 11, weight: .bold))
                                         .foregroundStyle(AppColors.secondary)
                                     Spacer()
-                                    StatusBadge(text: "\(matchedItems.count) Items", status: .neutral)
+                                    StatusBadge(text: LocalizedStringKey("\(matchedItems.count) Items"), status: .neutral)
                                 }
                             }
                             .padding(20)

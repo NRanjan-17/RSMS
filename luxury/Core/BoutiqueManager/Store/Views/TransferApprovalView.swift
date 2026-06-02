@@ -119,7 +119,7 @@ struct TransferApprovalView: View {
                                                 .foregroundStyle(AppColors.gold)
                                                 .kerning(1.5)
                                             Spacer()
-                                            StatusBadge(text: transfer.status, status: transfer.badgeStatus)
+                                            StatusBadge(text: LocalizedStringKey(transfer.status), status: transfer.badgeStatus)
                                         }
                                         
                                         HStack(spacing: 12) {
@@ -374,7 +374,7 @@ struct BMTransferDetailView: View {
                                     .foregroundStyle(AppColors.secondary)
                                     .kerning(1)
                                 Spacer()
-                                StatusBadge(text: transfer.status, status: transfer.badgeStatus)
+                                StatusBadge(text: LocalizedStringKey(transfer.status), status: transfer.badgeStatus)
                             }
                             
                             Divider().background(AppColors.border)

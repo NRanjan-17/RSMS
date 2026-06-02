@@ -117,8 +117,8 @@ struct BoutiqueManagerCanvas: View {
             BMEndlessAisleRequestsView()
         case .staffRequestDetail(let staff):
             RequestDetailSheet(
-                title: staff.name,
-                subtitle: staff.role.displayName,
+                title: LocalizedStringKey(staff.name),
+                subtitle: LocalizedStringKey(staff.role.displayName),
                 details: [
                     ("Email", staff.email),
                     ("Address", staff.address),

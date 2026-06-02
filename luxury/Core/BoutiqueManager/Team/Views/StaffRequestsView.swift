@@ -47,8 +47,8 @@ struct StaffRequestsView: View {
         }
         .sheet(item: $selectedStaff) { staff in
             RequestDetailSheet(
-                title: staff.name,
-                subtitle: staff.role.displayName,
+                title: LocalizedStringKey(staff.name),
+                subtitle: LocalizedStringKey(staff.role.displayName),
                 details: [
                     ("Email", staff.email),
                     ("Address", staff.address),

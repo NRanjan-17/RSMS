@@ -89,7 +89,7 @@ struct DashboardView: View {
                                     .kerning(1.5)
                                 Spacer()
                                 if !viewModel.pendingAppointments.isEmpty {
-                                    StatusBadge(text: "\(viewModel.pendingAppointments.count) Pending", status: .warning)
+                                    StatusBadge(text: LocalizedStringKey("\(viewModel.pendingAppointments.count) Pending"), status: .warning)
                                 }
                             }
                             .padding(.horizontal, 24)
@@ -284,7 +284,7 @@ struct DashboardView: View {
                                                                               (statusString == "secured") ? .neutral :
                                                                               (statusString == "pending") ? .pending : .warning
                                                 
-                                                StatusBadge(text: displayStatus, status: statusType)
+                                                StatusBadge(text: LocalizedStringKey(displayStatus), status: statusType)
                                                 
                                                 Image(systemName: "chevron.right")
                                                     .font(.system(size: 14, weight: .semibold))

@@ -46,7 +46,7 @@ struct ClientProfileView: View {
                                 .foregroundStyle(.white)
                             
                             HStack(spacing: 8) {
-                                StatusBadge(text: viewModel.client.tier.rawValue, status: viewModel.client.tier.badgeStatus)
+                                StatusBadge(text: LocalizedStringKey(viewModel.client.tier.rawValue), status: viewModel.client.tier.badgeStatus)
                                 Text(viewModel.joinedDateText)
                                     .font(AppFonts.sansSerif(size: 11))
                                     .foregroundStyle(AppColors.secondary)
@@ -304,7 +304,7 @@ private struct ClientOverviewTab: View {
                                         
                                         HStack(spacing: 6) {
                                             StatusBadge(
-                                                text: ast.status.capitalized,
+                                                text: LocalizedStringKey(ast.status.capitalized),
                                                 status: ast.status.lowercased() == "ready" ? .success : .pending
                                             )
                                             Text(ast.catalogs?.catalogId ?? "Unknown ID")

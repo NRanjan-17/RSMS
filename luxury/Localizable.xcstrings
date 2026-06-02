@@ -138,16 +138,28 @@
     "%lld Clients" : {
 
     },
+    "%lld In Boutique" : {
+
+    },
     "%lld in stock" : {
 
     },
     "%lld items" : {
 
     },
+    "%lld Items" : {
+
+    },
     "%lld Items expected" : {
 
     },
+    "%lld Left" : {
+
+    },
     "%lld pending" : {
+
+    },
+    "%lld Pending" : {
 
     },
     "%lld Requests awaiting approval" : {
@@ -172,6 +184,9 @@
     "%lld%% achieved" : {
 
     },
+    "%lld%% of Target" : {
+
+    },
     "%lld%% of Total Revenue" : {
 
     },
@@ -193,10 +208,19 @@
     "+%lld" : {
 
     },
+    "+4% vs Avg" : {
+
+    },
     "×%lld" : {
 
     },
     "−" : {
+
+    },
+    "● In Stock" : {
+
+    },
+    "● Out of Stock" : {
 
     },
     "✓ Pipeline Sourced Successfully" : {
@@ -214,7 +238,16 @@
     "ABV" : {
 
     },
+    "Accuracy" : {
+
+    },
     "Act: %lld" : {
+
+    },
+    "Action Needed" : {
+
+    },
+    "Action Required" : {
 
     },
     "ACTIVE" : {
@@ -223,10 +256,16 @@
     "ACTIVE BOUTIQUES" : {
 
     },
+    "Active Profiles" : {
+
+    },
     "ACTIVE SERVICES" : {
 
     },
     "ACTIVE SOURCING PIPELINES" : {
+
+    },
+    "Active Today" : {
 
     },
     "ACTUAL" : {
@@ -262,6 +301,9 @@
     "Add Product(s) / Scan Serials" : {
 
     },
+    "Add to Cart" : {
+
+    },
     "Add to Wishlist" : {
 
     },
@@ -269,6 +311,9 @@
 
     },
     "ADDITIONAL PROFILE INFO" : {
+
+    },
+    "Address" : {
 
     },
     "ADMIN TOOLS" : {
@@ -296,6 +341,9 @@
 
     },
     "All" : {
+
+    },
+    "All Appointments" : {
 
     },
     "ALL APPOINTMENTS" : {
@@ -349,7 +397,13 @@
     "Apply Courtesy" : {
 
     },
+    "Applying Correction" : {
+
+    },
     "Appointment Details" : {
+
+    },
+    "Appointment Linked" : {
 
     },
     "Appointment Tracking" : {
@@ -359,6 +413,9 @@
 
     },
     "Approve" : {
+
+    },
+    "Approve Access" : {
 
     },
     "Approve and Request from Paris" : {
@@ -442,6 +499,9 @@
     "Attach Client" : {
 
     },
+    "ATV" : {
+
+    },
     "Audit" : {
 
     },
@@ -484,13 +544,25 @@
     "AVAILABLE MODULES" : {
 
     },
+    "Avg Lifetime Value" : {
+
+    },
+    "Avg Transaction" : {
+
+    },
     "AWAITING ACTION" : {
 
     },
     "Back" : {
 
     },
+    "Back to Login" : {
+
+    },
     "Barcode" : {
+
+    },
+    "Barcode & QR Scanner" : {
 
     },
     "Barcode Lookup" : {
@@ -500,6 +572,9 @@
 
     },
     "Batch Scan" : {
+
+    },
+    "Begin Audit Scan" : {
 
     },
     "Birthday in %lld days" : {
@@ -512,6 +587,9 @@
 
     },
     "Boutique\nRegistration." : {
+
+    },
+    "Boutique Config" : {
 
     },
     "Boutique Details" : {
@@ -536,6 +614,9 @@
 
     },
     "Boutique Name" : {
+
+    },
+    "Boutique Registration" : {
 
     },
     "Boutique: %@" : {
@@ -677,6 +758,12 @@
     "Coming Soon" : {
 
     },
+    "Complete Count" : {
+
+    },
+    "Complete Transfer (Receive)" : {
+
+    },
     "Complete your profile to request access." : {
 
     },
@@ -722,6 +809,9 @@
     "Confirm Dispatch & Delivery" : {
 
     },
+    "Confirm Dispatch & Update Stock" : {
+
+    },
     "Confirm Password" : {
 
     },
@@ -749,10 +839,16 @@
     "CONTACT INFORMATION" : {
 
     },
+    "Contact Management" : {
+
+    },
     "Controller: %@" : {
 
     },
     "CONV" : {
+
+    },
+    "Conversion" : {
 
     },
     "CONVERSION" : {
@@ -789,6 +885,9 @@
     "Courtesy Applied (%lld%%)" : {
 
     },
+    "Create %@ Case" : {
+
+    },
     "Create a new planogram to direct your boutiques on visual merchandising." : {
 
     },
@@ -801,16 +900,28 @@
     "Create Event" : {
 
     },
+    "Create Profile" : {
+
+    },
+    "Create Remote Appointment" : {
+
+    },
     "Create Service Ticket" : {
 
     },
     "Currency" : {
 
     },
+    "Current inventory record" : {
+
+    },
     "Current stage" : {
 
     },
     "CVV" : {
+
+    },
+    "Cycle Count CC-2026-05 · 3 variance items · Recount completed · Audit trail locked" : {
 
     },
     "Cycle Count Sign-off" : {
@@ -885,6 +996,9 @@
     "Delete Note?" : {
 
     },
+    "Delivered" : {
+
+    },
     "Delivered Qty" : {
 
     },
@@ -927,6 +1041,9 @@
     "Discard Changes" : {
 
     },
+    "Discount Approvals" : {
+
+    },
     "DISCREPANCY REPORT" : {
 
     },
@@ -943,6 +1060,9 @@
 
     },
     "DONE" : {
+
+    },
+    "Draft" : {
 
     },
     "Duplicate catalog detected! A catalog with this barcode already exists." : {
@@ -1000,6 +1120,9 @@
 
     },
     "Enabled" : {
+
+    },
+    "Endless Aisle" : {
 
     },
     "Endless Aisle Approvals" : {
@@ -1096,6 +1219,9 @@
 
     },
     "Expected Qty" : {
+
+    },
+    "Expected Remaining" : {
 
     },
     "Expected SKU" : {
@@ -1233,6 +1359,9 @@
     "Fulfillment Alert" : {
 
     },
+    "Fulfillment Hub" : {
+
+    },
     "Gallery" : {
 
     },
@@ -1249,6 +1378,9 @@
 
     },
     "Global Overview" : {
+
+    },
+    "Global Revenue" : {
 
     },
     "Global Staff" : {
@@ -1341,6 +1473,9 @@
     "Inventory Alerts" : {
 
     },
+    "Inventory Audit" : {
+
+    },
     "Inventory Controller" : {
 
     },
@@ -1351,6 +1486,12 @@
 
     },
     "Inventory Details" : {
+
+    },
+    "Inventory Health" : {
+
+    },
+    "Inventory record" : {
 
     },
     "Inventory updated by %@ at %@." : {
@@ -1364,6 +1505,9 @@
       }
     },
     "INVENTORY VARIANCE REPORT" : {
+
+    },
+    "Inventory write-off %@8,20,000" : {
 
     },
     "Invite Boutique" : {
@@ -1405,6 +1549,9 @@
     "ITEMS (%lld)" : {
 
     },
+    "Items in count" : {
+
+    },
     "ITEMS REQUESTED (%lld)" : {
 
     },
@@ -1424,6 +1571,9 @@
 
     },
     "LATEST EVENT:" : {
+
+    },
+    "Launch Event" : {
 
     },
     "Line Items" : {
@@ -1474,10 +1624,16 @@
     "MANAGEMENT" : {
 
     },
+    "Manager" : {
+
+    },
     "Manager approval required for courtesy above 5%." : {
 
     },
     "MANAGER DETAILS" : {
+
+    },
+    "Manager Refund Check" : {
 
     },
     "Manual Entry" : {
@@ -1522,7 +1678,19 @@
     "MISSING ITEMS" : {
 
     },
+    "Missing Qty" : {
+
+    },
     "MM / YY" : {
+
+    },
+    "Month to Date" : {
+
+    },
+    "MTD Sales" : {
+
+    },
+    "MTD Write-offs" : {
 
     },
     "My Appointments" : {
@@ -1532,6 +1700,9 @@
 
     },
     "NEED TO CORRECT A COUNT?" : {
+
+    },
+    "Net Discrepancy" : {
 
     },
     "New" : {
@@ -1562,6 +1733,9 @@
 
     },
     "New Service Ticket" : {
+
+    },
+    "New Transfer" : {
 
     },
     "New Transfer Request" : {
@@ -1753,6 +1927,9 @@
     "Not configured" : {
 
     },
+    "Not scanned" : {
+
+    },
     "NOT SCANNED" : {
 
     },
@@ -1774,7 +1951,13 @@
     "On Target" : {
 
     },
+    "Open Camera Scanner" : {
+
+    },
     "Open Full Profile" : {
+
+    },
+    "Open Reconciliation" : {
 
     },
     "Open stock reconciliation to scan barcodes or QR codes, compare expected versus scanned quantities, and submit inventory corrections." : {
@@ -1843,6 +2026,9 @@
     "Pending" : {
 
     },
+    "Pending Alerts" : {
+
+    },
     "Pending Appointments" : {
 
     },
@@ -1855,6 +2041,9 @@
     "Pending Requests" : {
 
     },
+    "Per Client Average" : {
+
+    },
     "PERFORMANCE INSIGHTS" : {
 
     },
@@ -1862,6 +2051,9 @@
 
     },
     "PERSONAL INFORMATION" : {
+
+    },
+    "Phone" : {
 
     },
     "Phone Number" : {
@@ -1877,6 +2069,15 @@
 
     },
     "PHOTO EVIDENCE" : {
+
+    },
+    "Photo Required" : {
+
+    },
+    "Physical count" : {
+
+    },
+    "Physical counted" : {
 
     },
     "Planograms" : {
@@ -1928,6 +2129,9 @@
 
     },
     "Please select an approved boutique." : {
+
+    },
+    "PO Details" : {
 
     },
     "Point device at QR or Barcodes to track" : {
@@ -2032,10 +2236,22 @@
     "Read More" : {
 
     },
+    "Ready for Pickup" : {
+
+    },
+    "Ready to Create" : {
+
+    },
+    "Ready to Pick" : {
+
+    },
     "REASSIGN ADVISOR" : {
 
     },
     "Receipt RSMS-2026-0418" : {
+
+    },
+    "Receipt Valid" : {
 
     },
     "RECEIVED" : {
@@ -2062,7 +2278,19 @@
     "RECENT SIGN-OFFS" : {
 
     },
+    "Recount" : {
+
+    },
     "Recover Password" : {
+
+    },
+    "Refund %@2,45,000" : {
+
+    },
+    "Refund Approval" : {
+
+    },
+    "Refund Queue" : {
 
     },
     "Reject" : {
@@ -2086,6 +2314,9 @@
     "Reminder sent" : {
 
     },
+    "Remote" : {
+
+    },
     "Remove" : {
 
     },
@@ -2101,6 +2332,9 @@
     "Reports & Analytics" : {
 
     },
+    "Request Transfer from Paris Boutique" : {
+
+    },
     "Requested by Inventory Controller (Delhi)" : {
 
     },
@@ -2113,13 +2347,22 @@
     "Reset Link Sent" : {
 
     },
+    "Reset Session" : {
+
+    },
     "Resolution" : {
 
     },
     "Resolve" : {
 
     },
+    "Resolve Alert" : {
+
+    },
     "RESUME" : {
+
+    },
+    "Resume Scan Session (%lld items)" : {
 
     },
     "RETAIL MANAGEMENT SYSTEM" : {
@@ -2131,10 +2374,16 @@
     "Retry" : {
 
     },
+    "Return" : {
+
+    },
     "Return to Dashboard" : {
 
     },
     "Returns & Exchanges" : {
+
+    },
+    "Revenue" : {
 
     },
     "REVENUE BY CATEGORY" : {
@@ -2188,7 +2437,16 @@
     "Save All Targets" : {
 
     },
+    "Save Certificate Link" : {
+
+    },
     "Save Changes" : {
+
+    },
+    "Save Damage Report" : {
+
+    },
+    "Save PDF" : {
 
     },
     "Scan" : {
@@ -2206,6 +2464,9 @@
     "Scan Correct SKU" : {
 
     },
+    "Scan Items" : {
+
+    },
     "Scan items to add them here." : {
 
     },
@@ -2218,6 +2479,9 @@
     "Scan QR" : {
 
     },
+    "Scan QR & Save" : {
+
+    },
     "Scan Session Details" : {
 
     },
@@ -2227,6 +2491,9 @@
     "Scan Unexpected Item" : {
 
     },
+    "Scanned" : {
+
+    },
     "Scanned Items" : {
 
     },
@@ -2234,6 +2501,9 @@
 
     },
     "SCANNED ITEMS (%lld)" : {
+
+    },
+    "Scanned Qty" : {
 
     },
     "Scanned Serials (%lld)" : {
@@ -2311,6 +2581,9 @@
     "Secure your account with an SMS verification code." : {
 
     },
+    "Secured" : {
+
+    },
     "Security" : {
 
     },
@@ -2371,6 +2644,9 @@
     "Send Code" : {
 
     },
+    "Send OTP" : {
+
+    },
     "SEND REMINDERS" : {
 
     },
@@ -2387,6 +2663,9 @@
 
     },
     "Serial:" : {
+
+    },
+    "Serialization" : {
 
     },
     "Serialization & CoA" : {
@@ -2437,10 +2716,25 @@
     "Share / Save as PDF" : {
 
     },
+    "Ship Transfer" : {
+
+    },
     "Shrink & Inventory" : {
 
     },
+    "Shrink Value" : {
+
+    },
+    "Sign In" : {
+
+    },
+    "Sign Off & Submit Count" : {
+
+    },
     "Sign up is by invitation only." : {
+
+    },
+    "Sign-off Audit" : {
 
     },
     "SIMULATED SCANNING ACTIONS" : {
@@ -2514,6 +2808,9 @@
     "Staff Role" : {
 
     },
+    "Start New Scan Session" : {
+
+    },
     "Status" : {
 
     },
@@ -2562,6 +2859,15 @@
     "Submit" : {
 
     },
+    "Submit Application" : {
+
+    },
+    "Submit Correction" : {
+
+    },
+    "Submit Request" : {
+
+    },
     "Success" : {
 
     },
@@ -2583,6 +2889,9 @@
     "Take Photo" : {
 
     },
+    "Tap to Search" : {
+
+    },
     "TARGET" : {
 
     },
@@ -2590,6 +2899,9 @@
 
     },
     "Target Store" : {
+
+    },
+    "Target: %@" : {
 
     },
     "Tax-free eligible client" : {
@@ -2673,13 +2985,22 @@
     "TODAY'S REVENUE" : {
 
     },
+    "Today's Sales" : {
+
+    },
     "TORN / UNREADABLE LABEL MANUAL ENTRY" : {
 
     },
     "Total" : {
 
     },
+    "Total Clients" : {
+
+    },
     "TOTAL DUE" : {
+
+    },
+    "Total EPC Tags" : {
 
     },
     "Total Locations with Stock" : {
@@ -2691,7 +3012,13 @@
     "Total Revenue" : {
 
     },
+    "Total SKU" : {
+
+    },
     "Total Units Available" : {
+
+    },
+    "Transaction Details" : {
 
     },
     "Transaction ID" : {
@@ -2751,6 +3078,9 @@
     "U" : {
 
     },
+    "UHNW" : {
+
+    },
     "Unassigned" : {
 
     },
@@ -2763,10 +3093,16 @@
     "Unexpected Item Scanned" : {
 
     },
+    "Unexpected Qty" : {
+
+    },
     "UNEXPECTED SKU" : {
 
     },
     "UNEXPECTED SKU ITEMS (%lld)" : {
+
+    },
+    "Unexpected SKUs" : {
 
     },
     "units" : {
@@ -2778,7 +3114,13 @@
     "Unknown Client" : {
 
     },
+    "Unknown Client · Bottega Veneta The Jodie · Receipt verified · Tax-free documents attached" : {
+
+    },
     "Unsaved Changes" : {
+
+    },
+    "Unscanned expected" : {
 
     },
     "UPC: %@" : {
@@ -2797,6 +3139,9 @@
 
     },
     "Upcoming stage" : {
+
+    },
+    "Update Damage Report" : {
 
     },
     "Update Password" : {
@@ -2901,6 +3246,9 @@
     "Visual Merchandising" : {
 
     },
+    "vs Expected" : {
+
+    },
     "WARRANTY" : {
 
     },
@@ -2913,7 +3261,19 @@
     "We require two-factor authentication for all staff members. Scan this QR code with Google Authenticator or Apple Passwords." : {
 
     },
+    "Week to Date" : {
+
+    },
     "Welcome," : {
+
+    },
+    "Write-Off" : {
+
+    },
+    "Write-Off Approval" : {
+
+    },
+    "WTD Sales" : {
 
     },
     "XXXX  XXXX  XXXX  XXXX" : {

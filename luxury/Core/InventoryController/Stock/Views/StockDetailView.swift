@@ -32,7 +32,7 @@ struct StockDetailView: View {
                                 .foregroundStyle(AppColors.gold)
                                 .kerning(2)
                             
-                            StatusBadge(text: alert.currentQty == 0 ? "Out of Stock" : "\(alert.currentQty) In Boutique", status: alert.status)
+                            StatusBadge(text: alert.currentQty == 0 ? LocalizedStringKey("Out of Stock") : LocalizedStringKey("\(alert.currentQty) In Boutique"), status: alert.status)
                                 .padding(.top, 4)
                         }
                         .padding(.horizontal, 24)

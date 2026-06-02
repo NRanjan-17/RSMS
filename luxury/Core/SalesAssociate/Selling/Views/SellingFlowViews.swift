@@ -20,7 +20,7 @@ struct RemoteSellingView: View {
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 18) {
-                        StatusBadge(text: appointmentLinked ? "Appointment Linked" : "Draft", status: appointmentLinked ? .success : .pending)
+                        StatusBadge(text: appointmentLinked ? LocalizedStringKey("Appointment Linked") : LocalizedStringKey("Draft"), status: appointmentLinked ? .success : .pending)
                         
                         VStack(alignment: .leading, spacing: 10) {
                             Text("Private video consultation")

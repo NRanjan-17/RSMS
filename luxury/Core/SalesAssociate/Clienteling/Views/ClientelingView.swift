@@ -107,7 +107,7 @@ struct ClientelingView: View {
                                                 Text(client.name)
                                                     .font(AppFonts.sansSerif(size: 13, weight: .medium))
                                                     .foregroundStyle(.white)
-                                                StatusBadge(text: client.tier.rawValue, status: client.tier.badgeStatus)
+                                                StatusBadge(text: LocalizedStringKey(client.tier.rawValue), status: client.tier.badgeStatus)
                                             }
                                             
                                             Text("\(client.lastVisit) · LTV \(CurrencyManager.shared.formatCompact(amount: client.ltv))")

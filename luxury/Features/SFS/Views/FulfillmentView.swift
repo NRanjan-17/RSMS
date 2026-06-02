@@ -148,13 +148,13 @@ struct FulfillmentView: View {
                                                 Spacer()
                                                 
                                                 if order.status.lowercased() == "delivered" {
-                                                    StatusBadge(text: "Delivered", status: .success)
+                                                    StatusBadge(text: LocalizedStringKey("Delivered"), status: .success)
                                                 } else if order.status.lowercased() == "ready to pick" {
-                                                    StatusBadge(text: "Ready to Pick", status: .success)
+                                                    StatusBadge(text: LocalizedStringKey("Ready to Pick"), status: .success)
                                                 } else if order.status.lowercased() == "secured" {
-                                                    StatusBadge(text: "Secured", status: .neutral)
+                                                    StatusBadge(text: LocalizedStringKey("Secured"), status: .neutral)
                                                 } else {
-                                                    StatusBadge(text: "Pending", status: .warning)
+                                                    StatusBadge(text: LocalizedStringKey("Pending"), status: .warning)
                                                 }
                                             }
                                             

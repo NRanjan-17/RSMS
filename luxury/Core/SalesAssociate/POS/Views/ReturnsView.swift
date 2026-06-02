@@ -41,8 +41,8 @@ struct ReturnsView: View {
                             .pickerStyle(.segmented)
                             
                             HStack(spacing: 10) {
-                                StatusBadge(text: "Receipt Valid", status: .success)
-                                StatusBadge(text: "Manager Refund Check", status: selectedResolution == .refund ? .pending : .neutral)
+                                StatusBadge(text: LocalizedStringKey("Receipt Valid"), status: .success)
+                                StatusBadge(text: LocalizedStringKey("Manager Refund Check"), status: selectedResolution == .refund ? .pending : .neutral)
                             }
                             
                             CustomButton(title: "Create \(selectedResolution.rawValue) Case", icon: AnyView(Image(systemName: "checkmark.seal")), action: {
@@ -78,7 +78,7 @@ struct ReturnsView: View {
                                         Text(CurrencyManager.shared.format(amount: item.amount))
                                             .font(AppFonts.serif(size: 13, weight: .semibold))
                                             .foregroundStyle(AppColors.gold)
-                                        StatusBadge(text: item.resolution.rawValue, status: .pending)
+                                        StatusBadge(text: LocalizedStringKey(item.resolution.rawValue), status: .pending)
                                     }
                                 }
                                 .padding(14)

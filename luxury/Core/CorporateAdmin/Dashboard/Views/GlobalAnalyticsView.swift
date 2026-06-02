@@ -158,7 +158,7 @@ struct GlobalAnalyticsView: View {
                                                                               (statusString == "secured") ? .neutral :
                                                                               (statusString == "pending") ? .pending : .warning
                                                 
-                                                StatusBadge(text: displayStatus, status: statusType)
+                                                StatusBadge(text: LocalizedStringKey(displayStatus), status: statusType)
                                                 
                                                 Image(systemName: "chevron.right")
                                                     .font(.system(size: 14, weight: .semibold))

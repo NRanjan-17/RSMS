@@ -67,7 +67,7 @@ struct SalesTargetCard: View {
                         .foregroundStyle(AppColors.secondary)
                 }
                 Spacer()
-                StatusBadge(text: pacingStatus.rawValue, status: pacingStatus.badgeStatus)
+                StatusBadge(text: LocalizedStringKey(pacingStatus.rawValue), status: pacingStatus.badgeStatus)
             }
         }
         .padding(20)

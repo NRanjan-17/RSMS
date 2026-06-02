@@ -37,7 +37,7 @@ struct POSView: View {
                                     .font(AppFonts.sansSerif(size: 12, weight: .medium))
                                     .foregroundStyle(.white)
                                 if let tier = client.tier {
-                                    StatusBadge(text: tier, status: .success)
+                                    StatusBadge(text: LocalizedStringKey(tier), status: .success)
                                 }
                                 Spacer()
                                 Button("Change") {
@@ -192,7 +192,7 @@ struct POSView: View {
                             
                             if viewModel.requiresApproval {
                                 HStack(spacing: 8) {
-                                    StatusBadge(text: viewModel.approvalState.rawValue, status: viewModel.approvalState == .approved ? .success : viewModel.approvalState == .rejected ? .error : .pending)
+                                    StatusBadge(text: LocalizedStringKey(viewModel.approvalState.rawValue), status: viewModel.approvalState == .approved ? .success : viewModel.approvalState == .rejected ? .error : .pending)
                                     Text("Manager approval required for courtesy above 5%.")
                                         .font(AppFonts.sansSerif(size: 11))
                                         .foregroundStyle(AppColors.secondary)

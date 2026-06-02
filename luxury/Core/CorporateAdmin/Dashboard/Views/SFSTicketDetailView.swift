@@ -36,7 +36,7 @@ struct SFSTicketDetailView: View {
                                 let statusType: BadgeStatus = ticket.status.lowercased() == "ready to pick" ? .success :
                                                               ticket.status.lowercased() == "secured" ? .neutral : .warning
                                 
-                                StatusBadge(text: displayStatus, status: statusType)
+                                StatusBadge(text: LocalizedStringKey(displayStatus), status: statusType)
                                     .padding(.top, 4)
                             }
                             .padding(.vertical, 32)
