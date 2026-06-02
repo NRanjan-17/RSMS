@@ -266,8 +266,9 @@ struct PlanogramFormSheet: View {
                     }
                     .onChange(of: selectedItem) { _, newItem in
                         Task {
-                            if let data = try? await newItem?.loadTransferable(type: Data.self) {
-                                selectedImageData = data
+                            if let data = try? await newItem?.loadTransferable(type: Data.self),
+                               let uiImage = UIImage(data: data) {
+                                selectedImageData = uiImage.jpegData(compressionQuality: 0.6)
                             }
                         }
                     }
