@@ -105,6 +105,65 @@ final class PlanogramManagementViewModel {
     }
     
     @MainActor
+    func updatePlanogram(id: UUID, title: String, description: String, boutiqueId: UUID?, validFrom: Date, validUntil: Date, imageData: Data?, existingFileUrl: String) async -> Bool {
+        isUploading = true
+        errorMessage = nil
+        
+        do {
+            var finalFileUrl = existingFileUrl
+            
+            if let imageData = imageData {
+                let fileName = "\(UUID().uuidString).jpg"
+                let filePath = "public/\(fileName)"
+                
+                try await client.storage
+                    .from("planograms")
+                    .upload(
+                        filePath,
+                        data: imageData,
+                        options: FileOptions(contentType: "image/jpeg")
+                    )
+                
+                finalFileUrl = try client.storage.from("planograms").getPublicURL(path: filePath).absoluteString
+            }
+            
+            struct UpdatePlanogramRequest: Encodable {
+                let title: String
+                let description: String?
+                let file_url: String
+                let boutique_id: UUID?
+                let valid_from: String
+                let valid_until: String
+            }
+            
+            let isoFormatter = ISO8601DateFormatter()
+            let request = UpdatePlanogramRequest(
+                title: title,
+                description: description.isEmpty ? nil : description,
+                file_url: finalFileUrl,
+                boutique_id: boutiqueId,
+                valid_from: isoFormatter.string(from: validFrom),
+                valid_until: isoFormatter.string(from: validUntil)
+            )
+            
+            try await client.from("planogram")
+                .update(request)
+                .eq("id", value: id.uuidString)
+                .execute()
+            
+            await fetchData()
+            isUploading = false
+            return true
+            
+        } catch {
+            self.errorMessage = error.localizedDescription
+            print("Failed to update planogram: \(error)")
+            isUploading = false
+            return false
+        }
+    }
+    
+    @MainActor
     func deletePlanogram(id: UUID) async {
         do {
             try await client.from("planogram").delete().eq("id", value: id).execute()

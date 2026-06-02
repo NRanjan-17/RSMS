@@ -5,6 +5,7 @@ struct PlanogramManagementView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel = PlanogramManagementViewModel()
     @State private var isShowingCreateSheet = false
+    @State private var editingPlanogram: PlanogramEntity? = nil
     
     var body: some View {
         ZStack {
@@ -68,11 +69,18 @@ struct PlanogramManagementView: View {
                     ScrollView {
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 300), spacing: 20)], spacing: 20) {
                             ForEach(viewModel.planograms) { planogram in
-                                PlanogramAdminCard(planogram: planogram, boutiques: viewModel.boutiques) {
-                                    Task {
-                                        await viewModel.deletePlanogram(id: planogram.id)
+                                PlanogramAdminCard(
+                                    planogram: planogram,
+                                    boutiques: viewModel.boutiques,
+                                    onEdit: {
+                                        editingPlanogram = planogram
+                                    },
+                                    onDelete: {
+                                        Task {
+                                            await viewModel.deletePlanogram(id: planogram.id)
+                                        }
                                     }
-                                }
+                                )
                             }
                         }
                         .padding(24)
@@ -85,7 +93,10 @@ struct PlanogramManagementView: View {
             await viewModel.fetchData()
         }
         .sheet(isPresented: $isShowingCreateSheet) {
-            CreatePlanogramSheet(viewModel: viewModel)
+            PlanogramFormSheet(viewModel: viewModel, editingPlanogram: nil)
+        }
+        .sheet(item: $editingPlanogram) { planogram in
+            PlanogramFormSheet(viewModel: viewModel, editingPlanogram: planogram)
         }
         .alert("Error", isPresented: Binding(
             get: { viewModel.errorMessage != nil },
@@ -101,6 +112,7 @@ struct PlanogramManagementView: View {
 struct PlanogramAdminCard: View {
     let planogram: PlanogramEntity
     let boutiques: [CorporateBoutique]
+    let onEdit: () -> Void
     let onDelete: () -> Void
     
     var body: some View {
@@ -125,6 +137,7 @@ struct PlanogramAdminCard: View {
                         .foregroundStyle(AppColors.text)
                     Spacer()
                     Menu {
+                        Button("Edit", action: onEdit)
                         Button("Delete", role: .destructive, action: onDelete)
                     } label: {
                         Image(systemName: "ellipsis")
@@ -181,18 +194,42 @@ struct PlanogramAdminCard: View {
     }
 }
 
-struct CreatePlanogramSheet: View {
+struct PlanogramFormSheet: View {
     @Environment(\.dismiss) private var dismiss
     let viewModel: PlanogramManagementViewModel
+    let editingPlanogram: PlanogramEntity?
     
-    @State private var title = ""
-    @State private var description = ""
-    @State private var selectedBoutiqueId: UUID? = nil // nil means all
-    @State private var validFrom = Date()
-    @State private var validUntil = Calendar.current.date(byAdding: .month, value: 1, to: Date()) ?? Date()
+    @State private var title: String
+    @State private var description: String
+    @State private var selectedBoutiqueId: UUID?
+    @State private var validFrom: Date
+    @State private var validUntil: Date
     
     @State private var selectedItem: PhotosPickerItem? = nil
     @State private var selectedImageData: Data? = nil
+    
+    init(viewModel: PlanogramManagementViewModel, editingPlanogram: PlanogramEntity?) {
+        self.viewModel = viewModel
+        self.editingPlanogram = editingPlanogram
+        
+        let formatter = ISO8601DateFormatter()
+        
+        _title = State(initialValue: editingPlanogram?.title ?? "")
+        _description = State(initialValue: editingPlanogram?.description ?? "")
+        _selectedBoutiqueId = State(initialValue: editingPlanogram?.boutiqueId)
+        
+        if let from = editingPlanogram?.validFrom, let fDate = formatter.date(from: from) {
+            _validFrom = State(initialValue: fDate)
+        } else {
+            _validFrom = State(initialValue: Date())
+        }
+        
+        if let until = editingPlanogram?.validUntil, let uDate = formatter.date(from: until) {
+            _validUntil = State(initialValue: uDate)
+        } else {
+            _validUntil = State(initialValue: Calendar.current.date(byAdding: .month, value: 1, to: Date()) ?? Date())
+        }
+    }
     
     var body: some View {
         NavigationStack {
@@ -241,13 +278,23 @@ struct CreatePlanogramSheet: View {
                             .scaledToFit()
                             .frame(maxHeight: 200)
                             .clipShape(RoundedRectangle(cornerRadius: 8))
+                    } else if let editingPlanogram = editingPlanogram {
+                        AsyncImage(url: URL(string: editingPlanogram.fileUrl)) { image in
+                            image
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxHeight: 200)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        } placeholder: {
+                            ProgressView()
+                        }
                     }
                 }
                 .listRowBackground(AppColors.surface)
             }
             .scrollContentBackground(.hidden)
             .background(AppColors.background.ignoresSafeArea())
-            .navigationTitle("New Planogram")
+            .navigationTitle(editingPlanogram == nil ? "New Planogram" : "Edit Planogram")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -255,22 +302,36 @@ struct CreatePlanogramSheet: View {
                         .foregroundStyle(AppColors.gold)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Upload") {
+                    Button("Save") {
                         Task {
-                            guard let data = selectedImageData else { return }
-                            let success = await viewModel.uploadPlanogram(
-                                title: title,
-                                description: description,
-                                boutiqueId: selectedBoutiqueId,
-                                validFrom: validFrom,
-                                validUntil: validUntil,
-                                imageData: data
-                            )
-                            if success { dismiss() }
+                            if let existing = editingPlanogram {
+                                let success = await viewModel.updatePlanogram(
+                                    id: existing.id,
+                                    title: title,
+                                    description: description,
+                                    boutiqueId: selectedBoutiqueId,
+                                    validFrom: validFrom,
+                                    validUntil: validUntil,
+                                    imageData: selectedImageData,
+                                    existingFileUrl: existing.fileUrl
+                                )
+                                if success { dismiss() }
+                            } else {
+                                guard let data = selectedImageData else { return }
+                                let success = await viewModel.uploadPlanogram(
+                                    title: title,
+                                    description: description,
+                                    boutiqueId: selectedBoutiqueId,
+                                    validFrom: validFrom,
+                                    validUntil: validUntil,
+                                    imageData: data
+                                )
+                                if success { dismiss() }
+                            }
                         }
                     }
                     .foregroundStyle(AppColors.gold)
-                    .disabled(title.isEmpty || selectedImageData == nil || viewModel.isUploading)
+                    .disabled(title.isEmpty || (editingPlanogram == nil && selectedImageData == nil) || viewModel.isUploading)
                 }
             }
             .overlay {
