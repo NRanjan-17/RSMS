@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Supabase
 
 struct SFSVerificationView: View {
     let order: PurchasedItemEntity
@@ -27,6 +28,7 @@ struct SFSVerificationView: View {
     @State private var showAlert = false
     @State private var alertMessage = ""
     @State private var userRole: UserRole? = nil
+    @State private var localQuantity: Int? = nil
     
     private var allChecked: Bool {
         check1 && check2 && check3
@@ -149,6 +151,151 @@ struct SFSVerificationView: View {
                         }
                         .disabled(isUpdating)
                         .padding(.horizontal, 24)
+                        
+                        if let qty = localQuantity, qty <= 0 {
+                            VStack(alignment: .leading, spacing: 12) {
+                                HStack(spacing: 12) {
+                                    Image(systemName: "exclamationmark.triangle.fill")
+                                        .foregroundStyle(AppColors.warning)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Item Unavailable in Boutique Shelf")
+                                            .font(AppFonts.sansSerif(size: 13, weight: .bold))
+                                            .foregroundStyle(.white)
+                                        Text("Available local stock: 0 units.")
+                                            .font(AppFonts.sansSerif(size: 11))
+                                            .foregroundStyle(AppColors.secondary)
+                                    }
+                                    Spacer()
+                                }
+                                .padding(14)
+                                .background(AppColors.warning.opacity(0.1))
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.warning.opacity(0.3), lineWidth: 0.5))
+                                
+                                if let request = EndlessAisleViewModel.shared.activeRequests.first(where: { $0.item.id == order.productId }) {
+                                    VStack(alignment: .leading, spacing: 12) {
+                                        HStack {
+                                            VStack(alignment: .leading, spacing: 2) {
+                                                Text("Endless Aisle Sourcing Status")
+                                                    .font(AppFonts.sansSerif(size: 13, weight: .bold))
+                                                    .foregroundStyle(AppColors.gold)
+                                                Text(request.history.last ?? "Transfer request initiated.")
+                                                    .font(AppFonts.sansSerif(size: 11))
+                                                    .foregroundStyle(AppColors.secondary)
+                                                    .lineLimit(2)
+                                            }
+                                            Spacer()
+                                            StatusBadge(text: request.status.rawValue, status: request.status == .dispatched ? .success : .pending)
+                                        }
+                                        
+                                        if request.status == .dispatched && (request.history.last?.contains("Delivered") == true || request.history.contains(where: { $0.contains("Delivered") })) {
+                                            VStack(alignment: .leading, spacing: 10) {
+                                                HStack(spacing: 8) {
+                                                    Image(systemName: "bell.badge.fill")
+                                                        .foregroundStyle(AppColors.success)
+                                                    Text("Enough items in inventory to fulfill this order.")
+                                                        .font(AppFonts.sansSerif(size: 12, weight: .bold))
+                                                        .foregroundStyle(AppColors.success)
+                                                }
+                                                
+                                                Button(action: {
+                                                    isUpdating = true
+                                                    Task {
+                                                        if let profile = try? await ProfileService().fetchCurrentProfile(),
+                                                           let staff = profile.1 as? StaffModel, let storeId = staff.boutiqueId {
+                                                            let inventoryList = try? await viewModel.fetchInventoryHandler(order.productId, storeId)
+                                                            if let firstInventory = inventoryList?.first {
+                                                                _ = try? await SupabaseManager.shared.client
+                                                                    .from("inventory")
+                                                                    .update(["quantity": 1])
+                                                                    .eq("id", value: firstInventory.id)
+                                                                    .execute()
+                                                            } else {
+                                                                let newItem = InventoryItem(
+                                                                    id: UUID(),
+                                                                    storeId: storeId,
+                                                                    skuId: order.productId,
+                                                                    quantity: 1,
+                                                                    productAvailable: true
+                                                                )
+                                                                _ = try? await SupabaseManager.shared.client
+                                                                    .from("inventory")
+                                                                    .insert(newItem)
+                                                                    .execute()
+                                                            }
+                                                        }
+                                                        
+                                                        let success = await viewModel.updateStatusToSecured(orderId: order.id)
+                                                        if success {
+                                                            if let reqIdx = EndlessAisleViewModel.shared.activeRequests.firstIndex(where: { $0.item.id == order.productId }) {
+                                                                EndlessAisleViewModel.shared.activeRequests.remove(at: reqIdx)
+                                                            }
+                                                            router.pop()
+                                                        } else {
+                                                            await MainActor.run {
+                                                                alertMessage = viewModel.errorMessage ?? "Failed to fulfill order."
+                                                                showAlert = true
+                                                            }
+                                                        }
+                                                        isUpdating = false
+                                                    }
+                                                }) {
+                                                    HStack {
+                                                        if isUpdating {
+                                                            ProgressView()
+                                                                .tint(AppColors.background)
+                                                                .controlSize(.small)
+                                                        } else {
+                                                            Text("Assign Sourced Item & Fulfill Order")
+                                                        }
+                                                    }
+                                                    .font(AppFonts.sansSerif(size: 13, weight: .bold))
+                                                    .foregroundStyle(AppColors.background)
+                                                    .frame(maxWidth: .infinity)
+                                                    .frame(height: 40)
+                                                    .background(AppColors.success)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                }
+                                                .disabled(isUpdating)
+                                            }
+                                            .padding(12)
+                                            .background(AppColors.success.opacity(0.1))
+                                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                                            .overlay(RoundedRectangle(cornerRadius: 10).stroke(AppColors.success.opacity(0.3), lineWidth: 0.5))
+                                        }
+                                    }
+                                    .padding(14)
+                                    .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                } else {
+                                    Button(action: {
+                                        let endlessAisleItem = EndlessAisle.Item(
+                                            id: order.productId,
+                                            name: order.productName ?? "Premium Timepiece",
+                                            sku: order.productSku ?? "N/A",
+                                            price: 15000.0,
+                                            stockDelhi: 0,
+                                            stockParis: 5
+                                        )
+                                        EndlessAisleViewModel.shared.createRequest(item: endlessAisleItem)
+                                        localQuantity = 0
+                                    }) {
+                                        HStack {
+                                            Image(systemName: "paperplane.fill")
+                                            Text("Escalate to Manager (Endless-Aisle)")
+                                        }
+                                        .font(AppFonts.sansSerif(size: 13, weight: .bold))
+                                        .foregroundStyle(AppColors.background)
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 46)
+                                        .background(AppColors.gold)
+                                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 24)
+                        }
                         
                         VStack(alignment: .leading, spacing: 12) {
                             Text("SCANNER MODULE")
@@ -402,6 +549,18 @@ struct SFSVerificationView: View {
         .task {
             if let profile = try? await ProfileService().fetchCurrentProfile() {
                 userRole = profile.0
+                if let staff = profile.1 as? StaffModel, let storeId = staff.boutiqueId {
+                    let inventoryList = try? await viewModel.fetchInventoryHandler(order.productId, storeId)
+                    if let quantity = inventoryList?.first?.quantity {
+                        await MainActor.run {
+                            self.localQuantity = quantity
+                        }
+                    } else {
+                        await MainActor.run {
+                            self.localQuantity = 0
+                        }
+                    }
+                }
             }
         }
     }
