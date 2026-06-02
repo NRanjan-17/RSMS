@@ -150,7 +150,9 @@ struct BoutiqueManagerCanvas: View {
         case .sfsTicketDetail(let ticket):
             SFSTicketDetailView(ticket: ticket)
         case .sfsTicketsList(let tickets):
-            SFSTicketsListView(tickets: tickets)
+            SFSTicketsListView(tickets: tickets, onSelectTicket: { ticket in
+                router.push(BMRoute.sfsTicketDetail(ticket))
+            })
         }
     }
 }

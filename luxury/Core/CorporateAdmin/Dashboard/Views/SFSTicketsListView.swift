@@ -10,6 +10,7 @@ import SwiftUI
 struct SFSTicketsListView: View {
     @Environment(Router.self) private var router
     let tickets: [PurchasedItemEntity]
+    var onSelectTicket: ((PurchasedItemEntity) -> Void)?
     
     @State private var searchText = ""
     
@@ -91,7 +92,11 @@ struct SFSTicketsListView: View {
                             LazyVStack(spacing: 12) {
                                 ForEach(filteredTickets) { item in
                                     Button(action: {
-                                        router.push(CARoute.sfsTicketDetail(item))
+                                        if let onSelectTicket = onSelectTicket {
+                                            onSelectTicket(item)
+                                        } else {
+                                            router.push(CARoute.sfsTicketDetail(item))
+                                        }
                                     }) {
                                         HStack {
                                             VStack(alignment: .leading, spacing: 4) {
@@ -99,6 +104,7 @@ struct SFSTicketsListView: View {
                                                     .font(AppFonts.serif(size: 17, weight: .medium))
                                                     .foregroundStyle(.white)
                                                     .lineLimit(1)
+                                                    .minimumScaleFactor(0.8)
                                                 Text("Order ID: \(item.id.uuidString.prefix(8).uppercased())")
                                                     .font(AppFonts.sansSerif(size: 12))
                                                     .foregroundStyle(AppColors.secondary)
