@@ -19,7 +19,10 @@ struct GlobalInventoryView: View {
             
             VStack(spacing: 0) {
                 // KPI Summary
-                let columns = [GridItem(.flexible()), GridItem(.flexible())]
+                let columns = [
+                    GridItem(.flexible(), spacing: 16),
+                    GridItem(.flexible(), spacing: 16)
+                ]
                 LazyVGrid(columns: columns, spacing: 16) {
                     InventoryKPIBox(
                         title: "Total Units",
