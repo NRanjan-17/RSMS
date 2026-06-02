@@ -86,6 +86,9 @@ struct BoutiqueDetailView: View {
                                 InfoDetailRow(label: "City", value: currentBoutique.city)
                                 InfoDetailRow(label: "Address", value: currentBoutique.address)
                                 InfoDetailRow(label: "Pin Code", value: currentBoutique.pinCode)
+                                if let target = currentBoutique.dailySalesTarget {
+                                    InfoDetailRow(label: "Daily Target", value: CurrencyManager.shared.format(amount: target))
+                                }
                             }
                             .padding(20)
                             .background(AppColors.surface)

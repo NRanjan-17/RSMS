@@ -30,6 +30,9 @@ struct EditBoutiqueView: View {
                                 LabeledTextField(label: "Pin Code", text: $viewModel.pinCode)
                                     .keyboardType(.numberPad)
                                 
+                                LabeledTextField(label: "Daily Sales Target (Optional)", text: $viewModel.dailySalesTarget)
+                                    .keyboardType(.decimalPad)
+                                
                                 CustomButton(title: "Save Changes", isLoading: viewModel.isLoading) {
                                     viewModel.saveChanges {
                                         dismiss()

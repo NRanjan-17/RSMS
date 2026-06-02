@@ -3,6 +3,10 @@ import SwiftUI
 struct EmployeeDetailView: View {
     let employee: StaffModel
     @Environment(Router.self) private var router
+    @State private var showSetTargetAlert = false
+    @State private var targetInput = ""
+    @State private var localEmployee: StaffModel?
+    @State private var isUpdating = false
     
     var body: some View {
         ZStack {
@@ -29,7 +33,15 @@ struct EmployeeDetailView: View {
                     
                     Spacer()
                     
-                    Color.clear.frame(width: 44, height: 44)
+                    Button(action: {
+                        targetInput = employee.dailySalesTarget.map { String($0) } ?? ""
+                        showSetTargetAlert = true
+                    }) {
+                        Text("Set Target")
+                            .font(AppFonts.sansSerif(size: 14, weight: .medium))
+                            .foregroundStyle(AppColors.gold)
+                    }
+                    .frame(width: 80, alignment: .trailing)
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 16)
@@ -100,11 +112,31 @@ struct EmployeeDetailView: View {
                                 }
                                 .padding(.vertical, 16)
                                 
-                                if i < details.count - 1 {
-                                    Divider().background(AppColors.gold15)
+                                    if i < details.count - 1 {
+                                        Divider().background(AppColors.gold15)
+                                    }
                                 }
+                                
+                                Divider().background(AppColors.gold15)
+                                
+                                HStack {
+                                    Text("Daily Target")
+                                        .font(AppFonts.sansSerif(size: 13))
+                                        .foregroundStyle(AppColors.secondary)
+                                    Spacer()
+                                    let targetValue = localEmployee?.dailySalesTarget ?? employee.dailySalesTarget
+                                    if let target = targetValue {
+                                        Text(CurrencyManager.shared.format(amount: target))
+                                            .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                            .foregroundStyle(AppColors.gold)
+                                    } else {
+                                        Text("Not Set")
+                                            .font(AppFonts.sansSerif(size: 14, weight: .medium))
+                                            .foregroundStyle(.white)
+                                    }
+                                }
+                                .padding(.vertical, 16)
                             }
-                        }
                         .padding(20)
                         .background(AppColors.surface)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
@@ -145,5 +177,47 @@ struct EmployeeDetailView: View {
         .toolbarBackground(AppColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .alert("Set Daily Sales Target", isPresented: $showSetTargetAlert) {
+            TextField("Amount (e.g. 5000)", text: $targetInput)
+                .keyboardType(.decimalPad)
+            Button("Cancel", role: .cancel) {}
+            Button("Save") {
+                saveTarget()
+            }
+        } message: {
+            Text("Enter the daily sales target for this employee.")
+        }
+    }
+    
+    private func saveTarget() {
+        guard let value = Double(targetInput) else { return }
+        isUpdating = true
+        Task {
+            do {
+                struct UpdateTarget: Encodable {
+                    let daily_sales_target: Double
+                }
+                let data = UpdateTarget(daily_sales_target: value)
+                
+                try await SupabaseManager.shared.client.from("staff")
+                    .update(data)
+                    .eq("id", value: employee.id)
+                    .execute()
+                
+                if let updated: [StaffModel] = try? await SupabaseManager.shared.client.from("staff")
+                    .select()
+                    .eq("id", value: employee.id)
+                    .execute().value, let first = updated.first {
+                    await MainActor.run {
+                        self.localEmployee = first
+                    }
+                }
+            } catch {
+                print("Failed to set target: \(error)")
+            }
+            await MainActor.run {
+                self.isUpdating = false
+            }
+        }
     }
 }
