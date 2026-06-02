@@ -101,7 +101,7 @@ struct GlobalRevenueView: View {
     }
 }
 
-extension GlobalKPI.MetricType {
+extension KPIType {
     var value: Double {
         switch self {
         case .currency(let val): return val
