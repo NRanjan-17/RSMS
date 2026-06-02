@@ -120,6 +120,8 @@ struct ClientProfileView: View {
                                 ClientHistoryTab(viewModel: viewModel)
                             } else if viewModel.selectedTab == "wishlist" {
                                 ClientWishlistTab(viewModel: viewModel)
+                            } else if viewModel.selectedTab == "recommendations" {
+                                ClientRecommendationsTab(client: viewModel.client)
                             } else if viewModel.selectedTab == "notes" {
                                 ClientNotesTab(viewModel: viewModel)
                             }
@@ -1276,6 +1278,100 @@ struct NoteFormView: View {
             }
         }
         .preferredColorScheme(.dark)
+    }
+}
+
+private struct ClientRecommendationsTab: View {
+    @State private var recommendationVM: RecommendationViewModel
+    @Environment(Router.self) private var router
+    
+    init(client: Client) {
+        _recommendationVM = State(initialValue: RecommendationViewModel(client: client))
+    }
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            if recommendationVM.isLoading {
+                VStack {
+                    ProgressView()
+                        .tint(AppColors.gold)
+                        .scaleEffect(1.2)
+                    Text("Analyzing Taste Profile...")
+                        .font(AppFonts.sansSerif(size: 13))
+                        .foregroundStyle(AppColors.gold)
+                        .padding(.top, 12)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 40)
+                .background(AppColors.surface)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+            } else if let error = recommendationVM.error {
+                VStack {
+                    Text("Failed to generate recommendations.")
+                        .font(AppFonts.sansSerif(size: 13))
+                        .foregroundStyle(AppColors.error)
+                    Text(error)
+                        .font(AppFonts.sansSerif(size: 11))
+                        .foregroundStyle(AppColors.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 32)
+                .background(AppColors.surface)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+            } else if recommendationVM.recommendations.isEmpty {
+                VStack(spacing: 8) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 24))
+                        .foregroundStyle(AppColors.gold.opacity(0.5))
+                    Text("No recommendations available.")
+                        .font(AppFonts.sansSerif(size: 13))
+                        .foregroundStyle(AppColors.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 32)
+                .background(AppColors.surface)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+            } else {
+                // Insight Banner
+                if !recommendationVM.insight.isEmpty {
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 18))
+                            .foregroundStyle(AppColors.gold)
+                            .symbolEffect(.pulse, options: .repeating)
+                        
+                        Text(recommendationVM.insight)
+                            .font(AppFonts.serif(size: 14, weight: .medium))
+                            .foregroundStyle(.white)
+                            .lineSpacing(4)
+                        
+                        Spacer()
+                    }
+                    .padding(16)
+                    .background(LinearGradient(colors: [AppColors.gold.opacity(0.15), AppColors.surface], startPoint: .topLeading, endPoint: .bottomTrailing))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold50, lineWidth: 0.5))
+                }
+                
+                // Recommendations Grid/List
+                VStack(spacing: 12) {
+                    ForEach(recommendationVM.recommendations) { item in
+                        Button(action: {
+                            router.push(SARoute.catalogDetail(item))
+                        }) {
+                            ClientProfileProductRowView(product: item)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+        .task {
+            await recommendationVM.loadRecommendations()
+        }
     }
 }
 
