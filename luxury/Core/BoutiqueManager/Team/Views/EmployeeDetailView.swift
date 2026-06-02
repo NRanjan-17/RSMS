@@ -4,11 +4,8 @@ import PostgREST
 
 struct EmployeeDetailView: View {
     let employee: StaffModel
+    @State private var boutiqueManagerName: String?
     @Environment(Router.self) private var router
-    @State private var showSetTargetAlert = false
-    @State private var targetInput = ""
-    @State private var localEmployee: StaffModel?
-    @State private var isUpdating = false
     
     var body: some View {
         ZStack {
@@ -16,34 +13,11 @@ struct EmployeeDetailView: View {
             
             VStack(spacing: 0) {
                 HStack {
-                    Button(action: {
-                        router.pop()
-                    }) {
-                        Image(systemName: "arrow.left")
-                            .font(AppFonts.sansSerif(size: 20))
-                            .foregroundStyle(.white)
-                            .frame(width: 44, height: 44)
-                            .background(AppColors.surface)
-                            .clipShape(Circle())
-                    }
-                    
                     Spacer()
-                    
                     Text("Staff Details")
                         .font(AppFonts.serif(size: 20, weight: .medium))
                         .foregroundStyle(.white)
-                    
                     Spacer()
-                    
-                    Button(action: {
-                        targetInput = employee.dailySalesTarget.map { String($0) } ?? ""
-                        showSetTargetAlert = true
-                    }) {
-                        Text("Set Target")
-                            .font(AppFonts.sansSerif(size: 14, weight: .medium))
-                            .foregroundStyle(AppColors.gold)
-                    }
-                    .frame(width: 80, alignment: .trailing)
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 16)
@@ -119,25 +93,20 @@ struct EmployeeDetailView: View {
                                     }
                                 }
                                 
-                                Divider().background(AppColors.gold15)
-                                
-                                HStack {
-                                    Text("Daily Target")
-                                        .font(AppFonts.sansSerif(size: 13))
-                                        .foregroundStyle(AppColors.secondary)
-                                    Spacer()
-                                    let targetValue = localEmployee?.dailySalesTarget ?? employee.dailySalesTarget
-                                    if let target = targetValue {
-                                        Text(CurrencyManager.shared.format(amount: target))
-                                            .font(AppFonts.sansSerif(size: 14, weight: .bold))
-                                            .foregroundStyle(AppColors.gold)
-                                    } else {
-                                        Text("Not Set")
+                                if let manager = boutiqueManagerName {
+                                    Divider().background(AppColors.gold15)
+                                    
+                                    HStack {
+                                        Text("Boutique Manager")
+                                            .font(AppFonts.sansSerif(size: 13))
+                                            .foregroundStyle(AppColors.secondary)
+                                        Spacer()
+                                        Text(manager)
                                             .font(AppFonts.sansSerif(size: 14, weight: .medium))
-                                            .foregroundStyle(.white)
+                                            .foregroundStyle(AppColors.gold)
                                     }
+                                    .padding(.vertical, 16)
                                 }
-                                .padding(.vertical, 16)
                             }
                         .padding(20)
                         .background(AppColors.surface)
@@ -179,46 +148,16 @@ struct EmployeeDetailView: View {
         .toolbarBackground(AppColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
-        .alert("Set Daily Sales Target", isPresented: $showSetTargetAlert) {
-            TextField("Amount (e.g. 5000)", text: $targetInput)
-                .keyboardType(.decimalPad)
-            Button("Cancel", role: .cancel) {}
-            Button("Save") {
-                saveTarget()
-            }
-        } message: {
-            Text("Enter the daily sales target for this employee.")
-        }
-    }
-    
-    private func saveTarget() {
-        guard let value = Double(targetInput) else { return }
-        isUpdating = true
-        Task {
-            do {
-                struct UpdateTarget: Encodable {
-                    let daily_sales_target: Double
-                }
-                let data = UpdateTarget(daily_sales_target: value)
-                
-                try await SupabaseManager.shared.client.from("staff")
-                    .update(data)
-                    .eq("id", value: employee.id)
-                    .execute()
-                
-                if let updated: [StaffModel] = try? await SupabaseManager.shared.client.from("staff")
+        .task {
+            if let boutiqueId = employee.boutiqueId {
+                if let boutique: [CorporateBoutique] = try? await SupabaseManager.shared.client.from("boutiques")
                     .select()
-                    .eq("id", value: employee.id)
-                    .execute().value, let first = updated.first {
+                    .eq("id", value: boutiqueId)
+                    .execute().value, let first = boutique.first {
                     await MainActor.run {
-                        self.localEmployee = first
+                        self.boutiqueManagerName = first.managerName
                     }
                 }
-            } catch {
-                print("Failed to set target: \(error)")
-            }
-            await MainActor.run {
-                self.isUpdating = false
             }
         }
     }

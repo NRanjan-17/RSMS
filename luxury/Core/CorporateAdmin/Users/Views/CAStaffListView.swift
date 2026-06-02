@@ -61,13 +61,6 @@ struct CAStaffListView: View {
                                             Text("\(staff.role.displayName) · \(staff.location.isEmpty ? "No Location" : staff.location)")
                                                 .font(AppFonts.sansSerif(size: 12))
                                                 .foregroundStyle(AppColors.secondary)
-                                            
-                                            if let boutiqueId = staff.boutiqueId, let boutique = viewModel.boutiques[boutiqueId] {
-                                                Text("Manager: \(boutique.managerName)")
-                                                    .font(AppFonts.sansSerif(size: 11))
-                                                    .foregroundStyle(AppColors.gold)
-                                                    .padding(.top, 2)
-                                            }
                                         }
                                         Spacer()
                                         Image(systemName: "chevron.right")
@@ -89,7 +82,7 @@ struct CAStaffListView: View {
                 }
             }
         }
-        .searchable(text: $searchText, prompt: "Search by name, email, or boutique")
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search by name, email, or boutique")
         .navigationTitle("Global Staff")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
