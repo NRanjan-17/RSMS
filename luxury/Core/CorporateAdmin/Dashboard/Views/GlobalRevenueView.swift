@@ -170,20 +170,22 @@ struct GlobalRevenueView: View {
                                     }
                                     .padding(.horizontal, 24)
                                     
-                                    Button(action: {
-                                        router.push(CARoute.transactionsList(viewModel.transactions))
-                                    }) {
-                                        Text("View All Transactions")
-                                            .font(AppFonts.sansSerif(size: 14, weight: .semibold))
-                                            .foregroundStyle(AppColors.gold)
-                                            .frame(maxWidth: .infinity)
-                                            .padding(.vertical, 16)
-                                            .background(AppColors.surface)
-                                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                    if filteredTransactions.count > 5 {
+                                        Button(action: {
+                                            router.push(CARoute.transactionsList(viewModel.transactions))
+                                        }) {
+                                            Text("View All Transactions")
+                                                .font(AppFonts.sansSerif(size: 14, weight: .semibold))
+                                                .foregroundStyle(AppColors.gold)
+                                                .frame(maxWidth: .infinity)
+                                                .padding(.vertical, 16)
+                                                .background(AppColors.surface)
+                                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                        }
+                                        .padding(.horizontal, 24)
+                                        .padding(.top, 4)
                                     }
-                                    .padding(.horizontal, 24)
-                                    .padding(.top, 4)
                                 }
                             }
                             
