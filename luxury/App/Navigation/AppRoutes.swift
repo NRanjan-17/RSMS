@@ -94,6 +94,7 @@ enum CARoute: Hashable {
     case editProfile
     case planograms
     case clientInsights
+    case globalRevenue
 }
 
 enum AppRoutes: Hashable {

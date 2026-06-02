@@ -139,8 +139,8 @@ final class GlobalAnalyticsViewModel {
             
             let newKpis = [
                 GlobalKPI(label: "Global Revenue", type: .currency(totalRevenue), trend: revenueTrend, icon: "chart.line.uptrend.xyaxis"),
-                GlobalKPI(label: "Active Boutiques", type: .string("\(boutiquesResponse.count)"), trend: boutiqueTrend, icon: "building.2.fill"),
-                GlobalKPI(label: "Total Staff", type: .string("\(staffResponse.count)"), trend: staffTrend, icon: "person.3.fill"),
+                GlobalKPI(label: "Active Boutiques", type: .string("\(boutiquesResponse.count)"), trend: 0.0, icon: "building.2.fill"),
+                GlobalKPI(label: "Total Staff", type: .string("\(staffResponse.count)"), trend: 0.0, icon: "person.3.fill"),
                 GlobalKPI(label: "Inventory Value", type: .currency(totalInventoryValue), trend: inventoryTrend, icon: "shippingbox.fill")
             ]
             
