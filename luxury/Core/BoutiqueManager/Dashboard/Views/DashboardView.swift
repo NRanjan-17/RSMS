@@ -131,6 +131,7 @@ struct DashboardView: View {
                                             )
                                         }
                                         .buttonStyle(.plain)
+                                    }
                                 
                                     if viewModel.pendingAppointments.count > 5 {
                                         Button(action: {
