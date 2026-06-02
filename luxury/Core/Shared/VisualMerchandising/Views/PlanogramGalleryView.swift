@@ -69,7 +69,6 @@ struct PlanogramGalleryView: View {
                                                 .frame(height: 200)
                                                 .overlay(ProgressView().tint(AppColors.gold))
                                         }
-                                        }
                                         
                                         Text(planogram.title)
                                             .font(AppFonts.sansSerif(size: 14, weight: .bold))
