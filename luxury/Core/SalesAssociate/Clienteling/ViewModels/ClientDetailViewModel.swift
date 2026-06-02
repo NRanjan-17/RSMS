@@ -24,7 +24,7 @@ final class ClientDetailViewModel {
         }
     }
     var selectedTab: String = "overview"
-    let tabs = [("overview", "Overview"), ("appointments", "Appts"), ("history", "History"), ("wishlist", "Wishlist"), ("notes", "Notes")]
+    let tabs = [("overview", "Overview"), ("appointments", "Appts"), ("history", "History"), ("wishlist", "Wishlist"), ("recommendations", "AI Picks"), ("notes", "Notes")]
     
     var wishlistItems: [ClientWishlistItem] = []
     var wishlistCatalogs: [CatalogItem] = []
