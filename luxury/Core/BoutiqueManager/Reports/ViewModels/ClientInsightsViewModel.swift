@@ -14,7 +14,7 @@ final class ClientInsightsViewModel {
     var avgLTV: String = "\(CurrencyManager.shared.symbol)8,45,000"
     
     var tierBreakdown: [TierMetric] = [
-        TierMetric(tier: "UHNW", count: 12, revenue: "\(CurrencyManager.shared.symbol)4,50,00,000"),
+        TierMetric(tier: "High Networth", count: 12, revenue: "\(CurrencyManager.shared.symbol)4,50,00,000"),
         TierMetric(tier: "VIP", count: 42, revenue: "\(CurrencyManager.shared.symbol)2,10,00,000"),
         TierMetric(tier: "Standard", count: 70, revenue: "\(CurrencyManager.shared.symbol)85,00,000")
     ]

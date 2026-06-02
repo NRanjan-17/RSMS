@@ -130,13 +130,13 @@ struct ScannedAuditItem: Identifiable, Hashable {
 enum ClientTier: String, CaseIterable, Hashable {
     case standard = "Standard"
     case vip = "VIP"
-    case uhnw = "UHNW"
+    case highnetworth = "High Networth"
     
     var badgeStatus: BadgeStatus {
         switch self {
         case .standard: return .neutral
         case .vip: return .warning
-        case .uhnw: return .success
+        case .highnetworth: return .success
         }
     }
 }
@@ -197,7 +197,7 @@ extension Client {
                 self.ltv = 450000.0
             case .vip:
                 self.ltv = 2800000.0
-            case .uhnw:
+            case .highnetworth:
                 self.ltv = 11500000.0
             }
         } else {

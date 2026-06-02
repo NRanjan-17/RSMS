@@ -14,14 +14,14 @@ import PostgREST
 final class ClientelingViewModel {
     var searchText: String = ""
     var selectedFilter: String = "All"
-    let filters: [String] = ["All", "UHNW", "VIP", "Standard"]
+    let filters: [String] = ["All", "High Networth", "VIP", "Standard"]
     
     var isLoading = false
     var errorMessage: String? = nil
     
     var stats: [ClientStat] = [
         ClientStat(value: "0", label: "Total"),
-        ClientStat(value: "0", label: "UHNW"),
+        ClientStat(value: "0", label: "High Networth"),
         ClientStat(value: "0", label: "VIP"),
         ClientStat(value: "0", label: "Standard")
     ]
@@ -89,13 +89,13 @@ final class ClientelingViewModel {
         
         await MainActor.run {
             let totalCount = self.clients.count
-            let uhnwCount = self.clients.filter { $0.tier == .uhnw }.count
+            let highnetworthCount = self.clients.filter { $0.tier == .highnetworth }.count
             let vipCount = self.clients.filter { $0.tier == .vip }.count
             let standardCount = self.clients.filter { $0.tier == .standard }.count
             
             self.stats = [
                 ClientStat(value: "\(totalCount)", label: "Total"),
-                ClientStat(value: "\(uhnwCount)", label: "UHNW"),
+                ClientStat(value: "\(highnetworthCount)", label: "High Networth"),
                 ClientStat(value: "\(vipCount)", label: "VIP"),
                 ClientStat(value: "\(standardCount)", label: "Standard")
             ]
@@ -108,13 +108,13 @@ final class ClientelingViewModel {
         clients.removeAll { $0.id == id }
         
         let totalCount = self.clients.count
-        let uhnwCount = self.clients.filter { $0.tier == .uhnw }.count
+        let highnetworthCount = self.clients.filter { $0.tier == .highnetworth }.count
         let vipCount = self.clients.filter { $0.tier == .vip }.count
         let standardCount = self.clients.filter { $0.tier == .standard }.count
         
         self.stats = [
             ClientStat(value: "\(totalCount)", label: "Total"),
-            ClientStat(value: "\(uhnwCount)", label: "UHNW"),
+            ClientStat(value: "\(highnetworthCount)", label: "High Networth"),
             ClientStat(value: "\(vipCount)", label: "VIP"),
             ClientStat(value: "\(standardCount)", label: "Standard")
         ]
