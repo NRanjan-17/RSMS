@@ -14,6 +14,7 @@ struct luxuryApp: App {
     @State private var bmAppState = BoutiqueManagerAppState()
     @State private var icAppState = InventoryControllerAppState()
     @State private var caAppState = CorporateAdminAppState()
+    @State private var languageManager = LanguageManager.shared
     
     init() {
         let navAppearance = UINavigationBarAppearance()
@@ -46,6 +47,8 @@ struct luxuryApp: App {
                 .environment(bmAppState)
                 .environment(icAppState)
                 .environment(caAppState)
+                .environment(languageManager)
+                .environment(\.locale, languageManager.currentLocale)
                 .preferredColorScheme(.dark)
         }
     }
