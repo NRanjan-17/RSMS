@@ -169,21 +169,19 @@ struct GlobalAnalyticsView: View {
                                         }
                                     }
                                     
-                                    if viewModel.sfsFulfillments.count > 5 {
-                                        Button(action: {
-                                            router.push(CARoute.sfsTicketsList(viewModel.sfsFulfillments))
-                                        }) {
-                                            Text("View All Tickets")
-                                                .font(AppFonts.sansSerif(size: 14, weight: .semibold))
-                                                .foregroundStyle(AppColors.gold)
-                                                .frame(maxWidth: .infinity)
-                                                .padding(.vertical, 16)
-                                                .background(AppColors.surface)
-                                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
-                                        }
-                                        .padding(.top, 4)
+                                    Button(action: {
+                                        router.push(CARoute.sfsTicketsList(viewModel.sfsFulfillments))
+                                    }) {
+                                        Text("View All Tickets")
+                                            .font(AppFonts.sansSerif(size: 14, weight: .semibold))
+                                            .foregroundStyle(AppColors.gold)
+                                            .frame(maxWidth: .infinity)
+                                            .padding(.vertical, 16)
+                                            .background(AppColors.surface)
+                                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
                                     }
+                                    .padding(.top, 4)
                                 }
                             }
                         }
