@@ -31,10 +31,15 @@ struct SATransactionDetailView: View {
         ZStack {
             AppColors.background.ignoresSafeArea()
             
-            ScrollView {
-                VStack(spacing: 24) {
-                    // Header
-                    
+            VStack(spacing: 0) {
+                CustomHeader(
+                    title: "Transaction Details",
+                    showBackButton: true,
+                    backAction: { router.pop() }
+                )
+                
+                ScrollView {
+                    VStack(spacing: 24) {
                     // Main Receipt Card
                     VStack(spacing: 0) {
                         // Top Section
@@ -168,6 +173,7 @@ struct SATransactionDetailView: View {
                     .padding(.horizontal, 24)
                     
                     Spacer()
+                }
                 }
             }
         }
