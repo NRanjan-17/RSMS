@@ -12,7 +12,7 @@ struct GlobalRevenueView: View {
         } else {
             return viewModel.transactions.filter {
                 $0.id.uuidString.localizedCaseInsensitiveContains(searchText) ||
-                ($0.client?.name?.localizedCaseInsensitiveContains(searchText) == true)
+                ($0.client?.name.localizedCaseInsensitiveContains(searchText) == true)
             }
         }
     }
