@@ -8,12 +8,54 @@ final class POSDataService {
         SupabaseManager.shared.client
     }
     
+    private var posDecoder: JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            
+            if let dateString = try? container.decode(String.self) {
+                let formatters = [
+                    "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZZZZ",
+                    "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ",
+                    "yyyy-MM-dd'T'HH:mm:ssZZZZZ",
+                    "yyyy-MM-dd'T'HH:mm:ss.SSSSSS",
+                    "yyyy-MM-dd HH:mm:ss",
+                    "yyyy-MM-dd"
+                ]
+                let formatter = DateFormatter()
+                formatter.locale = Locale(identifier: "en_US_POSIX")
+                formatter.timeZone = TimeZone(secondsFromGMT: 0)
+                for format in formatters {
+                    formatter.dateFormat = format
+                    if let date = formatter.date(from: dateString) {
+                        return date
+                    }
+                }
+                if let date = ISO8601DateFormatter().date(from: dateString) {
+                    return date
+                }
+            } else if let doubleValue = try? container.decode(Double.self) {
+                return Date(timeIntervalSince1970: doubleValue)
+            }
+            
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Cannot decode date"
+            )
+        }
+        return decoder
+    }
+    
     func fetchCatalogs() async throws -> [CatalogItem] {
-        return try await client
+        let response = try await client
             .from("catalogs")
             .select()
             .execute()
-            .value
+        return try posDecoder.decode([CatalogItem].self, from: response.data)
+    }
+    
+    private struct IDResponse: Codable {
+        let id: UUID
     }
     
     func createCart(clientId: UUID?, boutiqueId: UUID, total: Double, productIds: [UUID]) async throws -> Cart {
@@ -25,17 +67,25 @@ final class POSDataService {
             "product_ids": .array(productIds.map { .string($0.uuidString) })
         ]
         
-        let cart: [Cart] = try await client
+        let response = try await client
             .from("cart")
             .insert(payload)
-            .select()
+            .select("id")
             .execute()
-            .value
         
-        guard let first = cart.first else {
+        let idResponses = try JSONDecoder().decode([IDResponse].self, from: response.data)
+        guard let first = idResponses.first else {
             throw NSError(domain: "POS", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to create cart"])
         }
-        return first
+        
+        return Cart(
+            id: first.id,
+            clientId: clientId,
+            boutiqueId: boutiqueId,
+            status: "active",
+            totalPrice: total,
+            productIds: productIds
+        )
     }
     
     func createTransaction(amount: Double, purpose: String, clientId: UUID?, boutiqueId: UUID, staffId: UUID, paymentGatewayId: String?, isGift: Bool? = nil, isTax: Bool? = nil) async throws -> Transaction {
@@ -57,17 +107,26 @@ final class POSDataService {
             payload["is_tax"] = .bool(isTax)
         }
         
-        let txs: [Transaction] = try await client
+        let response = try await client
             .from("transaction")
             .insert(payload)
-            .select()
+            .select("id")
             .execute()
-            .value
             
-        guard let first = txs.first else {
+        let idResponses = try JSONDecoder().decode([IDResponse].self, from: response.data)
+        guard let first = idResponses.first else {
             throw NSError(domain: "POS", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to create transaction"])
         }
-        return first
+        
+        return Transaction(
+            id: first.id,
+            transactionAmount: amount,
+            dateOfTransaction: Date(),
+            purpose: TransactionPurpose(rawValue: purpose) ?? .purchase,
+            paymentGatewayId: paymentGatewayId,
+            isGift: isGift,
+            isTax: isTax
+        )
     }
     
     func checkout(cartId: UUID, transactionId: UUID, staffId: UUID, boutiqueId: UUID, total: Double, productIds: [UUID], clientId: UUID?) async throws {
@@ -79,12 +138,10 @@ final class POSDataService {
             "total_price": .double(total)
         ]
         
-        let _: [Order] = try await client
+        try await client
             .from("order")
             .insert(orderPayload)
-            .select()
             .execute()
-            .value
         
         // 2. Create Purchased Items
         var itemsPayload: [[String: AnyJSON]] = []
@@ -105,26 +162,29 @@ final class POSDataService {
         }
         
         if !itemsPayload.isEmpty {
-            let _: [[String: AnyJSON]] = try await client
+            try await client
                 .from("purchased_items")
                 .insert(itemsPayload)
-                .select()
                 .execute()
-                .value
         }
         
         // 3. Update Client's products_purchased
         if let uid = clientId {
-            // Fetch current client
-            let clients: [StoreClient] = try await client
+            struct ClientProducts: Codable {
+                let products_purchased: [UUID]?
+            }
+            
+            // Fetch current client (only products_purchased to avoid strict decoding failures on dob etc.)
+            let response = try await client
                 .from("client")
-                .select()
+                .select("products_purchased")
                 .eq("id", value: uid.uuidString)
                 .execute()
-                .value
+            
+            let clients = try JSONDecoder().decode([ClientProducts].self, from: response.data)
             
             if let currentClient = clients.first {
-                var currentPurchased = currentClient.productsPurchased ?? []
+                var currentPurchased = currentClient.products_purchased ?? []
                 currentPurchased.append(contentsOf: productIds)
                 
                 let updatePayload: [String: AnyJSON] = [

@@ -43,6 +43,7 @@ struct CatalogEntity: Identifiable, Codable, Equatable, Hashable {
         case productImages = "product_images"
     }
     
+    
     var formattedPrice: String {
         return "\(CurrencyManager.shared.symbol)\(Int(amount))"
     }
