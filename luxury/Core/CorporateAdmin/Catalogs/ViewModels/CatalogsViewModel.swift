@@ -9,6 +9,8 @@ import Foundation
 import Observation
 import PhotosUI
 import SwiftUI
+import Supabase
+import PostgREST
 
 @Observable
 final class CatalogsViewModel {
