@@ -42,7 +42,7 @@ struct BMAllAppointmentsView: View {
                                 Button(action: {
                                     router.presentFullScreen(BMRoute.appointmentDetail(appointment))
                                 }) {
-                                    HStack(spacing: 16) {
+                                    HStack(spacing: 12) {
                                         VStack(alignment: .leading, spacing: 4) {
                                             Text(appointment.formattedTime)
                                                 .font(AppFonts.sansSerif(size: 14, weight: .bold))
@@ -51,24 +51,38 @@ struct BMAllAppointmentsView: View {
                                                 .font(AppFonts.sansSerif(size: 8, weight: .bold))
                                                 .foregroundStyle(AppColors.tertiary)
                                         }
-                                        .frame(width: 70, alignment: .leading)
+                                        .frame(width: 65, alignment: .leading)
                                         
-                                        VStack(alignment: .leading, spacing: 2) {
+                                        VStack(alignment: .leading, spacing: 4) {
                                             Text(appointment.client?.name ?? "Unknown Client")
                                                 .font(AppFonts.serif(size: 17, weight: .medium))
                                                 .foregroundStyle(AppColors.text)
-                                            Text("Advisor: \(advisorName(for: appointment.assignedTo))")
-                                                .font(AppFonts.sansSerif(size: 12))
-                                                .foregroundStyle(AppColors.secondary)
+                                                .lineLimit(1)
+                                                .minimumScaleFactor(0.8)
+                                            
+                                            if appointment.assignedTo == nil {
+                                                Text("Unassigned")
+                                                    .font(AppFonts.sansSerif(size: 10, weight: .semibold))
+                                                    .foregroundStyle(AppColors.warning)
+                                                    .padding(.horizontal, 8)
+                                                    .padding(.vertical, 3)
+                                                    .background(AppColors.warning.opacity(0.15))
+                                                    .clipShape(Capsule())
+                                            } else {
+                                                Text("Advisor: \(advisorName(for: appointment.assignedTo))")
+                                                    .font(AppFonts.sansSerif(size: 12))
+                                                    .foregroundStyle(AppColors.secondary)
+                                            }
                                         }
                                         
-                                        Spacer()
+                                        Spacer(minLength: 8)
                                         
                                         Image(systemName: "chevron.right")
                                             .font(AppFonts.sansSerif(size: 12))
                                             .foregroundStyle(AppColors.tertiary)
                                     }
-                                    .padding(20)
+                                    .padding(.vertical, 16)
+                                    .padding(.horizontal, 16)
                                     .background(AppColors.surface)
                                     .clipShape(RoundedRectangle(cornerRadius: 16))
                                     .overlay(

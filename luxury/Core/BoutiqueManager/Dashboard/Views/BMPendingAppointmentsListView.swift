@@ -91,7 +91,7 @@ struct BMPendingAppointmentsListView: View {
                                     Button(action: {
                                         router.push(BMRoute.appointmentDetail(appointment))
                                     }) {
-                                        HStack(spacing: 16) {
+                                        HStack(spacing: 12) {
                                             VStack(alignment: .leading, spacing: 4) {
                                                 Text(appointment.formattedTime)
                                                     .font(AppFonts.sansSerif(size: 14, weight: .bold))
@@ -100,28 +100,36 @@ struct BMPendingAppointmentsListView: View {
                                                     .font(AppFonts.sansSerif(size: 8, weight: .bold))
                                                     .foregroundStyle(AppColors.tertiary)
                                             }
-                                            .frame(width: 70, alignment: .leading)
+                                            .frame(width: 65, alignment: .leading)
                                             
-                                            VStack(alignment: .leading, spacing: 2) {
+                                            VStack(alignment: .leading, spacing: 6) {
                                                 Text(appointment.client?.name ?? "Unknown Client")
                                                     .font(AppFonts.serif(size: 17, weight: .medium))
                                                     .foregroundStyle(AppColors.text)
-                                                Text("Unassigned - Needs Approval")
-                                                    .font(AppFonts.sansSerif(size: 12))
+                                                    .lineLimit(1)
+                                                    .minimumScaleFactor(0.8)
+                                                
+                                                Text("Unassigned")
+                                                    .font(AppFonts.sansSerif(size: 10, weight: .semibold))
                                                     .foregroundStyle(AppColors.warning)
+                                                    .padding(.horizontal, 8)
+                                                    .padding(.vertical, 3)
+                                                    .background(AppColors.warning.opacity(0.15))
+                                                    .clipShape(Capsule())
                                             }
                                             
-                                            Spacer()
+                                            Spacer(minLength: 8)
                                             
                                             Text("Review")
                                                 .font(AppFonts.sansSerif(size: 12, weight: .bold))
                                                 .foregroundStyle(AppColors.background)
-                                                .padding(.horizontal, 12)
-                                                .padding(.vertical, 6)
+                                                .padding(.horizontal, 14)
+                                                .padding(.vertical, 8)
                                                 .background(AppColors.gold)
                                                 .clipShape(Capsule())
                                         }
-                                        .padding(20)
+                                        .padding(.vertical, 16)
+                                        .padding(.horizontal, 16)
                                         .background(AppColors.surface)
                                         .clipShape(RoundedRectangle(cornerRadius: 16))
                                         .overlay(

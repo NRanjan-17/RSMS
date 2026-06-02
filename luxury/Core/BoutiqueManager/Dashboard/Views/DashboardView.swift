@@ -92,43 +92,51 @@ struct DashboardView: View {
                                         Button(action: {
                                             router.push(BMRoute.appointmentDetail(appointment))
                                         }) {
-                                            HStack(spacing: 16) {
-                                                VStack(alignment: .leading, spacing: 4) {
-                                                    Text(appointment.formattedTime)
-                                                        .font(AppFonts.sansSerif(size: 14, weight: .bold))
-                                                        .foregroundStyle(AppColors.gold)
-                                                    Text(appointment.displayAppointmentType.uppercased())
-                                                        .font(AppFonts.sansSerif(size: 8, weight: .bold))
-                                                        .foregroundStyle(AppColors.tertiary)
-                                                }
-                                                .frame(width: 70, alignment: .leading)
+                                        HStack(spacing: 12) {
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                Text(appointment.formattedTime)
+                                                    .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                                    .foregroundStyle(AppColors.gold)
+                                                Text(appointment.displayAppointmentType.uppercased())
+                                                    .font(AppFonts.sansSerif(size: 8, weight: .bold))
+                                                    .foregroundStyle(AppColors.tertiary)
+                                            }
+                                            .frame(width: 65, alignment: .leading)
+                                            
+                                            VStack(alignment: .leading, spacing: 6) {
+                                                Text(appointment.client?.name ?? "Unknown Client")
+                                                    .font(AppFonts.serif(size: 17, weight: .medium))
+                                                    .foregroundStyle(AppColors.text)
+                                                    .lineLimit(1)
+                                                    .minimumScaleFactor(0.8)
                                                 
-                                                VStack(alignment: .leading, spacing: 2) {
-                                                    Text(appointment.client?.name ?? "Unknown Client")
-                                                        .font(AppFonts.serif(size: 17, weight: .medium))
-                                                        .foregroundStyle(AppColors.text)
-                                                    Text("Unassigned - Needs Approval")
-                                                        .font(AppFonts.sansSerif(size: 12))
-                                                        .foregroundStyle(AppColors.warning)
-                                                }
-                                                
-                                                Spacer()
-                                                
-                                                Text("Review")
-                                                    .font(AppFonts.sansSerif(size: 12, weight: .bold))
-                                                    .foregroundStyle(AppColors.background)
-                                                    .padding(.horizontal, 12)
-                                                    .padding(.vertical, 6)
-                                                    .background(AppColors.gold)
+                                                Text("Unassigned")
+                                                    .font(AppFonts.sansSerif(size: 10, weight: .semibold))
+                                                    .foregroundStyle(AppColors.warning)
+                                                    .padding(.horizontal, 8)
+                                                    .padding(.vertical, 3)
+                                                    .background(AppColors.warning.opacity(0.15))
                                                     .clipShape(Capsule())
                                             }
-                                            .padding(20)
-                                            .background(AppColors.surface)
-                                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 16)
-                                                    .stroke(AppColors.gold15, lineWidth: 0.5)
-                                            )
+                                            
+                                            Spacer(minLength: 8)
+                                            
+                                            Text("Review")
+                                                .font(AppFonts.sansSerif(size: 12, weight: .bold))
+                                                .foregroundStyle(AppColors.background)
+                                                .padding(.horizontal, 14)
+                                                .padding(.vertical, 8)
+                                                .background(AppColors.gold)
+                                                .clipShape(Capsule())
+                                        }
+                                        .padding(.vertical, 16)
+                                        .padding(.horizontal, 16)
+                                        .background(AppColors.surface)
+                                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 16)
+                                                .stroke(AppColors.gold15, lineWidth: 0.5)
+                                        )
                                         }
                                         .buttonStyle(.plain)
                                     }
