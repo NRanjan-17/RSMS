@@ -47,7 +47,50 @@ struct GlobalAnalyticsView: View {
                         }
                         .padding(.horizontal, 24)
                         
-                        // Chart moved to GlobalRevenueView
+                        
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("7-DAY REVENUE GLIMPSE (₹)")
+                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                .foregroundStyle(AppColors.secondary)
+                                .kerning(1.5)
+                            
+                            Chart {
+                                ForEach(viewModel.revenueChartData) { data in
+                                    BarMark(
+                                        x: .value("Day", data.month),
+                                        y: .value("Amount", data.amount)
+                                    )
+                                    .foregroundStyle(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [AppColors.gold, AppColors.gold.opacity(0.5)]),
+                                            startPoint: .top,
+                                            endPoint: .bottom
+                                        )
+                                    )
+                                    .cornerRadius(6)
+                                }
+                            }
+                            .frame(height: 180)
+                            .chartYAxis {
+                                AxisMarks(position: .leading) { value in
+                                    AxisValueLabel()
+                                        .font(AppFonts.sansSerif(size: 10))
+                                        .foregroundStyle(AppColors.tertiary)
+                                }
+                            }
+                            .chartXAxis {
+                                AxisMarks { value in
+                                    AxisValueLabel()
+                                        .font(AppFonts.sansSerif(size: 10))
+                                        .foregroundStyle(AppColors.tertiary)
+                                }
+                            }
+                        }
+                        .padding(24)
+                        .background(AppColors.surface)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
+                        .padding(.horizontal, 24)
                         
                         VStack(alignment: .leading, spacing: 16) {
                             Text("ACTIVE BOUTIQUES")

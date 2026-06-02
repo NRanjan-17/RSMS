@@ -124,18 +124,25 @@ final class GlobalAnalyticsViewModel {
                 ? (Double(recentInventoryItems.count) / Double(totalItems)) * 100.0 - 50.0
                 : 0.0
             
-            // Format revenue chart data
-            let sortedMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-            var chartData: [RevenueData] = []
-            for month in sortedMonths {
-                if let amount = revenueByMonth[month] {
-                    chartData.append(RevenueData(month: month, amount: amount / 100000.0)) // Scaled down for UI aesthetics
-                } else if !chartData.isEmpty || month == sortedMonths[Calendar.current.component(.month, from: Date()) - 1] {
-                    chartData.append(RevenueData(month: month, amount: 0.0))
+            // Format daily revenue chart data for dashboard glimpse
+            var dailyChartData: [RevenueData] = []
+            let dayFormatter = DateFormatter()
+            dayFormatter.dateFormat = "EEE" // Mon, Tue...
+            
+            for i in (0..<7).reversed() {
+                if let date = calendar.date(byAdding: .day, value: -i, to: now) {
+                    let label = dayFormatter.string(from: date)
+                    let startOfDay = calendar.startOfDay(for: date)
+                    let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+                    
+                    let dailyTotal = orders.filter { tx in
+                        guard let txDate = tx.dateOfPurchase else { return false }
+                        return txDate >= startOfDay && txDate < endOfDay
+                    }.reduce(0.0) { $0 + $1.totalPrice }
+                    
+                    dailyChartData.append(RevenueData(month: label, amount: dailyTotal))
                 }
             }
-            
-            // Remove mock data. The view will now display the actual zeroes or actual revenue data.
             
             let newKpis = [
                 GlobalKPI(label: "Global Revenue", type: .currency(totalRevenue), trend: revenueTrend, icon: "chart.line.uptrend.xyaxis"),
@@ -147,7 +154,7 @@ final class GlobalAnalyticsViewModel {
             await MainActor.run {
                 self.boutiquePerformance = boutiquesResponse
                 self.kpis = newKpis
-                self.revenueChartData = chartData
+                self.revenueChartData = dailyChartData
                 self.isLoading = false
             }
         }

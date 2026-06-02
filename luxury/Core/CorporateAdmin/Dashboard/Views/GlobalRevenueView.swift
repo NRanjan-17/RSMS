@@ -3,7 +3,7 @@ import Charts
 
 struct GlobalRevenueView: View {
     @Environment(Router.self) private var router
-    @State private var viewModel = GlobalAnalyticsViewModel()
+    @State private var viewModel = GlobalRevenueViewModel()
     
     var body: some View {
         ZStack {
@@ -32,7 +32,7 @@ struct GlobalRevenueView: View {
                                     .font(AppFonts.sansSerif(size: 14))
                                     .foregroundStyle(AppColors.secondary)
                                 
-                                Text(CurrencyManager.shared.format(amount: viewModel.kpis.first(where: { $0.label == "Global Revenue" })?.type.value ?? 0))
+                                Text(CurrencyManager.shared.format(amount: viewModel.totalRevenue))
                                     .font(AppFonts.serif(size: 36, weight: .bold))
                                     .foregroundStyle(.white)
                             }
@@ -43,17 +43,29 @@ struct GlobalRevenueView: View {
                             .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 1))
                             .padding(.horizontal, 24)
                             
+                            // Timeframe Picker
+                            Picker("Timeframe", selection: Binding(
+                                get: { viewModel.selectedTimeframe },
+                                set: { viewModel.setTimeframe($0) }
+                            )) {
+                                ForEach(RevenueTimeframe.allCases, id: \.self) { tf in
+                                    Text(tf.rawValue).tag(tf)
+                                }
+                            }
+                            .pickerStyle(SegmentedPickerStyle())
+                            .padding(.horizontal, 24)
+                            
                             // Chart
                             VStack(alignment: .leading, spacing: 16) {
-                                Text("MONTHLY REVENUE TREND")
+                                Text("\(viewModel.selectedTimeframe.rawValue.uppercased()) REVENUE TREND")
                                     .font(AppFonts.sansSerif(size: 11, weight: .bold))
                                     .foregroundStyle(AppColors.secondary)
                                     .kerning(1.5)
                                 
                                 Chart {
-                                    ForEach(viewModel.revenueChartData) { data in
+                                    ForEach(viewModel.chartData) { data in
                                         BarMark(
-                                            x: .value("Month", data.month),
+                                            x: .value("Period", data.month),
                                             y: .value("Amount", data.amount)
                                         )
                                         .foregroundStyle(
@@ -88,6 +100,49 @@ struct GlobalRevenueView: View {
                             .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 1))
                             .padding(.horizontal, 24)
                             
+                            // Transactions List
+                            VStack(alignment: .leading, spacing: 16) {
+                                Text("RECENT TRANSACTIONS")
+                                    .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                    .foregroundStyle(AppColors.secondary)
+                                    .kerning(1.5)
+                                    .padding(.horizontal, 24)
+                                
+                                if viewModel.transactions.isEmpty {
+                                    Text("No recent transactions.")
+                                        .font(AppFonts.sansSerif(size: 14))
+                                        .foregroundStyle(AppColors.tertiary)
+                                        .padding(.horizontal, 24)
+                                } else {
+                                    LazyVStack(spacing: 12) {
+                                        ForEach(viewModel.transactions) { tx in
+                                            HStack(spacing: 16) {
+                                                VStack(alignment: .leading, spacing: 4) {
+                                                    Text("Order #\(tx.id.uuidString.prefix(8).uppercased())")
+                                                        .font(AppFonts.serif(size: 17, weight: .medium))
+                                                        .foregroundStyle(.white)
+                                                    
+                                                    if let date = tx.dateOfPurchase {
+                                                        Text(date.formatted(date: .abbreviated, time: .shortened))
+                                                            .font(AppFonts.sansSerif(size: 12))
+                                                            .foregroundStyle(AppColors.secondary)
+                                                    }
+                                                }
+                                                Spacer()
+                                                Text(CurrencyManager.shared.format(amount: tx.totalPrice))
+                                                    .font(AppFonts.sansSerif(size: 15, weight: .semibold))
+                                                    .foregroundStyle(AppColors.gold)
+                                            }
+                                            .padding(16)
+                                            .background(AppColors.surface)
+                                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                        }
+                                    }
+                                    .padding(.horizontal, 24)
+                                }
+                            }
+                            
                         }
                         .padding(.vertical, 24)
                     }
@@ -95,17 +150,8 @@ struct GlobalRevenueView: View {
             }
         }
         .navigationBarHidden(true)
-        .onAppear {
-            viewModel.fetchData()
-        }
-    }
-}
-
-extension KPIType {
-    var value: Double {
-        switch self {
-        case .currency(let val): return val
-        default: return 0
+        .task {
+            await viewModel.fetchData()
         }
     }
 }
