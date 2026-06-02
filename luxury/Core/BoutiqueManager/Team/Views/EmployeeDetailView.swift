@@ -93,6 +93,27 @@ struct EmployeeDetailView: View {
                                     }
                                 }
                                 
+                                if employee.role != .inventoryController {
+                                    Divider().background(AppColors.gold15)
+                                    
+                                    HStack {
+                                        Text("Daily Target")
+                                            .font(AppFonts.sansSerif(size: 13))
+                                            .foregroundStyle(AppColors.secondary)
+                                        Spacer()
+                                        if let target = employee.dailySalesTarget {
+                                            Text(CurrencyManager.shared.format(amount: target))
+                                                .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                                .foregroundStyle(AppColors.gold)
+                                        } else {
+                                            Text("Not Set")
+                                                .font(AppFonts.sansSerif(size: 14, weight: .medium))
+                                                .foregroundStyle(.white)
+                                        }
+                                    }
+                                    .padding(.vertical, 16)
+                                }
+                                
                                 if let manager = boutiqueManagerName {
                                     Divider().background(AppColors.gold15)
                                     

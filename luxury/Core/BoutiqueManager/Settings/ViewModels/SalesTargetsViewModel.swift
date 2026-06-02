@@ -38,9 +38,11 @@ final class SalesTargetsViewModel {
                     .execute()
                     .value
                 
+                let eligibleStaff = fetchedStaff.filter { $0.role != .inventoryController }
+                
                 await MainActor.run {
-                    self.staffMembers = fetchedStaff
-                    for staff in fetchedStaff {
+                    self.staffMembers = eligibleStaff
+                    for staff in eligibleStaff {
                         if let target = staff.dailySalesTarget {
                             let localTarget = CurrencyManager.shared.convertedAmount(fromINR: target)
                             self.editedStaffTargets[staff.id] = String(format: "%.0f", localTarget)
