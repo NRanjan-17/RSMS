@@ -16,6 +16,9 @@ struct BoutiqueDetailView: View {
     @State private var showDisableAlert = false
     @State private var showEnableAlert = false
     @State private var showRemoveAlert = false
+    @State private var showSetTargetAlert = false
+    @State private var targetInput = ""
+    @State private var isSettingTarget = false
 
     init(boutique: CorporateBoutique, viewModel: UserManagementViewModel) {
         _currentBoutique = State(initialValue: boutique)
@@ -34,6 +37,16 @@ struct BoutiqueDetailView: View {
                         .font(AppFonts.serif(size: 24, weight: .semibold))
                         .foregroundStyle(.white)
                     Spacer()
+                    
+                    Button(action: {
+                        targetInput = currentBoutique.dailySalesTarget.map { String($0) } ?? ""
+                        showSetTargetAlert = true
+                    }) {
+                        Text("Set Target")
+                            .font(AppFonts.sansSerif(size: 14, weight: .medium))
+                            .foregroundStyle(AppColors.gold)
+                    }
+                    .padding(.trailing, 8)
                     
                     Button(action: { showEditBoutique = true }) {
                         Text("Edit")
@@ -265,7 +278,48 @@ struct BoutiqueDetailView: View {
         } message: {
             Text("Are you sure you want to completely remove this boutique?")
         }
+        .alert("Set Daily Sales Target", isPresented: $showSetTargetAlert) {
+            TextField("Amount (e.g. 5000)", text: $targetInput)
+                .keyboardType(.decimalPad)
+            Button("Cancel", role: .cancel) {}
+            Button("Save") {
+                saveTarget()
+            }
+        } message: {
+            Text("Enter the daily sales target for this boutique.")
+        }
     }
+    
+    private func saveTarget() {
+        guard let value = Double(targetInput) else { return }
+        isSettingTarget = true
+        Task {
+            do {
+                struct UpdateTarget: Encodable {
+                    let daily_sales_target: Double
+                }
+                let data = UpdateTarget(daily_sales_target: value)
+                
+                try await SupabaseManager.shared.client.from("boutiques")
+                    .update(data)
+                    .eq("id", value: currentBoutique.id)
+                    .execute()
+                
+                if let updated: [CorporateBoutique] = try? await SupabaseManager.shared.client.from("boutiques")
+                    .select()
+                    .eq("id", value: currentBoutique.id)
+                    .execute().value, let first = updated.first {
+                    await MainActor.run {
+                        self.currentBoutique = first
+                    }
+                }
+            } catch {
+                print("Failed to set target: \(error)")
+            }
+            await MainActor.run {
+                self.isSettingTarget = false
+            }
+        }
     
     private func statusColor(_ status: EntityStatus) -> Color {
         switch status {

@@ -254,6 +254,21 @@ private struct ApprovedBoutiquesListView: View {
                             router.push(CARoute.boutiqueDetail(boutique))
                         }) {
                             HStack(spacing: 16) {
+                                if let urlString = boutique.avatarUrl, let url = URL(string: urlString) {
+                                    AsyncImage(url: url) { image in
+                                        image.resizable().scaledToFill()
+                                    } placeholder: {
+                                        ProgressView().tint(AppColors.gold)
+                                    }
+                                    .frame(width: 44, height: 44)
+                                    .clipShape(Circle())
+                                } else {
+                                    Image(systemName: "person.circle.fill")
+                                        .resizable()
+                                        .frame(width: 44, height: 44)
+                                        .foregroundStyle(AppColors.gold)
+                                }
+                                
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(boutique.name)
                                         .font(AppFonts.serif(size: 18, weight: .medium))

@@ -30,6 +30,15 @@ struct CAStaffListView: View {
                 // Header & Custom Search
                 VStack(spacing: 16) {
                     HStack {
+                        Button(action: {
+                            router.pop()
+                        }) {
+                            Image(systemName: "arrow.left")
+                                .font(AppFonts.sansSerif(size: 20))
+                                .foregroundStyle(.white)
+                        }
+                        .padding(.trailing, 8)
+                        
                         Text("Global Staff")
                             .font(AppFonts.serif(size: 34, weight: .bold))
                             .foregroundStyle(.white)

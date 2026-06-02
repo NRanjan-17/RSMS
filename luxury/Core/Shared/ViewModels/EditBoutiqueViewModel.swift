@@ -13,7 +13,6 @@ final class EditBoutiqueViewModel {
     var address: String = ""
     var city: String = ""
     var pinCode: String = ""
-    var dailySalesTarget: String = ""
     
     var isLoading = false
     var errorMessage: String?
@@ -27,9 +26,6 @@ final class EditBoutiqueViewModel {
         self.address = boutique.address
         self.city = boutique.city
         self.pinCode = boutique.pinCode
-        if let target = boutique.dailySalesTarget {
-            self.dailySalesTarget = String(target)
-        }
     }
     
     init(boutiqueId: UUID, name: String, address: String, city: String, pinCode: String) {
@@ -38,7 +34,6 @@ final class EditBoutiqueViewModel {
         self.address = address
         self.city = city
         self.pinCode = pinCode
-        self.dailySalesTarget = ""
     }
     
     func saveChanges(onSuccess: @escaping () -> Void) {
@@ -57,11 +52,9 @@ final class EditBoutiqueViewModel {
                     let address: String
                     let city: String
                     let pin_code: String
-                    let daily_sales_target: Double?
                 }
                 
-                let targetValue = Double(dailySalesTarget)
-                let data = UpdateData(name: name, address: address, city: city, pin_code: pinCode, daily_sales_target: targetValue)
+                let data = UpdateData(name: name, address: address, city: city, pin_code: pinCode)
                 
                 try await client.from("boutiques")
                     .update(data)
