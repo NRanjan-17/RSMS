@@ -14,6 +14,7 @@ import SwiftUI
 final class CatalogsViewModel {
     var searchText: String = ""
     var catalogs: [CatalogEntity] = []
+    var boutiques: [CorporateBoutique] = []
     
     var isLoading = false
     var isSaving = false
@@ -57,14 +58,21 @@ final class CatalogsViewModel {
         
         Task {
             do {
-                let fetched = try await catalogService.fetchCatalogs()
+                let fetchedCatalogs = try await catalogService.fetchCatalogs()
+                let fetchedBoutiques: [CorporateBoutique] = try await SupabaseManager.shared.client
+                    .from("boutiques")
+                    .select()
+                    .execute()
+                    .value
+                
                 await MainActor.run {
-                    self.catalogs = fetched
+                    self.catalogs = fetchedCatalogs
+                    self.boutiques = fetchedBoutiques
                     self.isLoading = false
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to load catalogs: \(error.localizedDescription)"
+                    self.errorMessage = "Failed to load data: \(error.localizedDescription)"
                     self.isLoading = false
                 }
             }
@@ -235,7 +243,7 @@ final class CatalogsViewModel {
         }
     }
     
-    func addSerialNumbers(to catalog: CatalogEntity, serials: [String], completion: @escaping () -> Void) {
+    func addSerialNumbers(to catalog: CatalogEntity, serials: [String], boutiqueId: UUID, completion: @escaping () -> Void) {
         isSaving = true
         errorMessage = nil
         
@@ -247,7 +255,47 @@ final class CatalogsViewModel {
         Task {
             do {
                 try await catalogService.updateCatalog(updatedCatalog)
-                SystemLogService.shared.logAction(category: .inventory, severity: .info, message: "Added \(serials.count) serial numbers to catalog \(catalog.name) (\(catalog.catalogId))")
+                
+                // Fetch existing inventory for this boutique & sku
+                let existingInventoryResponse = try? await SupabaseManager.shared.client
+                    .from("inventory")
+                    .select()
+                    .eq("store_id", value: boutiqueId.uuidString)
+                    .eq("sku_id", value: catalog.id.uuidString)
+                    .execute()
+                    
+                var existingInventoryItem: InventoryItem? = nil
+                if let data = existingInventoryResponse?.data,
+                   let decoded = try? JSONDecoder().decode([InventoryItem].self, from: data),
+                   let item = decoded.first {
+                    existingInventoryItem = item
+                }
+                
+                if var item = existingInventoryItem {
+                    // Update quantity
+                    item.quantity += serials.count
+                    let updateData = ["quantity": item.quantity]
+                    try await SupabaseManager.shared.client
+                        .from("inventory")
+                        .update(updateData)
+                        .eq("id", value: item.id.uuidString)
+                        .execute()
+                } else {
+                    // Insert new
+                    let newItem = InventoryItem(
+                        id: UUID(),
+                        storeId: boutiqueId,
+                        skuId: catalog.id,
+                        quantity: serials.count,
+                        productAvailable: true
+                    )
+                    try await SupabaseManager.shared.client
+                        .from("inventory")
+                        .insert(newItem)
+                        .execute()
+                }
+                
+                SystemLogService.shared.logAction(category: .inventory, severity: .info, message: "Added \(serials.count) serial numbers to catalog \(catalog.name) for boutique \(boutiqueId)")
                 await MainActor.run {
                     if let index = self.catalogs.firstIndex(where: { $0.id == updatedCatalog.id }) {
                         self.catalogs[index] = updatedCatalog

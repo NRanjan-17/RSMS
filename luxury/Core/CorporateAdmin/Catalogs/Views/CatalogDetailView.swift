@@ -21,6 +21,15 @@ struct CatalogDetailView: View {
     @State private var showingBulkGenerateAlert = false
     @State private var bulkQuantity: String = ""
     
+    @State private var selectedBoutiqueId: UUID? = nil
+    @State private var showingBoutiquePicker = false
+    @State private var pendingAction: BoutiqueAction? = nil
+    
+    enum BoutiqueAction {
+        case batchScan
+        case bulkGenerate
+    }
+    
     private var currentCatalog: CatalogEntity {
         viewModel.catalogs.first(where: { $0.id == catalog.id }) ?? catalog
     }
@@ -105,8 +114,8 @@ struct CatalogDetailView: View {
             
             Section("Inventory / Serial Numbers") {
                 Button(action: {
-                    scannedSerials.removeAll()
-                    showingBatchScanner = true
+                    pendingAction = .batchScan
+                    showingBoutiquePicker = true
                 }) {
                     HStack {
                         Image(systemName: "plus.viewfinder")
@@ -118,8 +127,8 @@ struct CatalogDetailView: View {
                 }
                 
                 Button(action: {
-                    bulkQuantity = ""
-                    showingBulkGenerateAlert = true
+                    pendingAction = .bulkGenerate
+                    showingBoutiquePicker = true
                 }) {
                     HStack {
                         Image(systemName: "number.square.fill")
@@ -206,14 +215,31 @@ struct CatalogDetailView: View {
         }
         .fullScreenCover(isPresented: $showingBatchScanner) {
             BatchScannerSheet(scannedSerials: $scannedSerials, existingSerials: currentCatalog.productIds ?? []) {
-                if !scannedSerials.isEmpty {
-                    viewModel.addSerialNumbers(to: currentCatalog, serials: scannedSerials) {
+                if !scannedSerials.isEmpty, let bId = selectedBoutiqueId {
+                    viewModel.addSerialNumbers(to: currentCatalog, serials: scannedSerials, boutiqueId: bId) {
                         showingBatchScanner = false
                     }
                 } else {
                     showingBatchScanner = false
                 }
             }
+        }
+        .confirmationDialog("Select Boutique", isPresented: $showingBoutiquePicker, titleVisibility: .visible) {
+            ForEach(viewModel.boutiques, id: \.id) { boutique in
+                Button(boutique.name) {
+                    selectedBoutiqueId = boutique.id
+                    if pendingAction == .batchScan {
+                        scannedSerials.removeAll()
+                        showingBatchScanner = true
+                    } else if pendingAction == .bulkGenerate {
+                        bulkQuantity = ""
+                        showingBulkGenerateAlert = true
+                    }
+                }
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Select the boutique where this inventory will be added.")
         }
         .alert("Create Bulk Serial IDs", isPresented: $showingBulkGenerateAlert) {
             TextField("Quantity", text: $bulkQuantity)
@@ -278,8 +304,10 @@ struct CatalogDetailView: View {
             }
         }
         
-        viewModel.addSerialNumbers(to: currentCatalog, serials: newSerials) {
-            // Success
+        if let bId = selectedBoutiqueId {
+            viewModel.addSerialNumbers(to: currentCatalog, serials: newSerials, boutiqueId: bId) {
+                // Success
+            }
         }
     }
     
