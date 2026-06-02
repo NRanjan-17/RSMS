@@ -20,13 +20,15 @@ struct PlanogramManagementView: View {
                     Text("Planograms")
                         .font(AppFonts.serif(size: 32, weight: .medium))
                         .foregroundStyle(AppColors.text)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
                     Spacer()
                     Button(action: {
                         isShowingCreateSheet = true
                     }) {
-                        HStack {
+                        HStack(spacing: 4) {
                             Image(systemName: "plus")
-                            Text("New Planogram")
+                            Text("New")
                         }
                         .font(AppFonts.sansSerif(size: 14, weight: .semibold))
                         .foregroundStyle(AppColors.background)
@@ -36,7 +38,8 @@ struct PlanogramManagementView: View {
                         .clipShape(Capsule())
                     }
                 }
-                .padding(24)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 16)
                 
                 if viewModel.isLoading {
                     Spacer()
@@ -46,13 +49,18 @@ struct PlanogramManagementView: View {
                     Spacer()
                 } else if viewModel.planograms.isEmpty {
                     Spacer()
-                    VStack(spacing: 12) {
+                    VStack(spacing: 16) {
                         Image(systemName: "photo.artframe")
-                            .font(.system(size: 40))
-                            .foregroundStyle(AppColors.gold)
-                        Text("No planograms active.")
-                            .font(AppFonts.sansSerif(size: 16))
+                            .font(.system(size: 60, weight: .light))
+                            .foregroundStyle(AppColors.gold.opacity(0.8))
+                        Text("No planograms active")
+                            .font(AppFonts.serif(size: 24, weight: .medium))
+                            .foregroundStyle(AppColors.text)
+                        Text("Create a new planogram to direct your boutiques on visual merchandising.")
+                            .font(AppFonts.sansSerif(size: 14))
                             .foregroundStyle(AppColors.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 40)
                     }
                     .frame(maxWidth: .infinity)
                     Spacer()
@@ -72,6 +80,7 @@ struct PlanogramManagementView: View {
                 }
             }
         }
+        .navigationBarHidden(true)
         .task {
             await viewModel.fetchData()
         }
@@ -151,10 +160,11 @@ struct PlanogramAdminCard: View {
                 }
             }
             .padding(16)
-            .background(AppColors.background)
+            .background(AppColors.surface)
         }
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 1))
+        .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
     }
     
     private var targetStoreText: String {

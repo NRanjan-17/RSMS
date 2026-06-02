@@ -224,22 +224,51 @@ struct CatalogDetailView: View {
                 }
             }
         }
-        .confirmationDialog("Select Boutique", isPresented: $showingBoutiquePicker, titleVisibility: .visible) {
-            ForEach(viewModel.boutiques, id: \.id) { boutique in
-                Button(boutique.name) {
-                    selectedBoutiqueId = boutique.id
-                    if pendingAction == .batchScan {
-                        scannedSerials.removeAll()
-                        showingBatchScanner = true
-                    } else if pendingAction == .bulkGenerate {
-                        bulkQuantity = ""
-                        showingBulkGenerateAlert = true
+        .sheet(isPresented: $showingBoutiquePicker) {
+            NavigationStack {
+                List {
+                    ForEach(viewModel.boutiques, id: \.id) { boutique in
+                        Button(action: {
+                            selectedBoutiqueId = boutique.id
+                            showingBoutiquePicker = false
+                            
+                            // Delay presenting new view to allow sheet dismissal
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                if pendingAction == .batchScan {
+                                    scannedSerials.removeAll()
+                                    showingBatchScanner = true
+                                } else if pendingAction == .bulkGenerate {
+                                    bulkQuantity = ""
+                                    showingBulkGenerateAlert = true
+                                }
+                            }
+                        }) {
+                            HStack {
+                                Text(boutique.name)
+                                    .font(AppFonts.sansSerif(size: 16))
+                                    .foregroundStyle(AppColors.text)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(AppFonts.sansSerif(size: 14))
+                                    .foregroundStyle(AppColors.secondary)
+                            }
+                            .padding(.vertical, 4)
+                        }
+                    }
+                }
+                .listStyle(.insetGrouped)
+                .navigationTitle("Select Boutique")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Cancel") {
+                            showingBoutiquePicker = false
+                        }
+                        .foregroundStyle(AppColors.gold)
                     }
                 }
             }
-            Button("Cancel", role: .cancel) { }
-        } message: {
-            Text("Select the boutique where this inventory will be added.")
+            .presentationDetents([.medium, .large])
         }
         .alert("Create Bulk Serial IDs", isPresented: $showingBulkGenerateAlert) {
             TextField("Quantity", text: $bulkQuantity)

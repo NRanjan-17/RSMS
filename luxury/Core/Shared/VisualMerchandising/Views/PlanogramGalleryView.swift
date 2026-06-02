@@ -34,13 +34,18 @@ struct PlanogramGalleryView: View {
                     Spacer()
                 } else if viewModel.activePlanograms.isEmpty {
                     Spacer()
-                    VStack(spacing: 12) {
+                    VStack(spacing: 16) {
                         Image(systemName: "photo.artframe")
-                            .font(.system(size: 40))
-                            .foregroundStyle(AppColors.gold)
-                        Text("No active planograms.")
-                            .font(AppFonts.sansSerif(size: 16))
+                            .font(.system(size: 60, weight: .light))
+                            .foregroundStyle(AppColors.gold.opacity(0.8))
+                        Text("No active planograms")
+                            .font(AppFonts.serif(size: 24, weight: .medium))
+                            .foregroundStyle(AppColors.text)
+                        Text("There are no visual merchandising guidelines available for this boutique at the moment.")
+                            .font(AppFonts.sansSerif(size: 14))
                             .foregroundStyle(AppColors.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 40)
                     }
                     .frame(maxWidth: .infinity)
                     Spacer()
@@ -64,26 +69,28 @@ struct PlanogramGalleryView: View {
                                                 .frame(height: 200)
                                                 .overlay(ProgressView().tint(AppColors.gold))
                                         }
-                                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                                        }
                                         
                                         Text(planogram.title)
                                             .font(AppFonts.sansSerif(size: 14, weight: .bold))
                                             .foregroundStyle(AppColors.text)
                                             .lineLimit(1)
-                                            .padding(.horizontal, 8)
+                                            .padding(.horizontal, 12)
+                                            .padding(.top, 4)
                                         
                                         if let desc = planogram.description {
                                             Text(desc)
                                                 .font(AppFonts.sansSerif(size: 11))
                                                 .foregroundStyle(AppColors.secondary)
                                                 .lineLimit(2)
-                                                .padding(.horizontal, 8)
+                                                .padding(.horizontal, 12)
                                         }
                                         Spacer().frame(height: 8)
                                     }
-                                    .background(AppColors.background)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 1))
+                                    .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 1))
+                                    .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
                                 }
                                 .buttonStyle(.plain)
                             }
