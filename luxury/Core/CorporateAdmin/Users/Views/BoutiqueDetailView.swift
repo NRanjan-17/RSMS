@@ -33,32 +33,7 @@ struct BoutiqueDetailView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                HStack(spacing: 16) {
 
-                    Text("Boutique Details")
-                        .font(AppFonts.serif(size: 24, weight: .semibold))
-                        .foregroundStyle(.white)
-                    Spacer()
-                    
-                    Button(action: {
-                        targetInput = currentBoutique.dailySalesTarget.map { String($0) } ?? ""
-                        showSetTargetAlert = true
-                    }) {
-                        Text("Set Target")
-                            .font(AppFonts.sansSerif(size: 14, weight: .medium))
-                            .foregroundStyle(AppColors.gold)
-                    }
-                    .padding(.trailing, 8)
-                    
-                    Button(action: { showEditBoutique = true }) {
-                        Text("Edit")
-                            .font(AppFonts.sansSerif(size: 14, weight: .medium))
-                            .foregroundStyle(AppColors.gold)
-                    }
-                }
-                .padding(.horizontal, 24)
-                .padding(.vertical, 16)
-                
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 32) {
                         VStack(alignment: .leading, spacing: 8) {
@@ -237,7 +212,29 @@ struct BoutiqueDetailView: View {
                 }
             }
         }
-        .toolbarBackground(.hidden, for: .navigationBar)
+        .navigationTitle("Boutique Details")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button(action: {
+                    targetInput = currentBoutique.dailySalesTarget.map { String($0) } ?? ""
+                    showSetTargetAlert = true
+                }) {
+                    Text("Set Target")
+                        .font(AppFonts.sansSerif(size: 14, weight: .medium))
+                        .foregroundStyle(AppColors.gold)
+                }
+                
+                Button(action: { showEditBoutique = true }) {
+                    Text("Edit")
+                        .font(AppFonts.sansSerif(size: 14, weight: .medium))
+                        .foregroundStyle(AppColors.gold)
+                }
+            }
+        }
         .toolbar(.hidden, for: .tabBar)
         .sheet(isPresented: $showEditBoutique, onDismiss: {
             Task {

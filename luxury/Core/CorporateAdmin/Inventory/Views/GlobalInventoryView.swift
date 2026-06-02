@@ -19,12 +19,20 @@ struct GlobalInventoryView: View {
             
             VStack(spacing: 0) {
                 // KPI Summary
-                HStack(spacing: 16) {
+                let columns = [GridItem(.flexible()), GridItem(.flexible())]
+                LazyVGrid(columns: columns, spacing: 16) {
                     InventoryKPIBox(
                         title: "Total Units",
                         value: "\(viewModel.totalItemsCount)",
                         icon: "cube.box.fill",
                         color: AppColors.text
+                    )
+                    
+                    InventoryKPIBox(
+                        title: "Total Value",
+                        value: CurrencyManager.shared.format(amount: viewModel.totalInventoryValue),
+                        icon: "shippingbox.fill",
+                        color: AppColors.gold
                     )
                     
                     InventoryKPIBox(

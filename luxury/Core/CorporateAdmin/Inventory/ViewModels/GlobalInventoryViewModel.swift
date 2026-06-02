@@ -45,6 +45,10 @@ final class GlobalInventoryViewModel {
         summaries.reduce(0) { $0 + $1.totalQuantity }
     }
     
+    var totalInventoryValue: Double {
+        summaries.reduce(0.0) { $0 + ($1.product.amount * Double($1.totalQuantity)) }
+    }
+    
     var lowStockCount: Int {
         summaries.filter { $0.alertStatus == .lowStock }.count
     }
