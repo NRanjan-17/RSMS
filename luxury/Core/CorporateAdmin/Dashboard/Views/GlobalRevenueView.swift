@@ -35,6 +35,16 @@ struct GlobalRevenueView: View {
                                 Text(CurrencyManager.shared.format(amount: viewModel.totalRevenue))
                                     .font(AppFonts.serif(size: 36, weight: .bold))
                                     .foregroundStyle(.white)
+                                
+                                HStack(spacing: 6) {
+                                    Text("TODAY:")
+                                        .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                        .foregroundStyle(AppColors.secondary)
+                                    Text(CurrencyManager.shared.format(amount: viewModel.todayRevenue))
+                                        .font(AppFonts.sansSerif(size: 13, weight: .semibold))
+                                        .foregroundStyle(AppColors.success)
+                                }
+                                .padding(.top, 4)
                             }
                             .padding(24)
                             .frame(maxWidth: .infinity, alignment: .leading)

@@ -19,6 +19,7 @@ final class GlobalRevenueViewModel {
     var chartData: [RevenueData] = []
     var transactions: [OrderEntity] = []
     var totalRevenue: Double = 0.0
+    var todayRevenue: Double = 0.0
     
     private var allOrders: [OrderEntity] = []
     
@@ -39,6 +40,14 @@ final class GlobalRevenueViewModel {
                 self.allOrders = fetched
                 self.transactions = fetched
                 self.totalRevenue = fetched.reduce(0) { $0 + $1.totalPrice }
+                
+                let calendar = Calendar.current
+                let startOfToday = calendar.startOfDay(for: Date())
+                self.todayRevenue = fetched.filter { 
+                    guard let date = $0.dateOfPurchase else { return false }
+                    return date >= startOfToday
+                }.reduce(0) { $0 + $1.totalPrice }
+                
                 self.processChartData()
                 self.isLoading = false
             }
@@ -56,39 +65,46 @@ final class GlobalRevenueViewModel {
     }
     
     private func processChartData() {
-        let calendar = Calendar.current
+        var calendar = Calendar.current
+        calendar.firstWeekday = 2 // Monday
         let now = Date()
         var grouped: [String: Double] = [:]
         
         // Filter orders based on timeframe and calculate grouped data
         switch selectedTimeframe {
         case .days:
-            // Last 7 days
+            // Current Week starting from Monday
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "EEE" // Mon, Tue, etc
             
-            for i in (0..<7).reversed() {
-                if let date = calendar.date(byAdding: .day, value: -i, to: now) {
+            // Find start of the current week
+            var components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)
+            components.weekday = 2 // Monday
+            guard let startOfWeek = calendar.date(from: components) else { return }
+            
+            var weekDays: [Date] = []
+            for i in 0..<7 {
+                if let date = calendar.date(byAdding: .day, value: i, to: startOfWeek) {
                     let label = dateFormatter.string(from: date)
                     grouped[label] = 0.0
+                    weekDays.append(date)
                 }
             }
             
+            let endOfWeek = calendar.date(byAdding: .day, value: 7, to: startOfWeek) ?? now
+            
             for tx in allOrders {
                 guard let date = tx.dateOfPurchase else { continue }
-                if calendar.dateComponents([.day], from: date, to: now).day ?? 0 < 7 {
+                if date >= startOfWeek && date < endOfWeek {
                     let label = dateFormatter.string(from: date)
                     grouped[label, default: 0.0] += tx.totalPrice
                 }
             }
             
-            chartData = grouped.map { RevenueData(month: $0.key, amount: $0.value) }
-                // Sort by day of week relative to today
-                .sorted {
-                    let date1 = calendar.nextDate(after: now, matching: DateComponents(weekday: getWeekday(from: $0.month)), matchingPolicy: .nextTime, direction: .backward) ?? Date()
-                    let date2 = calendar.nextDate(after: now, matching: DateComponents(weekday: getWeekday(from: $1.month)), matchingPolicy: .nextTime, direction: .backward) ?? Date()
-                    return date1 < date2
-                }
+            chartData = weekDays.map { date in
+                let label = dateFormatter.string(from: date)
+                return RevenueData(month: label, amount: grouped[label] ?? 0.0)
+            }
             
         case .week:
             // Last 4 weeks
@@ -108,35 +124,35 @@ final class GlobalRevenueViewModel {
             chartData = grouped.map { RevenueData(month: $0.key, amount: $0.value) }.sorted { $0.month < $1.month }
             
         case .month:
-            // Last 12 months
+            // Current Year (Jan-Dec)
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "MMM"
             
-            for i in (0..<12).reversed() {
-                if let date = calendar.date(byAdding: .month, value: -i, to: now) {
+            guard let startOfYear = calendar.date(from: calendar.dateComponents([.year], from: now)) else { return }
+            
+            var months: [Date] = []
+            for i in 0..<12 {
+                if let date = calendar.date(byAdding: .month, value: i, to: startOfYear) {
                     let label = dateFormatter.string(from: date)
                     grouped[label] = 0.0
+                    months.append(date)
                 }
             }
             
+            let endOfYear = calendar.date(byAdding: .year, value: 1, to: startOfYear) ?? now
+            
             for tx in allOrders {
                 guard let date = tx.dateOfPurchase else { continue }
-                if calendar.dateComponents([.month], from: date, to: now).month ?? 0 < 12 {
+                if date >= startOfYear && date < endOfYear {
                     let label = dateFormatter.string(from: date)
                     grouped[label, default: 0.0] += tx.totalPrice
                 }
             }
             
-            // Sort to chronological 12 months
-            var sortedData: [RevenueData] = []
-            for i in (0..<12).reversed() {
-                if let date = calendar.date(byAdding: .month, value: -i, to: now) {
-                    let label = dateFormatter.string(from: date)
-                    let amount = grouped[label] ?? 0.0
-                    sortedData.append(RevenueData(month: label, amount: amount))
-                }
+            chartData = months.map { date in
+                let label = dateFormatter.string(from: date)
+                return RevenueData(month: label, amount: grouped[label] ?? 0.0)
             }
-            chartData = sortedData
             
         case .year:
             // Last 5 years
