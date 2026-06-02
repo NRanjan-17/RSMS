@@ -135,7 +135,7 @@ struct GlobalRevenueView: View {
                                     LazyVStack(spacing: 12) {
                                         ForEach(viewModel.transactions) { tx in
                                             Button(action: {
-                                                router.push(.transactionDetail(tx))
+                                                router.push(CARoute.transactionDetail(tx))
                                             }) {
                                                 HStack(spacing: 16) {
                                                     VStack(alignment: .leading, spacing: 4) {

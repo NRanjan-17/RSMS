@@ -137,7 +137,7 @@ struct GlobalAnalyticsView: View {
                                 VStack(spacing: 12) {
                                     ForEach(viewModel.sfsFulfillments) { item in
                                         Button(action: {
-                                            router.push(.sfsTicketDetail(item))
+                                            router.push(CARoute.sfsTicketDetail(item))
                                         }) {
                                             HStack {
                                                 VStack(alignment: .leading, spacing: 4) {
