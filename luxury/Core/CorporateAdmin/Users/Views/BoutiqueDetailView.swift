@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import Supabase
+import PostgREST
 
 struct BoutiqueDetailView: View {
     @State private var currentBoutique: CorporateBoutique
@@ -319,7 +321,6 @@ struct BoutiqueDetailView: View {
             await MainActor.run {
                 self.isSettingTarget = false
             }
-        }
         }
     }
     private func statusColor(_ status: EntityStatus) -> Color {

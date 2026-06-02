@@ -47,8 +47,8 @@ actor RecommendationEngine {
             }
         }
         
-        let tasteTextCentroid = MathUtilities.average(of: purchasedTextVectors)
-        let tasteVisualCentroid = MathUtilities.average(of: purchasedVisualVectors)
+        let tasteTextCentroid = await MathUtilities.average(of: purchasedTextVectors)
+        let tasteVisualCentroid = await MathUtilities.average(of: purchasedVisualVectors)
         
         let averagePurchaseAmount = calculateAveragePurchaseAmount(purchasedItems)
         
@@ -65,11 +65,11 @@ actor RecommendationEngine {
             var visualSimilarity: Float = 0
             
             if let tCentroid = tasteTextCentroid, let itemTVec = await getOrComputeTextEmbedding(for: item) {
-                textSimilarity = MathUtilities.cosineSimilarity(tCentroid, itemTVec)
+                textSimilarity = await MathUtilities.cosineSimilarity(tCentroid, itemTVec)
             }
             
             if let vCentroid = tasteVisualCentroid, let itemVVec = await getOrComputeVisualEmbedding(for: item) {
-                visualSimilarity = MathUtilities.cosineSimilarity(vCentroid, itemVVec)
+                visualSimilarity = await MathUtilities.cosineSimilarity(vCentroid, itemVVec)
             }
             
             // If the user has no past purchases, default to a neutral zero score for similarity,
@@ -145,10 +145,10 @@ actor RecommendationEngine {
             var visualSimilarity: Float = 0
             
             if let targetTVec = targetTextVec, let itemTVec = await getOrComputeTextEmbedding(for: item) {
-                textSimilarity = MathUtilities.cosineSimilarity(targetTVec, itemTVec)
+                textSimilarity = await MathUtilities.cosineSimilarity(targetTVec, itemTVec)
             }
             if let targetVVec = targetVisualVec, let itemVVec = await getOrComputeVisualEmbedding(for: item) {
-                visualSimilarity = MathUtilities.cosineSimilarity(targetVVec, itemVVec)
+                visualSimilarity = await MathUtilities.cosineSimilarity(targetVVec, itemVVec)
             }
             
             // Baseline 1.0
