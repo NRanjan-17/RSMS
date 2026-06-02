@@ -22,6 +22,14 @@ struct GlobalRevenueView: View {
                         .tint(AppColors.gold)
                         .frame(maxWidth: .infinity)
                     Spacer()
+                } else if let error = viewModel.errorMessage {
+                    Spacer()
+                    Text("Error loading data: \(error)")
+                        .font(AppFonts.sansSerif(size: 14))
+                        .foregroundStyle(AppColors.error)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                    Spacer()
                 } else {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 24) {

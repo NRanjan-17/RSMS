@@ -32,7 +32,7 @@ final class GlobalRevenueViewModel {
         do {
             let fetched: [OrderEntity] = try await client.from("order")
                 .select()
-                .order("dateOfPurchase", ascending: false)
+                .order("date_of_purchase", ascending: false)
                 .execute()
                 .value
             
