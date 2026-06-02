@@ -69,14 +69,14 @@ final class GlobalAnalyticsViewModel {
             
             let now = Date()
             let calendar = Calendar.current
-            let startOfThisMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now))!
-            let startOfLastMonth = calendar.date(byAdding: .month, value: -1, to: startOfThisMonth)!
+            let startOfToday = calendar.startOfDay(for: now)
+            let startOfYesterday = calendar.date(byAdding: .day, value: -1, to: startOfToday)!
             let thirtyDaysAgo = calendar.date(byAdding: .day, value: -30, to: now)!
             let sixtyDaysAgo = calendar.date(byAdding: .day, value: -60, to: now)!
             
             var totalRevenue = 0.0
-            var thisMonthRevenue = 0.0
-            var lastMonthRevenue = 0.0
+            var todayRevenue = 0.0
+            var yesterdayRevenue = 0.0
             var revenueByMonth: [String: Double] = [:]
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "MMM"
@@ -87,18 +87,18 @@ final class GlobalAnalyticsViewModel {
                     let monthStr = dateFormatter.string(from: date)
                     revenueByMonth[monthStr, default: 0.0] += tx.totalPrice
                     
-                    if date >= startOfThisMonth {
-                        thisMonthRevenue += tx.totalPrice
-                    } else if date >= startOfLastMonth && date < startOfThisMonth {
-                        lastMonthRevenue += tx.totalPrice
+                    if date >= startOfToday {
+                        todayRevenue += tx.totalPrice
+                    } else if date >= startOfYesterday && date < startOfToday {
+                        yesterdayRevenue += tx.totalPrice
                     }
                 }
             }
             
-            // Calculate revenue trend (month-over-month %)
-            let revenueTrend: Double = lastMonthRevenue > 0
-                ? ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100.0
-                : (thisMonthRevenue > 0 ? 100.0 : 0.0)
+            // Calculate revenue trend (day-over-day %)
+            let revenueTrend: Double = yesterdayRevenue > 0
+                ? ((todayRevenue - yesterdayRevenue) / yesterdayRevenue) * 100.0
+                : (todayRevenue > 0 ? 100.0 : 0.0)
             
             // Calculate boutique trend (added in last 30 days vs previous 30 days)
             let recentBoutiques = boutiquesResponse.filter { $0.createdAt >= thirtyDaysAgo }.count
