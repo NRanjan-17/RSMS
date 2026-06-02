@@ -95,6 +95,8 @@ enum CARoute: Hashable {
     case planograms
     case clientInsights
     case globalRevenue
+    case transactionDetail(SATransactionEntity)
+    case sfsTicketDetail(PurchasedItemEntity)
 }
 
 enum AppRoutes: Hashable {

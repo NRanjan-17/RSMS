@@ -148,10 +148,13 @@ struct CorporateAdminCanvas: View {
             ClientInsightsView()
         case .globalRevenue:
             GlobalRevenueView()
+        case .transactionDetail(let tx):
+            SATransactionDetailView(transaction: tx)
+        case .sfsTicketDetail(let ticket):
+            SFSTicketDetailView(ticket: ticket)
         @unknown default:
             // Fallback to a neutral view to satisfy exhaustiveness and aid forward-compatibility
             EmptyView()
         }
     }
 }
-

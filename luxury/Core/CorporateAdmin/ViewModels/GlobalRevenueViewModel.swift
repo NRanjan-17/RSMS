@@ -17,11 +17,11 @@ final class GlobalRevenueViewModel {
     var selectedTimeframe: RevenueTimeframe = .month
     
     var chartData: [RevenueData] = []
-    var transactions: [OrderEntity] = []
+    var transactions: [SATransactionEntity] = []
     var totalRevenue: Double = 0.0
     var todayRevenue: Double = 0.0
     
-    private var allOrders: [OrderEntity] = []
+    private var allTransactions: [SATransactionEntity] = []
     
     private let client = SupabaseManager.shared.client
     
@@ -30,23 +30,22 @@ final class GlobalRevenueViewModel {
         errorMessage = nil
         
         do {
-            let fetched: [OrderEntity] = try await client.from("order")
-                .select()
-                .order("date_of_purchase", ascending: false)
+            let fetched: [SATransactionEntity] = try await client.from("transaction").select("*, client(*)")
+                .order("date_of_transaction", ascending: false)
                 .execute()
                 .value
             
             await MainActor.run {
-                self.allOrders = fetched
+                self.allTransactions = fetched
                 self.transactions = fetched
-                self.totalRevenue = fetched.reduce(0) { $0 + $1.totalPrice }
+                self.totalRevenue = fetched.reduce(0) { $0 + $1.transactionAmount }
                 
                 let calendar = Calendar.current
                 let startOfToday = calendar.startOfDay(for: Date())
                 self.todayRevenue = fetched.filter { 
-                    guard let date = $0.dateOfPurchase else { return false }
+                    guard let date = $0.dateOfTransaction else { return false }
                     return date >= startOfToday
-                }.reduce(0) { $0 + $1.totalPrice }
+                }.reduce(0) { $0 + $1.transactionAmount }
                 
                 self.processChartData()
                 self.isLoading = false
@@ -93,11 +92,11 @@ final class GlobalRevenueViewModel {
             
             let endOfWeek = calendar.date(byAdding: .day, value: 7, to: startOfWeek) ?? now
             
-            for tx in allOrders {
-                guard let date = tx.dateOfPurchase else { continue }
+            for tx in allTransactions {
+                guard let date = tx.dateOfTransaction else { continue }
                 if date >= startOfWeek && date < endOfWeek {
                     let label = dateFormatter.string(from: date)
-                    grouped[label, default: 0.0] += tx.totalPrice
+                    grouped[label, default: 0.0] += tx.transactionAmount
                 }
             }
             
@@ -112,12 +111,12 @@ final class GlobalRevenueViewModel {
                 grouped["W\(4-i)"] = 0.0
             }
             
-            for tx in allOrders {
-                guard let date = tx.dateOfPurchase else { continue }
+            for tx in allTransactions {
+                guard let date = tx.dateOfTransaction else { continue }
                 let daysAgo = calendar.dateComponents([.day], from: date, to: now).day ?? 0
                 if daysAgo < 28 {
                     let weekIndex = 4 - (daysAgo / 7)
-                    grouped["W\(weekIndex)", default: 0.0] += tx.totalPrice
+                    grouped["W\(weekIndex)", default: 0.0] += tx.transactionAmount
                 }
             }
             
@@ -141,11 +140,11 @@ final class GlobalRevenueViewModel {
             
             let endOfYear = calendar.date(byAdding: .year, value: 1, to: startOfYear) ?? now
             
-            for tx in allOrders {
-                guard let date = tx.dateOfPurchase else { continue }
+            for tx in allTransactions {
+                guard let date = tx.dateOfTransaction else { continue }
                 if date >= startOfYear && date < endOfYear {
                     let label = dateFormatter.string(from: date)
-                    grouped[label, default: 0.0] += tx.totalPrice
+                    grouped[label, default: 0.0] += tx.transactionAmount
                 }
             }
             
@@ -166,11 +165,11 @@ final class GlobalRevenueViewModel {
                 }
             }
             
-            for tx in allOrders {
-                guard let date = tx.dateOfPurchase else { continue }
+            for tx in allTransactions {
+                guard let date = tx.dateOfTransaction else { continue }
                 if calendar.dateComponents([.year], from: date, to: now).year ?? 0 < 5 {
                     let label = dateFormatter.string(from: date)
-                    grouped[label, default: 0.0] += tx.totalPrice
+                    grouped[label, default: 0.0] += tx.transactionAmount
                 }
             }
             

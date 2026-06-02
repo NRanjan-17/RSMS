@@ -136,27 +136,36 @@ struct GlobalAnalyticsView: View {
                             } else {
                                 VStack(spacing: 12) {
                                     ForEach(viewModel.sfsFulfillments) { item in
-                                        HStack {
-                                            VStack(alignment: .leading, spacing: 4) {
-                                                Text(item.productName ?? "Premium Timepiece")
-                                                    .font(AppFonts.serif(size: 17, weight: .medium))
-                                                    .foregroundStyle(.white)
-                                                Text("Order ID: \(item.id.uuidString.prefix(8).uppercased())")
-                                                    .font(AppFonts.sansSerif(size: 12))
-                                                    .foregroundStyle(AppColors.secondary)
+                                        Button(action: {
+                                            router.push(.sfsTicketDetail(item))
+                                        }) {
+                                            HStack {
+                                                VStack(alignment: .leading, spacing: 4) {
+                                                    Text(item.productName ?? "Premium Timepiece")
+                                                        .font(AppFonts.serif(size: 17, weight: .medium))
+                                                        .foregroundStyle(.white)
+                                                    Text("Order ID: \(item.id.uuidString.prefix(8).uppercased())")
+                                                        .font(AppFonts.sansSerif(size: 12))
+                                                        .foregroundStyle(AppColors.secondary)
+                                                }
+                                                Spacer()
+                                                
+                                                let displayStatus = item.status.lowercased() == "ready to pick" ? "Ready" : item.status.capitalized
+                                                let statusType: BadgeStatus = item.status.lowercased() == "ready to pick" ? .success :
+                                                                              item.status.lowercased() == "secured" ? .neutral : .warning
+                                                
+                                                StatusBadge(text: displayStatus, status: statusType)
+                                                
+                                                Image(systemName: "chevron.right")
+                                                    .font(.system(size: 14, weight: .semibold))
+                                                    .foregroundStyle(AppColors.tertiary)
+                                                    .padding(.leading, 8)
                                             }
-                                            Spacer()
-
-                                            let displayStatus = item.status.lowercased() == "ready to pick" ? "Ready" : item.status.capitalized
-                                            let statusType: BadgeStatus = item.status.lowercased() == "ready to pick" ? .success :
-                                                                          item.status.lowercased() == "secured" ? .neutral : .warning
-
-                                            StatusBadge(text: displayStatus, status: statusType)
+                                            .padding(18)
+                                            .background(AppColors.surface)
+                                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
                                         }
-                                        .padding(18)
-                                        .background(AppColors.surface)
-                                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
                                     }
                                 }
                             }

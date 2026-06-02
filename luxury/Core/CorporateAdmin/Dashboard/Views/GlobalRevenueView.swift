@@ -134,27 +134,35 @@ struct GlobalRevenueView: View {
                                 } else {
                                     LazyVStack(spacing: 12) {
                                         ForEach(viewModel.transactions) { tx in
-                                            HStack(spacing: 16) {
-                                                VStack(alignment: .leading, spacing: 4) {
-                                                    Text("Order #\(tx.id.uuidString.prefix(8).uppercased())")
-                                                        .font(AppFonts.serif(size: 17, weight: .medium))
-                                                        .foregroundStyle(.white)
-                                                    
-                                                    if let date = tx.dateOfPurchase {
-                                                        Text(date.formatted(date: .abbreviated, time: .shortened))
-                                                            .font(AppFonts.sansSerif(size: 12))
-                                                            .foregroundStyle(AppColors.secondary)
+                                            Button(action: {
+                                                router.push(.transactionDetail(tx))
+                                            }) {
+                                                HStack(spacing: 16) {
+                                                    VStack(alignment: .leading, spacing: 4) {
+                                                        Text("Txn #\(tx.id.uuidString.prefix(8).uppercased())")
+                                                            .font(AppFonts.serif(size: 17, weight: .medium))
+                                                            .foregroundStyle(.white)
+                                                        
+                                                        if let date = tx.dateOfTransaction {
+                                                            Text(date.formatted(date: .abbreviated, time: .shortened))
+                                                                .font(AppFonts.sansSerif(size: 12))
+                                                                .foregroundStyle(AppColors.secondary)
+                                                        }
                                                     }
+                                                    Spacer()
+                                                    Text(CurrencyManager.shared.format(amount: tx.transactionAmount))
+                                                        .font(AppFonts.sansSerif(size: 15, weight: .semibold))
+                                                        .foregroundStyle(AppColors.gold)
+                                                    
+                                                    Image(systemName: "chevron.right")
+                                                        .font(.system(size: 14, weight: .semibold))
+                                                        .foregroundStyle(AppColors.tertiary)
                                                 }
-                                                Spacer()
-                                                Text(CurrencyManager.shared.format(amount: tx.totalPrice))
-                                                    .font(AppFonts.sansSerif(size: 15, weight: .semibold))
-                                                    .foregroundStyle(AppColors.gold)
+                                                .padding(16)
+                                                .background(AppColors.surface)
+                                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
                                             }
-                                            .padding(16)
-                                            .background(AppColors.surface)
-                                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
                                         }
                                     }
                                     .padding(.horizontal, 24)
