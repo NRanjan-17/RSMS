@@ -320,7 +320,8 @@ struct BoutiqueDetailView: View {
                 self.isSettingTarget = false
             }
         }
-    
+        }
+    }
     private func statusColor(_ status: EntityStatus) -> Color {
         switch status {
         case .pending:
