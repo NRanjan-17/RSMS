@@ -66,6 +66,21 @@ struct DashboardView: View {
                         }
                         .padding(.horizontal, 24)
 
+                        HStack(spacing: 10) {
+                            CustomOutlineButton(
+                                title: "Refund Queue",
+                                icon: AnyView(Image(systemName: "arrow.uturn.backward.circle")),
+                                action: { router.push(BMRoute.refundApproval) }
+                            )
+                            CustomOutlineButton(
+                                title: "Write-Off",
+                                icon: AnyView(Image(systemName: "exclamationmark.triangle")),
+                                action: { router.push(BMRoute.writeOffApproval) }
+                            )
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 8)
+
                         VStack(alignment: .leading, spacing: 16) {
                             HStack {
                                 Text("PENDING APPOINTMENTS")
@@ -159,20 +174,6 @@ struct DashboardView: View {
                                 }
                                 .padding(.horizontal, 24)
                             }
-                            
-                            HStack(spacing: 10) {
-                                CustomOutlineButton(
-                                    title: "Refund Queue",
-                                    icon: AnyView(Image(systemName: "arrow.uturn.backward.circle")),
-                                    action: { router.push(BMRoute.refundApproval) }
-                                )
-                                CustomOutlineButton(
-                                    title: "Write-Off",
-                                    icon: AnyView(Image(systemName: "exclamationmark.triangle")),
-                                    action: { router.push(BMRoute.writeOffApproval) }
-                                )
-                            }
-                            .padding(.horizontal, 24)
                         }
 
                         VStack(alignment: .leading, spacing: 16) {
