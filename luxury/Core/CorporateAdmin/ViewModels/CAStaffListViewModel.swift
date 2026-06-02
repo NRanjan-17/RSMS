@@ -10,6 +10,7 @@ import Supabase
 @Observable
 final class CAStaffListViewModel {
     var staffMembers: [StaffModel] = []
+    var boutiques: [UUID: CorporateBoutique] = [:]
     var isLoading = false
     var errorMessage: String?
     
@@ -21,10 +22,16 @@ final class CAStaffListViewModel {
         
         Task {
             do {
-                // Fetch staff across all boutiques managed by corporate admin
-                let response: [StaffModel] = try await client.from("staff").select().execute().value
+                async let staffTask: [StaffModel] = try client.from("staff").select().execute().value
+                async let boutiquesTask: [CorporateBoutique] = try client.from("boutiques").select().execute().value
+                
+                let (staffResponse, boutiquesResponse) = try await (staffTask, boutiquesTask)
+                
+                let boutiqueDict = Dictionary(uniqueKeysWithValues: boutiquesResponse.map { ($0.id, $0) })
+                
                 await MainActor.run {
-                    self.staffMembers = response
+                    self.staffMembers = staffResponse
+                    self.boutiques = boutiqueDict
                     self.isLoading = false
                 }
             } catch {

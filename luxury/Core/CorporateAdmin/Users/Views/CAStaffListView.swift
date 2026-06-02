@@ -8,6 +8,19 @@ import SwiftUI
 struct CAStaffListView: View {
     @State private var viewModel = CAStaffListViewModel()
     @Environment(Router.self) private var router
+    @State private var searchText = ""
+    
+    var filteredStaff: [StaffModel] {
+        if searchText.isEmpty {
+            return viewModel.staffMembers
+        } else {
+            return viewModel.staffMembers.filter {
+                $0.name.localizedCaseInsensitiveContains(searchText) ||
+                $0.email.localizedCaseInsensitiveContains(searchText) ||
+                $0.location.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+    }
     
     var body: some View {
         ZStack {
@@ -22,13 +35,13 @@ struct CAStaffListView: View {
                     Spacer()
                     Text(error).font(AppFonts.sansSerif(size: 14)).foregroundStyle(AppColors.error).padding(40)
                     Spacer()
-                } else if viewModel.staffMembers.isEmpty {
+                } else if filteredStaff.isEmpty {
                     Spacer()
                     VStack(spacing: 12) {
                         Image(systemName: "person.3.fill")
                             .font(AppFonts.sansSerif(size: 40))
                             .foregroundStyle(AppColors.tertiary)
-                        Text("No staff members found")
+                        Text(searchText.isEmpty ? "No staff members found" : "No staff matches '\(searchText)'")
                             .font(AppFonts.sansSerif(size: 14))
                             .foregroundStyle(AppColors.secondary)
                     }
@@ -36,7 +49,7 @@ struct CAStaffListView: View {
                 } else {
                     ScrollView {
                         VStack(spacing: 12) {
-                            ForEach(viewModel.staffMembers) { staff in
+                            ForEach(filteredStaff) { staff in
                                 Button(action: {
                                     router.push(CARoute.staffDetail(staff))
                                 }) {
@@ -48,6 +61,13 @@ struct CAStaffListView: View {
                                             Text("\(staff.role.displayName) · \(staff.location.isEmpty ? "No Location" : staff.location)")
                                                 .font(AppFonts.sansSerif(size: 12))
                                                 .foregroundStyle(AppColors.secondary)
+                                            
+                                            if let boutiqueId = staff.boutiqueId, let boutique = viewModel.boutiques[boutiqueId] {
+                                                Text("Manager: \(boutique.managerName)")
+                                                    .font(AppFonts.sansSerif(size: 11))
+                                                    .foregroundStyle(AppColors.gold)
+                                                    .padding(.top, 2)
+                                            }
                                         }
                                         Spacer()
                                         Image(systemName: "chevron.right")
@@ -69,6 +89,7 @@ struct CAStaffListView: View {
                 }
             }
         }
+        .searchable(text: $searchText, prompt: "Search by name, email, or boutique")
         .navigationTitle("Global Staff")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
