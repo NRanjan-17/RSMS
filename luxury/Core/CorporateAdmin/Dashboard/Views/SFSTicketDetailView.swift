@@ -24,47 +24,51 @@ struct SFSTicketDetailView: View {
                 
                 ScrollView {
                     VStack(spacing: 24) {
-                        
-                        VStack(spacing: 8) {
-                            Text("SFS Ticket Details")
-                                .font(AppFonts.sansSerif(size: 14))
-                                .foregroundStyle(AppColors.secondary)
+                        // Main Ticket Card
+                        VStack(spacing: 0) {
+                            // Top Section
+                            VStack(spacing: 8) {
+                                Text("SFS Ticket Details")
+                                    .font(AppFonts.sansSerif(size: 14))
+                                    .foregroundStyle(AppColors.secondary)
+                                
+                                let displayStatus = ticket.status.lowercased() == "ready to pick" ? "Ready" : ticket.status.capitalized
+                                let statusType: BadgeStatus = ticket.status.lowercased() == "ready to pick" ? .success :
+                                                              ticket.status.lowercased() == "secured" ? .neutral : .warning
+                                
+                                StatusBadge(text: displayStatus, status: statusType)
+                                    .padding(.top, 4)
+                            }
+                            .padding(.vertical, 32)
                             
-                            let displayStatus = ticket.status.lowercased() == "ready to pick" ? "Ready" : ticket.status.capitalized
-                            let statusType: BadgeStatus = ticket.status.lowercased() == "ready to pick" ? .success :
-                                                          ticket.status.lowercased() == "secured" ? .neutral : .warning
+                            Divider().background(AppColors.gold15)
                             
-                            StatusBadge(text: displayStatus, status: statusType)
-                                .padding(.top, 4)
+                            // Details Section
+                            VStack(spacing: 16) {
+                                DetailRow(label: "Order ID", value: String(ticket.id.uuidString.uppercased()))
+                                DetailRow(label: "Transaction ID", value: ticket.transactionId)
+                                DetailRow(label: "Product ID", value: String(ticket.productId.uuidString.uppercased()))
+                                
+                                if let name = ticket.productName {
+                                    DetailRow(label: "Product Name", value: name)
+                                }
+                                
+                                if let brand = ticket.productBrand {
+                                    DetailRow(label: "Brand", value: brand)
+                                }
+                                
+                                if let sku = ticket.productSku {
+                                    DetailRow(label: "SKU", value: sku)
+                                }
+                                
+                                DetailRow(label: "Date Reserved", value: ticket.reservedDate.formatted(date: .abbreviated, time: .shortened))
+                                
+                                if let delivery = ticket.deliveryDate {
+                                    DetailRow(label: "Delivery Date", value: delivery.formatted(date: .abbreviated, time: .shortened))
+                                }
+                            }
+                            .padding(24)
                         }
-                        .padding(.vertical, 32)
-                        
-                        Divider().background(AppColors.gold15)
-                        
-                        VStack(spacing: 16) {
-                            DetailRow(label: "Order ID", value: String(ticket.id.uuidString.uppercased()))
-                            DetailRow(label: "Transaction ID", value: ticket.transactionId)
-                            DetailRow(label: "Product ID", value: String(ticket.productId.uuidString.uppercased()))
-                            
-                            if let name = ticket.productName {
-                                DetailRow(label: "Product Name", value: name)
-                            }
-                            
-                            if let brand = ticket.productBrand {
-                                DetailRow(label: "Brand", value: brand)
-                            }
-                            
-                            if let sku = ticket.productSku {
-                                DetailRow(label: "SKU", value: sku)
-                            }
-                            
-                            DetailRow(label: "Date Reserved", value: ticket.reservedDate.formatted(date: .abbreviated, time: .shortened))
-                            
-                            if let delivery = ticket.deliveryDate {
-                                DetailRow(label: "Delivery Date", value: delivery.formatted(date: .abbreviated, time: .shortened))
-                            }
-                        }
-                        .padding(24)
                         .background(AppColors.surface)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                         .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 1))
