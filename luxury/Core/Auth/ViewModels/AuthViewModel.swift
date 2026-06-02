@@ -20,12 +20,12 @@ final class AuthViewModel {
         let trimmedPassword = password.trimmingCharacters(in: .whitespacesAndNewlines)
         
         guard !trimmedEmail.isEmpty && !trimmedPassword.isEmpty else {
-            errorMessage = "Please enter both email and password."
+            errorMessage = String(localized: "Please enter both email and password.")
             return
         }
         
         if isSignUp {
-            errorMessage = "Sign up is by invitation only."
+            errorMessage = String(localized: "Sign up is by invitation only.")
             return
         }
         
@@ -74,7 +74,7 @@ final class AuthViewModel {
     func resetPassword() {
         let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedEmail.isEmpty else {
-            errorMessage = "Please enter your email address."
+            errorMessage = String(localized: "Please enter your email address.")
             return
         }
         

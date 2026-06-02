@@ -60,7 +60,7 @@ final class TeamViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to fetch team data: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to fetch team data: \(error.localizedDescription)")
                     self.isLoading = false
                 }
             }
@@ -147,7 +147,7 @@ final class TeamViewModel {
             } catch {
                 await MainActor.run {
                     self.actionStaffId = nil
-                    self.errorMessage = "Failed to update staff request: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to update staff request: \(error.localizedDescription)")
                 }
             }
         }

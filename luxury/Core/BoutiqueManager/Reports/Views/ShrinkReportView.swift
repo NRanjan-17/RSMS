@@ -155,7 +155,7 @@ private struct LiveInventoryRow: View {
             HStack {
                 Text(item.brand)
                 Text("•")
-                Text(item.category.rawValue)
+                Text(LocalizedStringKey(item.category.rawValue))
                 
                 Spacer()
                 

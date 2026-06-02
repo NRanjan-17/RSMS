@@ -1725,7 +1725,13 @@
     "Planograms" : {
 
     },
+    "Please enter both email and password." : {
+
+    },
     "Please enter the 6-digit code from your authenticator app." : {
+
+    },
+    "Please enter your email address." : {
 
     },
     "Please select a destination boutique to unlock scanner." : {
@@ -2227,6 +2233,9 @@
 
     },
     "Shrink & Inventory" : {
+
+    },
+    "Sign up is by invitation only." : {
 
     },
     "SIMULATED SCANNING ACTIONS" : {

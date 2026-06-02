@@ -147,7 +147,7 @@ struct MFASetupView: View {
                 
                 qrCodeImage = generateQRCode(from: cleanUri)
             } catch {
-                errorMessage = "Failed to load MFA setup: \(error.localizedDescription)"
+                errorMessage = String(localized: "Failed to load MFA setup: \(error.localizedDescription)")
             }
             isLoading = false
         }

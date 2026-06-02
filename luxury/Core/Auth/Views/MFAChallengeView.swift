@@ -86,7 +86,7 @@ struct MFAChallengeView: View {
                 let verifiedFactors = factors.totp.filter { $0.status == .verified }
                 
                 if verifiedFactors.isEmpty {
-                    errorMessage = "No verified factor found."
+                    errorMessage = String(localized: "No verified factor found.")
                     isLoading = false
                     return
                 }
@@ -109,10 +109,10 @@ struct MFAChallengeView: View {
                     let session = await authService.getCurrentSession()
                     await coordinator.routingService.updateRoute(for: session)
                 } else {
-                    errorMessage = "Invalid code. Please try again."
+                    errorMessage = String(localized: "Invalid code. Please try again.")
                 }
             } catch {
-                errorMessage = "Failed to list MFA factors. Please try again."
+                errorMessage = String(localized: "Failed to list MFA factors. Please try again.")
             }
             isLoading = false
         }

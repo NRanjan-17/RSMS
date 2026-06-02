@@ -38,7 +38,7 @@ final class EditBoutiqueViewModel {
     
     func saveChanges(onSuccess: @escaping () -> Void) {
         guard !name.isEmpty, !address.isEmpty, !city.isEmpty, !pinCode.isEmpty else {
-            errorMessage = "Please fill in all fields"
+            errorMessage = String(localized: "Please fill in all fields")
             return
         }
         
@@ -67,7 +67,7 @@ final class EditBoutiqueViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to update boutique: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to update boutique: \(error.localizedDescription)")
                     self.isLoading = false
                 }
             }

@@ -29,7 +29,7 @@ final class ForgotPasswordViewModel {
     
     func sendResetEmail() {
         guard !email.isEmpty else {
-            errorMessage = "Please enter your email"
+            errorMessage = String(localized: "Please enter your email")
             return
         }
         
@@ -54,7 +54,7 @@ final class ForgotPasswordViewModel {
     
     func verifyOTP() {
         guard !otp.isEmpty else {
-            errorMessage = "Please enter the OTP sent to your email"
+            errorMessage = String(localized: "Please enter the OTP sent to your email")
             return
         }
         
@@ -74,7 +74,7 @@ final class ForgotPasswordViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Invalid or expired OTP: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Invalid or expired OTP: \(error.localizedDescription)")
                     self.isLoading = false
                 }
             }
@@ -83,11 +83,11 @@ final class ForgotPasswordViewModel {
     
     func updatePassword() {
         guard newPassword == confirmPassword else {
-            errorMessage = "Passwords do not match"
+            errorMessage = String(localized: "Passwords do not match")
             return
         }
         guard newPassword.count >= 6 else {
-            errorMessage = "Password must be at least 6 characters"
+            errorMessage = String(localized: "Password must be at least 6 characters")
             return
         }
         
@@ -103,7 +103,7 @@ final class ForgotPasswordViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to update password: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to update password: \(error.localizedDescription)")
                     self.isLoading = false
                 }
             }

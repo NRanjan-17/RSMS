@@ -280,7 +280,7 @@ struct EditClientView: View {
                         NotificationCenter.default.post(name: NSNotification.Name("ClientDeleted"), object: nil, userInfo: ["clientId": client.id])
                         dismiss()
                     } catch {
-                        errorMessage = "Cannot delete client: \(error.localizedDescription)"
+                        errorMessage = String(localized: "Cannot delete client: \(error.localizedDescription)")
                         showErrorAlert = true
                     }
                 }
@@ -362,13 +362,13 @@ struct EditClientView: View {
         let trimmedMobile = mobile.trimmingCharacters(in: .whitespacesAndNewlines)
         
         guard !trimmedFirst.isEmpty else {
-            errorMessage = "First name is required."
+            errorMessage = String(localized: "First name is required.")
             showErrorAlert = true
             return
         }
         
         guard !trimmedEmail.isEmpty else {
-            errorMessage = "Email is required."
+            errorMessage = String(localized: "Email is required.")
             showErrorAlert = true
             return
         }

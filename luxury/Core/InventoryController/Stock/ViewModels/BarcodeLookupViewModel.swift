@@ -44,7 +44,7 @@ final class BarcodeLookupViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to load expected products: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to load expected products: \(error.localizedDescription)")
                     self.isLoading = false
                 }
             }
@@ -137,7 +137,7 @@ final class BarcodeLookupViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Item not found for barcode: \(trimmed)"
+                    self.errorMessage = String(localized: "Item not found for barcode: \(trimmed)")
                     self.isLoading = false
                 }
             }

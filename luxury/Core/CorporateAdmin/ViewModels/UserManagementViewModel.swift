@@ -52,7 +52,7 @@ final class UserManagementViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to fetch user management data: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to fetch user management data: \(error.localizedDescription)")
                     self.isLoading = false
                 }
             }

@@ -36,7 +36,7 @@ final class CAStaffListViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to fetch staff: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to fetch staff: \(error.localizedDescription)")
                     self.isLoading = false
                 }
             }

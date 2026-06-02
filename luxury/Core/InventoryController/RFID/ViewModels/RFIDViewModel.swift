@@ -36,7 +36,7 @@ final class RFIDViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to load products: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to load products: \(error.localizedDescription)")
                     self.isLoading = false
                 }
             }
@@ -88,7 +88,7 @@ final class RFIDViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to complete delivery intake: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to complete delivery intake: \(error.localizedDescription)")
                 }
             }
         }

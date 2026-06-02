@@ -272,7 +272,7 @@ struct AppointmentDetailSheet: View {
                                 Text(clientModel.name)
                                     .font(AppFonts.sansSerif(size: 16, weight: .medium))
                                     .foregroundStyle(.white)
-                                Text(clientModel.tier.rawValue)
+                                Text(LocalizedStringKey(clientModel.tier.rawValue))
                                     .font(AppFonts.sansSerif(size: 12))
                                     .foregroundStyle(AppColors.gold)
                             }

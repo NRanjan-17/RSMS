@@ -399,11 +399,11 @@ struct AfterSalesIntakeView: View {
                         // Action Button
                         Button(action: {
                             guard !uploadedImages.isEmpty else {
-                                errorMessage = "Please attach at least one photo."
+                                errorMessage = String(localized: "Please attach at least one photo.")
                                 return
                             }
                             guard !serial.isEmpty else { 
-                                errorMessage = "Serial number is missing"
+                                errorMessage = String(localized: "Serial number is missing")
                                 return 
                             }
                             isCreating = true
@@ -413,7 +413,7 @@ struct AfterSalesIntakeView: View {
                                 do {
                                     guard let profile = try await ProfileService().fetchCurrentProfile() else {
                                         await MainActor.run {
-                                            errorMessage = "Profile not found"
+                                            errorMessage = String(localized: "Profile not found")
                                             isCreating = false 
                                         }
                                         return
@@ -426,7 +426,7 @@ struct AfterSalesIntakeView: View {
                                         boutiqueId = manager.id
                                     } else {
                                         await MainActor.run { 
-                                            errorMessage = "Boutique ID not found on profile"
+                                            errorMessage = String(localized: "Boutique ID not found on profile")
                                             isCreating = false 
                                         }
                                         return
@@ -434,7 +434,7 @@ struct AfterSalesIntakeView: View {
                                     
                                     guard let pid = selectedPurchase?.id ?? purchaseId else {
                                         await MainActor.run {
-                                            errorMessage = "Purchase ID is missing"
+                                            errorMessage = String(localized: "Purchase ID is missing")
                                             isCreating = false
                                         }
                                         return
@@ -702,7 +702,7 @@ struct AfterSalesTrackingView: View {
                                     }
                                     
                                     VStack(alignment: .leading, spacing: 3) {
-                                        Text(stage.rawValue)
+                                        Text(LocalizedStringKey(stage.rawValue))
                                             .font(AppFonts.sansSerif(size: 14, weight: .medium))
                                             .foregroundStyle(state == .upcoming ? .white.opacity(0.4) : .white)
                                         

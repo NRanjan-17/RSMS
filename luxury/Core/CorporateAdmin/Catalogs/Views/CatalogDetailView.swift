@@ -50,7 +50,7 @@ struct CatalogDetailView: View {
                         
                         Spacer()
                         
-                        Text(currentCatalog.status.rawValue.uppercased())
+                        Text(LocalizedStringKey(currentCatalog.status.rawValue)).textCase(.uppercase)
                             .font(AppFonts.sansSerif(size: 10, weight: .bold))
                             .foregroundStyle(statusTextColor(for: currentCatalog.status))
                             .padding(.horizontal, 8)

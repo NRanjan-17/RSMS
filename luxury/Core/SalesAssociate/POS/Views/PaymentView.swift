@@ -68,7 +68,7 @@ struct PaymentView: View {
                             let methods: [TenderMode] = [.card, .upi, .split]
                             ForEach(methods, id: \.self) { method in
                                 let isSelected = selectedMethod == method
-                                Text(method.rawValue)
+                                Text(LocalizedStringKey(method.rawValue))
                                     .font(AppFonts.sansSerif(size: 12, weight: isSelected ? .medium : .light))
                                     .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
                                     .frame(maxWidth: .infinity)

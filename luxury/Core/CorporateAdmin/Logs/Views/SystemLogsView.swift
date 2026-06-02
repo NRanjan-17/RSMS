@@ -122,7 +122,7 @@ private struct LogRow: View {
             
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
-                    Text(log.category.rawValue.uppercased())
+                    Text(LocalizedStringKey(log.category.rawValue)).textCase(.uppercase)
                         .font(AppFonts.sansSerif(size: 9, weight: .bold))
                         .foregroundStyle(severityColor)
                         .kerning(1)

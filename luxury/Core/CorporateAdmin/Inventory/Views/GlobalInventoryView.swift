@@ -216,7 +216,7 @@ private struct InventorySummaryRow: View {
                         .font(AppFonts.sansSerif(size: 20, weight: .bold))
                         .foregroundStyle(statusColor)
                     
-                    Text(summary.alertStatus.rawValue)
+                    Text(LocalizedStringKey(summary.alertStatus.rawValue))
                         .font(AppFonts.sansSerif(size: 10, weight: .bold))
                         .foregroundStyle(statusColor)
                         .padding(.horizontal, 8)

@@ -89,7 +89,7 @@ final class EditProfileViewModel {
             }
         } catch {
             await MainActor.run {
-                self.errorMessage = "Failed to load image."
+                self.errorMessage = String(localized: "Failed to load image.")
             }
         }
     }

@@ -209,13 +209,13 @@ struct NewClientView: View {
         let trimmedMobile = mobile.trimmingCharacters(in: .whitespacesAndNewlines)
         
         guard !trimmedFirst.isEmpty else {
-            errorMessage = "First name is required."
+            errorMessage = String(localized: "First name is required.")
             showErrorAlert = true
             return
         }
         
         guard !trimmedEmail.isEmpty else {
-            errorMessage = "Email is required."
+            errorMessage = String(localized: "Email is required.")
             showErrorAlert = true
             return
         }

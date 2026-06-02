@@ -29,7 +29,7 @@ final class ASTViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to load purchased items: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to load purchased items: \(error.localizedDescription)")
                     self.isLoading = false
                 }
             }
@@ -38,7 +38,7 @@ final class ASTViewModel {
     
     func submitAST(boutiqueId: UUID) {
         guard let productId = selectedProductId else {
-            self.errorMessage = "Please select a product"
+            self.errorMessage = String(localized: "Please select a product")
             return
         }
         
@@ -58,7 +58,7 @@ final class ASTViewModel {
                 )
                 
                 await MainActor.run {
-                    self.successMessage = "After Sales Ticket submitted successfully."
+                    self.successMessage = String(localized: "After Sales Ticket submitted successfully.")
                     self.isLoading = false
                     // Reset form
                     self.description = ""
@@ -67,7 +67,7 @@ final class ASTViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to submit ticket: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to submit ticket: \(error.localizedDescription)")
                     self.isLoading = false
                 }
             }

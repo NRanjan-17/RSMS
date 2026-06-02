@@ -43,7 +43,7 @@ final class SystemLogsViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to fetch logs: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to fetch logs: \(error.localizedDescription)")
                     self.isLoading = false
                 }
             }

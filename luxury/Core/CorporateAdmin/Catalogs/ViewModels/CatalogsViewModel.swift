@@ -74,7 +74,7 @@ final class CatalogsViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to load data: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to load data: \(error.localizedDescription)")
                     self.isLoading = false
                 }
             }
@@ -83,18 +83,18 @@ final class CatalogsViewModel {
     
     func addCatalog(completion: @escaping () -> Void) {
         guard let amountStr = Double(newAmount) else {
-            self.errorMessage = "Invalid amount."
+            self.errorMessage = String(localized: "Invalid amount.")
             return
         }
         let amount = CurrencyManager.shared.baseAmount(fromConverted: amountStr)
         
         guard !newBarCode.isEmpty else {
-            self.errorMessage = "QR/Barcode string is required."
+            self.errorMessage = String(localized: "QR/Barcode string is required.")
             return
         }
         
         if catalogs.contains(where: { $0.catalogId == newBarCode }) {
-            self.errorMessage = "Duplicate catalog detected! A catalog with this barcode already exists."
+            self.errorMessage = String(localized: "Duplicate catalog detected! A catalog with this barcode already exists.")
             return
         }
         
@@ -142,7 +142,7 @@ final class CatalogsViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to add catalog: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to add catalog: \(error.localizedDescription)")
                     self.isSaving = false
                 }
             }
@@ -165,7 +165,7 @@ final class CatalogsViewModel {
     
     func updateCatalog(_ existingCatalog: CatalogEntity, completion: @escaping () -> Void) {
         guard let amountStr = Double(newAmount) else {
-            self.errorMessage = "Invalid amount."
+            self.errorMessage = String(localized: "Invalid amount.")
             return
         }
         let amount = CurrencyManager.shared.baseAmount(fromConverted: amountStr)
@@ -216,7 +216,7 @@ final class CatalogsViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to update catalog: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to update catalog: \(error.localizedDescription)")
                     self.isSaving = false
                 }
             }
@@ -238,7 +238,7 @@ final class CatalogsViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to delete catalog: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to delete catalog: \(error.localizedDescription)")
                     self.isSaving = false
                 }
             }
@@ -307,7 +307,7 @@ final class CatalogsViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to add products: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to add products: \(error.localizedDescription)")
                     self.isSaving = false
                 }
             }
@@ -334,7 +334,7 @@ final class CatalogsViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to remove products: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to remove products: \(error.localizedDescription)")
                 }
             }
         }
@@ -358,7 +358,7 @@ final class CatalogsViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to remove image: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to remove image: \(error.localizedDescription)")
                 }
             }
         }

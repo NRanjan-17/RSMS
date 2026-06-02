@@ -35,7 +35,7 @@ struct ReturnsView: View {
                             
                             Picker("Resolution", selection: $selectedResolution) {
                                 ForEach(ReturnResolution.allCases, id: \.self) { resolution in
-                                    Text(resolution.rawValue).tag(resolution)
+                                    Text(LocalizedStringKey(resolution.rawValue)).tag(resolution)
                                 }
                             }
                             .pickerStyle(.segmented)

@@ -30,7 +30,7 @@ struct ICCatalogDetailView: View {
                         
                         Spacer()
                         
-                        Text(catalog.status.rawValue.uppercased())
+                        Text(LocalizedStringKey(catalog.status.rawValue)).textCase(.uppercase)
                             .font(AppFonts.sansSerif(size: 10, weight: .bold))
                             .foregroundStyle(statusTextColor(for: catalog.status))
                             .padding(.horizontal, 8)

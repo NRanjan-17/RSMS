@@ -100,7 +100,7 @@ final class RegistrationViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to load approved boutiques."
+                    self.errorMessage = String(localized: "Failed to load approved boutiques.")
                 }
             }
         }
@@ -350,36 +350,36 @@ final class RegistrationViewModel {
     
     private func validateApplication(role: UserRole) -> Bool {
         guard acceptedTerms else {
-            errorMessage = "Please accept the terms and conditions."
+            errorMessage = String(localized: "Please accept the terms and conditions.")
             return false
         }
         
         guard !name.trimmed.isEmpty, !email.trimmed.isEmpty, !phone.trimmed.isEmpty, !address.trimmed.isEmpty else {
-            errorMessage = "Please complete all required profile fields."
+            errorMessage = String(localized: "Please complete all required profile fields.")
             return false
         }
         
         switch role {
         case .boutiqueManager:
             guard !boutiqueName.trimmed.isEmpty, !city.trimmed.isEmpty, !pinCode.trimmed.isEmpty else {
-                errorMessage = "Please complete all boutique details."
+                errorMessage = String(localized: "Please complete all boutique details.")
                 return false
             }
         case .salesAssociate, .inventoryController:
             guard selectedBoutiqueId != nil else {
-                errorMessage = "Please select an approved boutique."
+                errorMessage = String(localized: "Please select an approved boutique.")
                 return false
             }
             guard !pinCode.trimmed.isEmpty else {
-                errorMessage = "Please enter your PIN code."
+                errorMessage = String(localized: "Please enter your PIN code.")
                 return false
             }
             guard avatarImage != nil, resumeImage != nil else {
-                errorMessage = "Please attach both profile and resume images."
+                errorMessage = String(localized: "Please attach both profile and resume images.")
                 return false
             }
         case .corporateAdmin:
-            errorMessage = "Corporate admin registration is not available."
+            errorMessage = String(localized: "Corporate admin registration is not available.")
             return false
         }
         

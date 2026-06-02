@@ -27,7 +27,7 @@ struct ProductStockDetailView: View {
                         
                         Spacer()
                         
-                        Text(summary.alertStatus.rawValue.uppercased())
+                        Text(LocalizedStringKey(summary.alertStatus.rawValue)).textCase(.uppercase)
                             .font(AppFonts.sansSerif(size: 10, weight: .bold))
                             .foregroundStyle(statusColor)
                             .padding(.horizontal, 8)

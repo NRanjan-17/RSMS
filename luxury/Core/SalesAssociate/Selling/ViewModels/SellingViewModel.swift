@@ -44,7 +44,7 @@ final class SellingViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to load catalogs: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to load catalogs: \(error.localizedDescription)")
                     self.isLoading = false
                 }
             }

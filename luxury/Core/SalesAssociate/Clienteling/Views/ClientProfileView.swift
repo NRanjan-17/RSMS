@@ -915,7 +915,7 @@ private struct WishlistProductSelectionView: View {
                         HStack(spacing: 8) {
                             ForEach(searchVM.categories, id: \.self) { cat in
                                 let isSelected = searchVM.selectedCategory == cat
-                                Text(cat.rawValue)
+                                Text(LocalizedStringKey(cat.rawValue))
                                     .font(AppFonts.sansSerif(size: 11, weight: isSelected ? .medium : .light))
                                     .foregroundStyle(isSelected ? AppColors.background : AppColors.secondary)
                                     .padding(.horizontal, 12)

@@ -70,7 +70,7 @@ struct GlobalRevenueView: View {
                                 set: { viewModel.setTimeframe($0) }
                             )) {
                                 ForEach(RevenueTimeframe.allCases, id: \.self) { tf in
-                                    Text(tf.rawValue).tag(tf)
+                                    Text(LocalizedStringKey(tf.rawValue)).tag(tf)
                                 }
                             }
                             .pickerStyle(SegmentedPickerStyle())
@@ -78,7 +78,7 @@ struct GlobalRevenueView: View {
                             
                             // Chart
                             VStack(alignment: .leading, spacing: 16) {
-                                Text("\(viewModel.selectedTimeframe.rawValue.uppercased()) REVENUE TREND")
+                                Text("\(String(localized: LocalizedStringResource(stringLiteral: viewModel.selectedTimeframe.rawValue))) REVENUE TREND").textCase(.uppercase)
                                     .font(AppFonts.sansSerif(size: 11, weight: .bold))
                                     .foregroundStyle(AppColors.secondary)
                                     .kerning(1.5)

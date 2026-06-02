@@ -96,7 +96,7 @@ final class GlobalInventoryViewModel {
                 
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to load inventory: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to load inventory: \(error.localizedDescription)")
                     self.isLoading = false
                 }
             }

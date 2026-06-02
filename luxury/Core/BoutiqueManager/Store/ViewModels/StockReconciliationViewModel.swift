@@ -77,7 +77,7 @@ final class StockReconciliationViewModel {
     func submitManualLookup() {
         let trimmed = manualSKU.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
-            errorMessage = "Enter the SKU manually to continue."
+            errorMessage = String(localized: "Enter the SKU manually to continue.")
             return
         }
 
@@ -143,7 +143,7 @@ final class StockReconciliationViewModel {
                     }
                     self.expectedQuantity = appliedQuantity
                     self.isSaving = false
-                    self.successMessage = "Inventory updated by \(context.editorName) at \(timestamp)."
+                    self.successMessage = String(localized: "Inventory updated by \(context.editorName) at \(timestamp).")
                     self.refreshSubmitState()
                 }
             } catch {
@@ -158,7 +158,7 @@ final class StockReconciliationViewModel {
     private func lookupItem(using code: String, initialScannedQuantity: Int) {
         guard let context else {
             loadContext()
-            errorMessage = "Loading boutique context. Try the scan again."
+            errorMessage = String(localized: "Loading boutique context. Try the scan again.")
             return
         }
 

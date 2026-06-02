@@ -40,7 +40,7 @@ final class ShrinkReportViewModel {
                 }
             } catch {
                 DispatchQueue.main.async {
-                    self.errorMessage = "Failed to load inventory: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to load inventory: \(error.localizedDescription)")
                     self.isLoading = false
                     print("Error fetching inventory: \(error)")
                 }

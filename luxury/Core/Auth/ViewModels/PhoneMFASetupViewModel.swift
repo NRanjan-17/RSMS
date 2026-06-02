@@ -23,7 +23,7 @@ final class PhoneMFASetupViewModel {
     
     func enrollPhone() {
         guard !phoneNumber.isEmpty else {
-            errorMessage = "Phone number is required"
+            errorMessage = String(localized: "Phone number is required")
             return
         }
         
@@ -44,7 +44,7 @@ final class PhoneMFASetupViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to send SMS: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to send SMS: \(error.localizedDescription)")
                     self.isLoading = false
                 }
             }
@@ -53,12 +53,12 @@ final class PhoneMFASetupViewModel {
     
     func verifyOTP(completion: @escaping (Bool) -> Void) {
         guard let factorId = enrolledFactorId else {
-            errorMessage = "No factor ID found. Please try again."
+            errorMessage = String(localized: "No factor ID found. Please try again.")
             return
         }
         
         guard otpCode.count >= 6 else {
-            errorMessage = "Please enter the 6-digit code"
+            errorMessage = String(localized: "Please enter the 6-digit code")
             return
         }
         
@@ -76,7 +76,7 @@ final class PhoneMFASetupViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to verify code: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to verify code: \(error.localizedDescription)")
                     self.isLoading = false
                     completion(false)
                 }

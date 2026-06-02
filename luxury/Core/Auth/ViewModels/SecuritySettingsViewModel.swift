@@ -44,11 +44,11 @@ final class SecuritySettingsViewModel {
     
     func changePassword() {
         guard newPassword == confirmPassword else {
-            errorMessage = "New passwords do not match"
+            errorMessage = String(localized: "New passwords do not match")
             return
         }
         guard newPassword.count >= 6 else {
-            errorMessage = "Password must be at least 6 characters"
+            errorMessage = String(localized: "Password must be at least 6 characters")
             return
         }
         
@@ -63,7 +63,7 @@ final class SecuritySettingsViewModel {
                 // We'll update directly.
                 try await client.auth.update(user: UserAttributes(password: newPassword))
                 await MainActor.run {
-                    self.successMessage = "Password updated successfully"
+                    self.successMessage = String(localized: "Password updated successfully")
                     self.currentPassword = ""
                     self.newPassword = ""
                     self.confirmPassword = ""
@@ -71,7 +71,7 @@ final class SecuritySettingsViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to update password: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to update password: \(error.localizedDescription)")
                     self.isLoading = false
                 }
             }
@@ -92,7 +92,7 @@ final class SecuritySettingsViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to remove authenticator: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to remove authenticator: \(error.localizedDescription)")
                     self.isLoading = false
                 }
             }

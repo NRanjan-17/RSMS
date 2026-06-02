@@ -162,7 +162,7 @@ struct CatalogItemRow: View {
                     Image(systemName: "tag.fill")
                         .font(AppFonts.sansSerif(size: 10))
                         .foregroundStyle(AppColors.secondary)
-                    Text(catalog.category.rawValue)
+                    Text(LocalizedStringKey(catalog.category.rawValue))
                         .font(AppFonts.sansSerif(size: 12))
                         .foregroundStyle(AppColors.secondary)
                 }

@@ -39,7 +39,7 @@ final class BoutiqueConfigViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to fetch boutiques: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to fetch boutiques: \(error.localizedDescription)")
                     self.isLoading = false
                 }
             }
@@ -55,7 +55,7 @@ final class BoutiqueConfigViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to update boutique: \(error.localizedDescription)"
+                    self.errorMessage = String(localized: "Failed to update boutique: \(error.localizedDescription)")
                 }
             }
         }

@@ -81,7 +81,7 @@ struct CatalogFormView: View {
                                 }
                             } label: {
                                 HStack {
-                                    Text(viewModel.newCategory.rawValue)
+                                    Text(LocalizedStringKey(viewModel.newCategory.rawValue))
                                         .font(AppFonts.sansSerif(size: 15))
                                         .foregroundStyle(AppColors.text)
                                     Spacer()
@@ -116,7 +116,7 @@ struct CatalogFormView: View {
                                     }
                                 } label: {
                                     HStack {
-                                        Text(viewModel.newStatus.rawValue)
+                                        Text(LocalizedStringKey(viewModel.newStatus.rawValue))
                                             .font(AppFonts.sansSerif(size: 15))
                                             .foregroundStyle(viewModel.newStatus == .active ? AppColors.success : AppColors.gold)
                                         Spacer()
