@@ -61,9 +61,8 @@ struct BoutiqueManagerProfileView: View {
                         .padding(.horizontal, 24)
                         .padding(.top, 18)
                         
-                        // Settings
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("SETTINGS")
+                            Text("MANAGEMENT")
                                 .font(AppFonts.sansSerif(size: 11, weight: .bold))
                                 .foregroundStyle(AppColors.secondary)
                                 .kerning(1.5)
@@ -77,28 +76,6 @@ struct BoutiqueManagerProfileView: View {
                                             .foregroundStyle(AppColors.gold)
                                             .frame(width: 24, alignment: .center)
                                         Text("Reports & Analytics")
-                                            .font(AppFonts.sansSerif(size: 15))
-                                            .foregroundStyle(.white)
-                                        Spacer()
-                                        Image(systemName: "chevron.right")
-                                            .font(AppFonts.sansSerif(size: 12))
-                                            .foregroundStyle(AppColors.tertiary)
-                                    }
-                                    .padding(16)
-                                    .background(AppColors.surface)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
-                                }
-                                .buttonStyle(.plain)
-                                Button(action: {
-                                    router.push(BMRoute.editProfile)
-                                }) {
-                                    HStack {
-                                        Image(systemName: "person.crop.circle")
-                                            .font(AppFonts.sansSerif(size: 18))
-                                            .foregroundStyle(AppColors.gold)
-                                            .frame(width: 24, alignment: .center)
-                                        Text("Edit Profile")
                                             .font(AppFonts.sansSerif(size: 15))
                                             .foregroundStyle(.white)
                                         Spacer()
@@ -135,7 +112,42 @@ struct BoutiqueManagerProfileView: View {
                                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
                                 }
                                 .buttonStyle(.plain)
-
+                            }
+                            .padding(.horizontal, 24)
+                        }
+                        .padding(.top, 24)
+                        
+                        // Settings
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("SETTINGS")
+                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                .foregroundStyle(AppColors.secondary)
+                                .kerning(1.5)
+                                .padding(.horizontal, 24)
+                            
+                            VStack(spacing: 12) {
+                                Button(action: {
+                                    router.push(BMRoute.editProfile)
+                                }) {
+                                    HStack {
+                                        Image(systemName: "person.crop.circle")
+                                            .font(AppFonts.sansSerif(size: 18))
+                                            .foregroundStyle(AppColors.gold)
+                                            .frame(width: 24, alignment: .center)
+                                        Text("Edit Profile")
+                                            .font(AppFonts.sansSerif(size: 15))
+                                            .foregroundStyle(.white)
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .font(AppFonts.sansSerif(size: 12))
+                                            .foregroundStyle(AppColors.tertiary)
+                                    }
+                                    .padding(16)
+                                    .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                }
+                                .buttonStyle(.plain)
 
                                 HStack {
                                     Image(systemName: "banknote.fill")
@@ -158,6 +170,28 @@ struct BoutiqueManagerProfileView: View {
                                 .background(AppColors.surface)
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                                 .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                
+                                NavigationLink(destination: LanguageSettingsView()) {
+                                    HStack {
+                                        Image(systemName: "globe")
+                                            .font(AppFonts.sansSerif(size: 18))
+                                            .foregroundStyle(AppColors.gold)
+                                            .frame(width: 24, alignment: .center)
+                                        Text("Language Settings")
+                                            .font(AppFonts.sansSerif(size: 15))
+                                            .foregroundStyle(.white)
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .font(AppFonts.sansSerif(size: 12))
+                                            .foregroundStyle(AppColors.tertiary)
+                                    }
+                                    .padding(16)
+                                    .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                }
+                                .buttonStyle(.plain)
+                                
                                 NavigationLink(destination: SecuritySettingsView()) {
                                     HStack {
                                         Image(systemName: "lock.shield.fill")

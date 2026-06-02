@@ -1,7 +1,2719 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "" : {
 
+    },
+    "· Encrypted" : {
+
+    },
+    "\"%@\"" : {
+
+    },
+    "(Archived)" : {
+
+    },
+    "%@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "%@ · %@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$@ · %3$@"
+          }
+        }
+      }
+    },
+    "%@ · %@ · Appointment linked" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$@ · Appointment linked"
+          }
+        }
+      }
+    },
+    "%@ · LTV %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · LTV %2$@"
+          }
+        }
+      }
+    },
+    "%@ (%@)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ (%2$@)"
+          }
+        }
+      }
+    },
+    "%@ • %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ • %2$@"
+          }
+        }
+      }
+    },
+    "%@ REVENUE TREND" : {
+
+    },
+    "%@, %@ - %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@ - %3$@"
+          }
+        }
+      }
+    },
+    "%@%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@%2$@"
+          }
+        }
+      }
+    },
+    "%@%%" : {
+
+    },
+    "%@%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@%2$lld"
+          }
+        }
+      }
+    },
+    "%lld" : {
+
+    },
+    "%lld / %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld / %2$lld"
+          }
+        }
+      }
+    },
+    "%lld / %lld units" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld / %2$lld units"
+          }
+        }
+      }
+    },
+    "%lld Audit ready for review" : {
+
+    },
+    "%lld Clients" : {
+
+    },
+    "%lld in stock" : {
+
+    },
+    "%lld items" : {
+
+    },
+    "%lld Items expected" : {
+
+    },
+    "%lld pending" : {
+
+    },
+    "%lld Requests awaiting approval" : {
+
+    },
+    "%lld walk-ins" : {
+
+    },
+    "%lld/%lld items" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld items"
+          }
+        }
+      }
+    },
+    "%lld%%" : {
+
+    },
+    "%lld%% achieved" : {
+
+    },
+    "%lld%% of Total Revenue" : {
+
+    },
+    "%lldh before" : {
+
+    },
+    "%lldx" : {
+
+    },
+    "•" : {
+
+    },
+    "+" : {
+
+    },
+    "+ New Event" : {
+
+    },
+    "+%lld" : {
+
+    },
+    "×%lld" : {
+
+    },
+    "−" : {
+
+    },
+    "✓ Pipeline Sourced Successfully" : {
+
+    },
+    "0%" : {
+
+    },
+    "7-DAY REVENUE GLIMPSE (₹)" : {
+
+    },
+    "A password reset link has been sent to your email address." : {
+
+    },
+    "ABV" : {
+
+    },
+    "Act: %lld" : {
+
+    },
+    "ACTIVE" : {
+
+    },
+    "ACTIVE BOUTIQUES" : {
+
+    },
+    "ACTIVE SERVICES" : {
+
+    },
+    "ACTIVE SOURCING PIPELINES" : {
+
+    },
+    "ACTUAL" : {
+
+    },
+    "Actual: %lld" : {
+
+    },
+    "Add a new catalog item" : {
+
+    },
+    "Add a quick note for %@" : {
+
+    },
+    "Add Device" : {
+
+    },
+    "Add Item" : {
+
+    },
+    "Add Note" : {
+
+    },
+    "Add Phone Number" : {
+
+    },
+    "Add Photo" : {
+
+    },
+    "Add Product" : {
+
+    },
+    "Add Product(s) / Scan Serials" : {
+
+    },
+    "Add to Wishlist" : {
+
+    },
+    "ADDITIONAL DETAILS" : {
+
+    },
+    "ADDITIONAL PROFILE INFO" : {
+
+    },
+    "ADMIN TOOLS" : {
+
+    },
+    "Advisor ID" : {
+
+    },
+    "Advisor: %@" : {
+
+    },
+    "After-Sales Intake" : {
+
+    },
+    "Align barcode / QR code within the frame" : {
+
+    },
+    "Align barcode within the frame to scan.\nIt will be added to the cart automatically." : {
+
+    },
+    "Align item barcode within the frame" : {
+
+    },
+    "All" : {
+
+    },
+    "ALL APPOINTMENTS" : {
+
+    },
+    "All Boutiques" : {
+
+    },
+    "ALL BOUTIQUES" : {
+
+    },
+    "All expected items have been scanned." : {
+
+    },
+    "All inter-store inventory transfers have been fully resolved." : {
+
+    },
+    "All inventory levels are within normal limits." : {
+
+    },
+    "All items matched — no variance found." : {
+
+    },
+    "All Serial Numbers" : {
+
+    },
+    "Amount" : {
+
+    },
+    "Amount (e.g. 5000)" : {
+
+    },
+    "Amount Paid" : {
+
+    },
+    "Analytics" : {
+
+    },
+    "Analyzing Taste Profile..." : {
+
+    },
+    "Anniversary Date" : {
+
+    },
+    "Anniversary in %lld days" : {
+
+    },
+    "Any special requests or notes..." : {
+
+    },
+    "Apply Courtesy" : {
+
+    },
+    "Appointment Details" : {
+
+    },
+    "Appointment Tracking" : {
+
+    },
+    "Appointments" : {
+
+    },
+    "Approve" : {
+
+    },
+    "Approve and Request from Paris" : {
+
+    },
+    "Approve Request" : {
+
+    },
+    "Approve Transfer" : {
+
+    },
+    "Archived Product" : {
+
+    },
+    "Are you sure you want to approve this stock transfer? This will update the inventory levels at the source and destination boutiques." : {
+
+    },
+    "Are you sure you want to completely remove this boutique?" : {
+
+    },
+    "Are you sure you want to delete %@? This action cannot be undone." : {
+
+    },
+    "Are you sure you want to delete this appointment?" : {
+
+    },
+    "Are you sure you want to delete this appointment? This action cannot be undone." : {
+
+    },
+    "Are you sure you want to delete this catalog? This action cannot be undone." : {
+
+    },
+    "Are you sure you want to delete this image?" : {
+
+    },
+    "Are you sure you want to disable this boutique?" : {
+
+    },
+    "Are you sure you want to enable this boutique?" : {
+
+    },
+    "Are you sure you want to logout?" : {
+
+    },
+    "Are you sure you want to mark this appointment as done?" : {
+
+    },
+    "Are you sure you want to reject this stock transfer request?" : {
+
+    },
+    "Are you sure you want to remove %@ from this client's wishlist?" : {
+
+    },
+    "Are you sure you want to save these changes?" : {
+
+    },
+    "Are you sure you want to submit this transfer request?" : {
+
+    },
+    "Assessing stock routes..." : {
+
+    },
+    "Assign" : {
+
+    },
+    "Assign Sourced Item & Fulfill Order" : {
+
+    },
+    "ASSIGNED HOST ASSOCIATE" : {
+
+    },
+    "ASSOCIATE" : {
+
+    },
+    "ASSOCIATE METRICS" : {
+
+    },
+    "Attach a clear damage photo" : {
+
+    },
+    "Attach Client" : {
+
+    },
+    "Audit" : {
+
+    },
+    "Audit Details" : {
+
+    },
+    "Audit Progress" : {
+
+    },
+    "Audit Sign-off" : {
+
+    },
+    "Authenticator App" : {
+
+    },
+    "Authorize Stock Transfer" : {
+
+    },
+    "AUTOMATIC REMINDER WINDOW" : {
+
+    },
+    "Avail: %lld" : {
+
+    },
+    "AVAILABILITY ASSESSMENT" : {
+
+    },
+    "Available" : {
+
+    },
+    "Available for sale" : {
+
+    },
+    "Available for transfer from %@." : {
+
+    },
+    "Available local stock: 0 units." : {
+
+    },
+    "AVAILABLE MODULES" : {
+
+    },
+    "AWAITING ACTION" : {
+
+    },
+    "Back" : {
+
+    },
+    "Barcode" : {
+
+    },
+    "Barcode Lookup" : {
+
+    },
+    "BARCODE SCAN SIMULATOR" : {
+
+    },
+    "Batch Scan" : {
+
+    },
+    "Birthday in %lld days" : {
+
+    },
+    "Bottega Veneta The Jodie · Unknown Client · Within exchange window" : {
+
+    },
+    "Boutique" : {
+
+    },
+    "Boutique\nRegistration." : {
+
+    },
+    "Boutique Details" : {
+
+    },
+    "BOUTIQUE DETAILS" : {
+
+    },
+    "Boutique ID" : {
+
+    },
+    "Boutique Management" : {
+
+    },
+    "Boutique Manager" : {
+
+    },
+    "Boutique Manager Email" : {
+
+    },
+    "Boutique Name" : {
+
+    },
+    "Boutique: %@" : {
+
+    },
+    "Brand" : {
+
+    },
+    "BTQ-MUM-01" : {
+
+    },
+    "By %@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "By %1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "Camera Modal (Placeholder)" : {
+
+    },
+    "Camera Unavailable" : {
+
+    },
+    "Cancel" : {
+
+    },
+    "Cancel Product Launch" : {
+
+    },
+    "Cancel Product Launch?" : {
+
+    },
+    "Cancel Transaction" : {
+
+    },
+    "Cancel Trunk Show (Case 3)" : {
+
+    },
+    "Cancel Trunk Show?" : {
+
+    },
+    "Cannot Send Email" : {
+
+    },
+    "CAPTURE" : {
+
+    },
+    "Capture Photo" : {
+
+    },
+    "Cardholder Name" : {
+
+    },
+    "Cart" : {
+
+    },
+    "Catalog" : {
+
+    },
+    "Catalog\nEntry." : {
+
+    },
+    "Catalog Details" : {
+
+    },
+    "Catalog ID" : {
+
+    },
+    "Catalogs" : {
+
+    },
+    "Category" : {
+
+    },
+    "CATEGORY" : {
+
+    },
+    "Celebrating today!" : {
+
+    },
+    "Certificate number" : {
+
+    },
+    "Change" : {
+
+    },
+    "CHANGE DATE & TIME" : {
+
+    },
+    "CHANGE PASSWORD" : {
+
+    },
+    "Change Photo" : {
+
+    },
+    "Checkout · %@" : {
+
+    },
+    "Choose from Library" : {
+
+    },
+    "Client" : {
+
+    },
+    "CLIENT" : {
+
+    },
+    "Client Appointment" : {
+
+    },
+    "Client Handover (SFS)" : {
+
+    },
+    "Client Information" : {
+
+    },
+    "Client Insights" : {
+
+    },
+    "Client Profile" : {
+
+    },
+    "Client receives curated products, split tender estimate, and secure payment handoff placeholder." : {
+
+    },
+    "Clients" : {
+
+    },
+    "Close" : {
+
+    },
+    "Coming Soon" : {
+
+    },
+    "Complete your profile to request access." : {
+
+    },
+    "Completed" : {
+
+    },
+    "Completed requests will be displayed here." : {
+
+    },
+    "Condition Photos" : {
+
+    },
+    "Configuration" : {
+
+    },
+    "Configure today's sales target to track performance" : {
+
+    },
+    "Confirm" : {
+
+    },
+    "Confirm & Submit" : {
+
+    },
+    "Confirm Appointment" : {
+
+    },
+    "Confirm Approval" : {
+
+    },
+    "Confirm Cancellation" : {
+
+    },
+    "Confirm certificates, warranty card, and luxury box are complete" : {
+
+    },
+    "Confirm Deletion" : {
+
+    },
+    "Confirm Dispatch" : {
+
+    },
+    "Confirm Dispatch & Delivery" : {
+
+    },
+    "Confirm Password" : {
+
+    },
+    "Confirm physical watch shows zero defects or scratches" : {
+
+    },
+    "Confirm Rejection" : {
+
+    },
+    "Confirm timepiece matches requested model specifications" : {
+
+    },
+    "Confirm Transfer Details" : {
+
+    },
+    "Confirmed" : {
+
+    },
+    "CONFIRMED" : {
+
+    },
+    "CONSULTATION TYPE" : {
+
+    },
+    "CONTACT INFORMATION" : {
+
+    },
+    "Controller: %@" : {
+
+    },
+    "CONV" : {
+
+    },
+    "CONVERSION" : {
+
+    },
+    "Could not load client details." : {
+
+    },
+    "COUNT SESSION STATISTICS" : {
+
+    },
+    "Count Submitted. Inventory record updated successfully." : {
+
+    },
+    "Counted" : {
+
+    },
+    "Counted by %@ on %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Counted by %1$@ on %2$@"
+          }
+        }
+      }
+    },
+    "Counted: %lld" : {
+
+    },
+    "Courtesy Applied (%lld%%)" : {
+
+    },
+    "Create a new planogram to direct your boutiques on visual merchandising." : {
+
+    },
+    "Create Bulk Serial Ids" : {
+
+    },
+    "Create Bulk Serial IDs" : {
+
+    },
+    "Create Event" : {
+
+    },
+    "Create Service Ticket" : {
+
+    },
+    "Currency" : {
+
+    },
+    "Current stage" : {
+
+    },
+    "CVV" : {
+
+    },
+    "Cycle Count Sign-off" : {
+
+    },
+    "Daily Target" : {
+
+    },
+    "Daily target surpassed" : {
+
+    },
+    "Damage Intake" : {
+
+    },
+    "Damaged on arrival" : {
+
+    },
+    "Damaged or unreadable barcode?" : {
+
+    },
+    "Dashboard" : {
+
+    },
+    "Data Processing & Storage" : {
+
+    },
+    "Date & Time" : {
+
+    },
+    "DATE & TIME" : {
+
+    },
+    "Date of Birth" : {
+
+    },
+    "Date of Purchase" : {
+
+    },
+    "Date: %@" : {
+
+    },
+    "Day" : {
+
+    },
+    "Decision timestamp, manager identity, and request snapshot will be securely stored." : {
+
+    },
+    "Declined" : {
+
+    },
+    "Deduct %lld units from stock levels immediately" : {
+
+    },
+    "Delete" : {
+
+    },
+    "Delete Appointment" : {
+
+    },
+    "Delete Catalog" : {
+
+    },
+    "Delete Client" : {
+
+    },
+    "Delete Client Profile" : {
+
+    },
+    "Delete Image" : {
+
+    },
+    "Delete Note?" : {
+
+    },
+    "Delivered Qty" : {
+
+    },
+    "DELIVERY QUANTITY CONFIGURATION" : {
+
+    },
+    "Description" : {
+
+    },
+    "DESCRIPTION" : {
+
+    },
+    "Description (Optional)" : {
+
+    },
+    "Description of Issue" : {
+
+    },
+    "DESTINATION" : {
+
+    },
+    "Destination Store" : {
+
+    },
+    "Destination: DLF Emporio, Delhi" : {
+
+    },
+    "Details" : {
+
+    },
+    "Disable" : {
+
+    },
+    "Disable Boutique" : {
+
+    },
+    "Discard" : {
+
+    },
+    "Discard Changes" : {
+
+    },
+    "DISCREPANCY REPORT" : {
+
+    },
+    "DISCREPANT ITEMS" : {
+
+    },
+    "Dismiss" : {
+
+    },
+    "DISPATCH IMPACT SUMMARY" : {
+
+    },
+    "Done" : {
+
+    },
+    "DONE" : {
+
+    },
+    "Duplicate Item" : {
+
+    },
+    "e.g. 1500000" : {
+
+    },
+    "e.g. Winter High Jewelry Collection" : {
+
+    },
+    "e.g. Winter High Jewelry Gala" : {
+
+    },
+    "Edit" : {
+
+    },
+    "Edit\nCatalog." : {
+
+    },
+    "Edit Boutique" : {
+
+    },
+    "Edit Catalog" : {
+
+    },
+    "Edit Client" : {
+
+    },
+    "Edit Damage Report" : {
+
+    },
+    "Edit Planogram" : {
+
+    },
+    "Edit Profile" : {
+
+    },
+    "Email" : {
+
+    },
+    "Email: %@" : {
+
+    },
+    "Enable" : {
+
+    },
+    "Enable Boutique" : {
+
+    },
+    "Enabled" : {
+
+    },
+    "Endless Aisle Approvals" : {
+
+    },
+    "Endless Aisle Lookup" : {
+
+    },
+    "Endless Aisle Requests" : {
+
+    },
+    "Endless Aisle Sourcing Status" : {
+
+    },
+    "Enough items in inventory to fulfill this order." : {
+
+    },
+    "Enter 6-digit code" : {
+
+    },
+    "Enter Barcode Manually..." : {
+
+    },
+    "Enter email address" : {
+
+    },
+    "Enter manual barcode..." : {
+
+    },
+    "Enter note..." : {
+
+    },
+    "Enter password" : {
+
+    },
+    "Enter SKU" : {
+
+    },
+    "Enter SKU or Product Code" : {
+
+    },
+    "Enter the 6-digit code sent to %@" : {
+
+    },
+    "Enter the daily sales target for this boutique." : {
+
+    },
+    "Enter the number of random serials to generate for this catalog." : {
+
+    },
+    "Enter the SKU manually to continue the count." : {
+
+    },
+    "Enter your credentials to continue." : {
+
+    },
+    "Error" : {
+
+    },
+    "Error generating PDF for email." : {
+
+    },
+    "Error loading data: %@" : {
+
+    },
+    "Error Saving Client" : {
+
+    },
+    "Escalate to Manager (Endless-Aisle)" : {
+
+    },
+    "EVENT TITLE" : {
+
+    },
+    "EVENT TYPE" : {
+
+    },
+    "Exchange Policy" : {
+
+    },
+    "Exp: %lld" : {
+
+    },
+    "Expected" : {
+
+    },
+    "Expected and scanned quantities match." : {
+
+    },
+    "EXPECTED ITEMS" : {
+
+    },
+    "Expected Qty" : {
+
+    },
+    "Expected SKU" : {
+
+    },
+    "Expected: %lld" : {
+
+    },
+    "Expired" : {
+
+    },
+    "EXPIRED" : {
+
+    },
+    "Export CSV" : {
+
+    },
+    "Export PDF" : {
+
+    },
+    "Failed to generate recommendations." : {
+
+    },
+    "FAULT DESCRIPTION" : {
+
+    },
+    "FEATURED COLLECTION" : {
+
+    },
+    "Filter" : {
+
+    },
+    "Flag Item as Missing" : {
+
+    },
+    "Forgot Password?" : {
+
+    },
+    "FROM (SOURCE)" : {
+
+    },
+    "FROM: %@" : {
+
+    },
+    "Fulfillment Alert" : {
+
+    },
+    "Gallery" : {
+
+    },
+    "Generate" : {
+
+    },
+    "Gift Invoice (Hide Prices)" : {
+
+    },
+    "Global Currency" : {
+
+    },
+    "Global Inventory" : {
+
+    },
+    "Global Overview" : {
+
+    },
+    "Global Staff" : {
+
+    },
+    "Global Summary" : {
+
+    },
+    "GUEST LIST (%lld)" : {
+
+    },
+    "HISTORY & LOGS" : {
+
+    },
+    "I agree to the internal policies, data privacy agreement, and terms of service required for system access." : {
+
+    },
+    "ID: %@" : {
+
+    },
+    "Image" : {
+
+    },
+    "Image attached successfully" : {
+
+    },
+    "Image Selected" : {
+
+    },
+    "IMMUTABLE AUDIT PREVIEW" : {
+
+    },
+    "In a production environment, this would display the device camera capture interface." : {
+
+    },
+    "in stock" : {
+
+    },
+    "In Stock" : {
+
+    },
+    "In Transit" : {
+
+    },
+    "In-Store · %@" : {
+
+    },
+    "incl. 3% GST" : {
+
+    },
+    "INCOMING REQUESTS (PARIS TO DELHI)" : {
+
+    },
+    "INDIVIDUAL ASSOCIATE TARGETS" : {
+
+    },
+    "INDIVIDUAL METRICS" : {
+
+    },
+    "Initial Password" : {
+
+    },
+    "INSTRUCTIONS" : {
+
+    },
+    "Insufficient stock. Only %lld units available." : {
+
+    },
+    "Inter-store Movement" : {
+
+    },
+    "INTERACTIONS" : {
+
+    },
+    "Internal Remarks" : {
+
+    },
+    "Inventory / Serial Numbers" : {
+
+    },
+    "Inventory Alerts" : {
+
+    },
+    "Inventory Controller" : {
+
+    },
+    "INVENTORY CONTROLS" : {
+
+    },
+    "Inventory Count Result" : {
+
+    },
+    "Inventory Details" : {
+
+    },
+    "INVENTORY VARIANCE REPORT" : {
+
+    },
+    "Invite Boutique" : {
+
+    },
+    "Invite Staff" : {
+
+    },
+    "iOS Simulator — Camera Unavailable" : {
+
+    },
+    "Issue and condition notes" : {
+
+    },
+    "Item" : {
+
+    },
+    "ITEM FEED (QR/BARCODE/RFID)" : {
+
+    },
+    "Item Name" : {
+
+    },
+    "Item out of stock at all regional locations." : {
+
+    },
+    "Item Unavailable in Boutique Shelf" : {
+
+    },
+    "Items" : {
+
+    },
+    "ITEMS" : {
+
+    },
+    "ITEMS (%lld)" : {
+
+    },
+    "ITEMS REQUESTED (%lld)" : {
+
+    },
+    "ITEMS TO TRANSFER" : {
+
+    },
+    "Keep Editing" : {
+
+    },
+    "Language" : {
+
+    },
+    "Language Settings" : {
+
+    },
+    "LAST PURCHASE" : {
+
+    },
+    "LATEST EVENT:" : {
+
+    },
+    "Line Items" : {
+
+    },
+    "Link to Unknown Client 2:30 PM appointment" : {
+
+    },
+    "LIVE INVENTORY" : {
+
+    },
+    "LIVE INVENTORY ALERTS" : {
+
+    },
+    "Loading catalogs..." : {
+
+    },
+    "Loading clients..." : {
+
+    },
+    "Loading purchased items..." : {
+
+    },
+    "Local Stock" : {
+
+    },
+    "Location" : {
+
+    },
+    "LOCATION DETAILS" : {
+
+    },
+    "Logged in immutable ticket timeline" : {
+
+    },
+    "Logout" : {
+
+    },
+    "LUXURY BOUTIQUE EDITION" : {
+
+    },
+    "Maison Mumbai" : {
+
+    },
+    "MANAGEMENT" : {
+
+    },
+    "Manager approval required for courtesy above 5%." : {
+
+    },
+    "MANAGER DETAILS" : {
+
+    },
+    "Manual Entry" : {
+
+    },
+    "Marital Status" : {
+
+    },
+    "MARITAL STATUS" : {
+
+    },
+    "Mark as Delivered" : {
+
+    },
+    "Mark as Done" : {
+
+    },
+    "Mark as Secured" : {
+
+    },
+    "Mark Damaged" : {
+
+    },
+    "Mark Ready to Pick" : {
+
+    },
+    "Marketing Communications" : {
+
+    },
+    "MATCHED" : {
+
+    },
+    "MATCHED ITEMS" : {
+
+    },
+    "Mismatch detected. Submit the scanned quantity to correct inventory." : {
+
+    },
+    "MISSING EXPECTED ITEMS (%lld)" : {
+
+    },
+    "MISSING ITEMS" : {
+
+    },
+    "MM / YY" : {
+
+    },
+    "My Appointments" : {
+
+    },
+    "Name: %@" : {
+
+    },
+    "NEED TO CORRECT A COUNT?" : {
+
+    },
+    "New" : {
+
+    },
+    "New Appointment" : {
+
+    },
+    "NEW CASE" : {
+
+    },
+    "New Catalog" : {
+
+    },
+    "New Client" : {
+
+    },
+    "New Password" : {
+
+    },
+    "New Planogram" : {
+
+    },
+    "NEW REQ" : {
+
+    },
+    "New Service Ticket" : {
+
+    },
+    "New Transfer Request" : {
+
+    },
+    "No active employees yet" : {
+
+    },
+    "No active planograms" : {
+
+    },
+    "No Active Reservations" : {
+
+    },
+    "No active service tickets" : {
+
+    },
+    "No anniversary or birthday set" : {
+
+    },
+    "No appointments for this day." : {
+
+    },
+    "No appointments found" : {
+
+    },
+    "No boutiques registered yet" : {
+
+    },
+    "No catalogs found." : {
+
+    },
+    "No clients found." : {
+
+    },
+    "No Completed SFS Orders" : {
+
+    },
+    "NO IMAGE" : {
+
+    },
+    "No images selected" : {
+
+    },
+    "No incoming requests awaiting Paris manager authorization." : {
+
+    },
+    "No inventory data found." : {
+
+    },
+    "No inventory records found for this product." : {
+
+    },
+    "No inventory records found." : {
+
+    },
+    "No items found." : {
+
+    },
+    "No items in wishlist yet" : {
+
+    },
+    "No items scanned yet" : {
+
+    },
+    "No logs found for this category." : {
+
+    },
+    "No matched items found in active view." : {
+
+    },
+    "No matching catalogs." : {
+
+    },
+    "No matching clients." : {
+
+    },
+    "No notes recorded yet" : {
+
+    },
+    "No Orders Ready for Handover" : {
+
+    },
+    "No outgoing requests awaiting Delhi manager approval." : {
+
+    },
+    "No pending alerts" : {
+
+    },
+    "No pending appointments" : {
+
+    },
+    "No pending appointments found." : {
+
+    },
+    "No pending requests" : {
+
+    },
+    "No Pending SFS Orders" : {
+
+    },
+    "No pending staff requests" : {
+
+    },
+    "No Pending Stock Transfers" : {
+
+    },
+    "No physical products added yet." : {
+
+    },
+    "No planograms active" : {
+
+    },
+    "No products found" : {
+
+    },
+    "No purchase history yet" : {
+
+    },
+    "No Purchase Orders Found" : {
+
+    },
+    "No purchased items found for this client." : {
+
+    },
+    "No purchases found for this client" : {
+
+    },
+    "No recent scan sessions" : {
+
+    },
+    "No recent transfer requests recorded." : {
+
+    },
+    "No recommendations available." : {
+
+    },
+    "No reminders sent" : {
+
+    },
+    "No Response" : {
+
+    },
+    "No results matching \"%@\"" : {
+
+    },
+    "No SFS fulfillments active" : {
+
+    },
+    "No SFS tickets found." : {
+
+    },
+    "No staff matches '%@'" : {
+
+    },
+    "No staff members found" : {
+
+    },
+    "No staff members found." : {
+
+    },
+    "No target set" : {
+
+    },
+    "No transactions found." : {
+
+    },
+    "No Transfer History Found" : {
+
+    },
+    "No upcoming appointments" : {
+
+    },
+    "No upcoming occasions" : {
+
+    },
+    "No VIP guests invited yet." : {
+
+    },
+    "Not available" : {
+
+    },
+    "Not configured" : {
+
+    },
+    "NOT SCANNED" : {
+
+    },
+    "Not Set" : {
+
+    },
+    "of %@ target" : {
+
+    },
+    "Offline · Last synced %@" : {
+
+    },
+    "OFTEN PAIRED WITH" : {
+
+    },
+    "OK" : {
+
+    },
+    "On Target" : {
+
+    },
+    "Open Full Profile" : {
+
+    },
+    "Open stock reconciliation to scan barcodes or QR codes, compare expected versus scanned quantities, and submit inventory corrections." : {
+
+    },
+    "OPERATIONAL LIMITS" : {
+
+    },
+    "or continue with" : {
+
+    },
+    "ORDER DETAILS" : {
+
+    },
+    "Order ID" : {
+
+    },
+    "Order ID: %@" : {
+
+    },
+    "ORDER ID: %@" : {
+
+    },
+    "Out" : {
+
+    },
+    "Out of Stock" : {
+
+    },
+    "Out of Stock Locally" : {
+
+    },
+    "OUTGOING REQUESTS (DELHI TO PARIS)" : {
+
+    },
+    "OVERCOUNT" : {
+
+    },
+    "Paid securely via Razorpay" : {
+
+    },
+    "Password successfully updated. You can now log in." : {
+
+    },
+    "Payment" : {
+
+    },
+    "Payment Failed" : {
+
+    },
+    "PAYMENT METHOD" : {
+
+    },
+    "Payment Successful" : {
+
+    },
+    "Pending" : {
+
+    },
+    "Pending Appointments" : {
+
+    },
+    "PENDING APPOINTMENTS" : {
+
+    },
+    "PENDING APPROVALS" : {
+
+    },
+    "Pending Requests" : {
+
+    },
+    "PERFORMANCE INSIGHTS" : {
+
+    },
+    "Period" : {
+
+    },
+    "PERSONAL INFORMATION" : {
+
+    },
+    "Phone Number" : {
+
+    },
+    "PHONE NUMBER (with country code)" : {
+
+    },
+    "Phone Setup" : {
+
+    },
+    "PHOTO EVIDENCE" : {
+
+    },
+    "Planograms" : {
+
+    },
+    "Please enter the 6-digit code from your authenticator app." : {
+
+    },
+    "Please select a destination boutique to unlock scanner." : {
+
+    },
+    "Point device at QR or Barcodes to track" : {
+
+    },
+    "POS" : {
+
+    },
+    "PREFERENCES" : {
+
+    },
+    "PREPARATION CHECKLIST" : {
+
+    },
+    "Price" : {
+
+    },
+    "Print" : {
+
+    },
+    "PRIVACY CONSENTS" : {
+
+    },
+    "Private video consultation" : {
+
+    },
+    "Process Payment · %@" : {
+
+    },
+    "Product" : {
+
+    },
+    "Product Category" : {
+
+    },
+    "PRODUCT DETAILS" : {
+
+    },
+    "Product ID" : {
+
+    },
+    "Product Images" : {
+
+    },
+    "PRODUCT IMAGES" : {
+
+    },
+    "PRODUCT LAUNCH" : {
+
+    },
+    "Product Launch Detail" : {
+
+    },
+    "Product Name" : {
+
+    },
+    "Product Serial Number" : {
+
+    },
+    "Products" : {
+
+    },
+    "Profile" : {
+
+    },
+    "Projected EOD: %@" : {
+
+    },
+    "Purchase Details" : {
+
+    },
+    "Purchase Order not found" : {
+
+    },
+    "Purchase Orders" : {
+
+    },
+    "Qty: %lld" : {
+
+    },
+    "Quantity" : {
+
+    },
+    "QUICK LINKS" : {
+
+    },
+    "Quick Note" : {
+
+    },
+    "Quick simulation buttons:" : {
+
+    },
+    "Read More" : {
+
+    },
+    "REASSIGN ADVISOR" : {
+
+    },
+    "Receipt RSMS-2026-0418" : {
+
+    },
+    "RECEIVED" : {
+
+    },
+    "RECENT CASES" : {
+
+    },
+    "RECENT DISCREPANCIES" : {
+
+    },
+    "RECENT MOVEMENTS" : {
+
+    },
+    "RECENT RECORDS" : {
+
+    },
+    "RECENT SALES" : {
+
+    },
+    "RECENT SCAN SESSIONS" : {
+
+    },
+    "RECENT SIGN-OFFS" : {
+
+    },
+    "Recover Password" : {
+
+    },
+    "Reject" : {
+
+    },
+    "Reject Request" : {
+
+    },
+    "Rejecting..." : {
+
+    },
+    "Release %lld units back to available stock" : {
+
+    },
+    "Remarks" : {
+
+    },
+    "REMARKS (OPTIONAL)" : {
+
+    },
+    "Reminder sent" : {
+
+    },
+    "Remove" : {
+
+    },
+    "Remove Boutique" : {
+
+    },
+    "Remove Item?" : {
+
+    },
+    "Report Issue" : {
+
+    },
+    "Reports & Analytics" : {
+
+    },
+    "Requested by Inventory Controller (Delhi)" : {
+
+    },
+    "Requests" : {
+
+    },
+    "Reservations" : {
+
+    },
+    "Reset Link Sent" : {
+
+    },
+    "Resolution" : {
+
+    },
+    "Resolve" : {
+
+    },
+    "RESUME" : {
+
+    },
+    "RETAIL MANAGEMENT SYSTEM" : {
+
+    },
+    "Retake Photo" : {
+
+    },
+    "Retry" : {
+
+    },
+    "Return to Dashboard" : {
+
+    },
+    "Returns & Exchanges" : {
+
+    },
+    "REVENUE BY CATEGORY" : {
+
+    },
+    "Review" : {
+
+    },
+    "Review and authorize boutique transfers" : {
+
+    },
+    "Review Responses" : {
+
+    },
+    "Role" : {
+
+    },
+    "ROLE SIMULATOR SHORTCUTS:" : {
+
+    },
+    "RSMS" : {
+
+    },
+    "RSVP ANALYTICS" : {
+
+    },
+    "RSVP DEADLINE" : {
+
+    },
+    "RSVPs" : {
+
+    },
+    "S/N: %@" : {
+
+    },
+    "SALES" : {
+
+    },
+    "Sales Analytics" : {
+
+    },
+    "Sales Associate" : {
+
+    },
+    "Sales Targets" : {
+
+    },
+    "Save" : {
+
+    },
+    "Save All Targets" : {
+
+    },
+    "Save Changes" : {
+
+    },
+    "Scan" : {
+
+    },
+    "Scan %@" : {
+
+    },
+    "Scan Barcode" : {
+
+    },
+    "Scan barcodes or QR codes to resolve quantity mismatches" : {
+
+    },
+    "Scan Correct SKU" : {
+
+    },
+    "Scan items to add them here." : {
+
+    },
+    "Scan Mismatch" : {
+
+    },
+    "Scan PO Items" : {
+
+    },
+    "Scan QR" : {
+
+    },
+    "Scan Session Details" : {
+
+    },
+    "Scan Unexpected" : {
+
+    },
+    "Scan Unexpected Item" : {
+
+    },
+    "Scanned Items" : {
+
+    },
+    "SCANNED ITEMS" : {
+
+    },
+    "SCANNED ITEMS (%lld)" : {
+
+    },
+    "Scanned Serials (%lld)" : {
+
+    },
+    "SCANNER MODULE" : {
+
+    },
+    "SCHEDULED COUNTS" : {
+
+    },
+    "Scheduled for %@" : {
+
+    },
+    "Search boutiques…" : {
+
+    },
+    "Search by client or type" : {
+
+    },
+    "Search by name or barcode..." : {
+
+    },
+    "Search by name or brand…" : {
+
+    },
+    "Search by name or SKU…" : {
+
+    },
+    "Search by name, brand, or SKU..." : {
+
+    },
+    "Search by name, phone, email…" : {
+
+    },
+    "Search by reference, store..." : {
+
+    },
+    "Search by SKU or Name..." : {
+
+    },
+    "Search by SKU, Brand, or Name" : {
+
+    },
+    "Search catalog..." : {
+
+    },
+    "Search clients" : {
+
+    },
+    "Search employees…" : {
+
+    },
+    "Search products..." : {
+
+    },
+    "Search Staff" : {
+
+    },
+    "Search Tickets" : {
+
+    },
+    "Search Transactions" : {
+
+    },
+    "Secret: %@" : {
+
+    },
+    "Secure payment authorization · PCI-DSS ready" : {
+
+    },
+    "Secure Your Account" : {
+
+    },
+    "Secure your account with an SMS verification code." : {
+
+    },
+    "Security" : {
+
+    },
+    "SECURITY" : {
+
+    },
+    "Security code" : {
+
+    },
+    "Security Settings" : {
+
+    },
+    "See All (%lld)" : {
+
+    },
+    "Select a client..." : {
+
+    },
+    "Select a Product" : {
+
+    },
+    "Select an item to verify local and regional boutique availability." : {
+
+    },
+    "Select Boutique" : {
+
+    },
+    "Select Client" : {
+
+    },
+    "Select Date" : {
+
+    },
+    "Select Deadline" : {
+
+    },
+    "Select Destination" : {
+
+    },
+    "Select Image" : {
+
+    },
+    "Select Media Source" : {
+
+    },
+    "Select Photos (Max 8)" : {
+
+    },
+    "Select Product" : {
+
+    },
+    "Selling" : {
+
+    },
+    "Send" : {
+
+    },
+    "Send Code" : {
+
+    },
+    "SEND REMINDERS" : {
+
+    },
+    "Senior Client Advisor" : {
+
+    },
+    "Serial number" : {
+
+    },
+    "Serial Number" : {
+
+    },
+    "Serial:" : {
+
+    },
+    "Serialization & CoA" : {
+
+    },
+    "Served By" : {
+
+    },
+    "Service Details" : {
+
+    },
+    "Session Summary" : {
+
+    },
+    "SESSION TOTALS" : {
+
+    },
+    "Set Daily Sales Target" : {
+
+    },
+    "Set specific daily targets for each associate" : {
+
+    },
+    "Set Target" : {
+
+    },
+    "Settings" : {
+
+    },
+    "SETTINGS" : {
+
+    },
+    "SFS FULFILLMENT STATUS" : {
+
+    },
+    "SFS Handover" : {
+
+    },
+    "SFS Orders" : {
+
+    },
+    "SFS Ticket Details" : {
+
+    },
+    "SFS Tickets" : {
+
+    },
+    "Share / Save as PDF" : {
+
+    },
+    "Shrink & Inventory" : {
+
+    },
+    "SIMULATED SCANNING ACTIONS" : {
+
+    },
+    "SIMULATED SCANNING CONSOLE" : {
+
+    },
+    "SIZE PREFERENCES" : {
+
+    },
+    "SKU" : {
+
+    },
+    "SKU %@" : {
+
+    },
+    "SKU matches order target: %@" : {
+
+    },
+    "SKU: %@" : {
+
+    },
+    "SKU: %@  ·  Delhi: %lld  ·  Paris: %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "SKU: %1$@  ·  Delhi: %2$lld  ·  Paris: %3$lld"
+          }
+        }
+      }
+    },
+    "SN: %@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "SN: %1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "SOURCE" : {
+
+    },
+    "Source Store" : {
+
+    },
+    "Source: %@  ➔  Delhi" : {
+
+    },
+    "Staff\nApplication." : {
+
+    },
+    "STAFF / ADVISOR" : {
+
+    },
+    "STAFF APPLICATIONS" : {
+
+    },
+    "Staff Details" : {
+
+    },
+    "Staff Email" : {
+
+    },
+    "Staff Performance" : {
+
+    },
+    "Staff Role" : {
+
+    },
+    "Status" : {
+
+    },
+    "STATUS" : {
+
+    },
+    "Status: %@" : {
+
+    },
+    "Stock" : {
+
+    },
+    "Stock by Location" : {
+
+    },
+    "STOCK ITEM SOURCE LIST" : {
+
+    },
+    "Stock Reconciliation" : {
+
+    },
+    "Stock Search" : {
+
+    },
+    "Stock Transfers" : {
+
+    },
+    "Store" : {
+
+    },
+    "STORE DAILY TARGET" : {
+
+    },
+    "Store Location" : {
+
+    },
+    "Store Operations" : {
+
+    },
+    "Store Performance" : {
+
+    },
+    "Store Policies" : {
+
+    },
+    "Submit" : {
+
+    },
+    "Success" : {
+
+    },
+    "SUPPLIER" : {
+
+    },
+    "SUPPORT & POLICIES" : {
+
+    },
+    "Syncing wishlist..." : {
+
+    },
+    "System Logs" : {
+
+    },
+    "Taj Mahal Palace, Mumbai" : {
+
+    },
+    "Take Photo" : {
+
+    },
+    "TARGET" : {
+
+    },
+    "Target amount" : {
+
+    },
+    "Target Store" : {
+
+    },
+    "Tax-free eligible client" : {
+
+    },
+    "Team" : {
+
+    },
+    "Team Management" : {
+
+    },
+    "The After Sales Ticket has been successfully generated and synced." : {
+
+    },
+    "The item '%@' does not match the expected count list. Verify before including." : {
+
+    },
+    "The item '%@' has already been scanned in this session." : {
+
+    },
+    "There are no visual merchandising guidelines available for this boutique at the moment." : {
+
+    },
+    "Third-Party Sharing" : {
+
+    },
+    "This action cannot be undone." : {
+
+    },
+    "This applies to the entire boutique collectively" : {
+
+    },
+    "This device does not have camera capture available." : {
+
+    },
+    "This feature will be available soon." : {
+
+    },
+    "This item is in stock at DLF Emporio, Delhi. Sourcing not required." : {
+
+    },
+    "This item is not listed on the Purchase Order. Would you like to verify and include it?" : {
+
+    },
+    "This will notify all invited clients about the cancellation and remove the trunk show from the boutique calendar." : {
+
+    },
+    "This will notify all invited clients and remove the product launch event from the boutique calendar." : {
+
+    },
+    "Ticket Created" : {
+
+    },
+    "Ticket Details" : {
+
+    },
+    "TIER" : {
+
+    },
+    "TIER BREAKDOWN" : {
+
+    },
+    "Timeframe" : {
+
+    },
+    "Title" : {
+
+    },
+    "TO (DESTINATION)" : {
+
+    },
+    "TO: %@" : {
+
+    },
+    "TODAY:" : {
+
+    },
+    "TODAY'S PERFORMANCE" : {
+
+    },
+    "TODAY'S REVENUE" : {
+
+    },
+    "TORN / UNREADABLE LABEL MANUAL ENTRY" : {
+
+    },
+    "Total" : {
+
+    },
+    "TOTAL DUE" : {
+
+    },
+    "Total Locations with Stock" : {
+
+    },
+    "Total Paid" : {
+
+    },
+    "Total Revenue" : {
+
+    },
+    "Total Units Available" : {
+
+    },
+    "Transaction ID" : {
+
+    },
+    "Transaction ID: %@" : {
+
+    },
+    "Transactions" : {
+
+    },
+    "TRANSACTIONS" : {
+
+    },
+    "Transfer Detail" : {
+
+    },
+    "TRANSFER DETAIL" : {
+
+    },
+    "Transfer Error" : {
+
+    },
+    "TRANSFER HISTORY" : {
+
+    },
+    "Transfer Request" : {
+
+    },
+    "Transfers" : {
+
+    },
+    "TRUNK SHOW" : {
+
+    },
+    "Trunk Show Detail" : {
+
+    },
+    "Try Again" : {
+
+    },
+    "Two-Factor Authentication" : {
+
+    },
+    "TWO-FACTOR AUTHENTICATION" : {
+
+    },
+    "TXN" : {
+
+    },
+    "Txn #%@" : {
+
+    },
+    "Type barcode or serial..." : {
+
+    },
+    "U" : {
+
+    },
+    "Unassigned" : {
+
+    },
+    "Underperforming" : {
+
+    },
+    "Unexpected Item" : {
+
+    },
+    "Unexpected Item Scanned" : {
+
+    },
+    "UNEXPECTED SKU" : {
+
+    },
+    "UNEXPECTED SKU ITEMS (%lld)" : {
+
+    },
+    "units" : {
+
+    },
+    "Unknown" : {
+
+    },
+    "Unknown Client" : {
+
+    },
+    "Unsaved Changes" : {
+
+    },
+    "UPC: %@" : {
+
+    },
+    "UPCOMING APPOINTMENTS" : {
+
+    },
+    "UPCOMING EVENTS" : {
+
+    },
+    "Upcoming occasion" : {
+
+    },
+    "UPCOMING OCCASIONS" : {
+
+    },
+    "Upcoming stage" : {
+
+    },
+    "Update Password" : {
+
+    },
+    "Update the details for this catalog" : {
+
+    },
+    "UPI ID or Mobile Number" : {
+
+    },
+    "Upload image" : {
+
+    },
+    "Uploading..." : {
+
+    },
+    "Valid" : {
+
+    },
+    "Valid From" : {
+
+    },
+    "Valid Until" : {
+
+    },
+    "Validity" : {
+
+    },
+    "Variance" : {
+
+    },
+    "Variance Report" : {
+
+    },
+    "VENUE" : {
+
+    },
+    "VERIFICATION CHECKLIST" : {
+
+    },
+    "VERIFICATION CODE" : {
+
+    },
+    "VERIFICATION MATCH SUCCESSFUL" : {
+
+    },
+    "Verify" : {
+
+    },
+    "Verify\nIdentity." : {
+
+    },
+    "Verify & Continue" : {
+
+    },
+    "Verify & Enable" : {
+
+    },
+    "Verify & Include" : {
+
+    },
+    "Verify & Match Item" : {
+
+    },
+    "Verify Code" : {
+
+    },
+    "Verify OTP" : {
+
+    },
+    "View active store planograms" : {
+
+    },
+    "View All" : {
+
+    },
+    "View All Pending" : {
+
+    },
+    "View All Tickets" : {
+
+    },
+    "View All Transactions" : {
+
+    },
+    "View Associates" : {
+
+    },
+    "View Details" : {
+
+    },
+    "View Product" : {
+
+    },
+    "VIP PREVIEW" : {
+
+    },
+    "VIP Preview Detail" : {
+
+    },
+    "Visual Merchandising" : {
+
+    },
+    "WARRANTY" : {
+
+    },
+    "Warranty Status" : {
+
+    },
+    "Watch Name" : {
+
+    },
+    "We require two-factor authentication for all staff members. Scan this QR code with Google Authenticator or Apple Passwords." : {
+
+    },
+    "Welcome," : {
+
+    },
+    "XXXX  XXXX  XXXX  XXXX" : {
+
+    },
+    "You have unsaved changes. Are you sure you want to go back? Your changes will be lost." : {
+
+    },
+    "Your cart is empty" : {
+
+    },
+    "Your device is not configured to send emails. Please set up the Apple Mail app." : {
+
+    }
   },
   "version" : "1.0"
 }

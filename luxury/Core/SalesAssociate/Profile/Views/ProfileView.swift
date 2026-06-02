@@ -13,7 +13,7 @@ struct ProfileView: View {
     @Environment(Router.self) private var router
     @State private var viewModel = SAProfileViewModel()
     @State private var showLogoutAlert = false
-
+    
     
     private var formattedDate: String {
         let formatter = DateFormatter()
@@ -115,7 +115,7 @@ struct ProfileView: View {
                         .padding(.horizontal, 24)
                         .padding(.top, 12)
                         
-
+                        
                         
                         // MARK: - Settings
                         VStack(alignment: .leading, spacing: 16) {
@@ -148,175 +148,223 @@ struct ProfileView: View {
                             .buttonStyle(.plain)
                             .padding(.horizontal, 24)
                             
-                            Button(action: {
-                                router.push(SARoute.appointmentList)
-                            }) {
-                                HStack {
-                                    Image(systemName: "calendar")
-                                        .font(.system(size: 18))
-                                        .foregroundStyle(AppColors.gold)
-                                    Text("My Appointments")
-                                        .font(AppFonts.sansSerif(size: 15))
-                                        .foregroundStyle(.white)
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .font(.system(size: 12))
-                                        .foregroundStyle(AppColors.tertiary)
+                            // MARK: - Quick Links
+                            VStack(alignment: .leading, spacing: 16) {
+                                Text("QUICK LINKS")
+                                    .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                    .foregroundStyle(AppColors.secondary)
+                                    .kerning(1.5)
+                                    .padding(.horizontal, 24)
+                                
+                                VStack(spacing: 12) {
+                                    Button(action: {
+                                        router.push(SARoute.appointmentList)
+                                    }) {
+                                        HStack {
+                                            Image(systemName: "calendar")
+                                                .font(AppFonts.sansSerif(size: 18))
+                                                .foregroundStyle(AppColors.gold)
+                                                .frame(width: 24, alignment: .center)
+                                            Text("My Appointments")
+                                                .font(AppFonts.sansSerif(size: 15))
+                                                .foregroundStyle(.white)
+                                            Spacer()
+                                            Image(systemName: "chevron.right")
+                                                .font(AppFonts.sansSerif(size: 12))
+                                                .foregroundStyle(AppColors.tertiary)
+                                        }
+                                        .padding(16)
+                                        .background(AppColors.surface)
+                                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                    }
+                                    .buttonStyle(.plain)
+                                    
+                                    Button(action: {
+                                        // Pass a dummy UUID until SAProfileViewModel includes the actual boutique ID.
+                                        router.push(SARoute.planogramGallery(boutiqueId: UUID()))
+                                    }) {
+                                        HStack {
+                                            Image(systemName: "photo.artframe")
+                                                .font(AppFonts.sansSerif(size: 18))
+                                                .foregroundStyle(AppColors.gold)
+                                                .frame(width: 24, alignment: .center)
+                                            Text("Visual Merchandising")
+                                                .font(AppFonts.sansSerif(size: 15))
+                                                .foregroundStyle(.white)
+                                            Spacer()
+                                            Image(systemName: "chevron.right")
+                                                .font(AppFonts.sansSerif(size: 12))
+                                                .foregroundStyle(AppColors.tertiary)
+                                        }
+                                        .padding(16)
+                                        .background(AppColors.surface)
+                                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                    }
+                                    .buttonStyle(.plain)
                                 }
-                                .padding(16)
-                                .background(AppColors.surface)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
-                            }
-                            .buttonStyle(.plain)
-                            .padding(.horizontal, 24)
-                            
-                            Button(action: {
-                                // Pass a dummy UUID until SAProfileViewModel includes the actual boutique ID.
-                                router.push(SARoute.planogramGallery(boutiqueId: UUID()))
-                            }) {
-                                HStack {
-                                    Image(systemName: "photo.artframe")
-                                        .font(.system(size: 18))
-                                        .foregroundStyle(AppColors.gold)
-                                    Text("Visual Merchandising")
-                                        .font(AppFonts.sansSerif(size: 15))
-                                        .foregroundStyle(.white)
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .font(.system(size: 12))
-                                        .foregroundStyle(AppColors.tertiary)
-                                }
-                                .padding(16)
-                                .background(AppColors.surface)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
-                            }
-                            .buttonStyle(.plain)
-                            .padding(.horizontal, 24)
-                            
-                            NavigationLink(destination: SecuritySettingsView()) {
-                                HStack {
-                                    Image(systemName: "lock.shield.fill")
-                                        .font(AppFonts.sansSerif(size: 18))
-                                        .foregroundStyle(AppColors.gold)
-                                    Text("Security Settings")
-                                        .font(AppFonts.sansSerif(size: 15))
-                                        .foregroundStyle(.white)
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .font(AppFonts.sansSerif(size: 12))
-                                        .foregroundStyle(AppColors.tertiary)
-                                }
-                                .padding(16)
-                                .background(AppColors.surface)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
-                            }
-                            .buttonStyle(.plain)
-                            .padding(.horizontal, 24)
-                            
-                            NavigationLink(destination: LanguageSettingsView()) {
-                                HStack {
-                                    Image(systemName: "globe")
-                                        .font(AppFonts.sansSerif(size: 18))
-                                        .foregroundStyle(AppColors.gold)
-                                    Text("Language Settings")
-                                        .font(AppFonts.sansSerif(size: 15))
-                                        .foregroundStyle(.white)
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .font(AppFonts.sansSerif(size: 12))
-                                        .foregroundStyle(AppColors.tertiary)
-                                }
-                                .padding(16)
-                                .background(AppColors.surface)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
-                            }
-                            .buttonStyle(.plain)
-                            .padding(.horizontal, 24)
-                        }
-                        .padding(.top, 18)
-                        
-
-                        
-                        // MARK: - Support & Policies
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text("SUPPORT & POLICIES")
-                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
-                                .foregroundStyle(AppColors.secondary)
-                                .kerning(1.5)
                                 .padding(.horizontal, 24)
-                            
-                            Button(action: {
-                                router.push(SARoute.exchangePolicy)
-                            }) {
-                                HStack {
-                                    Image(systemName: "doc.text.fill")
-                                        .font(AppFonts.sansSerif(size: 18))
-                                        .foregroundStyle(AppColors.gold)
-                                    Text("Exchange Policy")
-                                        .font(AppFonts.sansSerif(size: 15))
-                                        .foregroundStyle(.white)
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .font(AppFonts.sansSerif(size: 12))
-                                        .foregroundStyle(AppColors.tertiary)
-                                }
-                                .padding(16)
-                                .background(AppColors.surface)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
                             }
-                            .buttonStyle(.plain)
-                            .padding(.horizontal, 24)
+                            .padding(.top, 18)
+                            
+                            // MARK: - Settings
+                            VStack(alignment: .leading, spacing: 16) {
+                                Text("SETTINGS")
+                                    .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                    .foregroundStyle(AppColors.secondary)
+                                    .kerning(1.5)
+                                    .padding(.horizontal, 24)
+                                
+                                VStack(spacing: 12) {
+                                    Button(action: {
+                                        router.push(SARoute.editProfile)
+                                    }) {
+                                        HStack {
+                                            Image(systemName: "person.crop.circle")
+                                                .font(AppFonts.sansSerif(size: 18))
+                                                .foregroundStyle(AppColors.gold)
+                                                .frame(width: 24, alignment: .center)
+                                            Text("Edit Profile")
+                                                .font(AppFonts.sansSerif(size: 15))
+                                                .foregroundStyle(.white)
+                                            Spacer()
+                                            Image(systemName: "chevron.right")
+                                                .font(AppFonts.sansSerif(size: 12))
+                                                .foregroundStyle(AppColors.tertiary)
+                                        }
+                                        .padding(16)
+                                        .background(AppColors.surface)
+                                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                    }
+                                    .buttonStyle(.plain)
+                                    
+                                    NavigationLink(destination: LanguageSettingsView()) {
+                                        HStack {
+                                            Image(systemName: "globe")
+                                                .font(AppFonts.sansSerif(size: 18))
+                                                .foregroundStyle(AppColors.gold)
+                                                .frame(width: 24, alignment: .center)
+                                            Text("Language Settings")
+                                                .font(AppFonts.sansSerif(size: 15))
+                                                .foregroundStyle(.white)
+                                            Spacer()
+                                            Image(systemName: "chevron.right")
+                                                .font(AppFonts.sansSerif(size: 12))
+                                                .foregroundStyle(AppColors.tertiary)
+                                        }
+                                        .padding(16)
+                                        .background(AppColors.surface)
+                                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                    }
+                                    .buttonStyle(.plain)
+                                    
+                                    NavigationLink(destination: SecuritySettingsView()) {
+                                        HStack {
+                                            Image(systemName: "lock.shield.fill")
+                                                .font(AppFonts.sansSerif(size: 18))
+                                                .foregroundStyle(AppColors.gold)
+                                                .frame(width: 24, alignment: .center)
+                                            Text("Security Settings")
+                                                .font(AppFonts.sansSerif(size: 15))
+                                                .foregroundStyle(.white)
+                                            Spacer()
+                                            Image(systemName: "chevron.right")
+                                                .font(AppFonts.sansSerif(size: 12))
+                                                .foregroundStyle(AppColors.tertiary)
+                                        }
+                                        .padding(16)
+                                        .background(AppColors.surface)
+                                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                                .padding(.horizontal, 24)
+                            }
+                            .padding(.top, 18)
+                            
+                            
+                            
+                            // MARK: - Support & Policies
+                            VStack(alignment: .leading, spacing: 16) {
+                                Text("SUPPORT & POLICIES")
+                                    .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                    .foregroundStyle(AppColors.secondary)
+                                    .kerning(1.5)
+                                    .padding(.horizontal, 24)
+                                
+                                Button(action: {
+                                    router.push(SARoute.exchangePolicy)
+                                }) {
+                                    HStack {
+                                        Image(systemName: "doc.text.fill")
+                                            .font(AppFonts.sansSerif(size: 18))
+                                            .foregroundStyle(AppColors.gold)
+                                        Text("Exchange Policy")
+                                            .font(AppFonts.sansSerif(size: 15))
+                                            .foregroundStyle(.white)
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .font(AppFonts.sansSerif(size: 12))
+                                            .foregroundStyle(AppColors.tertiary)
+                                    }
+                                    .padding(16)
+                                    .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                }
+                                .buttonStyle(.plain)
+                                .padding(.horizontal, 24)
+                            }
+                            .padding(.top, 18)
+                            
+                            CustomButton(title: "Logout", action: { showLogoutAlert = true })
+                                .padding(.horizontal, 24)
+                                .padding(.top, 30)
+                                .padding(.bottom, 60)
                         }
-                        .padding(.top, 18)
-                        
-                        CustomButton(title: "Logout", action: { showLogoutAlert = true })
-                            .padding(.horizontal, 24)
-                            .padding(.top, 30)
-                            .padding(.bottom, 60)
+                    }
+                    .refreshable {
+                        await viewModel.fetchAppointments()
                     }
                 }
-                .refreshable {
-                    await viewModel.fetchAppointments()
+            }
+            .task {
+                await viewModel.fetchAppointments()
+            }
+            .toolbar(.hidden, for: .navigationBar)
+            .alert("Logout", isPresented: $showLogoutAlert) {
+                Button("Logout", role: .destructive) {
+                    coordinator.logout()
                 }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Are you sure you want to logout?")
             }
-        }
-        .task {
-            await viewModel.fetchAppointments()
-        }
-        .toolbar(.hidden, for: .navigationBar)
-        .alert("Logout", isPresented: $showLogoutAlert) {
-            Button("Logout", role: .destructive) {
-                coordinator.logout()
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("Are you sure you want to logout?")
         }
     }
-}
-
-private struct StatChip: View {
-    let value: String
-    let label: String
     
-    var body: some View {
-        VStack(spacing: 4) {
-            Text(value)
-                .font(AppFonts.serif(size: 27, weight: .medium))
-                .foregroundStyle(AppColors.text)
-            Text(label)
-                .font(AppFonts.sansSerif(size: 10))
-                .foregroundStyle(AppColors.secondary)
+    private struct StatChip: View {
+        let value: String
+        let label: String
+        
+        var body: some View {
+            VStack(spacing: 4) {
+                Text(value)
+                    .font(AppFonts.serif(size: 27, weight: .medium))
+                    .foregroundStyle(AppColors.text)
+                Text(label)
+                    .font(AppFonts.sansSerif(size: 10))
+                    .foregroundStyle(AppColors.secondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(AppColors.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(AppColors.surface)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
     }
 }
