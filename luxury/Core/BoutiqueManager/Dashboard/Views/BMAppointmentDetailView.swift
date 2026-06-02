@@ -190,6 +190,8 @@ struct BMAppointmentDetailView: View {
             }
             .background(AppColors.background)
         }
+        .navigationBarHidden(true)
+        .toolbar(.hidden, for: .tabBar)
         .alert("Delete Appointment", isPresented: $showingDeleteAlert) {
             Button("Cancel", role: .cancel) { }
             Button("Delete", role: .destructive) {

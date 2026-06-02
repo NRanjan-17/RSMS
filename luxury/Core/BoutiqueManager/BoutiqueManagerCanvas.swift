@@ -145,6 +145,12 @@ struct BoutiqueManagerCanvas: View {
             SalesTargetsView()
         case .planogramGallery(let boutiqueId):
             PlanogramGalleryView(boutiqueId: boutiqueId)
+        case .pendingAppointmentsList(let appointments):
+            BMPendingAppointmentsListView(appointments: appointments)
+        case .sfsTicketDetail(let ticket):
+            SFSTicketDetailView(ticket: ticket)
+        case .sfsTicketsList(let tickets):
+            SFSTicketsListView(tickets: tickets)
         }
     }
 }

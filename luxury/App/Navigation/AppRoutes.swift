@@ -50,6 +50,9 @@ enum BMRoute: Hashable {
     case editProfile
     case salesTargets
     case planogramGallery(boutiqueId: UUID)
+    case pendingAppointmentsList([AppointmentEntity])
+    case sfsTicketDetail(PurchasedItemEntity)
+    case sfsTicketsList([PurchasedItemEntity])
 }
 
 enum ICRoute: Hashable {

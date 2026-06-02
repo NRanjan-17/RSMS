@@ -88,7 +88,7 @@ struct DashboardView: View {
                                     .padding(.vertical, 8)
                             } else {
                                 VStack(spacing: 12) {
-                                    ForEach(viewModel.pendingAppointments) { appointment in
+                                    ForEach(Array(viewModel.pendingAppointments.prefix(5))) { appointment in
                                         Button(action: {
                                             router.push(BMRoute.appointmentDetail(appointment))
                                         }) {
@@ -131,11 +131,26 @@ struct DashboardView: View {
                                             )
                                         }
                                         .buttonStyle(.plain)
+                                
+                                    if viewModel.pendingAppointments.count > 5 {
+                                        Button(action: {
+                                            router.push(BMRoute.pendingAppointmentsList(viewModel.pendingAppointments))
+                                        }) {
+                                            Text("View All Pending")
+                                                .font(AppFonts.sansSerif(size: 14, weight: .semibold))
+                                                .foregroundStyle(AppColors.gold)
+                                                .frame(maxWidth: .infinity)
+                                                .padding(.vertical, 16)
+                                                .background(AppColors.surface)
+                                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                        }
+                                        .padding(.top, 4)
                                     }
                                 }
                                 .padding(.horizontal, 24)
                             }
-
+                            
                             HStack(spacing: 10) {
                                 CustomOutlineButton(
                                     title: "Refund Queue",
@@ -236,31 +251,56 @@ struct DashboardView: View {
                                     .padding(.horizontal, 24)
                             } else {
                                 VStack(spacing: 12) {
-                                    ForEach(viewModel.sfsFulfillments) { item in
-                                        HStack {
-                                            VStack(alignment: .leading, spacing: 4) {
-                                                Text(item.productName ?? "Premium Timepiece")
-                                                    .font(AppFonts.serif(size: 17, weight: .medium))
-                                                    .foregroundStyle(.white)
-                                                Text("Order ID: \(item.id.uuidString.prefix(8).uppercased())")
+                                    ForEach(Array(viewModel.sfsFulfillments.prefix(5))) { item in
+                                        Button(action: {
+                                            router.push(BMRoute.sfsTicketDetail(item))
+                                        }) {
+                                            HStack(spacing: 16) {
+                                                VStack(alignment: .leading, spacing: 4) {
+                                                    Text(item.productName ?? "Premium Timepiece")
+                                                        .font(AppFonts.serif(size: 17, weight: .medium))
+                                                        .foregroundStyle(.white)
+                                                    Text("Order ID: \(item.id.uuidString.prefix(8).uppercased())")
+                                                        .font(AppFonts.sansSerif(size: 12))
+                                                        .foregroundStyle(AppColors.secondary)
+                                                }
+                                                Spacer()
+                                                
+                                                let displayStatus = item.status.lowercased() == "ready to pick" ? "Ready" : item.status.capitalized
+                                                let statusType: BadgeStatus = item.status.lowercased() == "ready to pick" ? .success :
+                                                                              item.status.lowercased() == "secured" ? .neutral : .warning
+                                                
+                                                StatusBadge(text: displayStatus, status: statusType)
+                                                
+                                                Image(systemName: "chevron.right")
                                                     .font(AppFonts.sansSerif(size: 12))
-                                                    .foregroundStyle(AppColors.secondary)
+                                                    .foregroundStyle(AppColors.tertiary)
                                             }
-                                            Spacer()
-
-                                            let displayStatus = item.status.lowercased() == "ready to pick" ? "Ready" : item.status.capitalized
-                                            let statusType: BadgeStatus = item.status.lowercased() == "ready to pick" ? .success :
-                                                                          item.status.lowercased() == "secured" ? .neutral : .warning
-
-                                            StatusBadge(text: displayStatus, status: statusType)
+                                            .padding(20)
+                                            .background(AppColors.surface)
+                                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 16)
+                                                    .stroke(AppColors.gold15, lineWidth: 0.5)
+                                            )
                                         }
-                                        .padding(20)
-                                        .background(AppColors.surface)
-                                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 16)
-                                                .stroke(AppColors.gold15, lineWidth: 0.5)
-                                        )
+                                        .buttonStyle(.plain)
+                                    }
+                                    
+                                    if viewModel.sfsFulfillments.count > 5 {
+                                        Button(action: {
+                                            router.push(BMRoute.sfsTicketsList(viewModel.sfsFulfillments))
+                                        }) {
+                                            Text("View All Tickets")
+                                                .font(AppFonts.sansSerif(size: 14, weight: .semibold))
+                                                .foregroundStyle(AppColors.gold)
+                                                .frame(maxWidth: .infinity)
+                                                .padding(.vertical, 16)
+                                                .background(AppColors.surface)
+                                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                        }
+                                        .padding(.top, 4)
                                     }
                                 }
                                 .padding(.horizontal, 24)
