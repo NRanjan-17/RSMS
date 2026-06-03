@@ -20,6 +20,7 @@ final class ShrinkReportViewModel {
     ]
     
     var liveInventory: [CatalogEntity] = []
+    var stockDict: [UUID: Int] = [:]
     var isLoading: Bool = false
     var errorMessage: String? = nil
     
@@ -34,8 +35,16 @@ final class ShrinkReportViewModel {
                     .execute()
                     .value
                 
+                var newStockDict: [UUID: Int] = [:]
+                if let profileTuple = try? await ProfileService().fetchCurrentProfile(),
+                   let staff = profileTuple.1 as? StaffModel,
+                   let bId = staff.boutiqueId {
+                    newStockDict = try await InventoryService.shared.fetchAvailableStockDictionary(forBoutique: bId)
+                }
+                
                 DispatchQueue.main.async {
                     self.liveInventory = fetched
+                    self.stockDict = newStockDict
                     self.isLoading = false
                 }
             } catch {

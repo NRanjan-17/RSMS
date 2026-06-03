@@ -143,15 +143,39 @@ final class POSDataService {
             .insert(orderPayload)
             .execute()
         
-        // 2. Create Purchased Items
+        // 2. Create Purchased Items & Update Inventory Status
         var itemsPayload: [[String: AnyJSON]] = []
-        for productId in productIds {
+        for catalogId in productIds {
+            // Find an available physical unit to mark as sold
+            let response = try? await client
+                .from("inventory_units")
+                .select("id")
+                .eq("catalog_id", value: catalogId.uuidString)
+                .eq("boutique_id", value: boutiqueId.uuidString)
+                .eq("status", value: "Available")
+                .limit(1)
+                .execute()
+                
+            struct UnitID: Codable { let id: UUID }
+            
+            if let data = response?.data,
+               let units = try? JSONDecoder().decode([UnitID].self, from: data),
+               let unit = units.first {
+                
+                // Mark this specific physical item as Reserved for the IC to pick
+                try? await client
+                    .from("inventory_units")
+                    .update(["status": "Reserved"])
+                    .eq("id", value: unit.id.uuidString)
+                    .execute()
+            }
+            
             var piPayload: [String: AnyJSON] = [
-                "product_id": .string(productId.uuidString),
+                "product_id": .string(catalogId.uuidString),
                 "transaction_id": .string(transactionId.uuidString),
                 "boutique_id": .string(boutiqueId.uuidString),
                 "staff_id": .string(staffId.uuidString),
-                "status": .string("Pending")
+                "status": .string("Pending") // Changed back to Pending so IC receives it
             ]
             
             if let uid = clientId {

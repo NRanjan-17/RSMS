@@ -60,8 +60,16 @@ final class GlobalAnalyticsViewModel {
             
             // Calculate inventory value
             var totalInventoryValue = 0.0
+            var stockDict: [UUID: Int] = [:]
+            
+            if let allUnits = try? await InventoryService.shared.fetchAllInventoryUnits() {
+                for unit in allUnits where unit.status == .available {
+                    stockDict[unit.catalogId, default: 0] += 1
+                }
+            }
+            
             for item in catalogs {
-                let totalStock = (item.productIds?.count ?? 0) - (item.reserved?.count ?? 0)
+                let totalStock = stockDict[item.id] ?? 0
                 if totalStock > 0 {
                     totalInventoryValue += (item.amount * Double(totalStock))
                 }
@@ -116,7 +124,7 @@ final class GlobalAnalyticsViewModel {
             
             // Calculate inventory trend (recent catalog value vs older)
             let recentInventoryItems = catalogs.filter {
-                let totalStock = ($0.productIds?.count ?? 0) - ($0.reserved?.count ?? 0)
+                let totalStock = stockDict[$0.id] ?? 0
                 return totalStock > 0
             }
             let totalItems = catalogs.count

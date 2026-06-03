@@ -17,6 +17,7 @@ final class CatalogsViewModel {
     var searchText: String = ""
     var catalogs: [CatalogEntity] = []
     var boutiques: [CorporateBoutique] = []
+    var stockLevels: [UUID: Int] = [:]
     
     var isLoading = false
     var isSaving = false
@@ -67,9 +68,16 @@ final class CatalogsViewModel {
                     .execute()
                     .value
                 
+                let fetchedInventory = try await InventoryService.shared.fetchGlobalInventory()
+                var newStockLevels: [UUID: Int] = [:]
+                for unit in fetchedInventory where unit.status == .available {
+                    newStockLevels[unit.catalogId, default: 0] += 1
+                }
+                
                 await MainActor.run {
-                    self.catalogs = fetchedCatalogs
+                    self.catalogs = fetchedCatalogs.reversed() // Show newest first
                     self.boutiques = fetchedBoutiques
+                    self.stockLevels = newStockLevels
                     self.isLoading = false
                 }
             } catch {
@@ -111,8 +119,6 @@ final class CatalogsViewModel {
             amount: amount,
             barCode: newBarCode,
             status: newStatus,
-            reserved: nil,
-            productIds: nil,
             productImages: nil
         )
         
@@ -135,7 +141,7 @@ final class CatalogsViewModel {
                 try await catalogService.addCatalog(catalogToSave)
                 SystemLogService.shared.logAction(category: .inventory, severity: .info, message: "Added new catalog \(catalogToSave.name) (\(catalogToSave.catalogId))")
                 await MainActor.run {
-                    self.catalogs.append(catalogToSave)
+                    self.catalogs.insert(catalogToSave, at: 0)
                     self.isSaving = false
                     self.resetForm()
                     completion()
@@ -183,8 +189,6 @@ final class CatalogsViewModel {
             amount: amount,
             barCode: newBarCode,
             status: newStatus,
-            reserved: existingCatalog.reserved,
-            productIds: existingCatalog.productIds,
             productImages: existingCatalog.productImages
         )
         
@@ -249,63 +253,30 @@ final class CatalogsViewModel {
         isSaving = true
         errorMessage = nil
         
-        var updatedCatalog = catalog
-        var currentProducts = updatedCatalog.productIds ?? []
-        currentProducts.append(contentsOf: serials)
-        updatedCatalog.productIds = currentProducts
+        let newUnits = serials.map { serial in
+            InventoryUnitEntity(
+                id: UUID(),
+                catalogId: catalog.id,
+                boutiqueId: boutiqueId,
+                serialNumber: serial,
+                status: .available,
+                createdAt: Date(),
+                updatedAt: Date()
+            )
+        }
         
         Task {
+            print("🚀 [CatalogsViewModel] Starting bulk creation of \(newUnits.count) units...")
             do {
-                try await catalogService.updateCatalog(updatedCatalog)
-                
-                // Fetch existing inventory for this boutique & sku
-                let existingInventoryResponse = try? await SupabaseManager.shared.client
-                    .from("inventory")
-                    .select()
-                    .eq("store_id", value: boutiqueId.uuidString)
-                    .eq("sku_id", value: catalog.id.uuidString)
-                    .execute()
-                    
-                var existingInventoryItem: InventoryItem? = nil
-                if let data = existingInventoryResponse?.data,
-                   let decoded = try? JSONDecoder().decode([InventoryItem].self, from: data),
-                   let item = decoded.first {
-                    existingInventoryItem = item
-                }
-                
-                if var item = existingInventoryItem {
-                    // Update quantity
-                    item.quantity += serials.count
-                    let updateData = ["quantity": item.quantity]
-                    try await SupabaseManager.shared.client
-                        .from("inventory")
-                        .update(updateData)
-                        .eq("id", value: item.id.uuidString)
-                        .execute()
-                } else {
-                    // Insert new
-                    let newItem = InventoryItem(
-                        id: UUID(),
-                        storeId: boutiqueId,
-                        skuId: catalog.id,
-                        quantity: serials.count,
-                        productAvailable: true
-                    )
-                    try await SupabaseManager.shared.client
-                        .from("inventory")
-                        .insert(newItem)
-                        .execute()
-                }
-                
+                try await InventoryService.shared.createInventoryUnits(newUnits)
+                print("✅ [CatalogsViewModel] Successfully created \(newUnits.count) units in Supabase.")
                 SystemLogService.shared.logAction(category: .inventory, severity: .info, message: "Added \(serials.count) serial numbers to catalog \(catalog.name) for boutique \(boutiqueId)")
                 await MainActor.run {
-                    if let index = self.catalogs.firstIndex(where: { $0.id == updatedCatalog.id }) {
-                        self.catalogs[index] = updatedCatalog
-                    }
                     self.isSaving = false
                     completion()
                 }
             } catch {
+                print("❌ [CatalogsViewModel] ERROR creating units: \(error)")
                 await MainActor.run {
                     self.errorMessage = String(localized: "Failed to add products: \(error.localizedDescription)")
                     self.isSaving = false
@@ -314,24 +285,11 @@ final class CatalogsViewModel {
         }
     }
     
-    func removeSerialNumbers(from catalog: CatalogEntity, at offsets: IndexSet) {
-        guard let currentProducts = catalog.productIds else { return }
-        
-        var updatedProducts = currentProducts
-        updatedProducts.remove(atOffsets: offsets)
-        
-        var updatedCatalog = catalog
-        updatedCatalog.productIds = updatedProducts
-        
+    func removeSerialNumbers(serials: [String], from catalog: CatalogEntity) {
         Task {
             do {
-                try await catalogService.updateCatalog(updatedCatalog)
-                SystemLogService.shared.logAction(category: .inventory, severity: .warning, message: "Removed \(offsets.count) serial numbers from catalog \(catalog.name) (\(catalog.catalogId))")
-                await MainActor.run {
-                    if let index = self.catalogs.firstIndex(where: { $0.id == updatedCatalog.id }) {
-                        self.catalogs[index] = updatedCatalog
-                    }
-                }
+                try await InventoryService.shared.deleteInventoryUnits(serials: serials)
+                SystemLogService.shared.logAction(category: .inventory, severity: .warning, message: "Removed \(serials.count) serial numbers from catalog \(catalog.name) (\(catalog.catalogId))")
             } catch {
                 await MainActor.run {
                     self.errorMessage = String(localized: "Failed to remove products: \(error.localizedDescription)")

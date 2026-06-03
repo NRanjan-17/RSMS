@@ -113,8 +113,6 @@ final class ClientDetailViewModel {
                             amount: cat.amount,
                             barCode: cat.barCode,
                             status: cat.status.rawValue,
-                            reserved: cat.reserved,
-                            productIds: cat.productIds,
                             createdAt: nil,
                             productImages: cat.productImages
                         )

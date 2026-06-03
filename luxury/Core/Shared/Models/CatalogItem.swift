@@ -10,8 +10,6 @@ struct CatalogItem: Codable, Identifiable, Hashable {
     var amount: Double
     var barCode: String
     var status: String
-    var reserved: [String]?
-    var productIds: [String]?
     var createdAt: Date?
     var productImages: [String]?
     
@@ -20,8 +18,7 @@ struct CatalogItem: Codable, Identifiable, Hashable {
         case catalogId = "catalog_id"
         case name, description, brand, category, amount
         case barCode = "bar_code"
-        case status, reserved
-        case productIds = "product_ids"
+        case status
         case createdAt = "created_at"
         case productImages = "product_images"
     }

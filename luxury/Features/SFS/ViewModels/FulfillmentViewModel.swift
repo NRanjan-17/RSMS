@@ -117,7 +117,7 @@ final class FulfillmentViewModel {
                         item.productName = product.name
                         item.productBrand = product.brand
                         item.productSku = product.catalogId
-                        item.productImages = product.reserved?.compactMap { _ in nil }
+                        item.productImages = product.productImages
                         
                         let firstChar = product.brand.first ?? "A"
                         let shelfNum = (abs(product.id.hashValue) % 5) + 1
@@ -415,45 +415,13 @@ final class FulfillmentViewModel {
                 .execute()
                 .value
             
-            var currentProductIds = catalog.productIds ?? []
-            var currentReserved = catalog.reserved ?? []
-            
-            let toDeduct = min(deliveredQty, currentProductIds.count)
-            if toDeduct > 0 {
-                currentProductIds.removeLast(toDeduct)
-            }
-            
-            let toRelease = expectedQty - deliveredQty
-            let totalReservedToRemove = min(expectedQty, currentReserved.count)
-            if totalReservedToRemove > 0 {
-                currentReserved.removeLast(totalReservedToRemove)
-            }
-            
-            try await client
-                .from("catalogs")
-                .update([
-                    "product_ids": currentProductIds,
-                    "reserved": currentReserved
-                ])
-                .eq("id", value: catalog.id.uuidString)
-                .execute()
-            
             if let storeId = boutiqueId {
-                let inventory: [InventoryItem] = try await client
-                    .from("inventory")
-                    .select()
-                    .eq("sku_id", value: catalog.id.uuidString)
-                    .eq("store_id", value: storeId.uuidString)
-                    .execute()
-                    .value
+                let units = try await InventoryService.shared.fetchInventory(forBoutique: storeId)
+                let matchingUnits = units.filter { $0.catalogId == catalog.id && ($0.status == .available || $0.status == .reserved) }
                 
-                if let firstItem = inventory.first {
-                    let newQty = max(0, firstItem.quantity + toRelease)
-                    try await client
-                        .from("inventory")
-                        .update(["quantity": newQty])
-                        .eq("id", value: firstItem.id.uuidString)
-                        .execute()
+                let unitsToSell = matchingUnits.prefix(deliveredQty).map { $0.serialNumber }
+                if !unitsToSell.isEmpty {
+                    try await InventoryService.shared.updateInventoryStatus(serials: Array(unitsToSell), newStatus: .sold)
                 }
             }
             
@@ -466,7 +434,7 @@ final class FulfillmentViewModel {
                 .eq("id", value: order.id.uuidString)
                 .execute()
             
-            let logMsg = "Order \(order.id.uuidString.prefix(8).uppercased()) Dispatched: SKU \(catalog.catalogId), Expected: \(expectedQty), Delivered: \(deliveredQty), Released: \(toRelease). Confirmed by: \(staffName)."
+            let logMsg = "Order \(order.id.uuidString.prefix(8).uppercased()) Dispatched: SKU \(catalog.catalogId), Expected: \(expectedQty), Delivered: \(deliveredQty). Confirmed by: \(staffName)."
             SystemLogService.shared.logAction(
                 category: .inventory,
                 severity: .info,

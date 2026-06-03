@@ -54,16 +54,26 @@ final class RFIDViewModel {
                 var updatedCatalog = catalog
 
                 if !acceptedSerials.isEmpty {
-                    var currentSerials = catalog.productIds ?? []
-                    currentSerials.append(contentsOf: acceptedSerials)
-
-                    try await SupabaseManager.shared.client
-                        .from("catalogs")
-                        .update(["product_ids": currentSerials])
-                        .eq("id", value: catalog.id)
-                        .execute()
-
-                    updatedCatalog.productIds = currentSerials
+                    var boutiqueId: UUID? = nil
+                    if let profileTuple = try? await ProfileService().fetchCurrentProfile(),
+                       let staff = profileTuple.1 as? StaffModel {
+                        boutiqueId = staff.boutiqueId
+                    }
+                    
+                    if let storeId = boutiqueId {
+                        let newUnits = acceptedSerials.map { serial in
+                            InventoryUnitEntity(
+                                id: UUID(),
+                                catalogId: catalog.id,
+                                boutiqueId: storeId,
+                                serialNumber: serial,
+                                status: .available,
+                                createdAt: Date(),
+                                updatedAt: Date()
+                            )
+                        }
+                        try await InventoryService.shared.createInventoryUnits(newUnits)
+                    }
                 }
 
                 for damagedItem in damagedItems {

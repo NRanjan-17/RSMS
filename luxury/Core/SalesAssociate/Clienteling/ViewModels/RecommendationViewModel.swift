@@ -25,15 +25,17 @@ final class RecommendationViewModel {
         error = nil
         
         do {
-            // 1. Fetch all active catalogs from Supabase
-            let catalogs: [CatalogEntity] = try await SupabaseManager.shared.client
-                .from("catalogs")
-                .select()
-                .eq("status", value: "Active")
-                .execute()
-                .value
+            // 1. Fetch the base catalog blueprint
+            let catalogs = try await CatalogService().fetchCatalogs()
             
-            // 2. Build ClientEntity with purchase history
+            // 2. Fetch the actual physical stock for the CURRENT logged-in boutique
+            let profileTuple = try? await ProfileService().fetchCurrentProfile()
+            guard let staff = profileTuple?.1 as? StaffModel, let boutiqueId = staff.boutiqueId else {
+                throw NSError(domain: "RecommendationViewModel", code: 401, userInfo: [NSLocalizedDescriptionKey: "No boutique assigned to current user."])
+            }
+            let stockDict = try await InventoryService.shared.fetchAvailableStockDictionary(forBoutique: boutiqueId)
+            
+            // 3. Map Client to ClientEntity
             let purchases = PurchaseHistoryService.shared.fetchPurchases(clientId: client.id)
             let productIds = purchases.compactMap { $0.productId }
             
@@ -51,11 +53,11 @@ final class RecommendationViewModel {
                 dateOfAnniversary: client.dateOfAnniversary
             )
             
-            // 3. Get Recommendations
+            // 4. Get Recommendations with Boutique Stock Isolation
             let engine = RecommendationEngine.shared
-            let results = await engine.suggestProducts(for: clientEntity, catalog: catalogs, limit: 10)
+            let results = await engine.suggestProducts(for: clientEntity, catalog: catalogs, availableStock: stockDict, limit: 10)
             
-            // 4. Generate Insight
+            // 5. Generate Insight
             let generatedInsight: String
             if #available(iOS 18.0, *) {
                 generatedInsight = await engine.generatePersonalizedInsight(client: clientEntity, recommendations: results) ?? "Curated picks based on their profile."

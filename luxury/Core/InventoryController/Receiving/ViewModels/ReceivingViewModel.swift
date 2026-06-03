@@ -174,44 +174,19 @@ final class ReceivingViewModel {
                     continue
                 }
                 
-                var currentSerials = catalog.productIds ?? []
-                currentSerials.append(contentsOf: item.scannedSerials)
-                
-                _ = try? await SupabaseManager.shared.client
-                    .from("catalogs")
-                    .update(["product_ids": currentSerials])
-                    .eq("id", value: catalog.id)
-                    .execute()
-                
                 if let storeId = boutiqueId {
-                    let inventory: [InventoryItem]? = try? await SupabaseManager.shared.client
-                        .from("inventory")
-                        .select()
-                        .eq("sku_id", value: catalog.id)
-                        .eq("store_id", value: storeId)
-                        .execute()
-                        .value
-                    
-                    if let firstItem = inventory?.first {
-                        let newQty = firstItem.quantity + item.receivedQty
-                        _ = try? await SupabaseManager.shared.client
-                            .from("inventory")
-                            .update(["quantity": newQty])
-                            .eq("id", value: firstItem.id)
-                            .execute()
-                    } else {
-                        let newInventoryItem = InventoryItem(
+                    let newUnits = item.scannedSerials.map { serial in
+                        InventoryUnitEntity(
                             id: UUID(),
-                            storeId: storeId,
-                            skuId: catalog.id,
-                            quantity: item.receivedQty,
-                            productAvailable: true
+                            catalogId: catalog.id,
+                            boutiqueId: storeId,
+                            serialNumber: serial,
+                            status: .available,
+                            createdAt: Date(),
+                            updatedAt: Date()
                         )
-                        _ = try? await SupabaseManager.shared.client
-                            .from("inventory")
-                            .insert(newInventoryItem)
-                            .execute()
                     }
+                    try? await InventoryService.shared.createInventoryUnits(newUnits)
                 }
             }
         }

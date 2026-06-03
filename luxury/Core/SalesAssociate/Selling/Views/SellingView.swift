@@ -96,8 +96,9 @@ struct SellingView: View {
                 spacing: 16
             ) {
                 ForEach(viewModel.filteredCatalogs) { catalog in
+                    let inStock = (viewModel.availableStock[catalog.id] ?? 0) > 0
                     Button(action: { router.push(SARoute.catalogDetail(catalog)) }) {
-                        CatalogGridCard(catalog: catalog)
+                        CatalogGridCard(catalog: catalog, inStock: inStock)
                     }
                     .buttonStyle(.plain)
                 }
@@ -113,16 +114,13 @@ struct SellingView: View {
 
 private struct CatalogGridCard: View {
     let catalog: CatalogEntity
+    let inStock: Bool
 
     private let imageHeight: CGFloat = 150
     private let textHeight:  CGFloat = 88
 
     private var firstURL: URL? {
         catalog.productImages?.first.flatMap { URL(string: $0) }
-    }
-
-    private var inStock: Bool {
-        ((catalog.productIds?.count ?? 0) - (catalog.reserved?.count ?? 0)) > 0
     }
 
     var body: some View {

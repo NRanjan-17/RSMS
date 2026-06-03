@@ -193,8 +193,6 @@ struct ClientProfileView: View {
                 amount: product.amount,
                 barCode: product.barCode,
                 status: CatalogStatus(rawValue: product.status) ?? .active,
-                reserved: product.reserved,
-                productIds: product.productIds,
                 productImages: product.productImages
             )
             SalesProductDetailView(catalog: catalogEntity, client: viewModel.client)
@@ -740,8 +738,6 @@ private struct ClientWishlistTab: View {
                                     amount: w.price,
                                     barCode: "",
                                     status: "Active",
-                                    reserved: [],
-                                    productIds: [],
                                     createdAt: nil,
                                     productImages: w.productImages
                                 )

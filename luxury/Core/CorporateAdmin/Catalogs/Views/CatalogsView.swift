@@ -107,7 +107,7 @@ struct CatalogsView: View {
                                 Button(action: {
                                     router.push(CARoute.catalogDetail(catalog))
                                 }) {
-                                    CatalogItemRow(catalog: catalog)
+                                    CatalogItemRow(catalog: catalog, availableStock: viewModel.stockLevels[catalog.id, default: 0])
                                 }
                                 .buttonStyle(.plain)
                             }
@@ -130,10 +130,7 @@ struct CatalogsView: View {
 
 struct CatalogItemRow: View {
     let catalog: CatalogEntity
-    
-    var availableStock: Int {
-        (catalog.productIds?.count ?? 0) - (catalog.reserved?.count ?? 0)
-    }
+    let availableStock: Int
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {

@@ -52,7 +52,7 @@ struct TransferItemSearchSheet: View {
                         ScrollView {
                             LazyVStack(spacing: 12) {
                                 ForEach(viewModel.searchResults) { item in
-                                    let stock = max(0, (item.productIds?.count ?? 0) - (item.reserved?.count ?? 0))
+                                    let stock = 0 // Temporarily 0 for now
                                     
                                     Button(action: {
                                         onItemSelected(item)

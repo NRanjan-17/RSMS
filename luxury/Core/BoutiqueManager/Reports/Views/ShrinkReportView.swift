@@ -67,7 +67,7 @@ struct ShrinkReportView: View {
                             } else {
                                 VStack(spacing: 12) {
                                     ForEach(viewModel.liveInventory) { item in
-                                        LiveInventoryRow(item: item)
+                                        LiveInventoryRow(item: item, stockCount: viewModel.stockDict[item.id] ?? 0)
                                     }
                                 }
                                 .padding(.horizontal, 24)
@@ -137,6 +137,7 @@ private struct ShrinkWriteOffRow: View {
 
 private struct LiveInventoryRow: View {
     let item: CatalogEntity
+    let stockCount: Int
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -147,7 +148,7 @@ private struct LiveInventoryRow: View {
                 
                 Spacer()
                 
-                Text("\(item.productIds?.count ?? 0)")
+                Text("\(stockCount)")
                     .font(AppFonts.sansSerif(size: 16, weight: .bold))
                     .foregroundStyle(AppColors.gold)
             }
