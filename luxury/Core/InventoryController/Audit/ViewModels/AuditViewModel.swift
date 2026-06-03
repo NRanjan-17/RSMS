@@ -1,10 +1,3 @@
-//
-//  AuditViewModel.swift
-//  luxury
-//
-//  Created by Aditya Chauhan on 15/05/26.
-//
-
 import Foundation
 import Observation
 
@@ -13,115 +6,74 @@ final class AuditViewModel {
     var scheduledCounts: [RSMSCycleCount] = []
     var recentAudits: [RSMSCycleCount] = []
     
+    private let profileService = ProfileService()
+    private let cycleCountService = CycleCountService()
+    
     init() {
         refreshData()
     }
     
     func refreshData() {
-        var sessions = AuditPersistence.shared.loadAllSessions()
-        
-        var migrated = false
-        for i in 0..<sessions.count {
-            if sessions[i].title == "Monthly Full Audit" {
-                var updated = sessions[i]
-                updated.title = "Full Audit"
-                AuditPersistence.shared.saveSession(updated)
-                migrated = true
+        Task {
+            do {
+                guard let profile = try await profileService.fetchCurrentProfile(),
+                      profile.0 == .inventoryController,
+                      let staff = profile.1 as? StaffModel,
+                      let boutiqueId = staff.boutiqueId else { return }
+                
+                let audits = try await cycleCountService.fetchAudits(boutiqueId: boutiqueId)
+                
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd"
+                let todayString = dateFormatter.string(from: Date())
+                
+                var scheduled: [RSMSCycleCount] = []
+                var completed: [RSMSCycleCount] = []
+                
+                for dbAudit in audits {
+                    let formattedDate = CycleCountViewModel.shared.getFormattedDate(from: dbAudit.scheduledDate)
+                    
+                    if dbAudit.status == .signedOff {
+                        let count = RSMSCycleCount(
+                            id: dbAudit.id,
+                            title: "Full Audit",
+                            date: formattedDate,
+                            scope: "Full Store",
+                            status: "SIGNED OFF",
+                            badgeStatus: .success
+                        )
+                        completed.append(count)
+                    } else {
+                        var statusStr = "UPCOMING"
+                        var badge: BadgeStatus = .neutral
+                        
+                        if dbAudit.scheduledDate < todayString {
+                            statusStr = "PENDING"
+                            badge = .error
+                        } else if dbAudit.scheduledDate == todayString {
+                            statusStr = "DUE"
+                            badge = .warning
+                        }
+                        
+                        let count = RSMSCycleCount(
+                            id: dbAudit.id,
+                            title: "Full Audit",
+                            date: formattedDate,
+                            scope: "Full Store",
+                            status: statusStr,
+                            badgeStatus: badge
+                        )
+                        scheduled.append(count)
+                    }
+                }
+                
+                await MainActor.run {
+                    self.scheduledCounts = scheduled
+                    self.recentAudits = completed
+                }
+            } catch {
+                print("Failed to fetch audits: \(error)")
             }
-        }
-        if migrated {
-            sessions = AuditPersistence.shared.loadAllSessions()
-        }
-        
-        if sessions.isEmpty {
-            let monthly = AuditSession(
-                id: UUID(uuidString: "7f4c0a52-9b22-4a0b-8df7-ee6a17b01931")!,
-                title: "Full Audit",
-                date: "31 May 2026",
-                scope: "Full Store",
-                status: "Scheduled",
-                badgeStatus: .neutral,
-                storeName: "",
-                controllerName: "",
-                isSubmitted: false,
-                expectedItems: []
-            )
-            
-            let categoryReport = VarianceReport(
-                id: UUID(uuidString: "8a4c0a52-9b22-4a0b-8df7-ee6a17b01932")!,
-                boutiqueName: "Main Boutique",
-                date: Date(),
-                controllerName: "Staff Member",
-                items: [
-                    VarianceReportItem(id: UUID(), productName: "Leather Tote L", sku: "LT-8820", expectedQty: 10, countedQty: 10, variance: 0, isArchivedProduct: false),
-                    VarianceReportItem(id: UUID(), productName: "Slim Wallet", sku: "SW-1020", expectedQty: 15, countedQty: 14, variance: -1, isArchivedProduct: false)
-                ]
-            )
-            let category = AuditSession(
-                id: UUID(uuidString: "8a4c0a52-9b22-4a0b-8df7-ee6a17b01932")!,
-                title: "Category Audit",
-                date: "12 May 2026",
-                scope: "Leather Goods",
-                status: "Signed Off",
-                badgeStatus: .success,
-                storeName: "Main Boutique",
-                controllerName: "Staff Member",
-                isSubmitted: true,
-                expectedItems: [],
-                varianceReport: categoryReport
-            )
-            
-            let weeklyReport = VarianceReport(
-                id: UUID(uuidString: "9b4c0a52-9b22-4a0b-8df7-ee6a17b01933")!,
-                boutiqueName: "Main Boutique",
-                date: Date(),
-                controllerName: "Staff Member",
-                items: [
-                    VarianceReportItem(id: UUID(), productName: "Belt Classic Brown", sku: "BC-3301", expectedQty: 25, countedQty: 25, variance: 0, isArchivedProduct: false),
-                    VarianceReportItem(id: UUID(), productName: "Card Holder", sku: "CH-4402", expectedQty: 30, countedQty: 30, variance: 0, isArchivedProduct: false)
-                ]
-            )
-            let weekly = AuditSession(
-                id: UUID(uuidString: "9b4c0a52-9b22-4a0b-8df7-ee6a17b01933")!,
-                title: "Weekly Quick Scan",
-                date: "08 May 2026",
-                scope: "Zone B",
-                status: "Signed Off",
-                badgeStatus: .success,
-                storeName: "Main Boutique",
-                controllerName: "Staff Member",
-                isSubmitted: true,
-                expectedItems: [],
-                varianceReport: weeklyReport
-            )
-            
-            AuditPersistence.shared.saveSession(monthly)
-            AuditPersistence.shared.saveSession(category)
-            AuditPersistence.shared.saveSession(weekly)
-            
-            sessions = [monthly, category, weekly]
-        }
-        
-        self.scheduledCounts = sessions.filter { !$0.isSubmitted }.map { session in
-            RSMSCycleCount(
-                id: session.id,
-                title: session.title,
-                date: session.date,
-                scope: session.scope,
-                status: session.status,
-                badgeStatus: session.badgeStatus
-            )
-        }
-        
-        self.recentAudits = sessions.filter { $0.isSubmitted }.map { session in
-            RSMSCycleCount(
-                id: session.id,
-                title: session.title,
-                date: session.date,
-                scope: session.scope,
-                status: session.status,
-                badgeStatus: session.badgeStatus
-            )
         }
     }
 }

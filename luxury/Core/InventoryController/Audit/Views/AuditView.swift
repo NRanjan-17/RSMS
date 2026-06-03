@@ -1,16 +1,10 @@
-//
-//  AuditView.swift
-//  luxury
-//
-//  Created by Aditya Chauhan on 15/05/26.
-//
-
 import SwiftUI
 
 struct AuditView: View {
     @Environment(AppCoordinator.self) private var coordinator
     @Environment(Router.self) private var router
     @State private var viewModel = AuditViewModel()
+    @State private var showUpcomingToast = false
     
     var body: some View {
         ZStack {
@@ -24,7 +18,12 @@ struct AuditView: View {
                         let counts = viewModel.scheduledCounts
                         ForEach(counts, id: \.id) { count in
                             Button(action: {
-                                if count.status == "Signed Off" || count.status == "Submitted" {
+                                if count.status == "UPCOMING" {
+                                    withAnimation { showUpcomingToast = true }
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                                        withAnimation { showUpcomingToast = false }
+                                    }
+                                } else if count.status == "SIGNED OFF" || count.status == "Signed Off" || count.status == "Submitted" {
                                     router.push(ICRoute.varianceReport(count))
                                 } else {
                                     router.presentFullScreen(ICRoute.auditDetail(count))
@@ -83,6 +82,27 @@ struct AuditView: View {
                 }
                 .scrollContentBackground(.hidden)
                 .background(AppColors.background)
+            }
+            
+            if showUpcomingToast {
+                VStack {
+                    Spacer()
+                    HStack(spacing: 12) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(AppColors.warning)
+                        Text("Audit locked until scheduled date.")
+                            .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                            .foregroundStyle(.white)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 14)
+                    .background(AppColors.surface)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.warning, lineWidth: 1))
+                    .padding(.bottom, 100)
+                }
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .zIndex(1)
             }
         }
         .onAppear {

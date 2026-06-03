@@ -1,0 +1,21 @@
+{
+  "" : {
+    "const-values" : "/Users/prabh_kalraa/Library/Developer/Xcode/DerivedData/luxury-gnlmlmolkgbdthgnbwpudhavoeei/SourcePackages/checkouts/xctest-dynamic-overlay/build/xctest-dynamic-overlay.build/Release-iphonesimulator/XCTestDynamicOverlay.build/Objects-normal/x86_64/XCTestDynamicOverlay-primary.swiftconstvalues",
+    "dependencies" : "/Users/prabh_kalraa/Library/Developer/Xcode/DerivedData/luxury-gnlmlmolkgbdthgnbwpudhavoeei/SourcePackages/checkouts/xctest-dynamic-overlay/build/xctest-dynamic-overlay.build/Release-iphonesimulator/XCTestDynamicOverlay.build/Objects-normal/x86_64/XCTestDynamicOverlay-primary.d",
+    "diagnostics" : "/Users/prabh_kalraa/Library/Developer/Xcode/DerivedData/luxury-gnlmlmolkgbdthgnbwpudhavoeei/SourcePackages/checkouts/xctest-dynamic-overlay/build/xctest-dynamic-overlay.build/Release-iphonesimulator/XCTestDynamicOverlay.build/Objects-normal/x86_64/XCTestDynamicOverlay-primary.dia",
+    "emit-module-dependencies" : "/Users/prabh_kalraa/Library/Developer/Xcode/DerivedData/luxury-gnlmlmolkgbdthgnbwpudhavoeei/SourcePackages/checkouts/xctest-dynamic-overlay/build/xctest-dynamic-overlay.build/Release-iphonesimulator/XCTestDynamicOverlay.build/Objects-normal/x86_64/XCTestDynamicOverlay-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/prabh_kalraa/Library/Developer/Xcode/DerivedData/luxury-gnlmlmolkgbdthgnbwpudhavoeei/SourcePackages/checkouts/xctest-dynamic-overlay/build/xctest-dynamic-overlay.build/Release-iphonesimulator/XCTestDynamicOverlay.build/Objects-normal/x86_64/XCTestDynamicOverlay-primary-emit-module.dia",
+    "pch" : "/Users/prabh_kalraa/Library/Developer/Xcode/DerivedData/luxury-gnlmlmolkgbdthgnbwpudhavoeei/SourcePackages/checkouts/xctest-dynamic-overlay/build/xctest-dynamic-overlay.build/Release-iphonesimulator/XCTestDynamicOverlay.build/Objects-normal/x86_64/XCTestDynamicOverlay-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/prabh_kalraa/Library/Developer/Xcode/DerivedData/luxury-gnlmlmolkgbdthgnbwpudhavoeei/SourcePackages/checkouts/xctest-dynamic-overlay/build/xctest-dynamic-overlay.build/Release-iphonesimulator/XCTestDynamicOverlay.build/Objects-normal/x86_64/XCTestDynamicOverlay-primary.swiftdeps"
+  },
+  "/Users/prabh_kalraa/Library/Developer/Xcode/DerivedData/luxury-gnlmlmolkgbdthgnbwpudhavoeei/SourcePackages/checkouts/xctest-dynamic-overlay/Sources/XCTestDynamicOverlay/Internal/Deprecations.swift" : {
+    "index-unit-output-path" : "/xctest-dynamic-overlay.build/Release-iphonesimulator/XCTestDynamicOverlay.build/Objects-normal/x86_64/Deprecations.o",
+    "llvm-bc" : "/Users/prabh_kalraa/Library/Developer/Xcode/DerivedData/luxury-gnlmlmolkgbdthgnbwpudhavoeei/SourcePackages/checkouts/xctest-dynamic-overlay/build/xctest-dynamic-overlay.build/Release-iphonesimulator/XCTestDynamicOverlay.build/Objects-normal/x86_64/Deprecations.bc",
+    "object" : "/Users/prabh_kalraa/Library/Developer/Xcode/DerivedData/luxury-gnlmlmolkgbdthgnbwpudhavoeei/SourcePackages/checkouts/xctest-dynamic-overlay/build/xctest-dynamic-overlay.build/Release-iphonesimulator/XCTestDynamicOverlay.build/Objects-normal/x86_64/Deprecations.o"
+  },
+  "/Users/prabh_kalraa/Library/Developer/Xcode/DerivedData/luxury-gnlmlmolkgbdthgnbwpudhavoeei/SourcePackages/checkouts/xctest-dynamic-overlay/Sources/XCTestDynamicOverlay/Internal/Exports.swift" : {
+    "index-unit-output-path" : "/xctest-dynamic-overlay.build/Release-iphonesimulator/XCTestDynamicOverlay.build/Objects-normal/x86_64/Exports.o",
+    "llvm-bc" : "/Users/prabh_kalraa/Library/Developer/Xcode/DerivedData/luxury-gnlmlmolkgbdthgnbwpudhavoeei/SourcePackages/checkouts/xctest-dynamic-overlay/build/xctest-dynamic-overlay.build/Release-iphonesimulator/XCTestDynamicOverlay.build/Objects-normal/x86_64/Exports.bc",
+    "object" : "/Users/prabh_kalraa/Library/Developer/Xcode/DerivedData/luxury-gnlmlmolkgbdthgnbwpudhavoeei/SourcePackages/checkouts/xctest-dynamic-overlay/build/xctest-dynamic-overlay.build/Release-iphonesimulator/XCTestDynamicOverlay.build/Objects-normal/x86_64/Exports.o"
+  }
+}
