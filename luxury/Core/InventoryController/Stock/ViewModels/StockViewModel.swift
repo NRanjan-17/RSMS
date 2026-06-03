@@ -26,6 +26,7 @@ final class StockViewModel {
         }
         NotificationCenter.default.addObserver(forName: NSNotification.Name("SFSOrderReceived"), object: nil, queue: .main) { [weak self] _ in
             self?.fetchSFSCount()
+            self?.fetchInventoryStats()
         }
     }
     
