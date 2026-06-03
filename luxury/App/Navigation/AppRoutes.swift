@@ -14,7 +14,7 @@ enum SARoute: Hashable {
     case returns
     case transactionDetail(SATransactionEntity)
     case afterSalesIntake(client: Client, serialNumber: String?, isWarrantyActive: Bool, purchaseId: UUID? = nil)
-    case afterSalesTracking
+    case afterSalesTracking(ASTDetails)
     case remoteSelling
     case purchaseDetails(client: Client, purchase: ClientPurchase)
     case exchangePolicy
@@ -40,6 +40,7 @@ enum BMRoute: Hashable {
     case stockReconciliation
     case astQueue
     case astApproval(AST)
+    case afterSalesTracking(ASTDetails)
     case writeOffApproval
     case staffRequestDetail(StaffModel)
     case pendingStaff
@@ -69,7 +70,7 @@ enum ICRoute: Hashable {
     case auditDetail(RSMSCycleCount)
     case activeAudit(RSMSCycleCount)
     case varianceReport(RSMSCycleCount)
-    case serialCertificate
+
     case sfsOrders
 
     case sfsVerification(PurchasedItemEntity)
@@ -77,6 +78,8 @@ enum ICRoute: Hashable {
     case alerts
     case purchaseOrders
     case poDetail(PurchaseOrder)
+    case repairQueue
+    case astDetail(ASTDetails)
     case editProfile
 }
 

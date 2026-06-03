@@ -19,6 +19,11 @@ struct BoutiqueManagerCanvas: View {
                     .navigationDestination(for: BMRoute.self) { route in
                         destination(for: route, router: dashRouter)
                     }
+                    .navigationDestination(for: SARoute.self) { route in
+                        if case .afterSalesTracking(let ast) = route {
+                            AfterSalesTrackingView(ast: ast)
+                        }
+                    }
                     .fullScreenCover(item: $dashRouter.presentedFullScreen) { route in
                         destination(for: route.value as! BMRoute, router: dashRouter)
                     }
@@ -113,6 +118,8 @@ struct BoutiqueManagerCanvas: View {
             ASTQueueView()
         case .astApproval(let ast):
             ASTApprovalView(ast: ast)
+        case .afterSalesTracking(let ast):
+            AfterSalesTrackingView(ast: ast)
         case .writeOffApproval:
             WriteOffApprovalView()
         case .endlessAisleRequests:

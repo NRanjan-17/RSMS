@@ -181,8 +181,7 @@ struct InventoryControllerCanvas: View {
             ActiveAuditView(audit: audit)
         case .varianceReport(let audit):
             VarianceReportView(audit: audit)
-        case .serialCertificate:
-            SerializationView()
+
         case .sfsOrders:
             FulfillmentView()
         case .sfsVerification(let order):
@@ -195,6 +194,10 @@ struct InventoryControllerCanvas: View {
             PurchaseOrdersView()
         case .poDetail(let po):
             PODetailView(po: po)
+        case .repairQueue:
+            ASTRepairQueueView()
+        case .astDetail(let ast):
+            ICASTDetailView(ast: ast)
         case .editProfile:
             EditProfileView()
         }

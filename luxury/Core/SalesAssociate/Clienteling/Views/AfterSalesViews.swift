@@ -592,7 +592,7 @@ struct AfterSalesIntakeView: View {
 }
 
 
-struct ASTDetails: Codable {
+struct ASTDetails: Codable, Hashable {
     let id: UUID
     let status: String
     let description: String?
@@ -604,79 +604,87 @@ struct ASTDetails: Codable {
 struct AfterSalesTrackingView: View {
     @Environment(\.dismiss) private var dismiss
     
-    private let ticket = AfterSalesTicket(client: "Unknown Client", item: "Rolex Submariner Date", serial: "RLX-126610LN-8M2", issue: "Bracelet sizing", stage: .inspection, photoRequired: false)
+    let ast: ASTDetails
     
-    @State private var astStatus: String = "inspection"
-    @State private var fetchedAST: ASTDetails? = nil
+    @State private var astStatus: String
+    @State private var fetchedAST: ASTDetails
+    
+    init(ast: ASTDetails) {
+        self.ast = ast
+        self._astStatus = State(initialValue: ast.status)
+        self._fetchedAST = State(initialValue: ast)
+    }
     
     private enum StageState {
         case completed
         case active
         case upcoming
+        case failed
     }
     
     private func rank(for status: String) -> Int {
         switch status.lowercased() {
         case "open": return 1
-        case "inspection": return 2
-        case "brand_review": return 3
-        case "ready": return 4
-        default: return 2
+        case "approved": return 2
+        case "rejected", "declined": return 2
+        case "in_progress": return 3
+        case "dispatched": return 4
+        case "ready": return 5
+        default: return 1
         }
     }
     
     private func rank(for stage: AfterSalesStage) -> Int {
         switch stage {
         case .intake: return 1
-        case .inspection: return 2
-        case .brandReview: return 3
-        case .ready: return 4
+        case .managerReview: return 2
+        case .inProgress: return 3
+        case .dispatched: return 4
+        case .ready: return 5
         }
     }
     
     private func stageState(for stage: AfterSalesStage) -> StageState {
+        let isRejected = astStatus.lowercased() == "rejected" || astStatus.lowercased() == "declined"
+        
         let currentRank = rank(for: astStatus)
         let stageRank = rank(for: stage)
         
-        if stage == .intake {
-            return .completed
+        if isRejected {
+            if stageRank < 2 { return .completed }
+            else if stageRank == 2 { return .failed }
+            else { return .upcoming }
         }
         
         if astStatus.lowercased() == "ready" {
             return .completed
         }
         
-        let stageStr: String
-        switch stage {
-        case .intake: stageStr = "open"
-        case .inspection: stageStr = "inspection"
-        case .brandReview: stageStr = "brand_review"
-        case .ready: stageStr = "ready"
-        }
-        
-        if astStatus.lowercased() == stageStr {
-            return .active
-        }
-        
-        if stageRank < currentRank {
+        if stageRank <= currentRank {
             return .completed
+        } else if stageRank == currentRank + 1 {
+            return .active
         } else {
             return .upcoming
         }
     }
     
     private var displayStatusText: String {
-        switch astStatus.lowercased() {
-        case "open": return "Intake"
-        case "inspection": return "Inspection"
-        case "brand_review": return "Brand Review"
-        case "ready": return "Ready"
-        default: return "Inspection"
-        }
+        let lower = astStatus.lowercased()
+        if lower == "open" { return "Intake" }
+        if lower == "approved" { return "Manager Review" }
+        if lower == "rejected" || lower == "declined" { return "Declined" }
+        if lower == "in_progress" { return "In Progress" }
+        if lower == "dispatched" { return "Dispatched" }
+        if lower == "ready" { return "Ready" }
+        return "Intake"
     }
     
     private var badgeStatus: BadgeStatus {
-        return astStatus.lowercased() == "ready" ? .success : .pending
+        let lower = astStatus.lowercased()
+        if lower == "ready" { return .success }
+        if lower == "rejected" || lower == "declined" { return .error }
+        return .pending
     }
     
     var body: some View {
@@ -688,10 +696,10 @@ struct AfterSalesTrackingView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 18) {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text(fetchedAST?.catalogs?.name ?? "Rolex Datejust")
+                            Text(fetchedAST.catalogs?.name ?? "Service Ticket")
                                 .font(AppFonts.serif(size: 22, weight: .medium))
                                 .foregroundStyle(.white)
-                            Text("\(fetchedAST?.client?.name ?? "Unknown Client") · \(fetchedAST?.catalogs?.catalogId ?? ticket.serial)")
+                            Text("\(fetchedAST.client?.name ?? "Unknown Client") · \(fetchedAST.catalogs?.catalogId ?? "Unknown ID")")
                                 .font(AppFonts.sansSerif(size: 12))
                                 .foregroundStyle(AppColors.secondary)
                             StatusBadge(text: LocalizedStringKey(displayStatusText), status: badgeStatus)
@@ -713,6 +721,9 @@ struct AfterSalesTrackingView: View {
                                         case .active:
                                             Image(systemName: "clock.fill")
                                                 .foregroundStyle(AppColors.gold)
+                                        case .failed:
+                                            Image(systemName: "xmark.circle.fill")
+                                                .foregroundStyle(AppColors.error)
                                         case .upcoming:
                                             Image(systemName: "circle")
                                                 .foregroundStyle(.white.opacity(0.3))
@@ -727,14 +738,15 @@ struct AfterSalesTrackingView: View {
                                         Group {
                                             switch state {
                                             case .completed:
-                                                Text("Logged in immutable ticket timeline")
-                                                    .foregroundStyle(AppColors.secondary)
+                                                EmptyView()
                                             case .active:
                                                 Text("Current stage")
                                                     .foregroundStyle(AppColors.gold)
+                                            case .failed:
+                                                Text("Declined by Manager")
+                                                    .foregroundStyle(AppColors.error)
                                             case .upcoming:
-                                                Text("Upcoming stage")
-                                                    .foregroundStyle(AppColors.secondary.opacity(0.5))
+                                                EmptyView()
                                             }
                                         }
                                         .font(AppFonts.sansSerif(size: 11))
@@ -744,7 +756,7 @@ struct AfterSalesTrackingView: View {
                                 .padding(14)
                                 .background(AppColors.surface)
                                 .clipShape(RoundedRectangle(cornerRadius: 10))
-                                .opacity(state == .upcoming ? 0.6 : 1.0)
+                                .opacity((state == .upcoming || state == .failed) ? 0.6 : 1.0)
                             }
                         }
                     }
@@ -753,7 +765,7 @@ struct AfterSalesTrackingView: View {
                 }
             }
         }
-        .navigationTitle("Appointment Tracking")
+        .navigationTitle("Service Tracking")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(AppColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
@@ -766,46 +778,21 @@ struct AfterSalesTrackingView: View {
     private func fetchTicketDetails() {
         Task {
             do {
-                let catalogs: [CatalogEntity] = try await SupabaseManager.shared.client
-                    .from("catalogs")
-                    .select()
-                    .eq("catalog_id", value: ticket.serial)
+                let fetchedList: [ASTDetails] = try await SupabaseManager.shared.client
+                    .from("ast")
+                    .select("*, catalogs(*), client(*)")
+                    .eq("id", value: ast.id.uuidString)
                     .execute()
                     .value
                 
-                if let firstCatalog = catalogs.first {
-                    let astList: [ASTDetails] = try await SupabaseManager.shared.client
-                        .from("ast")
-                        .select("*, catalogs(*), client(*)")
-                        .eq("product_id", value: firstCatalog.id.uuidString)
-                        .order("id", ascending: false)
-                        .execute()
-                        .value
-                    
-                    if let firstAST = astList.first {
-                        await MainActor.run {
-                            self.fetchedAST = firstAST
-                            self.astStatus = firstAST.status
-                        }
-                    }
-                } else {
-                    let allASTs: [ASTDetails] = try await SupabaseManager.shared.client
-                        .from("ast")
-                        .select("*, catalogs(*), client(*)")
-                        .order("id", ascending: false)
-                        .limit(1)
-                        .execute()
-                        .value
-                    
-                    if let lastAST = allASTs.first {
-                        await MainActor.run {
-                            self.fetchedAST = lastAST
-                            self.astStatus = lastAST.status
-                        }
+                if let latestAST = fetchedList.first {
+                    await MainActor.run {
+                        self.fetchedAST = latestAST
+                        self.astStatus = latestAST.status
                     }
                 }
             } catch {
-                print("Failed to fetch ticket details from Supabase: \(error)")
+                print("Failed to fetch latest AST details: \(error)")
             }
         }
     }

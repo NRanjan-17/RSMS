@@ -116,8 +116,8 @@ struct SalesAssociateCanvas: View {
             ReturnsView()
         case .afterSalesIntake(let client, let serialNumber, let isWarrantyActive, let purchaseId):
             AfterSalesIntakeView(client: client, serialNumber: serialNumber, isWarrantyActive: isWarrantyActive, purchaseId: purchaseId)
-        case .afterSalesTracking:
-            AfterSalesTrackingView()
+        case .afterSalesTracking(let ast):
+            AfterSalesTrackingView(ast: ast)
         case .remoteSelling:
             RemoteSellingView()
         case .purchaseDetails(let client, let purchase):

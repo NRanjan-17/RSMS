@@ -15287,6 +15287,7 @@
       }
     },
     "Appointment Tracking" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -27303,6 +27304,7 @@
       }
     },
     "CAPTURE" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -28935,6 +28937,7 @@
       }
     },
     "Certificate number" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -38495,6 +38498,9 @@
         }
       }
     },
+    "CURRENT STATUS" : {
+
+    },
     "CVV" : {
       "localizations" : {
         "ar" : {
@@ -41080,6 +41086,9 @@
           }
         }
       }
+    },
+    "Declined by Manager" : {
+
     },
     "Deduct %lld units from stock levels immediately" : {
       "localizations" : {
@@ -51324,6 +51333,9 @@
           }
         }
       }
+    },
+    "Error Loading Tickets" : {
+
     },
     "Error Saving Client" : {
       "localizations" : {
@@ -71237,6 +71249,7 @@
       }
     },
     "Logged in immutable ticket timeline" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -84744,6 +84757,9 @@
           }
         }
       }
+    },
+    "No tickets in repair queue" : {
+
     },
     "No transactions found." : {
       "localizations" : {
@@ -101385,6 +101401,7 @@
       }
     },
     "RECENT RECORDS" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -104109,6 +104126,9 @@
           }
         }
       }
+    },
+    "Repair Queue" : {
+
     },
     "Report Issue" : {
       "localizations" : {
@@ -109292,6 +109312,7 @@
       }
     },
     "Save Certificate Link" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -109700,6 +109721,7 @@
       }
     },
     "Save PDF" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -119388,6 +119410,7 @@
       }
     },
     "Serial number" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -119932,6 +119955,7 @@
       }
     },
     "Serialization" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -120068,6 +120092,7 @@
       }
     },
     "Serialization & CoA" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -120474,6 +120499,9 @@
           }
         }
       }
+    },
+    "Service Tracking" : {
+
     },
     "Session Summary" : {
       "localizations" : {
@@ -133043,6 +133071,9 @@
     "Ticket #%@" : {
 
     },
+    "Ticket Actions" : {
+
+    },
     "Ticket Created" : {
       "localizations" : {
         "ar" : {
@@ -133314,6 +133345,12 @@
           }
         }
       }
+    },
+    "TICKET DETAILS" : {
+
+    },
+    "Ticket has been successfully %@." : {
+
     },
     "TIER" : {
       "localizations" : {
@@ -136170,6 +136207,12 @@
           }
         }
       }
+    },
+    "Track Active Service" : {
+
+    },
+    "Track Service Details" : {
+
     },
     "Transaction Details" : {
       "localizations" : {
@@ -141754,6 +141797,7 @@
       }
     },
     "Upcoming stage" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
