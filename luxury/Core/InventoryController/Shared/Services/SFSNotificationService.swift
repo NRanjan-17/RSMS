@@ -28,21 +28,22 @@ final class SFSNotificationService {
                 if let status = event.record["status"]?.stringValue, status == "Pending" {
                     await MainActor.run {
                         let idRaw = event.record["id"]?.stringValue ?? "Unknown"
-                        let prefix = idRaw.prefix(8).uppercased()
-                        self.lastOrderMessage = "New SFS Order Received: \(prefix)"
-                        self.hasNewOrder = true
-                        
-                        // Play a haptic vibration to grab attention
-                        let generator = UINotificationFeedbackGenerator()
-                        generator.notificationOccurred(.success)
-                        
-                        NotificationCenter.default.post(name: NSNotification.Name("SFSOrderReceived"), object: nil)
-                        
-                        // Auto-hide toast after 4 seconds
-                        Task {
-                            try? await Task.sleep(nanoseconds: 4_000_000_000)
-                            self.hasNewOrder = false
-                        }
+                        self.showAlert(idRaw: idRaw)
+                    }
+                }
+            }
+        }
+        
+        Task {
+            for await event in channel!.postgresChange(
+                UpdateAction.self,
+                schema: "public",
+                table: "purchased_items"
+            ) {
+                if let status = event.record["status"]?.stringValue, status == "Pending" {
+                    await MainActor.run {
+                        let idRaw = event.record["id"]?.stringValue ?? "Unknown"
+                        self.showAlert(idRaw: idRaw)
                     }
                 }
             }
@@ -50,6 +51,24 @@ final class SFSNotificationService {
         
         Task {
             try? await channel?.subscribeWithError()
+        }
+    }
+    
+    private func showAlert(idRaw: String) {
+        let prefix = idRaw.prefix(8).uppercased()
+        lastOrderMessage = "SFS Order Ready: \(prefix)"
+        hasNewOrder = true
+        
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+        
+        NotificationCenter.default.post(name: NSNotification.Name("SFSOrderReceived"), object: nil)
+        
+        Task {
+            try? await Task.sleep(nanoseconds: 4_000_000_000)
+            await MainActor.run {
+                self.hasNewOrder = false
+            }
         }
     }
     

@@ -9,6 +9,7 @@ import SwiftUI
 
 public struct EndlessAisleWorkflowView: View {
     @State private var viewModel = EndlessAisleViewModel.shared
+    @State private var scannedCode = ""
     @Environment(\.dismiss) private var dismiss
     
     public init() {}
@@ -18,243 +19,21 @@ public struct EndlessAisleWorkflowView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                HStack(spacing: 16) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "chevron.left")
-                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
-                            .foregroundStyle(AppColors.gold)
-                    }
-                    .accessibilityLabel("Back")
-                    
-                    Text("Endless Aisle Lookup")
-                        .font(AppFonts.serif(size: 24, weight: .semibold))
-                        .foregroundStyle(AppColors.text)
-                    
-                    Spacer()
-                }
-                .padding(.horizontal, 24)
-                .padding(.vertical, 16)
+                header
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 24) {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("STOCK ITEM SOURCE LIST")
-                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
-                                .foregroundStyle(AppColors.secondary)
-                                .kerning(1.5)
-                                .accessibilityAddTraits(.isHeader)
-                            Text("Select an item to verify local and regional boutique availability.")
-                                .font(AppFonts.sansSerif(size: 13))
-                                .foregroundStyle(AppColors.secondary)
-                        }
-                        .padding(.horizontal, 24)
+                        catalogSection
+                        availabilitySection
+                        dispatchSection
+                        receiveSection
+                        activeSection
                         
-                        VStack(spacing: 12) {
-                            ForEach(viewModel.mockItems) { item in
-                                Button(action: { viewModel.checkStock(item: item) }) {
-                                    HStack(spacing: 16) {
-                                        ZStack {
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .fill(AppColors.surface2)
-                                                .frame(width: 48, height: 48)
-                                            Image(systemName: "circle.grid.cross")
-                                                .font(AppFonts.sansSerif(size: 18))
-                                                .foregroundStyle(AppColors.gold)
-                                                .opacity(0.3)
-                                        }
-                                        .accessibilityHidden(true)
-                                        
-                                        VStack(alignment: .leading, spacing: 2) {
-                                            Text(item.name)
-                                                .font(AppFonts.serif(size: 15, weight: .medium))
-                                                .foregroundStyle(AppColors.text)
-                                            Text("SKU: \(item.sku)  ·  Delhi: \(item.stockDelhi)  ·  Paris: \(item.stockParis)")
-                                                .font(AppFonts.sansSerif(size: 12))
-                                                .foregroundStyle(AppColors.secondary)
-                                        }
-                                        
-                                        Spacer()
-                                    }
-                                    .padding(14)
-                                    .background(viewModel.selectedItem?.id == item.id ? AppColors.gold08 : AppColors.surface)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .stroke(viewModel.selectedItem?.id == item.id ? AppColors.gold : AppColors.gold15, lineWidth: 0.5)
-                                    )
-                                }
-                                .buttonStyle(.plain)
-                                .accessibilityElement(children: .combine)
-                                .accessibilityLabel(item.name)
-                                .accessibilityValue("SKU: \(item.sku), Delhi stock: \(item.stockDelhi), Paris stock: \(item.stockParis)")
-                                .accessibilityAddTraits(viewModel.selectedItem?.id == item.id ? [.isSelected] : [])
-                            }
-                        }
-                        .padding(.horizontal, 24)
-                        
-                        if let selected = viewModel.selectedItem {
-                            VStack(alignment: .leading, spacing: 16) {
-                                Text("AVAILABILITY ASSESSMENT")
-                                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                                    .foregroundStyle(AppColors.secondary)
-                                    .kerning(1.5)
-                                    .accessibilityAddTraits(.isHeader)
-                                
-                                VStack(alignment: .leading, spacing: 16) {
-                                    if viewModel.isCheckingStock {
-                                        HStack {
-                                            Spacer()
-                                            ProgressView("Assessing stock routes...")
-                                                .tint(AppColors.gold)
-                                                .foregroundStyle(AppColors.secondary)
-                                            Spacer()
-                                        }
-                                    } else if let result = viewModel.currentCheckResult {
-                                        switch result {
-                                        case .localInStock:
-                                            HStack(spacing: 12) {
-                                                Image(systemName: "checkmark.circle.fill")
-                                                    .foregroundStyle(AppColors.success)
-                                                    .font(AppFonts.sansSerif(size: 20))
-                                                Text("This item is in stock at DLF Emporio, Delhi. Sourcing not required.")
-                                                    .font(AppFonts.sansSerif(size: 13))
-                                                    .foregroundStyle(AppColors.success)
-                                            }
-                                            
-                                        case .noStockAnywhere:
-                                            HStack(spacing: 12) {
-                                                Image(systemName: "exclamationmark.triangle.fill")
-                                                    .foregroundStyle(AppColors.error)
-                                                    .font(AppFonts.sansSerif(size: 20))
-                                                Text("Item out of stock at all regional locations.")
-                                                    .font(AppFonts.sansSerif(size: 13))
-                                                    .foregroundStyle(AppColors.error)
-                                            }
-                                            
-                                        case .outOfStockLocally(let alternate):
-                                            VStack(alignment: .leading, spacing: 14) {
-                                                HStack(spacing: 12) {
-                                                    Image(systemName: "exclamationmark.triangle.fill")
-                                                        .foregroundStyle(AppColors.warning)
-                                                        .font(AppFonts.sansSerif(size: 20))
-                                                    VStack(alignment: .leading, spacing: 2) {
-                                                        Text("Out of Stock Locally")
-                                                            .font(AppFonts.sansSerif(size: 14, weight: .bold))
-                                                            .foregroundStyle(.white)
-                                                        Text("Available for transfer from \(alternate).")
-                                                            .font(AppFonts.sansSerif(size: 12))
-                                                            .foregroundStyle(AppColors.secondary)
-                                                    }
-                                                }
-                                                
-                                                CustomButton(title: "Request Transfer from Paris Boutique") {
-                                                    viewModel.createRequest(item: selected)
-                                                    viewModel.selectedItem = nil
-                                                    viewModel.currentCheckResult = nil
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                .padding(18)
-                                .background(AppColors.surface)
-                                .clipShape(RoundedRectangle(cornerRadius: 14))
-                                .overlay(RoundedRectangle(cornerRadius: 14).stroke(AppColors.gold15, lineWidth: 0.5))
-                            }
-                            .padding(.horizontal, 24)
-                        }
-                        
-                        if !viewModel.activeRequests.isEmpty {
-                            VStack(alignment: .leading, spacing: 14) {
-                                Text("ACTIVE SOURCING PIPELINES")
-                                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                                    .foregroundStyle(AppColors.secondary)
-                                    .kerning(1.5)
-                                    .padding(.horizontal, 24)
-                                    .accessibilityAddTraits(.isHeader)
-                                
-                                VStack(spacing: 16) {
-                                    ForEach(viewModel.activeRequests) { request in
-                                        VStack(alignment: .leading, spacing: 14) {
-                                            HStack {
-                                                VStack(alignment: .leading, spacing: 2) {
-                                                    Text(request.item.name)
-                                                        .font(AppFonts.serif(size: 16, weight: .medium))
-                                                        .foregroundStyle(AppColors.text)
-                                                    Text("Source: \(request.sourceStore)  ➔  Delhi")
-                                                        .font(AppFonts.sansSerif(size: 12))
-                                                        .foregroundStyle(AppColors.secondary)
-                                                }
-                                                Spacer()
-                                                StatusBadge(
-                                                    text: LocalizedStringKey(request.status.rawValue),
-                                                    status: badgeStatusFor(request.status)
-                                                )
-                                            }
-                                            
-                                            HStack(spacing: 4) {
-                                                stepIndicator(label: "Requested", active: true, completed: request.status != .pendingBMAproval)
-                                                stepLine(completed: request.status != .pendingBMAproval)
-                                                stepIndicator(label: "BM Delhi", active: request.status != .pendingBMAproval, completed: request.status != .pendingBMAproval && request.status != .pendingBMBApproval)
-                                                stepLine(completed: request.status != .pendingBMAproval && request.status != .pendingBMBApproval)
-                                                stepIndicator(label: "BM Paris", active: request.status == .pendingICBDispatch || request.status == .dispatched, completed: request.status == .dispatched)
-                                                stepLine(completed: request.status == .dispatched)
-                                                stepIndicator(label: "Dispatched", active: request.status == .dispatched, completed: false)
-                                            }
-                                            .padding(.vertical, 4)
-                                            .accessibilityElement(children: .ignore)
-                                            .accessibilityLabel("Pipeline progress")
-                                            .accessibilityValue(progressDescription(for: request.status))
-                                            
-                                            VStack(alignment: .leading, spacing: 6) {
-                                                Text("LATEST EVENT:")
-                                                    .font(AppFonts.sansSerif(size: 9, weight: .bold))
-                                                    .foregroundStyle(AppColors.secondary)
-                                                Text(request.history.last ?? "")
-                                                    .font(AppFonts.sansSerif(size: 12))
-                                                    .foregroundStyle(AppColors.text)
-                                            }
-                                            .padding(10)
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                            .background(AppColors.surface2)
-                                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                                            
-                                            VStack(alignment: .leading, spacing: 8) {
-                                                Text("ROLE SIMULATOR SHORTCUTS:")
-                                                    .font(AppFonts.sansSerif(size: 9, weight: .bold))
-                                                    .foregroundStyle(AppColors.gold)
-                                                    .kerning(1)
-                                                
-                                                HStack(spacing: 8) {
-                                                    if request.status == .pendingBMAproval {
-                                                        simButton(title: "Approve as BM Delhi") {
-                                                            viewModel.approveBMA(requestId: request.id)
-                                                        }
-                                                    } else if request.status == .pendingBMBApproval {
-                                                        simButton(title: "Authorize as BM Paris") {
-                                                            viewModel.approveBMB(requestId: request.id)
-                                                        }
-                                                    } else if request.status == .pendingICBDispatch {
-                                                        simButton(title: "Dispatch as IC Paris") {
-                                                            viewModel.dispatchICB(requestId: request.id)
-                                                        }
-                                                    } else {
-                                                        Text("✓ Pipeline Sourced Successfully")
-                                                            .font(AppFonts.sansSerif(size: 11, weight: .semibold))
-                                                            .foregroundStyle(AppColors.success)
-                                                    }
-                                                }
-                                            }
-                                            .padding(.top, 4)
-                                        }
-                                        .padding(18)
-                                        .background(AppColors.surface)
-                                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(AppColors.gold15, lineWidth: 0.5))
-                                    }
-                                }
+                        if let error = viewModel.errorMessage {
+                            Text(error)
+                                .font(AppFonts.sansSerif(size: 12, weight: .semibold))
+                                .foregroundStyle(AppColors.error)
                                 .padding(.horizontal, 24)
-                            }
                         }
                     }
                     .padding(.top, 16)
@@ -263,64 +42,333 @@ public struct EndlessAisleWorkflowView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .task {
+            viewModel.loadCatalogAvailability()
+            viewModel.loadRequests()
+        }
+    }
+    
+    private var header: some View {
+        HStack(spacing: 16) {
+            Button(action: { dismiss() }) {
+                Image(systemName: "chevron.left")
+                    .font(AppFonts.sansSerif(size: 20, weight: .semibold))
+                    .foregroundStyle(AppColors.gold)
+            }
+            
+            Text("Endless Aisle")
+                .font(AppFonts.serif(size: 24, weight: .semibold))
+                .foregroundStyle(AppColors.text)
+            
+            Spacer()
+            
+            Button(action: {
+                viewModel.loadCatalogAvailability()
+                viewModel.loadRequests()
+            }) {
+                Image(systemName: "arrow.clockwise")
+                    .font(AppFonts.sansSerif(size: 18, weight: .semibold))
+                    .foregroundStyle(AppColors.gold)
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.vertical, 16)
+    }
+    
+    private var catalogSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 6) {
+                sectionTitle("STOCK ITEM SOURCE LIST")
+                Text("Select an item to verify local and regional boutique availability.")
+                    .font(AppFonts.sansSerif(size: 13))
+                    .foregroundStyle(AppColors.secondary)
+                    .padding(.horizontal, 24)
+            }
+            
+            if viewModel.items.isEmpty {
+                Text(viewModel.isLoading ? "Loading catalog availability..." : "No active catalog items found.")
+                    .font(AppFonts.sansSerif(size: 13))
+                    .foregroundStyle(AppColors.secondary)
+                    .padding(.horizontal, 24)
+            } else {
+                VStack(spacing: 12) {
+                    ForEach(viewModel.items) { item in
+                        Button(action: { viewModel.checkStock(item: item) }) {
+                            HStack(spacing: 16) {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(AppColors.surface2)
+                                        .frame(width: 48, height: 48)
+                                    Image(systemName: "circle.grid.cross")
+                                        .font(AppFonts.sansSerif(size: 18))
+                                        .foregroundStyle(AppColors.gold)
+                                        .opacity(0.3)
+                                }
+                                
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(item.name)
+                                        .font(AppFonts.serif(size: 15, weight: .medium))
+                                        .foregroundStyle(AppColors.text)
+                                    Text("SKU: \(item.sku) · Local available: \(item.localQuantity)")
+                                        .font(AppFonts.sansSerif(size: 12))
+                                        .foregroundStyle(AppColors.secondary)
+                                }
+                                
+                                Spacer()
+                                
+                                if viewModel.selectedItem?.id == item.id {
+                                    Circle()
+                                        .fill(AppColors.gold)
+                                        .frame(width: 6, height: 6)
+                                }
+                            }
+                            .padding(14)
+                            .background(viewModel.selectedItem?.id == item.id ? AppColors.gold08 : AppColors.surface)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(viewModel.selectedItem?.id == item.id ? AppColors.gold : AppColors.gold15, lineWidth: 0.5)
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, 24)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var availabilitySection: some View {
+        if let selected = viewModel.selectedItem {
+            VStack(alignment: .leading, spacing: 16) {
+                sectionTitle("AVAILABILITY ASSESSMENT")
+                
+                VStack(alignment: .leading, spacing: 16) {
+                    if viewModel.isCheckingStock {
+                        ProgressView("Assessing stock routes...")
+                            .tint(AppColors.gold)
+                            .foregroundStyle(AppColors.secondary)
+                            .frame(maxWidth: .infinity)
+                    } else if let result = viewModel.currentCheckResult {
+                        switch result {
+                        case .localInStock:
+                            statusRow(icon: "checkmark.circle.fill", color: AppColors.success, title: "Local stock is available", subtitle: "Sourcing is not required for \(selected.name).")
+                        case .noStockAnywhere:
+                            statusRow(icon: "exclamationmark.triangle.fill", color: AppColors.error, title: "No source boutique found", subtitle: "No approved boutique currently has an available unit.")
+                        case .outOfStockLocally(let alternatives):
+                            VStack(alignment: .leading, spacing: 12) {
+                                statusRow(icon: "shippingbox.fill", color: AppColors.warning, title: "Available outside this boutique", subtitle: "\(alternatives.count) boutique\(alternatives.count == 1 ? "" : "s") can source this item.")
+                                ForEach(alternatives) { source in
+                                    Text("\(source.name), \(source.city) · \(source.quantity) available")
+                                        .font(AppFonts.sansSerif(size: 12, weight: .semibold))
+                                        .foregroundStyle(AppColors.text)
+                                        .padding(10)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .background(AppColors.surface2)
+                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(18)
+                .background(AppColors.surface)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .overlay(RoundedRectangle(cornerRadius: 14).stroke(AppColors.gold15, lineWidth: 0.5))
+                .padding(.horizontal, 24)
+            }
+        }
+    }
+    
+    private var dispatchSection: some View {
+        requestSection(
+            title: "AUTHORIZED DISPATCHES",
+            emptyText: "No approved source requests are waiting for dispatch.",
+            requests: viewModel.sourceDispatchRequests
+        ) { request in
+            VStack(alignment: .leading, spacing: 14) {
+                requestHeader(request, badge: request.status == .dispatched ? "In Transit" : "Ready", status: request.status == .dispatched ? .pending : .warning)
+                Text("Prepare serial \(request.serialNumber ?? "reserved unit") for \(request.destinationStore).")
+                    .font(AppFonts.sansSerif(size: 12))
+                    .foregroundStyle(AppColors.secondary)
+                
+                if request.status == .pendingSourceDispatch {
+                    Button(action: { viewModel.dispatchSourceRequest(request: request) }) {
+                        actionLabel("Dispatch Item", color: AppColors.gold)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(viewModel.isSaving)
+                }
+            }
+            .padding(16)
+            .background(AppColors.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+        }
+    }
+    
+    private var receiveSection: some View {
+        requestSection(
+            title: "ARRIVALS TO RECEIVE",
+            emptyText: "No sourced items have arrived for this boutique.",
+            requests: viewModel.destinationReceiveRequests
+        ) { request in
+            VStack(alignment: .leading, spacing: 14) {
+                requestHeader(request, badge: "Arrived", status: .success)
+                
+                TextField("Scan serial number or SKU", text: $scannedCode)
+                    .font(AppFonts.sansSerif(size: 14))
+                    .foregroundStyle(AppColors.text)
+                    .padding(12)
+                    .background(AppColors.surface2)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .textInputAutocapitalization(.characters)
+                
+                Button(action: {
+                    viewModel.receiveSourcedStock(request: request, scannedCode: scannedCode)
+                    scannedCode = ""
+                }) {
+                    actionLabel("Receive Into Inventory", color: AppColors.success)
+                }
+                .buttonStyle(.plain)
+                .disabled(viewModel.isSaving || scannedCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
+            .padding(16)
+            .background(AppColors.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+        }
+    }
+    
+    private var activeSection: some View {
+        requestSection(
+            title: "ACTIVE SOURCING",
+            emptyText: "No Endless Aisle sourcing pipelines are active.",
+            requests: viewModel.activeRequests
+        ) { request in
+            VStack(alignment: .leading, spacing: 10) {
+                requestHeader(request, badge: LocalizedStringKey(statusText(for: request.status)), status: badgeStatusFor(request.status))
+                Text(request.history.last ?? "")
+                    .font(AppFonts.sansSerif(size: 12))
+                    .foregroundStyle(AppColors.secondary)
+            }
+            .padding(16)
+            .background(AppColors.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+        }
+    }
+    
+    @ViewBuilder
+    private func requestSection<Content: View>(title: String, emptyText: String, requests: [EndlessAisle.SourcingRequest], @ViewBuilder content: @escaping (EndlessAisle.SourcingRequest) -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            sectionTitle(title)
+            
+            if requests.isEmpty {
+                Text(emptyText)
+                    .font(AppFonts.sansSerif(size: 13))
+                    .foregroundStyle(AppColors.secondary)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 10)
+            } else {
+                VStack(spacing: 12) {
+                    ForEach(requests, content: content)
+                }
+                .padding(.horizontal, 24)
+            }
+        }
+    }
+    
+    private func sectionTitle(_ title: String) -> some View {
+        Text(title)
+            .font(AppFonts.sansSerif(size: 10, weight: .bold))
+            .foregroundStyle(AppColors.secondary)
+            .kerning(1.5)
+            .padding(.horizontal, 24)
+    }
+    
+    private func statusRow(icon: String, color: Color, title: String, subtitle: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .foregroundStyle(color)
+                .font(AppFonts.sansSerif(size: 20))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                    .foregroundStyle(AppColors.text)
+                Text(subtitle)
+                    .font(AppFonts.sansSerif(size: 12))
+                    .foregroundStyle(AppColors.secondary)
+            }
+            Spacer()
+        }
+    }
+    
+    private func requestHeader(_ request: EndlessAisle.SourcingRequest, badge: LocalizedStringKey, status: BadgeStatus) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(request.item.name)
+                    .font(AppFonts.serif(size: 16, weight: .medium))
+                    .foregroundStyle(AppColors.text)
+                Text("\(request.sourceStore) -> \(request.destinationStore)")
+                    .font(AppFonts.sansSerif(size: 12))
+                    .foregroundStyle(AppColors.secondary)
+            }
+            Spacer()
+            StatusBadge(text: badge, status: status)
+        }
+    }
+    
+    private func actionLabel(_ title: String, color: Color) -> some View {
+        Text(title)
+            .font(AppFonts.sansSerif(size: 13, weight: .semibold))
+            .foregroundStyle(AppColors.background)
+            .frame(maxWidth: .infinity)
+            .frame(height: 40)
+            .background(color)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
     }
     
     private func badgeStatusFor(_ status: EndlessAisle.RequestState) -> BadgeStatus {
         switch status {
-        case .checking: return .neutral
-        case .localInStock: return .success
-        case .noStockAnywhere: return .error
-        case .pendingBMAproval: return .pending
-        case .pendingBMBApproval: return .pending
-        case .pendingICBDispatch: return .warning
-        case .dispatched: return .success
+        case .checking:
+            return .neutral
+        case .localInStock:
+            return .success
+        case .noStockAnywhere:
+            return .error
+        case .pendingBoutiqueManagerApproval, .pendingSourceBoutiqueApproval:
+            return .pending
+        case .pendingSourceDispatch:
+            return .warning
+        case .dispatched:
+            return .pending
+        case .arrived, .received:
+            return .success
         }
     }
     
-    @ViewBuilder
-    private func stepIndicator(label: String, active: Bool, completed: Bool) -> some View {
-        VStack(spacing: 4) {
-            Circle()
-                .fill(completed ? AppColors.success : (active ? AppColors.gold : AppColors.tertiary))
-                .frame(width: 8, height: 8)
-            Text(label)
-                .font(AppFonts.sansSerif(size: 8, weight: .bold))
-                .foregroundStyle(active ? AppColors.text : AppColors.secondary)
-        }
-    }
-    
-    @ViewBuilder
-    private func stepLine(completed: Bool) -> some View {
-        Rectangle()
-            .fill(completed ? AppColors.success : AppColors.tertiary)
-            .frame(height: 1)
-            .frame(maxWidth: .infinity)
-            .offset(y: -6)
-    }
-    
-    @ViewBuilder
-    private func simButton(title: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(title)
-                .font(AppFonts.sansSerif(size: 11, weight: .bold))
-                .foregroundStyle(AppColors.background)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(AppColors.gold)
-                .clipShape(RoundedRectangle(cornerRadius: 6))
-        }
-        .buttonStyle(.plain)
-    }
-    
-    private func progressDescription(for status: EndlessAisle.RequestState) -> String {
+    private func statusText(for status: EndlessAisle.RequestState) -> String {
         switch status {
-        case .checking: return "Checking availability"
-        case .localInStock: return "Local stock available, transfer not required"
-        case .noStockAnywhere: return "Out of stock everywhere"
-        case .pendingBMAproval: return "Step 1 of 4: Transfer requested, awaiting Delhi manager approval"
-        case .pendingBMBApproval: return "Step 2 of 4: Approved by Delhi manager, awaiting Paris manager authorization"
-        case .pendingICBDispatch: return "Step 3 of 4: Authorized by Paris manager, awaiting Paris inventory controller dispatch"
-        case .dispatched: return "Step 4 of 4: Dispatched and delivered successfully"
+        case .checking:
+            return "Checking"
+        case .localInStock:
+            return "Local"
+        case .noStockAnywhere:
+            return "No Stock"
+        case .pendingBoutiqueManagerApproval:
+            return "Manager Review"
+        case .pendingSourceBoutiqueApproval:
+            return "Source Review"
+        case .pendingSourceDispatch:
+            return "Dispatch"
+        case .dispatched:
+            return "In Transit"
+        case .arrived:
+            return "Arrived"
+        case .received:
+            return "Received"
         }
     }
 }
