@@ -2179,9 +2179,6 @@
         }
       }
     },
-    "%@%%" : {
-
-    },
     "%@%lld" : {
       "localizations" : {
         "ar" : {
@@ -4619,15 +4616,6 @@
           }
         }
       }
-    },
-    "%lld%%" : {
-
-    },
-    "%lld%% achieved" : {
-
-    },
-    "%lld%% of Total Revenue" : {
-
     },
     "%lldh before" : {
       "localizations" : {

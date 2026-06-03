@@ -26,7 +26,6 @@ struct LanguageSettingsView: View {
         ("Telugu", "te"),
         ("Marathi", "mr"),
         ("Tamil", "ta"),
-        ("Urdu", "ur"),
         ("Gujarati", "gu"),
         ("Kannada", "kn"),
         ("Odia", "or"),
