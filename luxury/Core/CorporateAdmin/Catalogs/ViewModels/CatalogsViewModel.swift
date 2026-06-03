@@ -266,17 +266,17 @@ final class CatalogsViewModel {
         }
         
         Task {
-            print("🚀 [CatalogsViewModel] Starting bulk creation of \(newUnits.count) units...")
+            print("[CatalogsViewModel] Starting bulk creation of \(newUnits.count) units...")
             do {
                 try await InventoryService.shared.createInventoryUnits(newUnits)
-                print("✅ [CatalogsViewModel] Successfully created \(newUnits.count) units in Supabase.")
+                print("[CatalogsViewModel] Successfully created \(newUnits.count) units in Supabase.")
                 SystemLogService.shared.logAction(category: .inventory, severity: .info, message: "Added \(serials.count) serial numbers to catalog \(catalog.name) for boutique \(boutiqueId)")
                 await MainActor.run {
                     self.isSaving = false
                     completion()
                 }
             } catch {
-                print("❌ [CatalogsViewModel] ERROR creating units: \(error)")
+                print("[CatalogsViewModel] ERROR creating units: \(error)")
                 await MainActor.run {
                     self.errorMessage = String(localized: "Failed to add products: \(error.localizedDescription)")
                     self.isSaving = false

@@ -44,7 +44,7 @@ final class InventoryService {
                 }
             }
             
-            print("❌ [InventoryService] CRITICAL DECODE ERROR: Unrecognized date format -> \(dateString)")
+            print("[InventoryService] CRITICAL DECODE ERROR: Unrecognized date format -> \(dateString)")
             throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode date: \(dateString)")
         }
         return decoder
@@ -129,15 +129,15 @@ final class InventoryService {
     
     /// Creates new stock units (e.g., Receiving new shipment)
     func createInventoryUnits(_ units: [InventoryUnitEntity]) async throws {
-        print("🚀 [InventoryService] Attempting to insert \(units.count) units into 'inventory_units' table...")
+        print("[InventoryService] Attempting to insert \(units.count) units into 'inventory_units' table...")
         do {
             let response = try await client
                 .from("inventory_units")
                 .insert(units)
                 .execute()
-            print("✅ [InventoryService] Insert successful! Response status: \(response.response.statusCode)")
+            print("[InventoryService] Insert successful! Response status: \(response.response.statusCode)")
         } catch {
-            print("❌ [InventoryService] Insert failed with error: \(error)")
+            print("[InventoryService] Insert failed with error: \(error)")
             throw error
         }
     }

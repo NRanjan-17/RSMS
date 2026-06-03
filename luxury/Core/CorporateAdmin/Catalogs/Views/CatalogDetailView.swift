@@ -365,17 +365,17 @@ struct CatalogDetailView: View {
     }
     
     private func loadInventory() {
-        print("🚀 [CatalogDetailView] Loading inventory for catalog: \(currentCatalog.catalogId)")
+        print("[CatalogDetailView] Loading inventory for catalog: \(currentCatalog.catalogId)")
         Task {
             do {
                 let units = try await InventoryService.shared.fetchInventory(forCatalog: currentCatalog.id)
-                print("✅ [CatalogDetailView] Successfully fetched \(units.count) physical units!")
+                print("[CatalogDetailView] Successfully fetched \(units.count) physical units!")
                 await MainActor.run {
                     self.inventoryUnits = units
                     self.isLoadingInventory = false
                 }
             } catch {
-                print("❌ [CatalogDetailView] ERROR fetching inventory: \(error)")
+                print("[CatalogDetailView] ERROR fetching inventory: \(error)")
                 await MainActor.run {
                     self.isLoadingInventory = false
                 }
