@@ -53,6 +53,7 @@ struct SFSVerificationView: View {
                             .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                             .foregroundStyle(AppColors.gold)
                     }
+                    .accessibilityLabel("Back")
                     Text("Verify & Match Item")
                         .font(AppFonts.sansSerif(size: 13, weight: .medium))
                         .foregroundStyle(AppColors.gold)
@@ -68,6 +69,7 @@ struct SFSVerificationView: View {
                                 .font(AppFonts.sansSerif(size: 10, weight: .bold))
                                 .foregroundStyle(AppColors.secondary)
                                 .kerning(1.5)
+                                .accessibilityAddTraits(.isHeader)
                             
                             VStack(alignment: .leading, spacing: 12) {
                                 HStack {
@@ -121,6 +123,7 @@ struct SFSVerificationView: View {
                             .background(AppColors.surface)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                             .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
+                            .accessibilityElement(children: .combine)
                         }
                         .padding(.horizontal, 24)
                         
@@ -302,6 +305,7 @@ struct SFSVerificationView: View {
                                 .font(AppFonts.sansSerif(size: 10, weight: .bold))
                                 .foregroundStyle(AppColors.secondary)
                                 .kerning(1.5)
+                                .accessibilityAddTraits(.isHeader)
                             
                             ZStack {
                                 AppColors.surface
@@ -316,6 +320,7 @@ struct SFSVerificationView: View {
                                         Image(systemName: "checkmark.circle.fill")
                                             .font(AppFonts.sansSerif(size: 64))
                                             .foregroundStyle(AppColors.success)
+                                            .accessibilityHidden(true)
                                         
                                         Text("VERIFICATION MATCH SUCCESSFUL")
                                             .font(AppFonts.sansSerif(size: 12, weight: .bold))
@@ -327,6 +332,8 @@ struct SFSVerificationView: View {
                                             .foregroundStyle(AppColors.secondary)
                                     }
                                     .padding(40)
+                                    .accessibilityElement(children: .combine)
+                                    .accessibilityLabel("Verification Match Successful. SKU matches order target: \(order.productSku ?? "")")
                                 } else {
                                     VStack(spacing: 20) {
                                         ZStack {
@@ -335,6 +342,7 @@ struct SFSVerificationView: View {
                                                     Image(systemName: "watch.analog")
                                                         .font(.system(size: 40))
                                                         .foregroundStyle(AppColors.gold.opacity(0.6))
+                                                        .accessibilityHidden(true)
                                                     Text("iOS Simulator — Camera Unavailable")
                                                         .font(AppFonts.sansSerif(size: 11, weight: .bold))
                                                         .foregroundStyle(AppColors.secondary)
@@ -346,6 +354,8 @@ struct SFSVerificationView: View {
                                                     RoundedRectangle(cornerRadius: 12)
                                                         .stroke(AppColors.gold50, lineWidth: 1.5)
                                                 )
+                                                .accessibilityElement(children: .combine)
+                                                .accessibilityLabel("iOS Simulator, Camera Unavailable")
                                             } else {
                                                 QRScannerView(scannerService: scannerService)
                                                     .frame(width: 240, height: 160)
@@ -361,6 +371,7 @@ struct SFSVerificationView: View {
                                                 .frame(width: 220, height: 2)
                                                 .shadow(color: .red, radius: 4)
                                                 .offset(y: laserOffset)
+                                                .accessibilityHidden(true)
                                                 .onAppear {
                                                     withAnimation(Animation.easeInOut(duration: 1.8).repeatForever(autoreverses: true)) {
                                                         laserOffset = 70
@@ -415,6 +426,7 @@ struct SFSVerificationView: View {
                                     .font(AppFonts.sansSerif(size: 10, weight: .bold))
                                     .foregroundStyle(AppColors.secondary)
                                     .kerning(1.5)
+                                    .accessibilityAddTraits(.isHeader)
                                 
                                 HStack(spacing: 12) {
                                     TextField("Enter SKU or Product Code", text: $inputSku)
@@ -429,6 +441,8 @@ struct SFSVerificationView: View {
                                         )
                                         .autocorrectionDisabled()
                                         .textInputAutocapitalization(.characters)
+                                        .accessibilityLabel("Manual SKU entry")
+                                        .accessibilityHint("Enter SKU or Product Code manually if label is unreadable")
                                     
                                     Button(action: {
                                         handleScannedCode(inputSku)
@@ -450,6 +464,7 @@ struct SFSVerificationView: View {
                                     .font(AppFonts.sansSerif(size: 10, weight: .bold))
                                     .foregroundStyle(AppColors.secondary)
                                     .kerning(1.5)
+                                    .accessibilityAddTraits(.isHeader)
                                 
                                 VStack(alignment: .leading, spacing: 16) {
                                     Toggle(isOn: $check1) {

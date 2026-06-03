@@ -24,6 +24,7 @@ public struct EndlessAisleWorkflowView: View {
                             .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                             .foregroundStyle(AppColors.gold)
                     }
+                    .accessibilityLabel("Back")
                     
                     Text("Endless Aisle Lookup")
                         .font(AppFonts.serif(size: 24, weight: .semibold))
@@ -41,6 +42,7 @@ public struct EndlessAisleWorkflowView: View {
                                 .font(AppFonts.sansSerif(size: 11, weight: .bold))
                                 .foregroundStyle(AppColors.secondary)
                                 .kerning(1.5)
+                                .accessibilityAddTraits(.isHeader)
                             Text("Select an item to verify local and regional boutique availability.")
                                 .font(AppFonts.sansSerif(size: 13))
                                 .foregroundStyle(AppColors.secondary)
@@ -60,6 +62,7 @@ public struct EndlessAisleWorkflowView: View {
                                                 .foregroundStyle(AppColors.gold)
                                                 .opacity(0.3)
                                         }
+                                        .accessibilityHidden(true)
                                         
                                         VStack(alignment: .leading, spacing: 2) {
                                             Text(item.name)
@@ -71,12 +74,6 @@ public struct EndlessAisleWorkflowView: View {
                                         }
                                         
                                         Spacer()
-                                        
-                                        if viewModel.selectedItem?.id == item.id {
-                                            Circle()
-                                                .fill(AppColors.gold)
-                                                .frame(width: 6, height: 6)
-                                        }
                                     }
                                     .padding(14)
                                     .background(viewModel.selectedItem?.id == item.id ? AppColors.gold08 : AppColors.surface)
@@ -87,6 +84,10 @@ public struct EndlessAisleWorkflowView: View {
                                     )
                                 }
                                 .buttonStyle(.plain)
+                                .accessibilityElement(children: .combine)
+                                .accessibilityLabel(item.name)
+                                .accessibilityValue("SKU: \(item.sku), Delhi stock: \(item.stockDelhi), Paris stock: \(item.stockParis)")
+                                .accessibilityAddTraits(viewModel.selectedItem?.id == item.id ? [.isSelected] : [])
                             }
                         }
                         .padding(.horizontal, 24)
@@ -97,6 +98,7 @@ public struct EndlessAisleWorkflowView: View {
                                     .font(AppFonts.sansSerif(size: 10, weight: .bold))
                                     .foregroundStyle(AppColors.secondary)
                                     .kerning(1.5)
+                                    .accessibilityAddTraits(.isHeader)
                                 
                                 VStack(alignment: .leading, spacing: 16) {
                                     if viewModel.isCheckingStock {
@@ -169,6 +171,7 @@ public struct EndlessAisleWorkflowView: View {
                                     .foregroundStyle(AppColors.secondary)
                                     .kerning(1.5)
                                     .padding(.horizontal, 24)
+                                    .accessibilityAddTraits(.isHeader)
                                 
                                 VStack(spacing: 16) {
                                     ForEach(viewModel.activeRequests) { request in
@@ -199,6 +202,9 @@ public struct EndlessAisleWorkflowView: View {
                                                 stepIndicator(label: "Dispatched", active: request.status == .dispatched, completed: false)
                                             }
                                             .padding(.vertical, 4)
+                                            .accessibilityElement(children: .ignore)
+                                            .accessibilityLabel("Pipeline progress")
+                                            .accessibilityValue(progressDescription(for: request.status))
                                             
                                             VStack(alignment: .leading, spacing: 6) {
                                                 Text("LATEST EVENT:")
@@ -304,6 +310,18 @@ public struct EndlessAisleWorkflowView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 6))
         }
         .buttonStyle(.plain)
+    }
+    
+    private func progressDescription(for status: EndlessAisle.RequestState) -> String {
+        switch status {
+        case .checking: return "Checking availability"
+        case .localInStock: return "Local stock available, transfer not required"
+        case .noStockAnywhere: return "Out of stock everywhere"
+        case .pendingBMAproval: return "Step 1 of 4: Transfer requested, awaiting Delhi manager approval"
+        case .pendingBMBApproval: return "Step 2 of 4: Approved by Delhi manager, awaiting Paris manager authorization"
+        case .pendingICBDispatch: return "Step 3 of 4: Authorized by Paris manager, awaiting Paris inventory controller dispatch"
+        case .dispatched: return "Step 4 of 4: Dispatched and delivered successfully"
+        }
     }
 }
 

@@ -19,6 +19,7 @@ struct MetricCard: View {
                 Image(systemName: icon)
                     .font(AppFonts.sansSerif(size: 20))
                     .foregroundStyle(AppColors.gold)
+                    .accessibilityHidden(true)
                 Spacer()
             }
             
@@ -47,5 +48,6 @@ struct MetricCard: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(AppColors.gold15, lineWidth: 0.5)
         )
+        .accessibilityElement(children: .combine)
     }
 }

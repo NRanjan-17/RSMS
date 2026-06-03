@@ -125,6 +125,7 @@ struct CustomTextField: View {
                 .font(AppFonts.sansSerif(size: 10, weight: .bold))
                 .foregroundStyle(AppColors.secondary)
                 .kerning(1.5)
+                .accessibilityHidden(true)
             
             TextField("", text: $text, prompt: Text(placeholder).foregroundStyle(AppColors.tertiary))
                 .font(AppFonts.sansSerif(size: 15))
@@ -140,6 +141,8 @@ struct CustomTextField: View {
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(AppColors.gold15, lineWidth: 1)
                 )
+                .accessibilityLabel(title)
+                .accessibilityHint(placeholder)
         }
     }
 }
@@ -155,6 +158,7 @@ struct CustomSecureField: View {
                 .font(AppFonts.sansSerif(size: 10, weight: .bold))
                 .foregroundStyle(AppColors.secondary)
                 .kerning(1.5)
+                .accessibilityHidden(true)
             
             SecureField("", text: $text, prompt: Text(placeholder).foregroundStyle(AppColors.tertiary))
                 .font(AppFonts.sansSerif(size: 15))
@@ -169,6 +173,8 @@ struct CustomSecureField: View {
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(AppColors.gold15, lineWidth: 1)
                 )
+                .accessibilityLabel(title)
+                .accessibilityHint(placeholder)
         }
     }
 }
@@ -199,6 +205,8 @@ private struct SocialButton: View {
                     .stroke(AppColors.gold15, lineWidth: 1)
             )
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(title)
     }
 }
 

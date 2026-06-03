@@ -13,6 +13,7 @@ struct CustomHeader: View {
     var showBackButton: Bool = false
     var backAction: (() -> Void)? = nil
     var trailingIcon: String? = nil
+    var trailingAccessibilityLabel: String? = nil
     var trailingAction: (() -> Void)? = nil
     
     var body: some View {
@@ -23,10 +24,12 @@ struct CustomHeader: View {
                         .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                         .foregroundStyle(AppColors.gold)
                 }
+                .accessibilityLabel("Back")
             }
             Text(title)
                 .font(AppFonts.serif(size: 28, weight: .semibold))
                 .foregroundStyle(.white)
+                .accessibilityAddTraits(.isHeader)
             
             Spacer()
             
@@ -36,6 +39,7 @@ struct CustomHeader: View {
                         .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                         .foregroundStyle(AppColors.gold)
                 }
+                .accessibilityLabel(trailingAccessibilityLabel ?? "Action")
             }
         }
         .padding(.horizontal, 24)
