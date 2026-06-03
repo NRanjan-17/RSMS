@@ -98,6 +98,8 @@ enum CARoute: Hashable {
     case planograms
     case clientInsights
     case globalRevenue
+    case activeBoutiques
+
     case transactionDetail(SATransactionEntity)
     case sfsTicketDetail(PurchasedItemEntity)
     case sfsTicketsList([PurchasedItemEntity])

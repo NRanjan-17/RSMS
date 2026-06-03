@@ -138,6 +138,7 @@
       }
     },
     "· Encrypted" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -296,7 +297,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\"%@\""
+            "value" : "„%@“"
           }
         },
         "es" : {
@@ -332,7 +333,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\"%@\""
+            "value" : "「%@」"
           }
         },
         "kn" : {
@@ -398,13 +399,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\"%@\""
+            "value" : "“%@”"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\"%@\""
+            "value" : "“%@”"
           }
         }
       }
@@ -555,8 +556,8 @@
         },
         "as" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ · %2$@"
+            "state" : "translated",
+            "value" : "__পিএইচ০__ · __পিএইচ০__"
           }
         },
         "bn" : {
@@ -697,8 +698,8 @@
         },
         "as" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ · %2$@ · %3$@"
+            "state" : "translated",
+            "value" : "__পিএইচ০__ · __পিএইচ০__ · __পিএইচ০__"
           }
         },
         "bn" : {
@@ -981,8 +982,8 @@
         },
         "as" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ · LTV %2$@"
+            "state" : "translated",
+            "value" : "%@ · এলটিভি __পিএইচ০__"
           }
         },
         "bn" : {
@@ -1123,8 +1124,8 @@
         },
         "as" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ (%2$@)"
+            "state" : "translated",
+            "value" : "__পিএইচ০__ (__পিএইচ০__)"
           }
         },
         "bn" : {
@@ -1265,8 +1266,8 @@
         },
         "as" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ • %2$@"
+            "state" : "translated",
+            "value" : "__পিএইচ০__ • __পিএইচ০__"
           }
         },
         "bn" : {
@@ -1815,8 +1816,8 @@
         },
         "as" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@, %2$@ - %3$@"
+            "state" : "translated",
+            "value" : "__পিএইচ০__, __পিএইচ০__ - __পিএইচ০__"
           }
         },
         "bn" : {
@@ -1957,8 +1958,8 @@
         },
         "as" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@%2$@"
+            "state" : "translated",
+            "value" : "__পিএইচ০____পিএইচ০__"
           }
         },
         "bn" : {
@@ -2089,9 +2090,6 @@
         }
       }
     },
-    "%@%%" : {
-
-    },
     "%@%lld" : {
       "localizations" : {
         "ar" : {
@@ -2102,8 +2100,8 @@
         },
         "as" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@%2$lld"
+            "state" : "translated",
+            "value" : "__পিএইচ০____পিএইচ১__ল্ড"
           }
         },
         "bn" : {
@@ -2317,7 +2315,7 @@
         "mr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld"
+            "value" : "%lदि"
           }
         },
         "or" : {
@@ -4586,8 +4584,8 @@
         },
         "as" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%lldx"
+            "state" : "translated",
+            "value" : "%lldx ৰ দ্বাৰা"
           }
         },
         "bn" : {
@@ -5481,7 +5479,7 @@
         "or" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "×%lld"
+            "value" : "× %lld"
           }
         },
         "pa" : {
@@ -5545,7 +5543,7 @@
         "bn" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "−"
+            "value" : "-"
           }
         },
         "de" : {
@@ -5593,31 +5591,31 @@
         "kn" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "−"
+            "value" : "-"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "−"
+            "value" : "-"
           }
         },
         "ml" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "−"
+            "value" : "-"
           }
         },
         "mr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "−"
+            "value" : "-"
           }
         },
         "or" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "−"
+            "value" : "-"
           }
         },
         "pa" : {
@@ -5629,7 +5627,7 @@
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "−"
+            "value" : "-"
           }
         },
         "ru" : {
@@ -5641,25 +5639,25 @@
         "ta" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "−"
+            "value" : "-"
           }
         },
         "te" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "−"
+            "value" : "-"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "−"
+            "value" : "-"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "−"
+            "value" : "-"
           }
         }
       }
@@ -6365,7 +6363,7 @@
         "bn" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ABV"
+            "value" : "এবিভি"
           }
         },
         "de" : {
@@ -6377,7 +6375,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ABV"
+            "value" : "alcohol"
           }
         },
         "fr" : {
@@ -6455,7 +6453,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ABV"
+            "value" : "АБВ"
           }
         },
         "ta" : {
@@ -6473,13 +6471,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ABV"
+            "value" : "酒精度"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ABV"
+            "value" : "酒精度"
           }
         }
       }
@@ -6630,8 +6628,8 @@
         },
         "as" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Act: %lld"
+            "state" : "translated",
+            "value" : "আইন: %lld"
           }
         },
         "bn" : {
@@ -7164,7 +7162,11 @@
         }
       }
     },
+    "Active Boutiques" : {
+
+    },
     "ACTIVE BOUTIQUES" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -7175,7 +7177,7 @@
         "as" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ACTIVE BOUTIQUES"
+            "value" : "সক্ৰিয় বুটিক"
           }
         },
         "bn" : {
@@ -22830,7 +22832,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Boutique ID"
+            "value" : "Boutique-ID"
           }
         },
         "es" : {
@@ -22842,7 +22844,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Boutique ID"
+            "value" : "Identifiant de la boutique"
           }
         },
         "gu" : {
@@ -23788,7 +23790,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Boutique: %@"
+            "value" : "Tienda: %@"
           }
         },
         "fr" : {
@@ -24036,7 +24038,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "BTQ-MUM-01"
+            "value" : "بي تي كيو-موم-01"
           }
         },
         "as" : {
@@ -24066,7 +24068,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "BTQ-MUM-01"
+            "value" : "BTQ-MAMAN-01"
           }
         },
         "gu" : {
@@ -24120,7 +24122,7 @@
         "or" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "BTQ-MUM-01"
+            "value" : "BTQ-MUM-01 |"
           }
         },
         "pa" : {
@@ -29376,7 +29378,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Clients"
+            "value" : "Clientèle"
           }
         },
         "gu" : {
@@ -33610,7 +33612,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Controller: %@"
+            "value" : "Controllore: %@"
           }
         },
         "ja" : {
@@ -33698,7 +33700,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CONV"
+            "value" : "التحويل"
           }
         },
         "as" : {
@@ -33716,19 +33718,19 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CONV"
+            "value" : "KONV"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CONV"
+            "value" : "CONV."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CONV"
+            "value" : "CONV."
           }
         },
         "gu" : {
@@ -33794,7 +33796,7 @@
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CONV"
+            "value" : "CONV."
           }
         },
         "ru" : {
@@ -33806,7 +33808,7 @@
         "ta" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CONV"
+            "value" : "மாற்றுதல்"
           }
         },
         "te" : {
@@ -36762,7 +36764,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CVV"
+            "value" : "이력서"
           }
         },
         "ml" : {
@@ -39227,8 +39229,8 @@
         },
         "or" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Deduct %lld units from stock levels immediately"
+            "state" : "translated",
+            "value" : "ତୁରନ୍ତ ଷ୍ଟକ୍ ସ୍ତରରୁ %lld ୟୁନିଟ୍ କା uct |"
           }
         },
         "pa" : {
@@ -44330,13 +44332,13 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Edit Boutique"
+            "value" : "Boutique bearbeiten"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Edit Boutique"
+            "value" : "Editar boutique"
           }
         },
         "fr" : {
@@ -44408,7 +44410,7 @@
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Edit Boutique"
+            "value" : "Editar boutique"
           }
         },
         "ru" : {
@@ -44432,13 +44434,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Edit Boutique"
+            "value" : "编辑精品店"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Edit Boutique"
+            "value" : "編輯精品店"
           }
         }
       }
@@ -45448,7 +45450,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Email: %@"
+            "value" : "E-mail: %@"
           }
         },
         "ja" : {
@@ -45792,13 +45794,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enable Boutique"
+            "value" : "启用精品店"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enable Boutique"
+            "value" : "啟用精品店"
           }
         }
       }
@@ -46506,7 +46508,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Endless Aisle Sourcing Status"
+            "value" : "Endlosgang-Beschaffungsstatus"
           }
         },
         "es" : {
@@ -49757,14 +49759,14 @@
         },
         "as" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Exp: %lld"
+            "state" : "translated",
+            "value" : "এক্সপ: %lld"
           }
         },
         "bn" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Exp: %lld"
+            "value" : "মেয়াদ: %lld"
           }
         },
         "de" : {
@@ -49776,13 +49778,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Exp: %lld"
+            "value" : "Exp.: %lld"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Exp: %lld"
+            "value" : "Expérience : %lld"
           }
         },
         "gu" : {
@@ -49800,7 +49802,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Exp: %lld"
+            "value" : "Esp: %lld"
           }
         },
         "ja" : {
@@ -49818,7 +49820,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Exp: %lld"
+            "value" : "만료: %lld"
           }
         },
         "ml" : {
@@ -49854,7 +49856,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Exp: %lld"
+            "value" : "Опыт: %lld"
           }
         },
         "ta" : {
@@ -49866,19 +49868,19 @@
         "te" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Exp: %lld"
+            "value" : "గడువు: %lld"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Exp: %lld"
+            "value" : "经验： %lld"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Exp: %lld"
+            "value" : "經驗： %lld"
           }
         }
       }
@@ -56488,7 +56490,7 @@
         "ml" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "FROM: %@"
+            "value" : "നിന്ന്: %@"
           }
         },
         "mr" : {
@@ -58480,7 +58482,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ID: %@"
+            "value" : "Identificación: %@"
           }
         },
         "fr" : {
@@ -58558,7 +58560,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ID: %@"
+            "value" : "Идентификатор: %@"
           }
         },
         "ta" : {
@@ -58576,13 +58578,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ID: %@"
+            "value" : "ID：%@"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ID: %@"
+            "value" : "ID：%@"
           }
         }
       }
@@ -59821,8 +59823,8 @@
         },
         "as" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "incl. %@ GST"
+            "state" : "translated",
+            "value" : "incl. %@ জি এছ টি"
           }
         },
         "bn" : {
@@ -59833,8 +59835,8 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "incl. %@ GST"
+            "state" : "translated",
+            "value" : "inkl. %@ GST"
           }
         },
         "es" : {
@@ -59845,8 +59847,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "incl. %@ GST"
+            "state" : "translated",
+            "value" : "y compris %@ TPS"
           }
         },
         "gu" : {
@@ -59881,8 +59883,8 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "incl. %@ GST"
+            "state" : "translated",
+            "value" : "포함. %@ GST"
           }
         },
         "ml" : {
@@ -59935,14 +59937,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "incl. %@ GST"
+            "state" : "translated",
+            "value" : "包括。 %@ 商品及服务税"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "incl. %@ GST"
+            "state" : "translated",
+            "value" : "包括。 %@ 商品及服務稅"
           }
         }
       }
@@ -63240,7 +63242,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Invite Boutique"
+            "value" : "Boutique einladen"
           }
         },
         "es" : {
@@ -63252,7 +63254,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Invite Boutique"
+            "value" : "Inviter la boutique"
           }
         },
         "gu" : {
@@ -63270,7 +63272,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Invite Boutique"
+            "value" : "Invita Boutique"
           }
         },
         "ja" : {
@@ -68142,13 +68144,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Maison Mumbai"
+            "value" : "Casa Bombay"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Maison Mumbai"
+            "value" : "Maison Bombay"
           }
         },
         "gu" : {
@@ -68166,7 +68168,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Maison Mumbai"
+            "value" : "Casa Mumbai"
           }
         },
         "ja" : {
@@ -68214,7 +68216,7 @@
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Maison Mumbai"
+            "value" : "Casa Mumbai"
           }
         },
         "ru" : {
@@ -71659,8 +71661,8 @@
         },
         "as" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Name: %@"
+            "state" : "translated",
+            "value" : "নাম: %@"
           }
         },
         "bn" : {
@@ -91677,7 +91679,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "POS"
+            "value" : "PDV"
           }
         },
         "gu" : {
@@ -91743,13 +91745,13 @@
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "POS"
+            "value" : "PDV"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "POS"
+            "value" : "POS-терминал"
           }
         },
         "ta" : {
@@ -91767,13 +91769,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "POS"
+            "value" : "销售点"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "POS"
+            "value" : "銷售點"
           }
         }
       }
@@ -95324,8 +95326,8 @@
         },
         "as" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Qty: %lld"
+            "state" : "translated",
+            "value" : "পৰিমাণ: %lld"
           }
         },
         "bn" : {
@@ -103782,7 +103784,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "RSMS"
+            "value" : "SMS"
           }
         },
         "gu" : {
@@ -103906,7 +103908,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "RSVP ANALYTICS"
+            "value" : "RSVP-ANALYSE"
           }
         },
         "es" : {
@@ -103936,7 +103938,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "RSVP ANALYTICS"
+            "value" : "ANALISI RSVP"
           }
         },
         "ja" : {
@@ -104302,7 +104304,7 @@
         "as" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "S/N: %@"
+            "value" : "S/N: __পিএইচ০__"
           }
         },
         "bn" : {
@@ -104314,7 +104316,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "S/N: %@"
+            "value" : "Seriennummer: %@"
           }
         },
         "es" : {
@@ -104398,7 +104400,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "S/N: %@"
+            "value" : "Серийный номер: %@"
           }
         },
         "ta" : {
@@ -111240,8 +111242,8 @@
         },
         "as" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Secret: %@"
+            "state" : "translated",
+            "value" : "গোপনীয়তা: %@"
           }
         },
         "bn" : {
@@ -113028,7 +113030,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Select Boutique"
+            "value" : "Seleccione Boutique"
           }
         },
         "fr" : {
@@ -113052,7 +113054,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Select Boutique"
+            "value" : "Seleziona Boutique"
           }
         },
         "ja" : {
@@ -119272,7 +119274,7 @@
         "bn" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SKU"
+            "value" : "এসকেইউ"
           }
         },
         "de" : {
@@ -119368,7 +119370,7 @@
         "ta" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SKU"
+            "value" : "எஸ்.கே.யு"
           }
         },
         "te" : {
@@ -119380,13 +119382,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SKU"
+            "value" : "存货单位"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SKU"
+            "value" : "存貨單位"
           }
         }
       }
@@ -119402,7 +119404,7 @@
         "as" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SKU %@"
+            "value" : "SKU %@ ৰ দ্বাৰা"
           }
         },
         "bn" : {
@@ -119414,7 +119416,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SKU %@"
+            "value" : "Artikelnummer %@"
           }
         },
         "es" : {
@@ -119426,7 +119428,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SKU %@"
+            "value" : "UGS %@"
           }
         },
         "gu" : {
@@ -119492,7 +119494,7 @@
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SKU %@"
+            "value" : "SKU%@"
           }
         },
         "ru" : {
@@ -119674,7 +119676,7 @@
         "as" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SKU: %@"
+            "value" : "SKU: __পিএইচ০__"
           }
         },
         "bn" : {
@@ -119951,8 +119953,8 @@
         },
         "as" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "SN: %1$@ · %2$@"
+            "state" : "translated",
+            "value" : "SN: __পিএইচ০__ · __পিএইচ০__"
           }
         },
         "bn" : {
@@ -120615,14 +120617,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Staff\nApplication."
+            "state" : "translated",
+            "value" : "员工\n应用。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Staff\nApplication."
+            "state" : "translated",
+            "value" : "員工\n應用。"
           }
         }
       }
@@ -122088,7 +122090,7 @@
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stock"
+            "value" : "Estoque"
           }
         },
         "ru" : {
@@ -129042,7 +129044,7 @@
         "te" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TO: %@"
+            "value" : "కు: %@"
           }
         },
         "zh-Hans" : {
@@ -132349,7 +132351,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Transfers"
+            "value" : "Überweisungen"
           }
         },
         "es" : {
@@ -133147,7 +133149,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TXN"
+            "value" : "تكسن"
           }
         },
         "as" : {
@@ -133201,7 +133203,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TXN"
+            "value" : "テキサス州"
           }
         },
         "kn" : {
@@ -133249,7 +133251,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TXN"
+            "value" : "Техас"
           }
         },
         "ta" : {
@@ -133579,7 +133581,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "U"
+            "value" : "Ud."
           }
         },
         "fr" : {
@@ -133651,7 +133653,7 @@
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "U"
+            "value" : "Você"
           }
         },
         "ru" : {
@@ -135736,8 +135738,8 @@
         },
         "as" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "UPC: %@"
+            "state" : "translated",
+            "value" : "ইউপিচি: __পিএইচ০__"
           }
         },
         "bn" : {
@@ -138954,8 +138956,8 @@
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Verify\nIdentity."
+            "state" : "translated",
+            "value" : "Verifique\nIdentidade."
           }
         },
         "ru" : {
@@ -138978,14 +138980,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Verify\nIdentity."
+            "state" : "translated",
+            "value" : "验证\n身份。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Verify\nIdentity."
+            "state" : "translated",
+            "value" : "驗證\n身份。"
           }
         }
       }
@@ -141219,7 +141221,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Visual Merchandising"
+            "value" : "Merchandising visivo"
           }
         },
         "ja" : {

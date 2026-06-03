@@ -40,6 +40,11 @@ struct GlobalAnalyticsView: View {
                                         .onTapGesture {
                                             router.push(CARoute.globalRevenue)
                                         }
+                                } else if kpi.label == "Active Boutiques" {
+                                    GlobalMetricCard(kpi: kpi)
+                                        .onTapGesture {
+                                            router.push(CARoute.activeBoutiques)
+                                        }
                                 } else {
                                     GlobalMetricCard(kpi: kpi)
                                 }
@@ -92,36 +97,7 @@ struct GlobalAnalyticsView: View {
                         .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
                         .padding(.horizontal, 24)
                         
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text("ACTIVE BOUTIQUES")
-                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
-                                .foregroundStyle(AppColors.secondary)
-                                .kerning(1.5)
-                            
-                            VStack(spacing: 12) {
-                                ForEach(viewModel.boutiquePerformance) { boutique in
-                                    HStack {
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text(boutique.name)
-                                                .font(AppFonts.serif(size: 17, weight: .medium))
-                                                .foregroundStyle(.white)
-                                            Text("\(boutique.city) · \(boutique.managerName)")
-                                                .font(AppFonts.sansSerif(size: 12))
-                                                .foregroundStyle(AppColors.secondary)
-                                        }
-                                        Spacer()
-                                        Image(systemName: "chevron.right")
-                                            .font(AppFonts.sansSerif(size: 12))
-                                            .foregroundStyle(AppColors.tertiary)
-                                    }
-                                    .padding(18)
-                                    .background(AppColors.surface)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 24)
+
 
                         VStack(alignment: .leading, spacing: 16) {
                             Text("SFS FULFILLMENT STATUS")
@@ -224,7 +200,7 @@ struct GlobalMetricCard: View {
                 if kpi.trend != 0 {
                     HStack(spacing: 2) {
                         Image(systemName: kpi.trend > 0 ? "arrow.up.right" : "arrow.down.right")
-                        Text("\(String(format: "%.1f", abs(kpi.trend)))%")
+                        Text((abs(kpi.trend) / 100).formatted(.percent.precision(.fractionLength(1))))
                     }
                     .font(AppFonts.sansSerif(size: 10, weight: .bold))
                     .foregroundStyle(kpi.trend > 0 ? AppColors.success : AppColors.error)
