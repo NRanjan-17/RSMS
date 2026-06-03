@@ -82,7 +82,7 @@ struct ProfileView: View {
                                         .padding(.top, 2)
                                 }
                                 Spacer()
-                                Text("\(Int(viewModel.progress * 100))%")
+                                Text(viewModel.progress.formatted(.percent.precision(.fractionLength(0))))
                                     .font(AppFonts.sansSerif(size: 13, weight: .medium))
                                     .foregroundStyle(AppColors.gold)
                                     .padding(.horizontal, 13)

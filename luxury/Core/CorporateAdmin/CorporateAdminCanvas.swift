@@ -148,6 +148,8 @@ struct CorporateAdminCanvas: View {
             ClientInsightsView()
         case .globalRevenue:
             GlobalRevenueView()
+        case .pricingCampaigns:
+            PricingCampaignView()
         case .activeBoutiques:
             ActiveBoutiquesView()
         case .transactionDetail(let tx):

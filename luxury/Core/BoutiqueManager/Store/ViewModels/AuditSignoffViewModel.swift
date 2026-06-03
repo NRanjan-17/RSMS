@@ -17,5 +17,5 @@ final class AuditSignoffViewModel {
     ]
     
     var netVariance: String = "-1"
-    var accuracy: String = "98.2%"
+    var accuracy: String = (0.982).formatted(.percent.precision(.fractionLength(1)))
 }

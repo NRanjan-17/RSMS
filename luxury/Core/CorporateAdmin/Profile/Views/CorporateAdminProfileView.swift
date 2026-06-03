@@ -72,6 +72,7 @@ struct CorporateAdminProfileView: View {
                                 adminToolRow(title: "Global Inventory", icon: "shippingbox.fill", route: .globalInventory)
                                 adminToolRow(title: "Store Performance", icon: "chart.bar.xaxis", route: .storePerformance)
                                 adminToolRow(title: "System Logs", icon: "list.bullet.rectangle.portrait.fill", route: .systemLogs)
+                                adminToolRow(title: "Pricing & Campaigns", icon: "tag.fill", route: .pricingCampaigns)
                                 adminToolRow(title: "Planograms", icon: "photo.artframe", route: .planograms)
                                 adminToolRow(title: "Client Insights", icon: "person.2.badge.gearshape", route: .clientInsights)
                             }

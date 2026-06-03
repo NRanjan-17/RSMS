@@ -102,6 +102,7 @@ enum CARoute: Hashable {
     case clientInsights
     case globalRevenue
     case activeBoutiques
+    case pricingCampaigns
 
     case transactionDetail(SATransactionEntity)
     case sfsTicketDetail(PurchasedItemEntity)

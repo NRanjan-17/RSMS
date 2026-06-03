@@ -12,7 +12,7 @@ import Supabase
 @Observable
 final class ShrinkReportViewModel {
     var totalShrinkValue: String = "\(CurrencyManager.shared.symbol)1,45,000"
-    var accuracy: String = "98.2%"
+    var accuracy: String = (0.982).formatted(.percent.precision(.fractionLength(1)))
     
     var recentWriteOffs: [RSMSVarianceItem] = [
         RSMSVarianceItem(name: "Diamond Ring 18K Gold", expected: 5, actual: 4, reason: "Missing / Under Investigation"),

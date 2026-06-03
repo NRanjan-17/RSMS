@@ -44,7 +44,7 @@ struct SalesAnalyticsView: View {
                                             Text(category.name)
                                                 .font(AppFonts.serif(size: 17, weight: .medium))
                                                 .foregroundStyle(.white)
-                                            Text("\(Int(category.percentage * 100))% of Total Revenue")
+                                            Text("\(category.percentage.formatted(.percent.precision(.fractionLength(0)))) of Total Revenue")
                                                 .font(AppFonts.sansSerif(size: 12))
                                                 .foregroundStyle(AppColors.secondary)
                                         }

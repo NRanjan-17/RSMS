@@ -163,7 +163,7 @@ final class POSDataService {
                let unit = units.first {
                 
                 // Mark this specific physical item as Reserved for the IC to pick
-                try? await client
+                _ = try? await client
                     .from("inventory_units")
                     .update(["status": "Reserved"])
                     .eq("id", value: unit.id.uuidString)

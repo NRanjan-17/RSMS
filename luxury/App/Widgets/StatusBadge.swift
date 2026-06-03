@@ -34,6 +34,6 @@ struct StatusBadge: View {
                 Capsule()
                     .stroke(color.opacity(0.3), lineWidth: 0.5)
             )
-            .accessibilityLabel(Text("Status: ") + Text(text))
+            .accessibilityLabel(text)
     }
 }

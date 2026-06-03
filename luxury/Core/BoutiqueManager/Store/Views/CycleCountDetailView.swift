@@ -311,7 +311,7 @@ struct CycleCountDetailView: View {
                         // 1. Top Section - Summary Metric Cards (First Block)
                         HStack(spacing: 12) {
                             MetricCard(title: "Variance", value: "-1", subtitle: "Net Discrepancy", icon: "arrow.up.arrow.down")
-                            MetricCard(title: "Accuracy", value: "98.2%", subtitle: "Store Performance", icon: "percent")
+                            MetricCard(title: "Accuracy", value: (0.982).formatted(.percent.precision(.fractionLength(1))), subtitle: "Store Performance", icon: "percent")
                         }
                         .padding(.horizontal, 24)
 
@@ -600,7 +600,7 @@ struct AuditReportHubView: View {
                                         title: "Audit \(audit.fixedDay)th",
                                         date: viewModel.getFormattedDate(from: audit.scheduledDate),
                                         variance: "\(audit.variance)",
-                                        accuracy: String(format: "%.1f%%", audit.accuracy)
+                                        accuracy: (audit.accuracy / 100).formatted(.percent.precision(.fractionLength(1)))
                                     ) {
                                         router.push(BMRoute.auditReportDetail(audit.id.uuidString))
                                     }

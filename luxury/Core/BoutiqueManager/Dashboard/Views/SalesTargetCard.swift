@@ -59,7 +59,7 @@ struct SalesTargetCard: View {
 
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("\(Int(min(actualProgress, 1.0) * 100))% achieved")
+                    Text("\(min(actualProgress, 1.0).formatted(.percent.precision(.fractionLength(0)))) achieved")
                         .font(AppFonts.sansSerif(size: 13, weight: .bold))
                         .foregroundStyle(pacingStatus == .exceeded ? AppColors.gold : AppColors.gold)
                     Text(pacingStatus == .exceeded ? "Daily target surpassed" : "Projected EOD: \(projectedSales)")

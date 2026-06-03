@@ -94,7 +94,7 @@ struct AuditDetailView: View {
                                     .padding(.horizontal, 24)
                                 
                                 VStack(spacing: 1) {
-                                    ChecklistRow(text: "Device Battery > 80%", checked: true)
+                                    ChecklistRow(text: String(localized: "Device Battery > \((0.80).formatted(.percent.precision(.fractionLength(0))))"), checked: true)
                                     ChecklistRow(text: "Scanner Synced", checked: true)
                                     ChecklistRow(text: "Floor area cleared", checked: false)
                                 }
