@@ -40,6 +40,12 @@ final class StorageService {
         return try client.storage.from(bucket).getPublicURL(path: path).absoluteString
     }
     
+    func uploadASTPhoto(image: PickedImageAsset, astId: UUID) async throws -> String {
+        let path = "ast-photos/\(astId.uuidString)/\(UUID().uuidString)-\(Int(Date().timeIntervalSince1970)).\(image.fileExtension)"
+        try await upload(image: image, path: path)
+        return try client.storage.from(bucket).getPublicURL(path: path).absoluteString
+    }
+    
     private func upload(image: PickedImageAsset, path: String) async throws {
         try await client.storage
             .from(bucket)

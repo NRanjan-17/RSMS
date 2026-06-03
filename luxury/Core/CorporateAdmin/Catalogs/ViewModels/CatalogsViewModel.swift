@@ -272,6 +272,7 @@ final class CatalogsViewModel {
                 print("✅ [CatalogsViewModel] Successfully created \(newUnits.count) units in Supabase.")
                 SystemLogService.shared.logAction(category: .inventory, severity: .info, message: "Added \(serials.count) serial numbers to catalog \(catalog.name) for boutique \(boutiqueId)")
                 await MainActor.run {
+                    self.stockLevels[catalog.id, default: 0] += newUnits.count
                     self.isSaving = false
                     completion()
                 }
@@ -290,6 +291,9 @@ final class CatalogsViewModel {
             do {
                 try await InventoryService.shared.deleteInventoryUnits(serials: serials)
                 SystemLogService.shared.logAction(category: .inventory, severity: .warning, message: "Removed \(serials.count) serial numbers from catalog \(catalog.name) (\(catalog.catalogId))")
+                await MainActor.run {
+                    self.stockLevels[catalog.id, default: 0] = max(0, self.stockLevels[catalog.id, default: 0] - serials.count)
+                }
             } catch {
                 await MainActor.run {
                     self.errorMessage = String(localized: "Failed to remove products: \(error.localizedDescription)")

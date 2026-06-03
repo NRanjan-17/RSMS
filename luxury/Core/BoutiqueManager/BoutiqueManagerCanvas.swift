@@ -109,8 +109,10 @@ struct BoutiqueManagerCanvas: View {
             CycleCountDetailView()
         case .stockReconciliation:
             StockReconciliationView()
-        case .refundApproval:
-            RefundApprovalView()
+        case .astQueue:
+            ASTQueueView()
+        case .astApproval(let ast):
+            ASTApprovalView(ast: ast)
         case .writeOffApproval:
             WriteOffApprovalView()
         case .endlessAisleRequests:

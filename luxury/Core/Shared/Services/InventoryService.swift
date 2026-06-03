@@ -52,29 +52,59 @@ final class InventoryService {
     
     /// Fetches all inventory units globally (For Corporate Admin)
     func fetchGlobalInventory() async throws -> [InventoryUnitEntity] {
-        let response = try await client
-            .from("inventory_units")
-            .select()
-            .execute()
-        return try decoder.decode([InventoryUnitEntity].self, from: response.data)
+        return try await fetchAllInventoryUnits()
     }
     
     /// Fetches all inventory units for a specific boutique (For SA, BM, IC)
     func fetchInventory(forBoutique boutiqueId: UUID) async throws -> [InventoryUnitEntity] {
-        let response = try await client
-            .from("inventory_units")
-            .select()
-            .eq("boutique_id", value: boutiqueId.uuidString)
-            .execute()
-        return try decoder.decode([InventoryUnitEntity].self, from: response.data)
+        var allUnits: [InventoryUnitEntity] = []
+        var offset = 0
+        let limit = 1000
+        var hasMore = true
+        
+        while hasMore {
+            let response = try await client
+                .from("inventory_units")
+                .select()
+                .eq("boutique_id", value: boutiqueId.uuidString)
+                .range(from: offset, to: offset + limit - 1)
+                .execute()
+            
+            let batch = try decoder.decode([InventoryUnitEntity].self, from: response.data)
+            allUnits.append(contentsOf: batch)
+            
+            if batch.count < limit {
+                hasMore = false
+            } else {
+                offset += limit
+            }
+        }
+        return allUnits
     }
     
     func fetchAllInventoryUnits() async throws -> [InventoryUnitEntity] {
-        let response = try await client
-            .from("inventory_units")
-            .select()
-            .execute()
-        return try decoder.decode([InventoryUnitEntity].self, from: response.data)
+        var allUnits: [InventoryUnitEntity] = []
+        var offset = 0
+        let limit = 1000
+        var hasMore = true
+        
+        while hasMore {
+            let response = try await client
+                .from("inventory_units")
+                .select()
+                .range(from: offset, to: offset + limit - 1)
+                .execute()
+            
+            let batch = try decoder.decode([InventoryUnitEntity].self, from: response.data)
+            allUnits.append(contentsOf: batch)
+            
+            if batch.count < limit {
+                hasMore = false
+            } else {
+                offset += limit
+            }
+        }
+        return allUnits
     }
     
     /// Fetches inventory for a specific catalog item globally

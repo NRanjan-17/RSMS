@@ -17,8 +17,9 @@ final class ASTService {
             .value
     }
     
-    func createAST(productId: UUID, clientId: UUID?, boutiqueId: UUID, warrantyStatus: String, description: String, remark: String) async throws -> AST {
-        let payload: [String: AnyJSON] = [
+    func createAST(id: UUID, productId: UUID, clientId: UUID?, boutiqueId: UUID, warrantyStatus: String, description: String, remark: String, photoUrls: [String], createdBy: String? = nil) async throws -> AST {
+        var payload: [String: AnyJSON] = [
+            "id": .string(id.uuidString),
             "product_id": .string(productId.uuidString),
             "client_id": clientId.map { .string($0.uuidString) } ?? .null,
             "boutique_id": .string(boutiqueId.uuidString),
@@ -27,6 +28,20 @@ final class ASTService {
             "description": .string(description),
             "remark": .string(remark)
         ]
+        
+        var metadataObj: [String: AnyJSON] = [:]
+        
+        if !photoUrls.isEmpty {
+            metadataObj["photos"] = .array(photoUrls.map { .string($0) })
+        }
+        
+        if let createdBy = createdBy {
+            metadataObj["created_by"] = .string(createdBy)
+        }
+        
+        if !metadataObj.isEmpty {
+            payload["metadata"] = .object(metadataObj)
+        }
         
         let ast: [AST] = try await client
             .from("ast")
@@ -39,5 +54,23 @@ final class ASTService {
             throw NSError(domain: "AST", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to create AST"])
         }
         return first
+    }
+
+    func fetchASTs(forBoutique boutiqueId: UUID) async throws -> [AST] {
+        return try await client
+            .from("ast")
+            .select()
+            .eq("boutique_id", value: boutiqueId.uuidString)
+            .execute()
+            .value
+    }
+
+    func updateASTStatus(astId: UUID, newStatus: String) async throws {
+        let payload: [String: AnyJSON] = ["status": .string(newStatus)]
+        try await client
+            .from("ast")
+            .update(payload)
+            .eq("id", value: astId.uuidString)
+            .execute()
     }
 }
