@@ -286,6 +286,12 @@ struct CycleCountDetailView: View {
     @State private var applyNextMonth: Bool = false
     @State private var showConfirmAlert: Bool = false
     @State private var pendingSelectedDay: String = ""
+    @State private var showDatePicker: Bool = false
+    @State private var customDate: Date = Date()
+    
+    private var isCustomDateSelected: Bool {
+        !["1st Day", "15th Day", "Last Day"].contains(selectedDay) && !selectedDay.isEmpty
+    }
 
     private var auditDateTitle: String {
         if selectedDay.isEmpty {
@@ -426,6 +432,20 @@ struct CycleCountDetailView: View {
                                                 )
                                         }
                                     }
+                                    
+                                    Button(action: {
+                                        showDatePicker = true
+                                    }) {
+                                        Image(systemName: "calendar")
+                                            .font(.system(size: 14, weight: .semibold))
+                                            .foregroundStyle(isCustomDateSelected ? Color.black : AppColors.gold)
+                                            .frame(width: 38, height: 38)
+                                            .background(isCustomDateSelected ? AppColors.gold : AppColors.background)
+                                            .clipShape(Circle())
+                                            .overlay(
+                                                Circle().stroke(isCustomDateSelected ? Color.clear : AppColors.border, lineWidth: 1)
+                                            )
+                                    }
                                 }
                                 .padding(.top, 4)
                             }
@@ -459,6 +479,41 @@ struct CycleCountDetailView: View {
                     selectedDay = "1st Day"
                 }
             }
+        }
+        .sheet(isPresented: $showDatePicker) {
+            VStack(spacing: 0) {
+                Text("Select Audit Date")
+                    .font(AppFonts.serif(size: 20, weight: .bold))
+                    .foregroundStyle(.white)
+                    .padding(.top, 24)
+                    .padding(.bottom, 16)
+                
+                DatePicker("Audit Date", selection: $customDate, displayedComponents: .date)
+                    .datePickerStyle(.graphical)
+                    .tint(AppColors.gold)
+                    .padding(16)
+                    .background(AppColors.surface)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.border, lineWidth: 1))
+                    .padding(.horizontal, 24)
+                
+                Spacer()
+                
+                CustomButton(title: "Confirm Date") {
+                    let day = Calendar.current.component(.day, from: customDate)
+                    pendingSelectedDay = formatDayAsOrdinal(day)
+                    showDatePicker = false
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        showConfirmAlert = true
+                    }
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 32)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(AppColors.background.ignoresSafeArea())
+            .presentationDetents([.medium, .large])
         }
         .alert("Reschedule Audit", isPresented: $showConfirmAlert) {
             Button("Cancel", role: .cancel) { }
@@ -537,6 +592,10 @@ struct AuditReportHubView: View {
         let targetStartOfDay = calendar.startOfDay(for: projectedDate)
         let todayStartOfDay = calendar.startOfDay(for: today)
         
+        if targetStartOfDay == todayStartOfDay {
+            return nil
+        }
+        
         if targetStartOfDay < todayStartOfDay {
             comps.month = (comps.month ?? 0) + 1
             if let newMonthDate = calendar.date(from: comps), 
@@ -581,12 +640,19 @@ struct AuditReportHubView: View {
                                 .padding(.horizontal, 24)
                                 .padding(.top, 12)
                             
+                            let todayStr: String = {
+                                let f = DateFormatter()
+                                f.dateFormat = "yyyy-MM-dd"
+                                return f.string(from: Date())
+                            }()
+                            
                             VStack(spacing: 12) {
                                 ForEach(activeTabAudits) { audit in
                                     ActiveAuditRow(
                                         status: viewModel.getStatusLabel(for: audit.status),
                                         date: viewModel.getFormattedDate(from: audit.scheduledDate),
-                                        badgeColor: viewModel.getStatusColor(for: audit.status)
+                                        badgeColor: viewModel.getStatusColor(for: audit.status),
+                                        hideBadge: audit.scheduledDate == todayStr
                                     ) {
                                         router.push(BMRoute.activeAuditReportDetail(audit.id.uuidString))
                                     }
@@ -937,6 +1003,7 @@ private struct ActiveAuditRow: View {
     let status: String
     let date: String
     let badgeColor: Color
+    var hideBadge: Bool = false
     let action: () -> Void
     
     var body: some View {
@@ -950,7 +1017,7 @@ private struct ActiveAuditRow: View {
                 
                 Spacer()
                 
-                if status.uppercased() != "UPCOMING" {
+                if status.uppercased() != "UPCOMING" && !hideBadge {
                     Text(status.uppercased())
                         .font(AppFonts.sansSerif(size: 10, weight: .bold))
                         .foregroundStyle(badgeColor)
