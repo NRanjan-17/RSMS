@@ -658,7 +658,7 @@ struct VarianceReport: Identifiable, Hashable, Codable {
 
 struct AuditSession: Identifiable, Hashable, Codable {
     let id: UUID
-    let title: String
+    var title: String
     let date: String
     let scope: String
     var status: String
