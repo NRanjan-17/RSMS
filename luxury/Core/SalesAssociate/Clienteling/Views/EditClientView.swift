@@ -244,29 +244,30 @@ struct EditClientView: View {
                         .padding(.horizontal, 24)
                         .padding(.bottom, 24)
 
-                        
-                        Button(action: {
-                            showDeleteAlert = true
-                        }) {
-                            Text("Delete Client Profile")
-                                .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                                .foregroundStyle(AppColors.error)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
-                                .background(AppColors.error.opacity(0.08))
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.error.opacity(0.3), lineWidth: 0.5))
-                        }
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 40)
+
                     }
                 }
                 
                 VStack(spacing: 0) {
-                    CustomButton(title: "Save Changes", isLoading: isLoading, action: { updateClient() })
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 14)
-                        .padding(.bottom, 38)
+                    HStack(spacing: 16) {
+                        Button(action: {
+                            showDeleteAlert = true
+                        }) {
+                            Text("Delete")
+                                .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                .foregroundStyle(AppColors.error)
+                                .frame(height: 52)
+                                .frame(maxWidth: .infinity)
+                                .background(AppColors.error.opacity(0.1))
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.error.opacity(0.3), lineWidth: 1))
+                        }
+                        
+                        CustomButton(title: "Save", isLoading: isLoading, action: { updateClient() })
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 14)
+                    .padding(.bottom, 38)
                 }
                 .background(AppColors.background)
             }

@@ -10,6 +10,7 @@ import Supabase
 
 struct DBSizePreference: Codable {
     let clientId: UUID
+    var salesAssociateId: UUID?
     let ringSize: String
     let wristSize: String
     let apparelSize: String
@@ -17,6 +18,7 @@ struct DBSizePreference: Codable {
     
     enum CodingKeys: String, CodingKey {
         case clientId = "client_id"
+        case salesAssociateId = "sales_associate_id"
         case ringSize = "ring_size"
         case wristSize = "wrist_size"
         case apparelSize = "apparel_size"
@@ -61,8 +63,10 @@ final class SizePreferenceService {
         // Sync to Supabase in background
         Task {
             do {
+                let saId = try? await client.auth.session.user.id
                 let dbSize = DBSizePreference(
                     clientId: clientId,
+                    salesAssociateId: saId,
                     ringSize: sizes.ringSize,
                     wristSize: sizes.wristSize,
                     apparelSize: sizes.apparelSize,

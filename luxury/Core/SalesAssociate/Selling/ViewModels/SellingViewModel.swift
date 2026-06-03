@@ -40,17 +40,18 @@ final class SellingViewModel {
             do {
                 let fetched = try await catalogService.fetchCatalogs()
                 
-                var stockDict: [UUID: Int] = [:]
+                await MainActor.run {
+                    self.catalogs = fetched
+                    self.isLoading = false
+                }
+                
                 if let profileTuple = try? await ProfileService().fetchCurrentProfile(),
                    let staff = profileTuple.1 as? StaffModel,
                    let boutiqueId = staff.boutiqueId {
-                    stockDict = try await InventoryService.shared.fetchAvailableStockDictionary(forBoutique: boutiqueId)
-                }
-                
-                await MainActor.run {
-                    self.catalogs = fetched
-                    self.availableStock = stockDict
-                    self.isLoading = false
+                    let stockDict = try await InventoryService.shared.fetchAvailableStockDictionary(forBoutique: boutiqueId)
+                    await MainActor.run {
+                        self.availableStock = stockDict
+                    }
                 }
             } catch {
                 await MainActor.run {

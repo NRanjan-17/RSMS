@@ -9,7 +9,8 @@ import SwiftUI
 import Observation
 
 @Observable
-final class AppCoordinator {
+final class AppCoordinator: @unchecked Sendable {
+    @MainActor static let shared = AppCoordinator()
     let routingService = RoutingService()
     
     var rootDestination: RoutingService.Destination {

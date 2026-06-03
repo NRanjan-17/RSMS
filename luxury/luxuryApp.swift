@@ -6,17 +6,23 @@
 //
 
 import SwiftUI
+import AppIntents
 
 @main
 struct luxuryApp: App {
-    @State private var appCoordinator = AppCoordinator()
-    @State private var saAppState = SalesAssociateAppState()
+    @State private var appCoordinator = AppCoordinator.shared
+    @State private var saAppState = SalesAssociateAppState.shared
     @State private var bmAppState = BoutiqueManagerAppState()
     @State private var icAppState = InventoryControllerAppState()
     @State private var caAppState = CorporateAdminAppState()
     @State private var languageManager = LanguageManager.shared
     
     init() {
+        let coordinator = AppCoordinator.shared
+        let saState = SalesAssociateAppState.shared
+        AppDependencyManager.shared.add(dependency: coordinator)
+        AppDependencyManager.shared.add(dependency: saState)
+        
         let navAppearance = UINavigationBarAppearance()
         navAppearance.configureWithOpaqueBackground()
         navAppearance.backgroundColor = UIColor(AppColors.background)

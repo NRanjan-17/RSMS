@@ -339,10 +339,32 @@ private struct ClientOverviewTab: View {
                             RoundedRectangle(cornerRadius: 10)
                                 .fill(AppColors.surface2)
                                 .frame(width: 42, height: 42)
-                            Image(systemName: "circle.grid.cross")
-                                .font(AppFonts.sansSerif(size: 16))
-                                .foregroundStyle(AppColors.gold)
-                                .opacity(0.4)
+                            
+                            if let imgUrlStr = lastPurchase.imageUrl, let url = URL(string: imgUrlStr) {
+                                CachedAsyncImage(url: url) { phase in
+                                    switch phase {
+                                    case .empty:
+                                        ProgressView().scaleEffect(0.5)
+                                    case .success(let image):
+                                        image.resizable()
+                                            .aspectRatio(contentMode: .fill)
+                                            .frame(width: 42, height: 42)
+                                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    case .failure:
+                                        Image(systemName: "circle.grid.cross")
+                                            .font(AppFonts.sansSerif(size: 16))
+                                            .foregroundStyle(AppColors.gold)
+                                            .opacity(0.4)
+                                    @unknown default:
+                                        EmptyView()
+                                    }
+                                }
+                            } else {
+                                Image(systemName: "circle.grid.cross")
+                                    .font(AppFonts.sansSerif(size: 16))
+                                    .foregroundStyle(AppColors.gold)
+                                    .opacity(0.4)
+                            }
                         }
                         
                         VStack(alignment: .leading, spacing: 2) {
@@ -353,9 +375,11 @@ private struct ClientOverviewTab: View {
                                 .font(AppFonts.sansSerif(size: 11))
                                 .foregroundStyle(AppColors.gold)
                         }
+                        Spacer()
                     }
                     .padding(.horizontal, 14)
                     .padding(.vertical, 12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .background(AppColors.surface)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))

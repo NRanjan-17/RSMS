@@ -68,6 +68,12 @@ final class CatalogsViewModel {
                     .execute()
                     .value
                 
+                await MainActor.run {
+                    self.catalogs = fetchedCatalogs.reversed() // Show newest first
+                    self.boutiques = fetchedBoutiques
+                    self.isLoading = false
+                }
+                
                 let fetchedInventory = try await InventoryService.shared.fetchGlobalInventory()
                 var newStockLevels: [UUID: Int] = [:]
                 for unit in fetchedInventory where unit.status == .available {
@@ -75,10 +81,7 @@ final class CatalogsViewModel {
                 }
                 
                 await MainActor.run {
-                    self.catalogs = fetchedCatalogs.reversed() // Show newest first
-                    self.boutiques = fetchedBoutiques
                     self.stockLevels = newStockLevels
-                    self.isLoading = false
                 }
             } catch {
                 await MainActor.run {

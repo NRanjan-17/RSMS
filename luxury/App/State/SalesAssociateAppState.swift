@@ -9,6 +9,7 @@ import Foundation
 import Observation
 
 @Observable
-final class SalesAssociateAppState {
+final class SalesAssociateAppState: @unchecked Sendable {
+    @MainActor static let shared = SalesAssociateAppState()
     var selectedTab: SATab = .clients
 }
