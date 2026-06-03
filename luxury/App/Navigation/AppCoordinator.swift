@@ -10,6 +10,7 @@ import Observation
 
 @Observable
 final class AppCoordinator {
+    static let shared = AppCoordinator()
     let routingService = RoutingService()
     
     var rootDestination: RoutingService.Destination {

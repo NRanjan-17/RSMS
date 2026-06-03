@@ -12,6 +12,7 @@ struct POSView: View {
     @Environment(SalesAssociateAppState.self) private var saAppState
     @State private var viewModel = POSViewModel.shared
     @State private var showClientSheet = false
+    @State private var showCampaignSheet = false
     
     var body: some View {
         ZStack {
@@ -168,18 +169,39 @@ struct POSView: View {
                         
                         VStack(alignment: .leading, spacing: 12) {
                             if !viewModel.activeCampaigns.isEmpty {
-                                HStack {
-                                    Text("Campaign")
-                                        .font(AppFonts.sansSerif(size: 13))
+                                VStack(alignment: .leading, spacing: 10) {
+                                    Text("APPLY CAMPAIGN")
+                                        .font(AppFonts.sansSerif(size: 10, weight: .bold))
                                         .foregroundStyle(AppColors.secondary)
-                                    Spacer()
-                                    Picker("Campaign", selection: $viewModel.appliedCampaign) {
-                                        Text("None").tag(PricingCampaign?(nil))
-                                        ForEach(viewModel.activeCampaigns) { campaign in
-                                            Text(campaign.title).tag(PricingCampaign?(campaign))
+                                        .kerning(1.5)
+                                    
+                                    Button(action: { showCampaignSheet = true }) {
+                                        HStack {
+                                            if let applied = viewModel.appliedCampaign {
+                                                VStack(alignment: .leading, spacing: 2) {
+                                                    Text(applied.title)
+                                                        .font(AppFonts.serif(size: 14, weight: .semibold))
+                                                        .foregroundStyle(.white)
+                                                    Text("\(Int(applied.discountPercentage))% OFF")
+                                                        .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                                        .foregroundStyle(AppColors.gold)
+                                                }
+                                            } else {
+                                                Text("Select Campaign")
+                                                    .font(AppFonts.sansSerif(size: 13, weight: .medium))
+                                                    .foregroundStyle(AppColors.secondary)
+                                            }
+                                            Spacer()
+                                            Image(systemName: "chevron.up.chevron.down")
+                                                .font(.system(size: 12))
+                                                .foregroundStyle(AppColors.gold)
                                         }
+                                        .padding(.horizontal, 14)
+                                        .padding(.vertical, 12)
+                                        .background(AppColors.surface2)
+                                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(viewModel.appliedCampaign != nil ? AppColors.gold : AppColors.gold15, lineWidth: viewModel.appliedCampaign != nil ? 1 : 0.5))
                                     }
-                                    .tint(.white)
                                 }
                                 Divider().background(AppColors.gold15).padding(.vertical, 4)
                             }
@@ -278,6 +300,12 @@ struct POSView: View {
             ClientSelectionSheet { client in
                 viewModel.attachClient(client)
             }
+        }
+        .sheet(isPresented: $showCampaignSheet) {
+            CampaignSelectionSheet(
+                activeCampaigns: viewModel.activeCampaigns,
+                selectedCampaign: $viewModel.appliedCampaign
+            )
         }
         .toolbar(.hidden, for: .navigationBar)
     }

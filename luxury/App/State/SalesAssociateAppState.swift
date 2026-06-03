@@ -10,5 +10,6 @@ import Observation
 
 @Observable
 final class SalesAssociateAppState {
+    static let shared = SalesAssociateAppState()
     var selectedTab: SATab = .clients
 }

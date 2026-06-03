@@ -87,5 +87,67 @@ struct RSMSAppShortcuts: AppShortcutsProvider {
             shortTitle: "View Daily Targets",
             systemImageName: "chart.bar.fill"
         )
+        
+        AppShortcut(
+            intent: ViewAppointmentsIntent(),
+            phrases: [
+                "Show my appointments in \(.applicationName)",
+                "View schedule in \(.applicationName)",
+                "Open appointments in \(.applicationName)"
+            ],
+            shortTitle: "View Appointments",
+            systemImageName: "calendar"
+        )
+        
+        AppShortcut(
+            intent: StartSaleIntent(),
+            phrases: [
+                "Start a sale in \(.applicationName)",
+                "Open POS in \(.applicationName)",
+                "Open cart in \(.applicationName)"
+            ],
+            shortTitle: "Start a Sale",
+            systemImageName: "cart"
+        )
+    }
+}
+
+// 3. View Appointments Intent
+struct ViewAppointmentsIntent: AppIntent {
+    static var title: LocalizedStringResource = "View Appointments"
+    static var description = IntentDescription("Opens your upcoming appointments in RSMS.")
+    
+    static var openAppWhenRun: Bool = true
+
+    @Dependency
+    private var saAppState: SalesAssociateAppState
+    
+    @Dependency
+    private var appCoordinator: AppCoordinator
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        saAppState.selectedTab = .clients
+        return .result()
+    }
+}
+
+// 4. Start Sale Intent
+struct StartSaleIntent: AppIntent {
+    static var title: LocalizedStringResource = "Start a Sale"
+    static var description = IntentDescription("Opens the Point of Sale in RSMS.")
+    
+    static var openAppWhenRun: Bool = true
+
+    @Dependency
+    private var saAppState: SalesAssociateAppState
+    
+    @Dependency
+    private var appCoordinator: AppCoordinator
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        saAppState.selectedTab = .pos
+        return .result()
     }
 }
