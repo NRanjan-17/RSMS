@@ -8054,6 +8054,9 @@
     "Activate Now" : {
 
     },
+    "Active" : {
+
+    },
     "ACTIVE" : {
       "localizations" : {
         "ar" : {
@@ -14745,9 +14748,6 @@
     "Applies to: %@" : {
 
     },
-    "Apply — takes effect next month" : {
-
-    },
     "APPLY CAMPAIGN" : {
 
     },
@@ -18156,6 +18156,9 @@
         }
       }
     },
+    "Are you sure you want to reschedule the monthly audit window?" : {
+
+    },
     "Are you sure you want to save these changes?" : {
       "localizations" : {
         "ar" : {
@@ -19793,9 +19796,6 @@
       }
     },
     "Audit Breakdown" : {
-
-    },
-    "Audit Date" : {
 
     },
     "Audit Details" : {
@@ -33316,9 +33316,6 @@
         }
       }
     },
-    "Confirm Date" : {
-
-    },
     "Confirm Deletion" : {
       "localizations" : {
         "ar" : {
@@ -41768,6 +41765,7 @@
       }
     },
     "Delete Client Profile" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -59772,9 +59770,6 @@
         }
       }
     },
-    "Full Store · General + High Value Zone" : {
-
-    },
     "Gallery" : {
       "localizations" : {
         "ar" : {
@@ -77516,6 +77511,9 @@
         }
       }
     },
+    "No active or pending audits." : {
+
+    },
     "No active planograms" : {
       "localizations" : {
         "ar" : {
@@ -78749,6 +78747,9 @@
           }
         }
       }
+    },
+    "No completed audits yet." : {
+
     },
     "No Completed SFS Orders" : {
       "localizations" : {
@@ -83921,6 +83922,9 @@
           }
         }
       }
+    },
+    "No schedule configured." : {
+
     },
     "No SFS fulfillments active" : {
       "localizations" : {
@@ -98511,6 +98515,9 @@
         }
       }
     },
+    "PROJECTED SCHEDULE" : {
+
+    },
     "Purchase Details" : {
       "localizations" : {
         "ar" : {
@@ -104780,6 +104787,9 @@
           }
         }
       }
+    },
+    "Reschedule Audit" : {
+
     },
     "Reservations" : {
       "extractionState" : "stale",
@@ -117318,9 +117328,6 @@
           }
         }
       }
-    },
-    "Select Audit Date" : {
-
     },
     "Select Boutique" : {
       "localizations" : {
@@ -129898,6 +129905,9 @@
           }
         }
       }
+    },
+    "Tab" : {
+
     },
     "Taj Mahal Palace, Mumbai" : {
       "localizations" : {

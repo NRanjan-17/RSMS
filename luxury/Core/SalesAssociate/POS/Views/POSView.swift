@@ -113,10 +113,8 @@ struct POSView: View {
                                         RoundedRectangle(cornerRadius: 10)
                                             .fill(AppColors.surface2)
                                             .frame(width: 48, height: 48)
-                                        Image(systemName: "circle.grid.cross")
-                                            .font(AppFonts.sansSerif(size: 20))
-                                            .foregroundStyle(AppColors.gold)
-                                            .opacity(0.3)
+                                        
+                                        ProductImageView(imageUrl: item.product.productImages?.first, size: 48)
                                     }
                                     
                                     VStack(alignment: .leading, spacing: 2) {
@@ -325,5 +323,39 @@ private struct PriceRow: View {
                 .font(AppFonts.serif(size: 13))
                 .foregroundStyle(.white)
         }
+    }
+}
+
+struct ProductImageView: View {
+    let imageUrl: String?
+    let size: CGFloat
+    
+    var body: some View {
+        if let imgUrlStr = imageUrl, let url = URL(string: imgUrlStr) {
+            CachedAsyncImage(url: url) { phase in
+                switch phase {
+                case .empty:
+                    ProgressView().scaleEffect(0.5)
+                case .success(let image):
+                    image.resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: size, height: size)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                case .failure:
+                    placeholder
+                @unknown default:
+                    EmptyView()
+                }
+            }
+        } else {
+            placeholder
+        }
+    }
+    
+    private var placeholder: some View {
+        Image(systemName: "circle.grid.cross")
+            .font(AppFonts.sansSerif(size: 20))
+            .foregroundStyle(AppColors.gold)
+            .opacity(0.3)
     }
 }
