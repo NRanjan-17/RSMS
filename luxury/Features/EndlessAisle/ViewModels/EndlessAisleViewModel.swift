@@ -14,73 +14,16 @@ import Supabase
 public final class EndlessAisleViewModel {
     public static let shared = EndlessAisleViewModel()
     
-    public var items: [EndlessAisle.Item] = []
-    public var selectedItem: EndlessAisle.Item?
-    public var currentCheckResult: StockResult?
-    public var isCheckingStock = false
     public var isLoading = false
     public var isSaving = false
     public var errorMessage: String?
     
-    public var activeRequests: [EndlessAisle.SourcingRequest] = []
     public var outgoingManagerRequests: [EndlessAisle.SourcingRequest] = []
     public var incomingManagerRequests: [EndlessAisle.SourcingRequest] = []
     public var sourceDispatchRequests: [EndlessAisle.SourcingRequest] = []
     public var destinationReceiveRequests: [EndlessAisle.SourcingRequest] = []
     
     private let client = SupabaseManager.shared.client
-    private let inventoryService: EndlessAisleInventoryService
-    
-    public convenience init() {
-        self.init(inventoryService: SupabaseEndlessAisleInventoryService())
-    }
-    
-    public init(inventoryService: EndlessAisleInventoryService) {
-        self.inventoryService = inventoryService
-    }
-    
-    public func loadCatalogAvailability() {
-        isLoading = true
-        errorMessage = nil
-        
-        Task {
-            do {
-                guard let boutiqueId = try await currentBoutiqueId() else {
-                    throw endlessAisleError("Boutique association not found.")
-                }
-                
-                let catalogs: [CatalogEntity] = try await client
-                    .from("catalogs")
-                    .select()
-                    .eq("status", value: CatalogStatus.active.rawValue)
-                    .execute()
-                    .value
-                
-                let units = try await InventoryService.shared.fetchInventory(forBoutique: boutiqueId)
-                let counts = Dictionary(grouping: units.filter { $0.status == .available }, by: \.catalogId)
-                
-                let resolvedItems = catalogs.map { catalog in
-                    EndlessAisle.Item(
-                        id: catalog.id,
-                        name: catalog.name,
-                        sku: catalog.catalogId,
-                        price: catalog.amount,
-                        localQuantity: counts[catalog.id]?.count ?? 0
-                    )
-                }
-                
-                await MainActor.run {
-                    self.items = resolvedItems.sorted { $0.name < $1.name }
-                    self.isLoading = false
-                }
-            } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                    self.isLoading = false
-                }
-            }
-        }
-    }
     
     public func loadRequests() {
         isLoading = true
@@ -114,11 +57,9 @@ public final class EndlessAisleViewModel {
                 var incoming: [EndlessAisle.SourcingRequest] = []
                 var dispatch: [EndlessAisle.SourcingRequest] = []
                 var receive: [EndlessAisle.SourcingRequest] = []
-                var active: [EndlessAisle.SourcingRequest] = []
                 
                 for row in rows {
                     guard let request = request(from: row, catalogs: catalogs, boutiques: boutiques) else { continue }
-                    active.append(request)
                     
                     if row.boutiqueId == boutiqueId && !row.transactionId.hasPrefix("\(EndlessAisleLink.prefix)|") {
                         if request.status == .pendingBoutiqueManagerApproval || request.status == .pendingSourceBoutiqueApproval || request.status == .arrived {
@@ -145,37 +86,12 @@ public final class EndlessAisleViewModel {
                     self.incomingManagerRequests = incoming.sorted { $0.lastUpdated > $1.lastUpdated }
                     self.sourceDispatchRequests = dispatch.sorted { $0.lastUpdated > $1.lastUpdated }
                     self.destinationReceiveRequests = receive.sorted { $0.lastUpdated > $1.lastUpdated }
-                    self.activeRequests = active.sorted { $0.lastUpdated > $1.lastUpdated }
                     self.isLoading = false
                 }
             } catch {
                 await MainActor.run {
                     self.errorMessage = error.localizedDescription
                     self.isLoading = false
-                }
-            }
-        }
-    }
-    
-    public func checkStock(item: EndlessAisle.Item) {
-        selectedItem = item
-        isCheckingStock = true
-        currentCheckResult = nil
-        
-        Task {
-            do {
-                guard let boutiqueId = try await currentBoutiqueId() else {
-                    throw endlessAisleError("Boutique association not found.")
-                }
-                let result = try await inventoryService.checkStock(itemId: item.id, currentBoutiqueId: boutiqueId)
-                await MainActor.run {
-                    self.currentCheckResult = result
-                    self.isCheckingStock = false
-                }
-            } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                    self.isCheckingStock = false
                 }
             }
         }

@@ -175,7 +175,12 @@ struct SFSVerificationView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                                 .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.warning.opacity(0.3), lineWidth: 0.5))
                                 
-                                if let request = EndlessAisleViewModel.shared.activeRequests.first(where: { $0.originalOrderId == order.id || $0.item.id == order.productId }) {
+                                if let request = (
+                                    EndlessAisleViewModel.shared.outgoingManagerRequests
+                                    + EndlessAisleViewModel.shared.incomingManagerRequests
+                                    + EndlessAisleViewModel.shared.sourceDispatchRequests
+                                    + EndlessAisleViewModel.shared.destinationReceiveRequests
+                                ).first(where: { $0.originalOrderId == order.id || $0.item.id == order.productId }) {
                                     VStack(alignment: .leading, spacing: 12) {
                                         HStack {
                                             VStack(alignment: .leading, spacing: 2) {
