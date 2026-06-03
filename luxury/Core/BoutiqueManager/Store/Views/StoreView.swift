@@ -68,7 +68,7 @@ struct StoreView: View {
                                 }
                                 .buttonStyle(.plain)
                                 
-                                Button(action: { router.presentFullScreen(BMRoute.cycleCountSignoff) }) {
+                                Button(action: { router.push(BMRoute.cycleCountSignoff) }) {
                                     HStack {
                                         VStack(alignment: .leading, spacing: 4) {
                                             Text("Cycle Count Sign-off")
