@@ -152,11 +152,11 @@ final class InvoicePDFGenerator {
                     drawTextRightAligned(CurrencyManager.shared.format(amount: data.subtotal), atY: currentY + 5, rightEdge: rightMargin - 5, font: storeFont)
                     currentY += 20
                     
-                    drawText("CGST (9%)", at: CGPoint(x: totalsLabelsX, y: currentY + 5), font: storeFont)
+                    drawText("CGST (\((0.09).formatted(.percent)))", at: CGPoint(x: totalsLabelsX, y: currentY + 5), font: storeFont)
                     drawTextRightAligned(CurrencyManager.shared.format(amount: data.cgst), atY: currentY + 5, rightEdge: rightMargin - 5, font: storeFont)
                     currentY += 20
                     
-                    drawText("SGST (9%)", at: CGPoint(x: totalsLabelsX, y: currentY + 5), font: storeFont)
+                    drawText("SGST (\((0.09).formatted(.percent)))", at: CGPoint(x: totalsLabelsX, y: currentY + 5), font: storeFont)
                     drawTextRightAligned(CurrencyManager.shared.format(amount: data.sgst), atY: currentY + 5, rightEdge: rightMargin - 5, font: storeFont)
                     currentY += 20
                     

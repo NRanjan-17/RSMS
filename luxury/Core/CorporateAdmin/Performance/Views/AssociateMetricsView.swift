@@ -70,13 +70,13 @@ struct AssociateMetricsView: View {
         HStack(spacing: 0) {
             SnapshotCell(
                 label: "ACHIEVEMENT",
-                value: String(format: "%.0f%%", boutique.achievementPct),
+                value: (boutique.achievementPct / 100).formatted(.percent.precision(.fractionLength(0))),
                 color: boutique.isUnderperforming ? AppColors.error : AppColors.success
             )
             Divider().background(AppColors.gold15).frame(height: 40)
             SnapshotCell(
                 label: "CONV. RATE",
-                value: String(format: "%.0f%%", boutique.conversionRate),
+                value: (boutique.conversionRate / 100).formatted(.percent.precision(.fractionLength(0))),
                 color: AppColors.gold
             )
             Divider().background(AppColors.gold15).frame(height: 40)
@@ -165,7 +165,7 @@ private struct AssociateRow: View {
                     .foregroundStyle(AppColors.text)
                     .frame(width: 36, alignment: .trailing)
 
-                Text(String(format: "%.0f%%", associate.conversionRate))
+                Text((associate.conversionRate / 100).formatted(.percent.precision(.fractionLength(0))))
                     .font(AppFonts.sansSerif(size: 13))
                     .foregroundStyle(associate.conversionRate >= 40 ? AppColors.success : AppColors.secondary)
                     .frame(width: 44, alignment: .trailing)

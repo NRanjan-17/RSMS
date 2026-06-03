@@ -230,7 +230,7 @@ struct GlobalMetricCard: View {
                     .foregroundStyle(kpi.trend > 0 ? AppColors.success : AppColors.error)
                     .frame(height: 20)
                 } else {
-                    Text("0%")
+                    Text((0.0).formatted(.percent))
                         .font(AppFonts.sansSerif(size: 10, weight: .bold))
                         .opacity(0)
                         .frame(height: 20)

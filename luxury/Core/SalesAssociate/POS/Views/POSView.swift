@@ -174,7 +174,7 @@ struct POSView: View {
                                 }) {
                                     HStack {
                                         Image(systemName: "gift")
-                                        Text(viewModel.courtesyRate > 0 ? "Courtesy Applied (\(Int(viewModel.courtesyRate * 100))%)" : "Apply Courtesy")
+                                        Text(viewModel.courtesyRate > 0 ? "Courtesy Applied (\(viewModel.courtesyRate.formatted(.percent)))" : "Apply Courtesy")
                                     }
                                     .font(AppFonts.sansSerif(size: 12, weight: .semibold))
                                     .foregroundStyle(viewModel.courtesyRate > 0 ? AppColors.success : AppColors.gold)
@@ -193,7 +193,7 @@ struct POSView: View {
                             if viewModel.requiresApproval {
                                 HStack(spacing: 8) {
                                     StatusBadge(text: LocalizedStringKey(viewModel.approvalState.rawValue), status: viewModel.approvalState == .approved ? .success : viewModel.approvalState == .rejected ? .error : .pending)
-                                    Text("Manager approval required for courtesy above 5%.")
+                                    Text("Manager approval required for courtesy above \((0.05).formatted(.percent)).")
                                         .font(AppFonts.sansSerif(size: 11))
                                         .foregroundStyle(AppColors.secondary)
                                 }
@@ -223,9 +223,9 @@ struct POSView: View {
                         VStack(spacing: 10) {
                             PriceRow(label: "Subtotal", value: viewModel.formatCurrency(viewModel.subtotal))
                             if viewModel.courtesyRate > 0 {
-                                PriceRow(label: "Courtesy (\(Int(viewModel.courtesyRate * 100))%)", value: "−\(viewModel.formatCurrency(viewModel.courtesyAmount))")
+                                PriceRow(label: "Courtesy (\(viewModel.courtesyRate.formatted(.percent)))", value: "−\(viewModel.formatCurrency(viewModel.courtesyAmount))")
                             }
-                            PriceRow(label: viewModel.taxFree ? "GST" : "GST (3%)", value: "+\(viewModel.formatCurrency(viewModel.tax))")
+                            PriceRow(label: viewModel.taxFree ? "GST" : "GST (\((0.03).formatted(.percent)))", value: "+\(viewModel.formatCurrency(viewModel.tax))")
                             
                             Divider().background(AppColors.gold15).padding(.vertical, 4)
                             
@@ -337,9 +337,9 @@ private struct CourtesySheet: View {
                     .padding(.top, 24)
                 
                 VStack(spacing: 12) {
-                    CourtesyButton(title: "VIP Privilege (5%)", rate: 0.05, action: { onApply(0.05); dismiss() })
-                    CourtesyButton(title: "Service Recovery (8%)", rate: 0.08, action: { onApply(0.08); dismiss() })
-                    CourtesyButton(title: "Exceptional Gesture (12%)", rate: 0.12, action: { onApply(0.12); dismiss() })
+                    CourtesyButton(title: "VIP Privilege (\((0.05).formatted(.percent)))", rate: 0.05, action: { onApply(0.05); dismiss() })
+                    CourtesyButton(title: "Service Recovery (\((0.08).formatted(.percent)))", rate: 0.08, action: { onApply(0.08); dismiss() })
+                    CourtesyButton(title: "Exceptional Gesture (\((0.12).formatted(.percent)))", rate: 0.12, action: { onApply(0.12); dismiss() })
                 }
                 
                 Spacer()

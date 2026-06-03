@@ -173,7 +173,7 @@ struct BoutiquePerformanceCard: View {
                     value: CurrencyManager.shared.format(amount: boutique.salesTarget)
                 )
                 Divider().background(AppColors.gold15).frame(height: 36)
-                MetricPill(label: "CONV. RATE", value: String(format: "%.0f%%", boutique.conversionRate))
+                MetricPill(label: "CONV. RATE", value: (boutique.conversionRate / 100).formatted(.percent.precision(.fractionLength(0))))
                 Divider().background(AppColors.gold15).frame(height: 36)
                 MetricPill(label: "ATV", value: CurrencyManager.shared.format(amount: boutique.atv))
             }
@@ -181,7 +181,7 @@ struct BoutiquePerformanceCard: View {
             AchievementBar(pct: boutique.achievementPct, isUnderperforming: boutique.isUnderperforming)
 
             HStack {
-                Text(String(format: "%.0f%% of target achieved", boutique.achievementPct))
+                Text("\((boutique.achievementPct / 100).formatted(.percent.precision(.fractionLength(0)))) of target achieved")
                     .font(AppFonts.sansSerif(size: 11))
                     .foregroundStyle(boutique.isUnderperforming ? AppColors.error : AppColors.success)
                 Spacer()

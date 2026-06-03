@@ -86,8 +86,9 @@ struct RSMSCalendarView: View {
             VStack(spacing: 12) {
                 // Weekday headers
                 HStack(spacing: 0) {
-                    ForEach(["S", "M", "T", "W", "T", "F", "S"], id: \.self) { day in
-                        Text(day)
+                    let days = ["S", "M", "T", "W", "T", "F", "S"]
+                    ForEach(0..<days.count, id: \.self) { index in
+                        Text(days[index])
                             .font(AppFonts.sansSerif(size: 11, weight: .medium))
                             .foregroundStyle(AppColors.secondary)
                             .frame(maxWidth: .infinity)

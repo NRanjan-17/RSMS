@@ -61,8 +61,8 @@ struct StaffPerformanceDetailView: View {
                                 .padding(.horizontal, 24)
                             
                             LazyVGrid(columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible())], spacing: 16) {
-                                MetricCard(title: "Revenue", value: member.rev, subtitle: "\(Int(member.pct * 100))% of Target", icon: "chart.line.uptrend.xyaxis")
-                                MetricCard(title: "Conversion", value: "32%", subtitle: "+4% vs Avg", icon: "person.2.fill")
+                                MetricCard(title: "Revenue", value: member.rev, subtitle: "\(member.pct.formatted(.percent.precision(.fractionLength(0)))) of Target", icon: "chart.line.uptrend.xyaxis")
+                                MetricCard(title: "Conversion", value: (0.32).formatted(.percent.precision(.fractionLength(0))), subtitle: "+\((0.04).formatted(.percent.precision(.fractionLength(0)))) vs Avg", icon: "person.2.fill")
                                 MetricCard(title: "Clients", value: "\(member.clients)", subtitle: "Active Today", icon: "person.text.rectangle")
                                 MetricCard(title: "ATV", value: "\(CurrencyManager.shared.symbol)42,500", subtitle: "Avg Transaction", icon: "cart.fill")
                             }

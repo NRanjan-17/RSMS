@@ -48,7 +48,7 @@ struct SalesProductDetailView: View {
                                 Text(CurrencyManager.shared.format(amount: catalog.amount))
                                     .font(AppFonts.serif(size: 30, weight: .semibold))
                                     .foregroundStyle(AppColors.gold)
-                                Text("incl. 3% GST")
+                                Text("incl. \((0.03).formatted(.percent)) GST")
                                     .font(AppFonts.sansSerif(size: 11))
                                     .foregroundStyle(AppColors.secondary)
                             }
