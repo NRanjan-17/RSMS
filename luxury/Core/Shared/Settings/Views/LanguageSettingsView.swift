@@ -7,31 +7,29 @@ struct LanguageSettingsView: View {
     // Define available languages
     let availableLanguages = [
         ("System Default", ""),
-        // Major World Languages
+        ("Arabic", "ar"),
+        ("Assamese", "as"),
+        ("Bengali", "bn"),
+        ("Chinese (Simplified)", "zh-Hans"),
+        ("Chinese (Traditional)", "zh-Hant"),
         ("English", "en"),
         ("French", "fr"),
         ("German", "de"),
-        ("Spanish", "es"),
-        ("Chinese (Simplified)", "zh-Hans"),
-        ("Chinese (Traditional)", "zh-Hant"),
-        ("Japanese", "ja"),
-        ("Korean", "ko"),
-        ("Arabic", "ar"),
-        ("Russian", "ru"),
-        ("Portuguese", "pt"),
-        ("Italian", "it"),
-        // Indian Languages
-        ("Hindi", "hi"),
-        ("Bengali", "bn"),
-        ("Telugu", "te"),
-        ("Marathi", "mr"),
-        ("Tamil", "ta"),
         ("Gujarati", "gu"),
+        ("Hindi", "hi"),
+        ("Italian", "it"),
+        ("Japanese", "ja"),
         ("Kannada", "kn"),
-        ("Odia", "or"),
+        ("Korean", "ko"),
         ("Malayalam", "ml"),
+        ("Marathi", "mr"),
+        ("Odia", "or"),
+        ("Portuguese", "pt"),
         ("Punjabi", "pa"),
-        ("Assamese", "as")
+        ("Russian", "ru"),
+        ("Spanish", "es"),
+        ("Tamil", "ta"),
+        ("Telugu", "te")
     ]
     
     var body: some View {
