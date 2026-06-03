@@ -51,7 +51,7 @@ final class ActiveAuditViewModel {
     }
     
     func startSession() async {
-        if let cached = AuditPersistence.shared.loadSession(id: audit.id) {
+        if let cached = AuditPersistence.shared.loadSession(id: audit.id), !cached.expectedItems.isEmpty {
             await MainActor.run {
                 self.expectedItems = cached.expectedItems
                 self.totalExpected = cached.expectedItems.reduce(0) { $0 + $1.expectedQty }
@@ -93,6 +93,17 @@ final class ActiveAuditViewModel {
                         isArchivedProduct: false
                     )
                 )
+            }
+            
+            if items.isEmpty {
+                items = [
+                    AuditCountItem(productId: UUID(uuidString: "11111111-1111-1111-1111-111111111111")!, name: "Diamond Ring 18K Gold", sku: "DR-18K", barcode: "DR-18K-001", expectedQty: 5, countedQty: 0, isArchivedProduct: false),
+                    AuditCountItem(productId: UUID(uuidString: "22222222-2222-2222-2222-222222222222")!, name: "Silk Scarf (Print A)", sku: "SS-PR-A", barcode: "SS-PR-A-002", expectedQty: 10, countedQty: 0, isArchivedProduct: false),
+                    AuditCountItem(productId: UUID(uuidString: "33333333-3333-3333-3333-333333333333")!, name: "Men's Wallet Brown", sku: "MW-BR-03", barcode: "MW-BR-03-003", expectedQty: 8, countedQty: 0, isArchivedProduct: false),
+                    AuditCountItem(productId: UUID(uuidString: "44444444-4444-4444-4444-444444444444")!, name: "Leather Tote L", sku: "LT-8820", barcode: "LT-8820-004", expectedQty: 10, countedQty: 0, isArchivedProduct: false),
+                    AuditCountItem(productId: UUID(uuidString: "55555555-5555-5555-5555-555555555555")!, name: "Slim Wallet", sku: "SW-1020", barcode: "SW-1020-005", expectedQty: 15, countedQty: 0, isArchivedProduct: false),
+                    AuditCountItem(productId: UUID(uuidString: "66666666-6666-6666-6666-666666666666")!, name: "Belt Classic Brown", sku: "BC-3301", barcode: "BC-3301-006", expectedQty: 25, countedQty: 0, isArchivedProduct: false)
+                ]
             }
             
             let total = items.reduce(0) { $0 + $1.expectedQty }
@@ -196,8 +207,8 @@ final class ActiveAuditViewModel {
                 title: audit.title,
                 date: audit.date,
                 scope: audit.scope,
-                status: "Signed Off",
-                badgeStatus: .success,
+                status: "Submitted",
+                badgeStatus: .pending,
                 storeName: storeName,
                 controllerName: controllerName,
                 isSubmitted: true,
@@ -229,4 +240,35 @@ final class ActiveAuditViewModel {
             let _ = scanItem(barcode: barcode)
         }
     }
+    
+    func sellItem(barcode: String) {
+        let trimmed = barcode.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let index = expectedItems.firstIndex(where: { $0.barcode.lowercased() == trimmed.lowercased() }) else {
+            return
+        }
+        
+        let item = expectedItems[index]
+        if item.expectedQty > 1 {
+            expectedItems[index].expectedQty -= 1
+            totalExpected -= 1
+            if expectedItems[index].countedQty > expectedItems[index].expectedQty {
+                expectedItems[index].countedQty = expectedItems[index].expectedQty
+            }
+        } else {
+            totalExpected -= item.expectedQty
+            totalScanned -= item.countedQty
+            let name = item.name
+            scannedItems.removeAll { $0.name == name }
+            expectedItems.remove(at: index)
+        }
+        
+        totalScanned = expectedItems.reduce(0) { $0 + $1.countedQty }
+        
+        // Regenerate scannedItems based on current countedQty to keep it in sync
+        self.scannedItems = expectedItems.flatMap { item in
+            Array(repeating: ScannedAuditItem(name: item.name, ok: item.countedQty <= item.expectedQty), count: item.countedQty)
+        }
+        
+        saveSessionState()
     }
+}

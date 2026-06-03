@@ -84,6 +84,45 @@ struct AuditDetailView: View {
                         .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
                         .padding(.horizontal, 24)
                         
+                        // Audit Scan Progress Bar
+                        if !viewModel.isLoading {
+                            VStack(alignment: .leading, spacing: 12) {
+                                HStack {
+                                    Text("AUDIT SCAN PROGRESS")
+                                        .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                        .foregroundStyle(AppColors.gold)
+                                        .kerning(1.5)
+                                    Spacer()
+                                    Text("\(viewModel.totalScanned) / \(viewModel.totalExpected)")
+                                        .font(AppFonts.sansSerif(size: 13, weight: .bold))
+                                        .foregroundStyle(.white)
+                                }
+                                
+                                GeometryReader { geometry in
+                                    ZStack(alignment: .leading) {
+                                        RoundedRectangle(cornerRadius: 4)
+                                            .fill(AppColors.surface2)
+                                            .frame(height: 8)
+                                        
+                                        RoundedRectangle(cornerRadius: 4)
+                                            .fill(AppColors.gold)
+                                            .frame(width: geometry.size.width * CGFloat(viewModel.progress), height: 8)
+                                            .animation(.spring(), value: viewModel.progress)
+                                    }
+                                }
+                                .frame(height: 8)
+                                
+                                Text(viewModel.progress >= 1.0 ? "All expected items scanned" : "Scan remaining expected items to complete the audit")
+                                    .font(AppFonts.sansSerif(size: 11))
+                                    .foregroundStyle(viewModel.progress >= 1.0 ? AppColors.success : AppColors.secondary)
+                            }
+                            .padding(20)
+                            .background(AppColors.surface)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
+                            .padding(.horizontal, 24)
+                        }
+                        
                         // Checklist (only shown if not monthly and not full)
                         if !audit.title.localizedCaseInsensitiveContains("monthly") && !audit.title.localizedCaseInsensitiveContains("full") {
                             VStack(alignment: .leading, spacing: 16) {
@@ -132,21 +171,39 @@ struct AuditDetailView: View {
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack(spacing: 12) {
                                         ForEach(viewModel.expectedItems) { item in
-                                            Button(action: {
-                                                let _ = viewModel.scanItem(barcode: item.barcode)
-                                            }) {
-                                                HStack {
-                                                    Image(systemName: "barcode.viewfinder")
-                                                        .font(AppFonts.sansSerif(size: 14))
-                                                    Text("Scan \(item.name)")
-                                                        .font(AppFonts.sansSerif(size: 13, weight: .semibold))
+                                            VStack(spacing: 8) {
+                                                Button(action: {
+                                                    let _ = viewModel.scanItem(barcode: item.barcode)
+                                                }) {
+                                                    HStack {
+                                                        Image(systemName: "barcode.viewfinder")
+                                                            .font(AppFonts.sansSerif(size: 14))
+                                                        Text("Scan \(item.name)")
+                                                            .font(AppFonts.sansSerif(size: 13, weight: .semibold))
+                                                    }
+                                                    .padding(.horizontal, 16)
+                                                    .padding(.vertical, 10)
+                                                    .background(AppColors.surface2)
+                                                    .foregroundStyle(AppColors.gold)
+                                                    .clipShape(Capsule())
+                                                    .overlay(Capsule().stroke(AppColors.gold50, lineWidth: 0.5))
                                                 }
-                                                .padding(.horizontal, 16)
-                                                .padding(.vertical, 10)
-                                                .background(AppColors.surface2)
-                                                .foregroundStyle(AppColors.gold)
-                                                .clipShape(Capsule())
-                                                .overlay(Capsule().stroke(AppColors.gold50, lineWidth: 0.5))
+                                                
+                                                Button(action: {
+                                                    viewModel.sellItem(barcode: item.barcode)
+                                                }) {
+                                                    HStack {
+                                                        Image(systemName: "tag.slash")
+                                                            .font(AppFonts.sansSerif(size: 12))
+                                                        Text("Sell \(item.name) (Exp: \(item.expectedQty))")
+                                                            .font(AppFonts.sansSerif(size: 11, weight: .medium))
+                                                    }
+                                                    .padding(.horizontal, 12)
+                                                    .padding(.vertical, 6)
+                                                    .background(AppColors.error.opacity(0.15))
+                                                    .foregroundStyle(AppColors.error)
+                                                    .clipShape(Capsule())
+                                                }
                                             }
                                         }
                                     }

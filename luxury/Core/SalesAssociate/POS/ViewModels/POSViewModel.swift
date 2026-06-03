@@ -261,6 +261,9 @@ final class POSViewModel {
                 clientId: selectedClient?.id
             )
             
+            // Update active audits with the sold products
+            AuditPersistence.shared.registerSale(productIds: productIds)
+            
             self.lastTotalPaid = self.total
             self.lastTransactionId = transaction.id.uuidString
             self.lastPurchasedItems = self.cartItems

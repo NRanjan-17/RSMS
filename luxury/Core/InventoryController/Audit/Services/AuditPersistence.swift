@@ -49,6 +49,32 @@ final class AuditPersistence {
         return ids.compactMap { loadSession(id: $0) }
     }
     
+    func registerSale(productIds: [UUID]) {
+        let sessions = loadAllSessions()
+        for var session in sessions {
+            guard !session.isSubmitted else { continue }
+            var expected = session.expectedItems
+            var modified = false
+            for productId in productIds {
+                if let index = expected.firstIndex(where: { $0.productId == productId }) {
+                    if expected[index].expectedQty > 1 {
+                        expected[index].expectedQty -= 1
+                        if expected[index].countedQty > expected[index].expectedQty {
+                            expected[index].countedQty = expected[index].expectedQty
+                        }
+                    } else {
+                        expected.remove(at: index)
+                    }
+                    modified = true
+                }
+            }
+            if modified {
+                session.expectedItems = expected
+                saveSession(session)
+            }
+        }
+    }
+    
     private func loadAllSessionIds() -> [UUID] {
         guard let data = UserDefaults.standard.data(forKey: listKey) else {
             return []

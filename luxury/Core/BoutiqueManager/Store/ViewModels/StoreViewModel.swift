@@ -11,7 +11,7 @@ import Observation
 @Observable
 final class StoreViewModel {
     var pendingTransfersCount: Int = 0
-    var pendingCycleCountsCount: Int = 1
+    var pendingCycleCountsCount: Int = 0
     
     var events: [StoreEvent] = []
     
@@ -20,6 +20,12 @@ final class StoreViewModel {
     init() {
         loadLocalEvents()
         fetchPendingTransfersCount()
+        fetchPendingCycleCountsCount()
+    }
+    
+    func fetchPendingCycleCountsCount() {
+        let sessions = AuditPersistence.shared.loadAllSessions()
+        self.pendingCycleCountsCount = sessions.filter { $0.status == "Submitted" }.count
     }
     
     func fetchPendingTransfersCount() {

@@ -67,9 +67,12 @@ struct CycleCountDetailView: View {
                         )
                         .padding(.horizontal, 24)
 
-                        CustomButton(title: "Sign-off Audit", action: { dismiss() })
-                            .padding(.horizontal, 24)
-                            .padding(.bottom, 40)
+                        CustomButton(title: "Sign-off Audit", action: {
+                            viewModel.signoffAudit()
+                            dismiss()
+                        })
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 40)
                     }
                     .padding(.top, 20)
                 }
