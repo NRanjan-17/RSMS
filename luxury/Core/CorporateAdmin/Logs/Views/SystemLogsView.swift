@@ -25,7 +25,7 @@ struct SystemLogsView: View {
                             }
                             
                             ForEach(LogCategory.allCases, id: \.self) { category in
-                                FilterChip(label: category.rawValue, isSelected: viewModel.selectedCategory == category) {
+                                FilterChip(label: LocalizedStringKey(category.rawValue), isSelected: viewModel.selectedCategory == category) {
                                     withAnimation { viewModel.selectedCategory = category }
                                 }
                             }
@@ -85,7 +85,7 @@ struct SystemLogsView: View {
 }
 
 private struct FilterChip: View {
-    let label: String
+    let label: LocalizedStringKey
     let isSelected: Bool
     var action: () -> Void
     
@@ -132,7 +132,7 @@ private struct LogRow: View {
                         .foregroundStyle(AppColors.tertiary)
                 }
                 
-                Text(log.message)
+                Text(LocalizedStringKey(log.message))
                     .font(AppFonts.sansSerif(size: 13, weight: .light))
                     .foregroundStyle(.white)
                     .lineSpacing(2)
