@@ -1,5 +1,6 @@
 import AppIntents
 import SwiftUI
+import Supabase
 
 // 1. Check Inventory Intent
 struct CheckInventoryIntent: AppIntent {
@@ -195,36 +196,48 @@ struct ProductEntity: AppEntity, IndexedEntity {
         self.price = product.price
         self.inStock = product.inStock
     }
+    
+    init(from catalog: CatalogEntity) {
+        self.id = catalog.id
+        self.brand = catalog.brand
+        self.name = catalog.name
+        self.price = catalog.formattedPrice
+        self.inStock = catalog.status == .active
+    }
 }
 
 // MARK: - Entity Query for Siri & Spotlight Search
 struct ProductEntityQuery: EntityQuery, EntityStringQuery {
     func entities(for identifiers: [ProductEntity.ID]) async throws -> [ProductEntity] {
-        // Mocking a database lookup by ID
-        return identifiers.compactMap { id in
-            ProductEntity(id: id, brand: "Maison", name: "Sample Product", price: "$1,000", inStock: true)
-        }
+        let catalogs: [CatalogEntity] = try await SupabaseManager.shared.client
+            .from("catalogs")
+            .select()
+            .in("id", values: identifiers.map { $0.uuidString })
+            .execute()
+            .value
+            
+        return catalogs.map { ProductEntity(from: $0) }
     }
     
     func entities(matching string: String) async throws -> [ProductEntity] {
-        // Mocking a text search for Visual Intelligence & Siri
-        let lowercased = string.lowercased()
-        let allProducts = [
-            ProductEntity(id: UUID(), brand: "Maison", name: "Classic Tote", price: "$1,200", inStock: true),
-            ProductEntity(id: UUID(), brand: "Maison", name: "Silk Scarf", price: "$350", inStock: true),
-            ProductEntity(id: UUID(), brand: "Maison", name: "Leather Wallet", price: "$500", inStock: false)
-        ]
-        
-        return allProducts.filter { product in
-            product.name.lowercased().contains(lowercased) || product.brand.lowercased().contains(lowercased)
-        }
+        let catalogs: [CatalogEntity] = try await SupabaseManager.shared.client
+            .from("catalogs")
+            .select()
+            .or("name.ilike.%\(string)%,brand.ilike.%\(string)%")
+            .execute()
+            .value
+            
+        return catalogs.map { ProductEntity(from: $0) }
     }
     
     func suggestedEntities() async throws -> [ProductEntity] {
-        // Suggested items for Spotlight/Siri predictive suggestions
-        return [
-            ProductEntity(id: UUID(), brand: "Maison", name: "Classic Tote", price: "$1,200", inStock: true),
-            ProductEntity(id: UUID(), brand: "Maison", name: "Silk Scarf", price: "$350", inStock: true)
-        ]
+        let catalogs: [CatalogEntity] = try await SupabaseManager.shared.client
+            .from("catalogs")
+            .select()
+            .limit(10)
+            .execute()
+            .value
+            
+        return catalogs.map { ProductEntity(from: $0) }
     }
 }

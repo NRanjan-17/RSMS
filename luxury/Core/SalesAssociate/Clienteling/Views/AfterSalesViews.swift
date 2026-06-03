@@ -696,6 +696,7 @@ struct AfterSalesTrackingView: View {
                                 .foregroundStyle(AppColors.secondary)
                             StatusBadge(text: LocalizedStringKey(displayStatusText), status: badgeStatus)
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(16)
                         .background(AppColors.surface)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
