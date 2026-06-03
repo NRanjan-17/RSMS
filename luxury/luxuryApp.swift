@@ -51,6 +51,9 @@ struct luxuryApp: App {
                 .environment(\.locale, languageManager.currentLocale)
                 .id(languageManager.selectedLanguage)
                 .preferredColorScheme(.dark)
+                .task {
+                    await CacheManager.shared.clearBucket("catalog")
+                }
         }
     }
 }

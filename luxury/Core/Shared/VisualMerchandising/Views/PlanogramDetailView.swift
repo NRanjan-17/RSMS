@@ -36,7 +36,7 @@ struct PlanogramDetailView: View {
                 .zIndex(1)
                 
                 GeometryReader { geo in
-                    AsyncImage(url: URL(string: planogram.fileUrl)) { image in
+                    CachedAsyncImage(url: URL(string: planogram.fileUrl)) { image in
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fit)

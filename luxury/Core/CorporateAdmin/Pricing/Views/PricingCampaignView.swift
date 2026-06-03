@@ -80,10 +80,10 @@ struct PricingCampaignView: View {
             
             HStack(spacing: 16) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("REGION")
+                    Text("BOUTIQUE")
                         .font(AppFonts.sansSerif(size: 10))
                         .foregroundStyle(AppColors.secondary)
-                    Text(campaign.region)
+                    Text(campaign.boutique)
                         .font(AppFonts.sansSerif(size: 13))
                         .foregroundStyle(.white)
                 }

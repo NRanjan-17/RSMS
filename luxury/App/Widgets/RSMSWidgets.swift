@@ -218,7 +218,7 @@ struct RequestDetailSheet: View {
                     VStack(alignment: .leading, spacing: 32) {
                         HStack(spacing: 16) {
                             if let avatarUrl = avatarUrl, let url = URL(string: avatarUrl) {
-                                AsyncImage(url: url) { image in
+                                CachedAsyncImage(url: url) { image in
                                     image
                                         .resizable()
                                         .aspectRatio(contentMode: .fill)
@@ -272,7 +272,7 @@ struct RequestDetailSheet: View {
                                     .foregroundStyle(AppColors.secondary)
                                     .kerning(1.5)
                                 
-                                AsyncImage(url: url) { image in
+                                CachedAsyncImage(url: url) { image in
                                     image
                                         .resizable()
                                         .aspectRatio(contentMode: .fit)

@@ -22,7 +22,7 @@ struct EditProfileView: View {
                                 .clipShape(Circle())
                                 .overlay(Circle().stroke(AppColors.gold, lineWidth: 1))
                         } else if let urlStr = viewModel.avatarUrl, let url = URL(string: urlStr) {
-                            AsyncImage(url: url) { image in
+                            CachedAsyncImage(url: url) { image in
                                 image.resizable()
                                     .scaledToFill()
                             } placeholder: {

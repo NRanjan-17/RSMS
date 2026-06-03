@@ -65,7 +65,7 @@ struct ZoomableImageView: View {
     private let minScale: CGFloat = 1.0
 
     var body: some View {
-        AsyncImage(url: url) { phase in
+        CachedAsyncImage(url: url) { phase in
             switch phase {
             case .empty:
                 ZStack {

@@ -145,6 +145,45 @@ struct StoreView: View {
                             .padding(.horizontal, 24)
                         }
                         
+                        if !viewModel.activeCampaigns.isEmpty {
+                            VStack(alignment: .leading, spacing: 16) {
+                                Text("ACTIVE CAMPAIGNS")
+                                    .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                    .foregroundStyle(AppColors.secondary)
+                                    .kerning(1.5)
+                                    .padding(.horizontal, 24)
+                                
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 16) {
+                                        ForEach(viewModel.activeCampaigns) { campaign in
+                                            VStack(alignment: .leading, spacing: 8) {
+                                                Text(campaign.title)
+                                                    .font(AppFonts.serif(size: 16, weight: .medium))
+                                                    .foregroundStyle(.white)
+                                                    .lineLimit(1)
+                                                
+                                                HStack {
+                                                    Text(campaign.boutique)
+                                                        .font(AppFonts.sansSerif(size: 12))
+                                                        .foregroundStyle(AppColors.secondary)
+                                                    Spacer()
+                                                    Text((campaign.discountPercentage / 100).formatted(.percent))
+                                                        .font(AppFonts.sansSerif(size: 13, weight: .semibold))
+                                                        .foregroundStyle(AppColors.gold)
+                                                }
+                                            }
+                                            .padding(16)
+                                            .frame(width: 220)
+                                            .background(AppColors.surface)
+                                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                        }
+                                    }
+                                    .padding(.horizontal, 24)
+                                }
+                            }
+                        }
+                        
                         VStack(alignment: .leading, spacing: 16) {
                             HStack {
                                 Text("UPCOMING EVENTS")
@@ -227,6 +266,9 @@ struct StoreView: View {
         .onAppear {
             viewModel.loadLocalEvents()
             viewModel.fetchPendingTransfersCount()
+            Task {
+                await viewModel.fetchActiveCampaigns()
+            }
         }
         .toolbar(.hidden, for: .navigationBar)
     }

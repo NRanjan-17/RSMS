@@ -5,15 +5,16 @@ struct CreateCampaignView: View {
     let viewModel: PricingCampaignViewModel
     
     @State private var title = ""
-    @State private var region = "Global"
+    @State private var boutique = "All Boutiques"
     @State private var discountPercentage: Double = 10.0
     @State private var startDate = Date()
     @State private var endDate = Date().addingTimeInterval(86400 * 7)
     
     @State private var selectedCategories: Set<String> = []
     
-    let regions = ["Global", "North America", "Europe", "APAC", "Middle East", "India"]
-    let categories = ["Handbags", "Shoes", "Ready-to-Wear", "Accessories", "Jewelry", "Leather Goods"]
+    var categories: [String] {
+        return ["All"] + CatalogCategory.allCases.map { $0.rawValue }
+    }
     
     var body: some View {
         NavigationStack {
@@ -44,12 +45,12 @@ struct CreateCampaignView: View {
                                 .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.border, lineWidth: 1))
                                 
                                 HStack {
-                                    Text("Region")
+                                    Text("Boutique")
                                         .font(AppFonts.sansSerif(size: 13))
                                         .foregroundStyle(AppColors.secondary)
                                     Spacer()
-                                    Picker("Region", selection: $region) {
-                                        ForEach(regions, id: \.self) {
+                                    Picker("Boutique", selection: $boutique) {
+                                        ForEach(viewModel.boutiques.isEmpty ? ["All Boutiques"] : viewModel.boutiques, id: \.self) {
                                             Text($0).tag($0)
                                         }
                                     }
@@ -157,7 +158,7 @@ struct CreateCampaignView: View {
                     Button("Save") {
                         viewModel.addCampaign(
                             title: title.isEmpty ? "New Campaign" : title,
-                            region: region,
+                            boutique: boutique,
                             discountPercentage: discountPercentage,
                             startDate: startDate,
                             endDate: endDate,

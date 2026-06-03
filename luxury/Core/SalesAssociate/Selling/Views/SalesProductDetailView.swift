@@ -171,7 +171,7 @@ struct RecommendationCard: View {
             ZStack {
                 Rectangle().fill(AppColors.surface2).frame(height: 80)
                 if let firstImage = catalog.productImages?.first, let url = URL(string: firstImage) {
-                    AsyncImage(url: url) { phase in
+                    CachedAsyncImage(url: url) { phase in
                         switch phase {
                         case .success(let image):
                             image.resizable().scaledToFill()

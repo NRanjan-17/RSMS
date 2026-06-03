@@ -12,7 +12,6 @@ struct POSView: View {
     @Environment(SalesAssociateAppState.self) private var saAppState
     @State private var viewModel = POSViewModel.shared
     @State private var showClientSheet = false
-    @State private var showCourtesySheet = false
     
     var body: some View {
         ZStack {
@@ -168,38 +167,22 @@ struct POSView: View {
                         }
                         
                         VStack(alignment: .leading, spacing: 12) {
-                            HStack {
-                                Button(action: {
-                                    showCourtesySheet = true
-                                }) {
-                                    HStack {
-                                        Image(systemName: "gift")
-                                        Text(viewModel.courtesyRate > 0 ? "Courtesy Applied (\(viewModel.courtesyRate.formatted(.percent)))" : "Apply Courtesy")
-                                    }
-                                    .font(AppFonts.sansSerif(size: 12, weight: .semibold))
-                                    .foregroundStyle(viewModel.courtesyRate > 0 ? AppColors.success : AppColors.gold)
-                                }
-                                
-                                Spacer()
-                                
-                                if viewModel.courtesyRate > 0 {
-                                    Button(action: { viewModel.applyCourtesy(0) }) {
-                                        Image(systemName: "xmark.circle.fill")
-                                            .foregroundStyle(AppColors.secondary)
-                                    }
-                                }
-                            }
-                            
-                            if viewModel.requiresApproval {
-                                HStack(spacing: 8) {
-                                    StatusBadge(text: LocalizedStringKey(viewModel.approvalState.rawValue), status: viewModel.approvalState == .approved ? .success : viewModel.approvalState == .rejected ? .error : .pending)
-                                    Text("Manager approval required for courtesy above \((0.05).formatted(.percent)).")
-                                        .font(AppFonts.sansSerif(size: 11))
+                            if !viewModel.activeCampaigns.isEmpty {
+                                HStack {
+                                    Text("Campaign")
+                                        .font(AppFonts.sansSerif(size: 13))
                                         .foregroundStyle(AppColors.secondary)
+                                    Spacer()
+                                    Picker("Campaign", selection: $viewModel.appliedCampaign) {
+                                        Text("None").tag(PricingCampaign?(nil))
+                                        ForEach(viewModel.activeCampaigns) { campaign in
+                                            Text(campaign.title).tag(PricingCampaign?(campaign))
+                                        }
+                                    }
+                                    .tint(.white)
                                 }
+                                Divider().background(AppColors.gold15).padding(.vertical, 4)
                             }
-                            
-                            Divider().background(AppColors.gold15).padding(.vertical, 4)
                             
                             Toggle("Tax-free eligible client", isOn: $viewModel.taxFree)
                                 .font(AppFonts.sansSerif(size: 12))
@@ -222,8 +205,8 @@ struct POSView: View {
                         
                         VStack(spacing: 10) {
                             PriceRow(label: "Subtotal", value: viewModel.formatCurrency(viewModel.subtotal))
-                            if viewModel.courtesyRate > 0 {
-                                PriceRow(label: "Courtesy (\(viewModel.courtesyRate.formatted(.percent)))", value: "−\(viewModel.formatCurrency(viewModel.courtesyAmount))")
+                            if let campaign = viewModel.appliedCampaign, viewModel.campaignDiscountAmount > 0 {
+                                PriceRow(label: "\(campaign.title) (\((campaign.discountPercentage / 100.0).formatted(.percent)))", value: "−\(viewModel.formatCurrency(viewModel.campaignDiscountAmount))")
                             }
                             PriceRow(label: viewModel.taxFree ? "GST" : "GST (\((0.03).formatted(.percent)))", value: "+\(viewModel.formatCurrency(viewModel.tax))")
                             
@@ -280,8 +263,8 @@ struct POSView: View {
                         .background(RoundedRectangle(cornerRadius: 14).fill(AppColors.gold))
                     }
                     .buttonStyle(.plain)
-                    .disabled(viewModel.cartItems.isEmpty || (viewModel.requiresApproval && viewModel.approvalState != .approved) || viewModel.isProcessingPayment)
-                    .opacity(viewModel.cartItems.isEmpty || (viewModel.requiresApproval && viewModel.approvalState != .approved) || viewModel.isProcessingPayment ? 0.45 : 1)
+                    .disabled(viewModel.cartItems.isEmpty || viewModel.isProcessingPayment)
+                    .opacity(viewModel.cartItems.isEmpty || viewModel.isProcessingPayment ? 0.45 : 1)
                     .padding(.horizontal, 24)
                     .padding(.bottom, 40)
                 }
@@ -294,11 +277,6 @@ struct POSView: View {
         .sheet(isPresented: $showClientSheet) {
             ClientSelectionSheet { client in
                 viewModel.attachClient(client)
-            }
-        }
-        .sheet(isPresented: $showCourtesySheet) {
-            CourtesySheet { rate in
-                viewModel.applyCourtesy(rate)
             }
         }
         .toolbar(.hidden, for: .navigationBar)
@@ -318,59 +296,6 @@ private struct PriceRow: View {
             Text(value)
                 .font(AppFonts.serif(size: 13))
                 .foregroundStyle(.white)
-        }
-    }
-}
-
-private struct CourtesySheet: View {
-    @Environment(\.dismiss) private var dismiss
-    let onApply: (Double) -> Void
-    
-    var body: some View {
-        ZStack {
-            AppColors.background.ignoresSafeArea()
-            
-            VStack(spacing: 24) {
-                Text("Apply Courtesy")
-                    .font(AppFonts.serif(size: 20, weight: .medium))
-                    .foregroundStyle(.white)
-                    .padding(.top, 24)
-                
-                VStack(spacing: 12) {
-                    CourtesyButton(title: "VIP Privilege (\((0.05).formatted(.percent)))", rate: 0.05, action: { onApply(0.05); dismiss() })
-                    CourtesyButton(title: "Service Recovery (\((0.08).formatted(.percent)))", rate: 0.08, action: { onApply(0.08); dismiss() })
-                    CourtesyButton(title: "Exceptional Gesture (\((0.12).formatted(.percent)))", rate: 0.12, action: { onApply(0.12); dismiss() })
-                }
-                
-                Spacer()
-            }
-            .padding(.horizontal, 24)
-        }
-        .presentationDetents([.height(320)])
-        .presentationDragIndicator(.visible)
-    }
-}
-
-private struct CourtesyButton: View {
-    let title: String
-    let rate: Double
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            HStack {
-                Text(title)
-                    .font(AppFonts.sansSerif(size: 14, weight: .medium))
-                    .foregroundStyle(AppColors.gold)
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .font(AppFonts.sansSerif(size: 12, weight: .semibold))
-                    .foregroundStyle(AppColors.gold.opacity(0.5))
-            }
-            .padding()
-            .background(AppColors.surface)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
         }
     }
 }

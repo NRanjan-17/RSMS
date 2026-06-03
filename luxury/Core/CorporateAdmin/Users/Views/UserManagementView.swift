@@ -255,7 +255,7 @@ private struct ApprovedBoutiquesListView: View {
                         }) {
                             HStack(spacing: 16) {
                                 if let urlString = boutique.avatarUrl, let url = URL(string: urlString) {
-                                    AsyncImage(url: url) { image in
+                                    CachedAsyncImage(url: url) { image in
                                         image.resizable().scaledToFill()
                                     } placeholder: {
                                         ProgressView().tint(AppColors.gold)

@@ -117,7 +117,7 @@ struct PlanogramAdminCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            AsyncImage(url: URL(string: planogram.fileUrl)) { image in
+            CachedAsyncImage(url: URL(string: planogram.fileUrl)) { image in
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fill)
@@ -280,7 +280,7 @@ struct PlanogramFormSheet: View {
                             .frame(maxHeight: 200)
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                     } else if let editingPlanogram = editingPlanogram {
-                        AsyncImage(url: URL(string: editingPlanogram.fileUrl)) { image in
+                        CachedAsyncImage(url: URL(string: editingPlanogram.fileUrl)) { image in
                             image
                                 .resizable()
                                 .scaledToFit()

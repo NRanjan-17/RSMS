@@ -130,7 +130,7 @@ private struct CatalogGridCard: View {
                 ZStack {
                     AppColors.surface2
                     if let url = firstURL {
-                        AsyncImage(url: url) { phase in
+                        CachedAsyncImage(url: url) { phase in
                             switch phase {
                             case .success(let image):
                                 image

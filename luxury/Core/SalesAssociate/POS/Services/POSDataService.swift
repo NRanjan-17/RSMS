@@ -54,6 +54,15 @@ final class POSDataService {
         return try posDecoder.decode([CatalogItem].self, from: response.data)
     }
     
+    func fetchActiveCampaigns() async throws -> [PricingCampaign] {
+        let response = try await client
+            .from("campaigns")
+            .select()
+            .eq("status", value: "Active")
+            .execute()
+        return try posDecoder.decode([PricingCampaign].self, from: response.data)
+    }
+    
     private struct IDResponse: Codable {
         let id: UUID
     }

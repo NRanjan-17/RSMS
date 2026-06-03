@@ -614,7 +614,7 @@ private struct ClientHistoryTab: View {
                                         .frame(width: 48, height: 48)
                                         
                                     if let imageUrl = p.imageUrl, !imageUrl.isEmpty, let url = URL(string: imageUrl) {
-                                        AsyncImage(url: url) { image in
+                                        CachedAsyncImage(url: url) { image in
                                             image.resizable().scaledToFill()
                                         } placeholder: {
                                             ProgressView()
@@ -755,7 +755,7 @@ private struct ClientWishlistTab: View {
                                                 .frame(width: 44, height: 44)
                                             
                                             if let imgStr = w.productImages?.first, let imgURL = URL(string: imgStr) {
-                                                AsyncImage(url: imgURL) { phase in
+                                                CachedAsyncImage(url: imgURL) { phase in
                                                     switch phase {
                                                     case .success(let image):
                                                         image

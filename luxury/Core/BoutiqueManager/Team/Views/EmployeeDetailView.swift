@@ -27,7 +27,7 @@ struct EmployeeDetailView: View {
                     VStack(alignment: .leading, spacing: 32) {
                         HStack(spacing: 16) {
                             if let url = URL(string: employee.avatarUrl) {
-                                AsyncImage(url: url) { image in
+                                CachedAsyncImage(url: url) { image in
                                     image
                                         .resizable()
                                         .aspectRatio(contentMode: .fill)
@@ -142,7 +142,7 @@ struct EmployeeDetailView: View {
                                     .foregroundStyle(AppColors.secondary)
                                     .kerning(1.5)
                                 
-                                AsyncImage(url: url) { image in
+                                CachedAsyncImage(url: url) { image in
                                     image
                                         .resizable()
                                         .aspectRatio(contentMode: .fit)

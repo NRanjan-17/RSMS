@@ -82,7 +82,7 @@ struct SalesTargetsView: View {
                                             VStack(alignment: .leading, spacing: 10) {
                                                 HStack {
                                                     if let url = URL(string: staff.avatarUrl) {
-                                                        AsyncImage(url: url) { image in
+                                                        CachedAsyncImage(url: url) { image in
                                                             image.resizable().scaledToFill()
                                                         } placeholder: {
                                                             Image(systemName: "person.circle.fill").foregroundStyle(AppColors.gold)

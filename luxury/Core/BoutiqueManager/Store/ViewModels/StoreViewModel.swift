@@ -7,11 +7,14 @@
 
 import Foundation
 import Observation
+import Supabase
+import PostgREST
 
 @Observable
 final class StoreViewModel {
     var pendingTransfersCount: Int = 0
     var pendingCycleCountsCount: Int = 1
+    var activeCampaigns: [PricingCampaign] = []
     
     var events: [StoreEvent] = []
     
@@ -20,6 +23,42 @@ final class StoreViewModel {
     init() {
         loadLocalEvents()
         fetchPendingTransfersCount()
+        Task {
+            await fetchActiveCampaigns()
+        }
+    }
+    
+    func fetchActiveCampaigns() async {
+        do {
+            let response = try await SupabaseManager.shared.client
+                .from("campaigns")
+                .select()
+                .eq("status", value: "Active")
+                .execute()
+            
+            let decoder = JSONDecoder()
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"
+            
+            decoder.dateDecodingStrategy = .custom { decoder in
+                let container = try decoder.singleValueContainer()
+                let dateString = try container.decode(String.self)
+                if let date = formatter.date(from: dateString) {
+                    return date
+                }
+                if let date = ISO8601DateFormatter().date(from: dateString) {
+                    return date
+                }
+                throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode date")
+            }
+            
+            let fetched = try decoder.decode([PricingCampaign].self, from: response.data)
+            await MainActor.run {
+                self.activeCampaigns = fetched
+            }
+        } catch {
+            print("StoreViewModel: Failed to fetch campaigns \(error)")
+        }
     }
     
     func fetchPendingTransfersCount() {

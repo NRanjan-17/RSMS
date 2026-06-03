@@ -57,7 +57,7 @@ struct PlanogramGalleryView: View {
                                     selectedPlanogram = planogram
                                 }) {
                                     VStack(alignment: .leading, spacing: 8) {
-                                        AsyncImage(url: URL(string: planogram.fileUrl)) { image in
+                                        CachedAsyncImage(url: URL(string: planogram.fileUrl)) { image in
                                             image
                                                 .resizable()
                                                 .aspectRatio(contentMode: .fill)

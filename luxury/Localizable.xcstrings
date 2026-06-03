@@ -8319,6 +8319,9 @@
     "Active Campaigns" : {
 
     },
+    "ACTIVE CAMPAIGNS" : {
+
+    },
     "Active Profiles" : {
       "localizations" : {
         "ar" : {
@@ -14589,6 +14592,7 @@
 
     },
     "Apply Courtesy" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -23453,6 +23457,9 @@
         }
       }
     },
+    "BOUTIQUE" : {
+
+    },
     "Boutique\nRegistration." : {
       "localizations" : {
         "ar" : {
@@ -25907,6 +25914,9 @@
           }
         }
       }
+    },
+    "Campaign" : {
+
     },
     "CAMPAIGN DETAILS" : {
       "extractionState" : "manual"
@@ -36417,6 +36427,7 @@
       }
     },
     "Courtesy Applied (%@)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -70365,6 +70376,7 @@
       }
     },
     "Manager approval required for courtesy above %@." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -83714,6 +83726,9 @@
           }
         }
       }
+    },
+    "None" : {
+
     },
     "Not available" : {
       "localizations" : {
@@ -100610,9 +100625,6 @@
     },
     "Region" : {
       "extractionState" : "manual"
-    },
-    "REGION" : {
-
     },
     "Reject" : {
       "localizations" : {

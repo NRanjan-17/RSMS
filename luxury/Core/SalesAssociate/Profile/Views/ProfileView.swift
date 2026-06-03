@@ -46,7 +46,7 @@ struct ProfileView: View {
                             Spacer()
                             
                             if let avatar = viewModel.avatarUrl, !avatar.isEmpty, let url = URL(string: avatar) {
-                                AsyncImage(url: url) { image in
+                                CachedAsyncImage(url: url) { image in
                                     image.resizable()
                                         .scaledToFill()
                                 } placeholder: {

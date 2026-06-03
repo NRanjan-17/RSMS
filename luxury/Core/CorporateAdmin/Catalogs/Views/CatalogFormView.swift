@@ -165,7 +165,7 @@ struct CatalogFormView: View {
                                 HStack(spacing: 12) {
                                     ForEach(Array(viewModel.existingImageURLs.enumerated()), id: \.offset) { index, url in
                                         if let parsedURL = URL(string: url) {
-                                            AsyncImage(url: parsedURL) { phase in
+                                            CachedAsyncImage(url: parsedURL) { phase in
                                                 if let image = phase.image {
                                                     image
                                                         .resizable()

@@ -71,10 +71,8 @@ final class POSViewModel {
         }
     }
     
-    var courtesyRate: Double = 0.0
     var taxFree: Bool = false
     var isGiftInvoice: Bool = false
-    var approvalState: ApprovalState = .approved
     var offlineCartQueued: Bool = true
     
     var isProcessingPayment: Bool = false
@@ -85,6 +83,9 @@ final class POSViewModel {
     var lastClient: StoreClient? = nil
     var lastBoutique: CorporateBoutique? = nil
     
+    var activeCampaigns: [PricingCampaign] = []
+    var appliedCampaign: PricingCampaign? = nil
+    
     var isLoadingProducts = false
     var errorMessage: String? = nil
     
@@ -92,20 +93,20 @@ final class POSViewModel {
         Int(cartItems.reduce(0) { $0 + ($1.product.amount * Double($1.qty)) })
     }
     
-    var courtesyAmount: Int {
-        Int(Double(subtotal) * courtesyRate)
+    var campaignDiscountAmount: Int {
+        guard let campaign = appliedCampaign else { return 0 }
+        let eligibleSubtotal = cartItems.filter { item in
+            campaign.affectedCategories.contains("All") || campaign.affectedCategories.contains(item.product.category)
+        }.reduce(0) { $0 + ($1.product.amount * Double($1.qty)) }
+        return Int(Double(eligibleSubtotal) * (campaign.discountPercentage / 100.0))
     }
     
     var tax: Int {
-        taxFree ? 0 : Int(Double(subtotal - courtesyAmount) * 0.03)
+        taxFree ? 0 : Int(Double(subtotal - campaignDiscountAmount) * 0.03)
     }
     
     var total: Int {
-        subtotal - courtesyAmount + tax
-    }
-    
-    var requiresApproval: Bool {
-        courtesyRate > 0.05
+        subtotal - campaignDiscountAmount + tax
     }
     
     func fetchProducts() {
@@ -113,8 +114,10 @@ final class POSViewModel {
         Task {
             do {
                 let products = try await POSDataService.shared.fetchCatalogs()
+                let campaigns = try? await POSDataService.shared.fetchActiveCampaigns()
                 await MainActor.run {
                     self.availableProducts = products
+                    self.activeCampaigns = campaigns ?? []
                     self.isLoadingProducts = false
                 }
             } catch {
@@ -164,23 +167,6 @@ final class POSViewModel {
             guestCart.removeAll()
         }
         self.selectedClient = client
-    }
-    
-    func applyCourtesy(_ rate: Double) {
-        courtesyRate = rate
-        approvalState = rate > 0.05 ? .waiting : .approved
-    }
-    
-    func requestApproval() {
-        approvalState = .waiting
-    }
-    
-    func approve() {
-        approvalState = .approved
-    }
-    
-    func reject() {
-        approvalState = .rejected
     }
     
     @MainActor

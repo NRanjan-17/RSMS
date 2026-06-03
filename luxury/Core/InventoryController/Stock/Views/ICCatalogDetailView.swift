@@ -57,7 +57,7 @@ struct ICCatalogDetailView: View {
                         HStack(spacing: 12) {
                             ForEach(Array(images.enumerated()), id: \.offset) { _, url in
                                 if let parsedURL = URL(string: url) {
-                                    AsyncImage(url: parsedURL) { phase in
+                                    CachedAsyncImage(url: parsedURL) { phase in
                                         if let image = phase.image {
                                             image
                                                 .resizable()

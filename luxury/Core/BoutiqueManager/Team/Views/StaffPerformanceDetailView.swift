@@ -22,7 +22,7 @@ struct StaffPerformanceDetailView: View {
                         VStack(spacing: 16) {
                             ZStack {
                                 if let avatarUrl = member.avatarUrl, let url = URL(string: avatarUrl) {
-                                    AsyncImage(url: url) { image in
+                                    CachedAsyncImage(url: url) { image in
                                         image.resizable().aspectRatio(contentMode: .fill)
                                     } placeholder: {
                                         AppColors.gold08
@@ -77,7 +77,7 @@ struct StaffPerformanceDetailView: View {
                                     .kerning(1.5)
                                     .padding(.horizontal, 24)
                                 
-                                AsyncImage(url: url) { image in
+                                CachedAsyncImage(url: url) { image in
                                     image
                                         .resizable()
                                         .aspectRatio(contentMode: .fit)
