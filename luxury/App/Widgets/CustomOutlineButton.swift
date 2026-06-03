@@ -37,5 +37,7 @@ struct CustomOutlineButton: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(Text(title))
     }
 }

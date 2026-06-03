@@ -71,6 +71,7 @@ struct GoldRule: View {
                 )
             )
             .frame(width: width, height: height)
+            .accessibilityHidden(true)
     }
 }
 
@@ -108,9 +109,16 @@ struct LuxuryToggleStyle: ToggleStyle {
                     .padding(.horizontal, 3)
             }
             .animation(.easeInOut(duration: 0.2), value: configuration.isOn)
-            .onTapGesture {
-                configuration.isOn.toggle()
-            }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            configuration.isOn.toggle()
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityValue(configuration.isOn ? "On" : "Off")
+        .accessibilityAction {
+            configuration.isOn.toggle()
         }
     }
 }
@@ -155,6 +163,9 @@ struct Sparkline: View {
             }
         }
         .frame(height: height)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Performance chart")
+        .accessibilityValue("Showing \(points.count) data points ranging from \(points.min() ?? 0) to \(points.max() ?? 0)")
     }
 }
 
@@ -168,6 +179,8 @@ struct LoadingOverlay: View {
                 .tint(AppColors.gold)
                 .scaleEffect(1.2)
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Loading")
     }
 }
 
@@ -332,44 +345,59 @@ struct RSMSDatePicker: View {
                 .foregroundStyle(AppColors.secondary)
                 .kerning(0.8)
                 .textCase(.uppercase)
+                .accessibilityHidden(true)
             
-            Button(action: {
-                tempDate = isSet ? date : Date()
-                showCalendarSheet = true
-            }) {
-                HStack {
-                    if isSet {
-                        Text(formatDate(date))
-                            .font(AppFonts.sansSerif(size: 14))
-                            .foregroundStyle(.white)
-                    } else {
-                        Text("Not Set")
-                            .font(AppFonts.sansSerif(size: 14))
-                            .foregroundStyle(AppColors.tertiary)
-                    }
-                    
-                    Spacer()
-                    
-                    if isSet {
-                        Button(action: {
-                            isSet = false
-                        }) {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundStyle(AppColors.secondary)
+            HStack(spacing: 8) {
+                Button(action: {
+                    tempDate = isSet ? date : Date()
+                    showCalendarSheet = true
+                }) {
+                    HStack {
+                        if isSet {
+                            Text(formatDate(date))
+                                .font(AppFonts.sansSerif(size: 14))
+                                .foregroundStyle(.white)
+                        } else {
+                            Text("Not Set")
+                                .font(AppFonts.sansSerif(size: 14))
+                                .foregroundStyle(AppColors.tertiary)
                         }
-                        .buttonStyle(.plain)
-                    } else {
-                        Image(systemName: "calendar")
-                            .foregroundStyle(AppColors.gold)
+                        
+                        Spacer()
+                        
+                        if !isSet {
+                            Image(systemName: "calendar")
+                                .foregroundStyle(AppColors.gold)
+                                .accessibilityHidden(true)
+                        }
                     }
+                    .padding(.horizontal, 14)
+                    .frame(height: 46)
+                    .background(AppColors.surface)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text(label))
+                .accessibilityValue(isSet ? formatDate(date) : "Not Set")
+                .accessibilityHint("Double tap to change date")
+                
+                if isSet {
+                    Button(action: {
+                        isSet = false
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 18))
+                            .foregroundStyle(AppColors.secondary)
+                            .frame(width: 46, height: 46)
+                            .background(AppColors.surface)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Clear \(Text(label))")
                 }
             }
-            .buttonStyle(.plain)
-            .padding(.horizontal, 14)
-            .frame(height: 46)
-            .background(AppColors.surface)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
         }
         .sheet(isPresented: $showCalendarSheet) {
             CalendarPickerSheet(label: label, selectedDate: $tempDate, onSave: {
@@ -413,6 +441,7 @@ struct CalendarPickerSheet: View {
                     Text(label)
                         .font(AppFonts.sansSerif(size: 16, weight: .semibold))
                         .foregroundStyle(AppColors.text)
+                        .accessibilityAddTraits(.isHeader)
                     
                     Spacer()
                     

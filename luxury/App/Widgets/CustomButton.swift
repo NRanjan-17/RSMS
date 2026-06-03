@@ -48,5 +48,8 @@ struct CustomButton: View {
         }
         .buttonStyle(.plain)
         .disabled(isLoading)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(Text(title))
+        .accessibilityValue(isLoading ? "Loading" : "")
     }
 }

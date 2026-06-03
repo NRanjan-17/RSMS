@@ -31,6 +31,7 @@ struct FulfillmentView: View {
                             .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                             .foregroundStyle(AppColors.gold)
                     }
+                    .accessibilityLabel("Back")
                     Text("SFS Orders")
                         .font(AppFonts.sansSerif(size: 13, weight: .medium))
                         .foregroundStyle(AppColors.gold)
@@ -52,9 +53,13 @@ struct FulfillmentView: View {
                             Rectangle()
                                 .fill(viewModel.selectedSegment == 0 ? AppColors.gold : Color.clear)
                                 .frame(height: 2)
+                                .accessibilityHidden(true)
                         }
                     }
                     .frame(maxWidth: .infinity)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("New Requests Tab")
+                    .accessibilityAddTraits(viewModel.selectedSegment == 0 ? [.isSelected] : [])
                     
                     Button(action: {
                         withAnimation(.easeInOut(duration: 0.25)) {
@@ -68,9 +73,13 @@ struct FulfillmentView: View {
                             Rectangle()
                                 .fill(viewModel.selectedSegment == 1 ? AppColors.gold : Color.clear)
                                 .frame(height: 2)
+                                .accessibilityHidden(true)
                         }
                     }
                     .frame(maxWidth: .infinity)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Completed Orders Tab")
+                    .accessibilityAddTraits(viewModel.selectedSegment == 1 ? [.isSelected] : [])
                 }
                 .padding(.top, 8)
                 .background(AppColors.background)
@@ -116,11 +125,7 @@ struct FulfillmentView: View {
                         ScrollView {
                             LazyVStack(spacing: 16) {
                                 ForEach(orders) { order in
-                                    Button(action: {
-                                        if order.status.lowercased() == "pending" {
-                                            router.push(ICRoute.sfsVerification(order))
-                                        }
-                                    }) {
+                                    VStack(alignment: .leading, spacing: 12) {
                                         VStack(alignment: .leading, spacing: 12) {
                                             HStack {
                                                 Text("ORDER ID: \(String(order.id.uuidString.prefix(8)).uppercased())")
@@ -157,61 +162,69 @@ struct FulfillmentView: View {
                                                     StatusBadge(text: LocalizedStringKey("Pending"), status: .warning)
                                                 }
                                             }
-                                            
+                                        }
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
                                             if order.status.lowercased() == "pending" {
-                                                Button(action: {
-                                                    Task {
-                                                        _ = await viewModel.updateStatusToReadyToPick(orderId: order.id)
-                                                    }
-                                                }) {
-                                                    Text("Mark Ready to Pick")
-                                                        .font(AppFonts.sansSerif(size: 14, weight: .bold))
-                                                        .foregroundStyle(AppColors.background)
-                                                        .frame(maxWidth: .infinity)
-                                                        .padding(.vertical, 12)
-                                                        .background(AppColors.gold)
-                                                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                }
-                                                .padding(.top, 8)
-                                            } else if order.status.lowercased() == "secured" {
-                                                Button(action: {
-                                                    Task {
-                                                        await viewModel.updateStatusToReadyToPick(orderId: order.id)
-                                                    }
-                                                }) {
-                                                    Text("Mark Ready to Pick")
-                                                        .font(AppFonts.sansSerif(size: 14, weight: .bold))
-                                                        .foregroundStyle(AppColors.background)
-                                                        .frame(maxWidth: .infinity)
-                                                        .padding(.vertical, 12)
-                                                        .background(AppColors.gold)
-                                                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                }
-                                                .padding(.top, 8)
-                                            } else if order.status.lowercased() == "ready to pick" {
-                                                Button(action: {
-                                                    dispatchingOrder = order
-                                                }) {
-                                                    Text("Confirm Dispatch & Delivery")
-                                                        .font(AppFonts.sansSerif(size: 14, weight: .bold))
-                                                        .foregroundStyle(AppColors.background)
-                                                        .frame(maxWidth: .infinity)
-                                                        .padding(.vertical, 12)
-                                                        .background(AppColors.gold)
-                                                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                }
-                                                .padding(.top, 8)
+                                                router.push(ICRoute.sfsVerification(order))
                                             }
                                         }
-                                        .padding(16)
-                                        .background(AppColors.surface)
-                                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .stroke(AppColors.gold15, lineWidth: 0.5)
-                                        )
+                                        .accessibilityElement(children: .combine)
+                                        .accessibilityAddTraits(order.status.lowercased() == "pending" ? [.isButton] : [])
+                                        .accessibilityHint(order.status.lowercased() == "pending" ? "Double tap to verify order" : "")
+                                        
+                                        if order.status.lowercased() == "pending" {
+                                            Button(action: {
+                                                Task {
+                                                    _ = await viewModel.updateStatusToReadyToPick(orderId: order.id)
+                                                }
+                                            }) {
+                                                Text("Mark Ready to Pick")
+                                                    .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                                    .foregroundStyle(AppColors.background)
+                                                    .frame(maxWidth: .infinity)
+                                                    .padding(.vertical, 12)
+                                                    .background(AppColors.gold)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                            }
+                                            .padding(.top, 8)
+                                        } else if order.status.lowercased() == "secured" {
+                                            Button(action: {
+                                                Task {
+                                                    await viewModel.updateStatusToReadyToPick(orderId: order.id)
+                                                }
+                                            }) {
+                                                Text("Mark Ready to Pick")
+                                                    .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                                    .foregroundStyle(AppColors.background)
+                                                    .frame(maxWidth: .infinity)
+                                                    .padding(.vertical, 12)
+                                                    .background(AppColors.gold)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                            }
+                                            .padding(.top, 8)
+                                        } else if order.status.lowercased() == "ready to pick" {
+                                            Button(action: {
+                                                dispatchingOrder = order
+                                            }) {
+                                                Text("Confirm Dispatch & Delivery")
+                                                    .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                                    .foregroundStyle(AppColors.background)
+                                                    .frame(maxWidth: .infinity)
+                                                    .padding(.vertical, 12)
+                                                    .background(AppColors.gold)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                            }
+                                            .padding(.top, 8)
+                                        }
                                     }
-                                    .buttonStyle(.plain)
+                                    .padding(16)
+                                    .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(AppColors.gold15, lineWidth: 0.5)
+                                    )
                                 }
                             }
                             .padding(20)

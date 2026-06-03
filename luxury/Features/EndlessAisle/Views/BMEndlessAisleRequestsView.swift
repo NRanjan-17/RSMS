@@ -24,6 +24,7 @@ public struct BMEndlessAisleRequestsView: View {
                             .font(AppFonts.sansSerif(size: 20, weight: .semibold))
                             .foregroundStyle(AppColors.gold)
                     }
+                    .accessibilityLabel("Back")
                     
                     Text("Endless Aisle Approvals")
                         .font(AppFonts.serif(size: 24, weight: .semibold))
@@ -43,6 +44,7 @@ public struct BMEndlessAisleRequestsView: View {
                                 .foregroundStyle(AppColors.secondary)
                                 .kerning(1.5)
                                 .padding(.horizontal, 24)
+                                .accessibilityAddTraits(.isHeader)
                             
                             if outgoing.isEmpty {
                                 Text("No outgoing requests awaiting Delhi manager approval.")
@@ -66,6 +68,7 @@ public struct BMEndlessAisleRequestsView: View {
                                                 Spacer()
                                                 StatusBadge(text: LocalizedStringKey("Pending"), status: .pending)
                                             }
+                                            .accessibilityElement(children: .combine)
                                             
                                             HStack(spacing: 12) {
                                                 Button(action: { viewModel.approveBMA(requestId: request.id) }) {
@@ -97,6 +100,7 @@ public struct BMEndlessAisleRequestsView: View {
                                 .foregroundStyle(AppColors.secondary)
                                 .kerning(1.5)
                                 .padding(.horizontal, 24)
+                                .accessibilityAddTraits(.isHeader)
                             
                             if incoming.isEmpty {
                                 Text("No incoming requests awaiting Paris manager authorization.")
@@ -120,6 +124,7 @@ public struct BMEndlessAisleRequestsView: View {
                                                 Spacer()
                                                 StatusBadge(text: LocalizedStringKey("Action Needed"), status: .warning)
                                             }
+                                            .accessibilityElement(children: .combine)
                                             
                                             HStack(spacing: 12) {
                                                 Button(action: { viewModel.approveBMB(requestId: request.id) }) {
@@ -151,6 +156,7 @@ public struct BMEndlessAisleRequestsView: View {
                                 .foregroundStyle(AppColors.secondary)
                                 .kerning(1.5)
                                 .padding(.horizontal, 24)
+                                .accessibilityAddTraits(.isHeader)
                             
                             if history.isEmpty {
                                 Text("No recent transfer requests recorded.")
@@ -180,6 +186,7 @@ public struct BMEndlessAisleRequestsView: View {
                                         .background(AppColors.surface)
                                         .clipShape(RoundedRectangle(cornerRadius: 12))
                                         .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                        .accessibilityElement(children: .combine)
                                     }
                                 }
                                 .padding(.horizontal, 24)
