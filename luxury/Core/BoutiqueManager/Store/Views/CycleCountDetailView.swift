@@ -106,21 +106,39 @@ final class CycleCountService {
             .execute()
             .value
         
+        let today = Date()
+        let calendar = Calendar.current
+        var comps = calendar.dateComponents([.year, .month], from: today)
+        comps.day = day
+        
+        var targetDate = calendar.date(from: comps) ?? today
+        
+        let targetStartOfDay = calendar.startOfDay(for: targetDate)
+        let todayStartOfDay = calendar.startOfDay(for: today)
+        
+        if targetStartOfDay < todayStartOfDay {
+            comps.month = (comps.month ?? 0) + 1
+            if let newMonthDate = calendar.date(from: comps), 
+               let range = calendar.range(of: .day, in: .month, for: newMonthDate) {
+                comps.day = min(day, range.count)
+            }
+            targetDate = calendar.date(from: comps) ?? today
+        }
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let scheduledDateStr = dateFormatter.string(from: targetDate)
+        
         if let latest = activeAudits.first {
-            struct UpdateFixedDay: Codable {
+            struct UpdatePayload: Codable {
                 let fixed_day: Int
+                let scheduled_date: String
             }
             try await client.from("audits")
-                .update(UpdateFixedDay(fixed_day: day))
+                .update(UpdatePayload(fixed_day: day, scheduled_date: scheduledDateStr))
                 .eq("id", value: latest.id)
                 .execute()
         } else {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd"
-            var comps = Calendar.current.dateComponents([.year, .month], from: Date())
-            comps.month = (comps.month ?? 0) + 1
-            comps.day = day
-            let nextDate = Calendar.current.date(from: comps) ?? Date()
             struct InsertAudit: Codable {
                 let boutique_id: UUID
                 let scheduled_date: String
@@ -129,7 +147,7 @@ final class CycleCountService {
             }
             let payload = InsertAudit(
                 boutique_id: boutiqueId,
-                scheduled_date: dateFormatter.string(from: nextDate),
+                scheduled_date: scheduledDateStr,
                 fixed_day: day,
                 status: AuditModelStatus.scheduled.rawValue
             )
@@ -264,16 +282,15 @@ struct CycleCountDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(Router.self) private var router
     @State private var viewModel = CycleCountViewModel.shared
-    @State private var selectedDay: String = "28th"
+    @State private var selectedDay: String = ""
     @State private var applyNextMonth: Bool = false
-    @State private var showDatePicker: Bool = false
-    @State private var customDate: Date = Date()
-
-    private var isCustomDateSelected: Bool {
-        !["1st Day", "15th Day", "Last Day"].contains(selectedDay)
-    }
+    @State private var showConfirmAlert: Bool = false
+    @State private var pendingSelectedDay: String = ""
 
     private var auditDateTitle: String {
+        if selectedDay.isEmpty {
+            return "Loading..."
+        }
         if selectedDay == "1st Day" {
             return "1st of every month"
         } else if selectedDay == "15th Day" {
@@ -298,6 +315,21 @@ struct CycleCountDetailView: View {
             }
         }
         return "\(day)\(suffix)"
+    }
+
+    private func executeDayUpdate(for dayString: String) {
+        var dayNum = 1
+        if dayString == "1st Day" { dayNum = 1 }
+        else if dayString == "15th Day" { dayNum = 15 }
+        else if dayString == "Last Day" { 
+            let range = Calendar.current.range(of: .day, in: .month, for: Date())
+            dayNum = range?.count ?? 28
+        }
+        else { dayNum = Int(dayString.replacingOccurrences(of: "st", with: "").replacingOccurrences(of: "nd", with: "").replacingOccurrences(of: "rd", with: "").replacingOccurrences(of: "th", with: "")) ?? 1 }
+        
+        viewModel.updateFixedDay(day: dayNum)
+        
+        viewModel.updateFixedDay(day: dayNum)
     }
 
     var body: some View {
@@ -372,17 +404,14 @@ struct CycleCountDetailView: View {
                                     Text(auditDateTitle)
                                         .font(AppFonts.serif(size: 24, weight: .semibold))
                                         .foregroundStyle(.white)
-                                    
-                                    Text("Full Store · General + High Value Zone")
-                                        .font(AppFonts.sansSerif(size: 13))
-                                        .foregroundStyle(AppColors.secondary)
                                 }
                                 
-                                // Day Picker Pill Matrix (Simplified + Calendar)
+                                // Day Picker Pill Matrix (Simplified)
                                 HStack(spacing: 8) {
                                     ForEach(["1st Day", "15th Day", "Last Day"], id: \.self) { day in
                                         Button(action: {
-                                            selectedDay = day
+                                            pendingSelectedDay = day
+                                            showConfirmAlert = true
                                         }) {
                                             Text(day)
                                                 .font(AppFonts.sansSerif(size: 12, weight: .semibold))
@@ -397,64 +426,8 @@ struct CycleCountDetailView: View {
                                                 )
                                         }
                                     }
-                                    
-                                    // Calendar Button
-                                    Button(action: {
-                                        showDatePicker = true
-                                    }) {
-                                        Image(systemName: "calendar")
-                                            .font(.system(size: 16, weight: .bold))
-                                            .foregroundStyle(isCustomDateSelected ? Color.black : AppColors.gold)
-                                            .frame(width: 40, height: 40)
-                                            .background(isCustomDateSelected ? AppColors.gold : AppColors.background)
-                                            .clipShape(Circle())
-                                            .overlay(
-                                                Circle()
-                                                    .stroke(isCustomDateSelected ? Color.clear : AppColors.border, lineWidth: 1)
-                                            )
-                                    }
                                 }
                                 .padding(.top, 4)
-                                
-                                // Action Confirmation Toggle Row
-                                Button(action: {
-                                    applyNextMonth.toggle()
-                                    if applyNextMonth {
-                                        var dayNum = 1
-                                        if selectedDay == "1st Day" { dayNum = 1 }
-                                        else if selectedDay == "15th Day" { dayNum = 15 }
-                                        else if selectedDay == "Last Day" { dayNum = 28 }
-                                        else { dayNum = Int(selectedDay.replacingOccurrences(of: "st", with: "").replacingOccurrences(of: "nd", with: "").replacingOccurrences(of: "rd", with: "").replacingOccurrences(of: "th", with: "")) ?? 1 }
-                                        viewModel.updateFixedDay(day: dayNum)
-                                    }
-                                }) {
-                                    HStack {
-                                        Image(systemName: applyNextMonth ? "checkmark.square.fill" : "square")
-                                            .font(.system(size: 18, weight: .medium))
-                                            .foregroundStyle(applyNextMonth ? AppColors.gold : AppColors.secondary)
-                                        
-                                        Spacer()
-                                        
-                                        Text("Apply — takes effect next month")
-                                            .font(AppFonts.sansSerif(size: 13, weight: .bold))
-                                            .foregroundStyle(.white)
-                                        
-                                        Spacer()
-                                        
-                                        Image(systemName: "square")
-                                            .font(.system(size: 18))
-                                            .opacity(0)
-                                    }
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 14)
-                                    .background(AppColors.background)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .stroke(AppColors.border, lineWidth: 1)
-                                    )
-                                }
-                                .buttonStyle(PlainButtonStyle())
                             }
                             .padding(20)
                             .background(AppColors.surface)
@@ -470,9 +443,31 @@ struct CycleCountDetailView: View {
                     .padding(.bottom, 24)
                 }
             }
+            
         }
         .onAppear {
             viewModel.loadAudits()
+        }
+        .onChange(of: viewModel.isLoading) { _, isLoading in
+            if !isLoading {
+                if let day = viewModel.activeAudits.first?.fixedDay ?? viewModel.completedAudits.first?.fixedDay {
+                    if day == 1 { selectedDay = "1st Day" }
+                    else if day == 15 { selectedDay = "15th Day" }
+                    else if day == 28 || day == 30 || day == 31 { selectedDay = "Last Day" }
+                    else { selectedDay = formatDayAsOrdinal(day) }
+                } else {
+                    selectedDay = "1st Day"
+                }
+            }
+        }
+        .alert("Reschedule Audit", isPresented: $showConfirmAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Confirm") {
+                selectedDay = pendingSelectedDay
+                executeDayUpdate(for: pendingSelectedDay)
+            }
+        } message: {
+            Text("Are you sure you want to reschedule the monthly audit window?")
         }
         .navigationTitle("Audit Sign-off")
         .navigationBarTitleDisplayMode(.inline)
@@ -489,33 +484,6 @@ struct CycleCountDetailView: View {
                 }
             }
         }
-        .sheet(isPresented: $showDatePicker) {
-            VStack(spacing: 24) {
-                Text("Select Audit Date")
-                    .font(AppFonts.serif(size: 20, weight: .bold))
-                    .foregroundStyle(.white)
-                    .padding(.top, 24)
-                
-                DatePicker("Audit Date", selection: $customDate, displayedComponents: .date)
-                    .datePickerStyle(.graphical)
-                    .tint(AppColors.gold)
-                    .padding(16)
-                    .background(AppColors.surface)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.border, lineWidth: 1))
-                
-                CustomButton(title: "Confirm Date") {
-                    let day = Calendar.current.component(.day, from: customDate)
-                    selectedDay = formatDayAsOrdinal(day)
-                    showDatePicker = false
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 24)
-            }
-            .padding()
-            .background(AppColors.background.ignoresSafeArea())
-            .presentationDetents([.medium, .large])
-        }
     }
 }
 
@@ -525,12 +493,64 @@ struct AuditReportHubView: View {
     @State private var selectedTab: String = "Active"
     @State private var viewModel = CycleCountViewModel.shared
     
-    private var activeAudits: [DBStoreAudit] {
-        viewModel.activeAudits
+    private var activeTabAudits: [DBStoreAudit] {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let today = formatter.string(from: Date())
+        
+        return viewModel.activeAudits.filter { audit in
+            let isCurrent = (audit.scheduledDate == today) || (audit.status == .inProgress)
+            let isPending = (audit.scheduledDate < today) && (audit.status != .signedOff)
+            return isCurrent || isPending
+        }
     }
     
     private var completedAudits: [DBStoreAudit] {
         viewModel.completedAudits
+    }
+    
+    private func formatDayAsOrdinal(_ day: Int) -> String {
+        let suffix: String
+        if (11...13).contains(day % 100) { suffix = "th" }
+        else {
+            switch day % 10 {
+            case 1: suffix = "st"
+            case 2: suffix = "nd"
+            case 3: suffix = "rd"
+            default: suffix = "th"
+            }
+        }
+        return "\(day)\(suffix)"
+    }
+    
+    private var upcomingAuditProj: (title: String, dateStr: String, badge: Color)? {
+        let fixedDay = viewModel.activeAudits.first?.fixedDay ?? viewModel.completedAudits.first?.fixedDay
+        guard let day = fixedDay else { return nil }
+        
+        let today = Date()
+        let calendar = Calendar.current
+        var comps = calendar.dateComponents([.year, .month], from: today)
+        comps.day = day
+        
+        var projectedDate = calendar.date(from: comps) ?? today
+        
+        let targetStartOfDay = calendar.startOfDay(for: projectedDate)
+        let todayStartOfDay = calendar.startOfDay(for: today)
+        
+        if targetStartOfDay < todayStartOfDay {
+            comps.month = (comps.month ?? 0) + 1
+            if let newMonthDate = calendar.date(from: comps), 
+               let range = calendar.range(of: .day, in: .month, for: newMonthDate) {
+                comps.day = min(day, range.count)
+            }
+            projectedDate = calendar.date(from: comps) ?? today
+        }
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM d, yyyy"
+        let formattedDate = formatter.string(from: projectedDate)
+        
+        return (title: "Audit \(formatDayAsOrdinal(day))", dateStr: formattedDate, badge: AppColors.blue)
     }
     
     var body: some View {
@@ -538,29 +558,17 @@ struct AuditReportHubView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Horizontal Selection Bar
-                HStack(spacing: 0) {
-                    ForEach(["Active", "Completed"], id: \.self) { tab in
-                        Button(action: {
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                selectedTab = tab
-                            }
-                        }) {
-                            VStack(spacing: 12) {
-                                Text(tab)
-                                    .font(AppFonts.sansSerif(size: 15, weight: .bold))
-                                    .foregroundStyle(selectedTab == tab ? .white : AppColors.secondary)
-                                
-                                Rectangle()
-                                    .fill(selectedTab == tab ? AppColors.gold : Color.clear)
-                                    .frame(height: 2)
-                            }
-                            .frame(maxWidth: .infinity)
-                        }
-                    }
+                // Apple Native Segmented Control
+                Picker("Tab", selection: $selectedTab) {
+                    Text("Active").tag("Active")
+                    Text("Upcoming").tag("Upcoming")
+                    Text("Completed").tag("Completed")
                 }
-                .padding(.top, 12)
-                .background(AppColors.surface)
+                .pickerStyle(.segmented)
+                .colorScheme(.dark)
+                .padding(.horizontal, 24)
+                .padding(.top, 16)
+                .padding(.bottom, 8)
                 
                 // Toggle List Views
                 ScrollView(showsIndicators: false) {
@@ -571,12 +579,11 @@ struct AuditReportHubView: View {
                                 .foregroundStyle(AppColors.secondary)
                                 .kerning(1.5)
                                 .padding(.horizontal, 24)
-                                .padding(.top, 20)
+                                .padding(.top, 12)
                             
                             VStack(spacing: 12) {
-                                ForEach(activeAudits) { audit in
+                                ForEach(activeTabAudits) { audit in
                                     ActiveAuditRow(
-                                        title: "Audit \(audit.fixedDay)th",
                                         status: viewModel.getStatusLabel(for: audit.status),
                                         date: viewModel.getFormattedDate(from: audit.scheduledDate),
                                         badgeColor: viewModel.getStatusColor(for: audit.status)
@@ -584,26 +591,64 @@ struct AuditReportHubView: View {
                                         router.push(BMRoute.activeAuditReportDetail(audit.id.uuidString))
                                     }
                                 }
+                                if activeTabAudits.isEmpty {
+                                    Text("No active or pending audits.")
+                                        .font(AppFonts.sansSerif(size: 14))
+                                        .foregroundStyle(AppColors.secondary)
+                                        .padding(.vertical, 20)
+                                }
                             }
                             .padding(.horizontal, 24)
+                            
+                        } else if selectedTab == "Upcoming" {
+                            Text("PROJECTED SCHEDULE")
+                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                .foregroundStyle(AppColors.secondary)
+                                .kerning(1.5)
+                                .padding(.horizontal, 24)
+                                .padding(.top, 12)
+                            
+                            VStack(spacing: 12) {
+                                if let upcoming = upcomingAuditProj {
+                                    ActiveAuditRow(
+                                        status: "Upcoming",
+                                        date: upcoming.dateStr,
+                                        badgeColor: upcoming.badge
+                                    ) {
+                                        // Upcoming view not actionable
+                                    }
+                                } else {
+                                    Text("No schedule configured.")
+                                        .font(AppFonts.sansSerif(size: 14))
+                                        .foregroundStyle(AppColors.secondary)
+                                        .padding(.vertical, 20)
+                                }
+                            }
+                            .padding(.horizontal, 24)
+                            
                         } else {
                             Text("HISTORICAL FINALIZED COUNTS")
                                 .font(AppFonts.sansSerif(size: 11, weight: .bold))
                                 .foregroundStyle(AppColors.secondary)
                                 .kerning(1.5)
                                 .padding(.horizontal, 24)
-                                .padding(.top, 20)
+                                .padding(.top, 12)
                             
                             VStack(spacing: 12) {
                                 ForEach(completedAudits) { audit in
                                     HubCompletedAuditRow(
-                                        title: "Audit \(audit.fixedDay)th",
                                         date: viewModel.getFormattedDate(from: audit.scheduledDate),
                                         variance: "\(audit.variance)",
                                         accuracy: (audit.accuracy / 100).formatted(.percent.precision(.fractionLength(1)))
                                     ) {
                                         router.push(BMRoute.auditReportDetail(audit.id.uuidString))
                                     }
+                                }
+                                if completedAudits.isEmpty {
+                                    Text("No completed audits yet.")
+                                        .font(AppFonts.sansSerif(size: 14))
+                                        .foregroundStyle(AppColors.secondary)
+                                        .padding(.vertical, 20)
                                 }
                             }
                             .padding(.horizontal, 24)
@@ -889,7 +934,6 @@ struct ActiveAuditReportDetailView: View {
 // MARK: - Row Subviews
 
 private struct ActiveAuditRow: View {
-    let title: String
     let status: String
     let date: String
     let badgeColor: Color
@@ -899,25 +943,23 @@ private struct ActiveAuditRow: View {
         Button(action: action) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
+                    Text(date)
                         .font(AppFonts.sansSerif(size: 15, weight: .semibold))
                         .foregroundStyle(.white)
-                    
-                    Text(date)
-                        .font(AppFonts.sansSerif(size: 13))
-                        .foregroundStyle(AppColors.secondary)
                 }
                 
                 Spacer()
                 
-                Text(status.uppercased())
-                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                    .foregroundStyle(badgeColor)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(badgeColor.opacity(0.1))
-                    .clipShape(Capsule())
-                    .overlay(Capsule().stroke(badgeColor.opacity(0.3), lineWidth: 1))
+                if status.uppercased() != "UPCOMING" {
+                    Text(status.uppercased())
+                        .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                        .foregroundStyle(badgeColor)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(badgeColor.opacity(0.1))
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(badgeColor.opacity(0.3), lineWidth: 1))
+                }
                 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 14, weight: .bold))
@@ -934,7 +976,6 @@ private struct ActiveAuditRow: View {
 }
 
 struct HubCompletedAuditRow: View {
-    let title: String
     let date: String
     let variance: String
     let accuracy: String
@@ -944,13 +985,9 @@ struct HubCompletedAuditRow: View {
         Button(action: action) {
             HStack {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(title)
+                    Text(date)
                         .font(AppFonts.sansSerif(size: 15, weight: .bold))
                         .foregroundStyle(.white)
-                    
-                    Text("Date: \(date)")
-                        .font(AppFonts.sansSerif(size: 13))
-                        .foregroundStyle(AppColors.secondary)
                 }
                 
                 Spacer()
