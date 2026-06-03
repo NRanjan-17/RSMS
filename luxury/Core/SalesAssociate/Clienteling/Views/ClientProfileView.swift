@@ -1105,8 +1105,7 @@ struct SwipeToDeleteNote: View {
                 
                 HStack(spacing: 6) {
                     Circle().fill(AppColors.gold).frame(width: 5, height: 5).opacity(0.6)
-                    Text("\(note.author) · \(note.date)")
-                    Text("· Encrypted").foregroundStyle(AppColors.tertiary)
+                    Text("\(note.authorName) · \(note.date)")
                 }
                 .font(AppFonts.sansSerif(size: 10))
                 .foregroundStyle(AppColors.secondary)

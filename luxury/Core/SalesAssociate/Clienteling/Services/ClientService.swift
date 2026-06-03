@@ -127,7 +127,7 @@ final class ClientService {
         _ = try? await client.from("wishlist").delete().eq("client_id", value: uuidStr).execute()
         _ = try? await client.from("tickets").delete().eq("client_id", value: uuidStr).execute()
         _ = try? await client.from("size_preferences").delete().eq("client_id", value: uuidStr).execute()
-        _ = try? await client.from("notes").delete().eq("client_id", value: uuidStr).execute()
+        _ = try? await client.from("client_notes").delete().eq("client_id", value: uuidStr).execute()
         
         try await client
             .from("client")
