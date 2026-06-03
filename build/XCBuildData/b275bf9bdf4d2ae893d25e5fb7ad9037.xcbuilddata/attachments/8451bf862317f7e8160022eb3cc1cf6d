@@ -1,0 +1,16 @@
+{
+  "" : {
+    "const-values" : "/Users/prabh_kalraa/Library/Developer/Xcode/DerivedData/luxury-gnlmlmolkgbdthgnbwpudhavoeei/SourcePackages/checkouts/razorpay-pod/build/RazorpayCheckout.build/Release-iphonesimulator/RazorpayCheckout.build/Objects-normal/x86_64/RazorpayCheckout-primary.swiftconstvalues",
+    "dependencies" : "/Users/prabh_kalraa/Library/Developer/Xcode/DerivedData/luxury-gnlmlmolkgbdthgnbwpudhavoeei/SourcePackages/checkouts/razorpay-pod/build/RazorpayCheckout.build/Release-iphonesimulator/RazorpayCheckout.build/Objects-normal/x86_64/RazorpayCheckout-primary.d",
+    "diagnostics" : "/Users/prabh_kalraa/Library/Developer/Xcode/DerivedData/luxury-gnlmlmolkgbdthgnbwpudhavoeei/SourcePackages/checkouts/razorpay-pod/build/RazorpayCheckout.build/Release-iphonesimulator/RazorpayCheckout.build/Objects-normal/x86_64/RazorpayCheckout-primary.dia",
+    "emit-module-dependencies" : "/Users/prabh_kalraa/Library/Developer/Xcode/DerivedData/luxury-gnlmlmolkgbdthgnbwpudhavoeei/SourcePackages/checkouts/razorpay-pod/build/RazorpayCheckout.build/Release-iphonesimulator/RazorpayCheckout.build/Objects-normal/x86_64/RazorpayCheckout-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/prabh_kalraa/Library/Developer/Xcode/DerivedData/luxury-gnlmlmolkgbdthgnbwpudhavoeei/SourcePackages/checkouts/razorpay-pod/build/RazorpayCheckout.build/Release-iphonesimulator/RazorpayCheckout.build/Objects-normal/x86_64/RazorpayCheckout-primary-emit-module.dia",
+    "pch" : "/Users/prabh_kalraa/Library/Developer/Xcode/DerivedData/luxury-gnlmlmolkgbdthgnbwpudhavoeei/SourcePackages/checkouts/razorpay-pod/build/RazorpayCheckout.build/Release-iphonesimulator/RazorpayCheckout.build/Objects-normal/x86_64/RazorpayCheckout-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/prabh_kalraa/Library/Developer/Xcode/DerivedData/luxury-gnlmlmolkgbdthgnbwpudhavoeei/SourcePackages/checkouts/razorpay-pod/build/RazorpayCheckout.build/Release-iphonesimulator/RazorpayCheckout.build/Objects-normal/x86_64/RazorpayCheckout-primary.swiftdeps"
+  },
+  "/Users/prabh_kalraa/Library/Developer/Xcode/DerivedData/luxury-gnlmlmolkgbdthgnbwpudhavoeei/SourcePackages/checkouts/razorpay-pod/RazorpayCheckout/Sources/RazorpayCheckoutCore/RazorpayCheckout.swift" : {
+    "index-unit-output-path" : "/RazorpayCheckout.build/Release-iphonesimulator/RazorpayCheckout.build/Objects-normal/x86_64/RazorpayCheckout.o",
+    "llvm-bc" : "/Users/prabh_kalraa/Library/Developer/Xcode/DerivedData/luxury-gnlmlmolkgbdthgnbwpudhavoeei/SourcePackages/checkouts/razorpay-pod/build/RazorpayCheckout.build/Release-iphonesimulator/RazorpayCheckout.build/Objects-normal/x86_64/RazorpayCheckout.bc",
+    "object" : "/Users/prabh_kalraa/Library/Developer/Xcode/DerivedData/luxury-gnlmlmolkgbdthgnbwpudhavoeei/SourcePackages/checkouts/razorpay-pod/build/RazorpayCheckout.build/Release-iphonesimulator/RazorpayCheckout.build/Objects-normal/x86_64/RazorpayCheckout.o"
+  }
+}
