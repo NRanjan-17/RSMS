@@ -112,7 +112,7 @@ struct ClientProfileView: View {
                             if viewModel.selectedTab == "overview" {
                                 ClientOverviewTab(
                                     viewModel: viewModel,
-                                    onTicketTap: { router.push(SARoute.afterSalesTracking) }
+                                    onTicketTap: { ast in router.push(SARoute.afterSalesTracking(ast)) }
                                 )
                             } else if viewModel.selectedTab == "appointments" {
                                 ClientAppointmentsTab(viewModel: viewModel)
@@ -202,7 +202,7 @@ struct ClientProfileView: View {
 
 private struct ClientOverviewTab: View {
     let viewModel: ClientDetailViewModel
-    var onTicketTap: () -> Void
+    var onTicketTap: (ASTDetails) -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
@@ -283,7 +283,7 @@ private struct ClientOverviewTab: View {
                 } else {
                     VStack(spacing: 10) {
                         ForEach(viewModel.activeServices.prefix(3), id: \.id) { ast in
-                            Button(action: onTicketTap) {
+                            Button(action: { onTicketTap(ast) }) {
                                 HStack(spacing: 12) {
                                     ZStack {
                                         RoundedRectangle(cornerRadius: 10)

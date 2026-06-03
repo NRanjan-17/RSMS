@@ -72,8 +72,8 @@ struct StockView: View {
                                 router.push(ICRoute.purchaseOrders)
                             })
                             
-                            CustomOutlineButton(title: "Serialization", icon: AnyView(Image(systemName: "doc.badge.gearshape")), action: {
-                                router.push(ICRoute.serialCertificate)
+                            CustomOutlineButton(title: "Repair Queue", icon: AnyView(Image(systemName: "wrench.and.screwdriver")), action: {
+                                router.push(ICRoute.repairQueue)
                             })
                         }
                         .padding(.horizontal, 20)

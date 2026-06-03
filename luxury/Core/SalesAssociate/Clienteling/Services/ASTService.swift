@@ -65,12 +65,18 @@ final class ASTService {
             .value
     }
 
+    struct UpdateStatusPayload: Encodable {
+        let status: String
+    }
+
     func updateASTStatus(astId: UUID, newStatus: String) async throws {
-        let payload: [String: AnyJSON] = ["status": .string(newStatus)]
+        let payload = UpdateStatusPayload(status: newStatus)
         try await client
             .from("ast")
             .update(payload)
             .eq("id", value: astId.uuidString)
+            .select()
+            .single()
             .execute()
     }
 }

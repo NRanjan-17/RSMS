@@ -145,8 +145,8 @@ struct Client: Identifiable, Hashable {
     let id: UUID
     let name: String
     let tier: ClientTier
-    let lastVisit: String
-    let ltv: Double
+    var lastVisit: String
+    var ltv: Double
     let initial: String
     var isHot: Bool
     let phone: String?
@@ -597,8 +597,9 @@ enum ReturnResolution: String, CaseIterable, Hashable {
 
 enum AfterSalesStage: String, CaseIterable, Hashable {
     case intake = "Intake"
-    case inspection = "Inspection"
-    case brandReview = "Brand Review"
+    case managerReview = "Manager Review"
+    case inProgress = "In Progress"
+    case dispatched = "Dispatched"
     case ready = "Ready"
 }
 

@@ -51,6 +51,7 @@ struct PurchaseDetailsView: View {
     let purchase: ClientPurchase
     
     @State private var details: PurchasedItemDetails? = nil
+    @State private var activeAST: ASTDetails? = nil
     
     private var category: String {
         let lower = purchase.name.lowercased()
@@ -359,19 +360,36 @@ struct PurchaseDetailsView: View {
                                 }
                             }
                             
-                            Button(action: {
-                                router.push(SARoute.afterSalesIntake(client: client, serialNumber: displayProductSerial, isWarrantyActive: true, purchaseId: purchase.id))
-                            }) {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "exclamationmark.triangle.fill")
-                                    Text("Report Issue")
+                            if let ast = activeAST {
+                                Button(action: {
+                                    router.push(SARoute.afterSalesTracking(ast))
+                                }) {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "wrench.and.screwdriver.fill")
+                                        Text("Track Active Service")
+                                    }
+                                    .font(AppFonts.sansSerif(size: 15, weight: .bold))
+                                    .foregroundStyle(AppColors.background)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 54)
+                                    .background(AppColors.gold)
+                                    .clipShape(RoundedRectangle(cornerRadius: 14))
                                 }
-                                .font(AppFonts.sansSerif(size: 15, weight: .bold))
-                                .foregroundStyle(AppColors.background)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 54)
-                                .background(AppColors.gold)
-                                .clipShape(RoundedRectangle(cornerRadius: 14))
+                            } else {
+                                Button(action: {
+                                    router.push(SARoute.afterSalesIntake(client: client, serialNumber: displayProductSerial, isWarrantyActive: true, purchaseId: purchase.id))
+                                }) {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "exclamationmark.triangle.fill")
+                                        Text("Report Issue")
+                                    }
+                                    .font(AppFonts.sansSerif(size: 15, weight: .bold))
+                                    .foregroundStyle(AppColors.background)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 54)
+                                    .background(AppColors.gold)
+                                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                                }
                             }
                         }
                         .padding(.top, 8)
@@ -408,6 +426,20 @@ struct PurchaseDetailsView: View {
                         self.details = first
                     }
                 }
+                
+                let asts: [ASTDetails] = try await SupabaseManager.shared.client
+                    .from("ast")
+                    .select("*, catalogs(*), client(*)")
+                    .eq("product_id", value: displayProductId)
+                    .execute()
+                    .value
+                
+                if let active = asts.first(where: { $0.status != "ready" && $0.status != "rejected" && $0.status != "declined" }) {
+                    await MainActor.run {
+                        self.activeAST = active
+                    }
+                }
+                
             } catch {
                 print("Supabase fetch purchased item detail warning: \(error)")
             }
