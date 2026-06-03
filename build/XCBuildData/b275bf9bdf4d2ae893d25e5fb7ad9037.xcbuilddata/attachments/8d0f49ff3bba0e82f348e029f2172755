@@ -1,4 +1,0 @@
-module RazorpayCheckout {
-header "RazorpayCheckout-Swift.h"
-export *
-}
