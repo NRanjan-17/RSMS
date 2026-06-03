@@ -53,6 +53,9 @@ enum BMRoute: Hashable {
     case pendingAppointmentsList([AppointmentEntity])
     case sfsTicketDetail(PurchasedItemEntity)
     case sfsTicketsList([PurchasedItemEntity])
+    case auditReportHub
+    case auditReportDetail(String)
+    case activeAuditReportDetail(String)
 }
 
 enum ICRoute: Hashable {

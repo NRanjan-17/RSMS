@@ -153,6 +153,12 @@ struct BoutiqueManagerCanvas: View {
             SFSTicketsListView(tickets: tickets, onSelectTicket: { ticket in
                 router.push(BMRoute.sfsTicketDetail(ticket))
             })
+        case .auditReportHub:
+            AuditReportHubView()
+        case .auditReportDetail(let title):
+            AuditReportDetailView(auditTitle: title)
+        case .activeAuditReportDetail(let title):
+            ActiveAuditReportDetailView(auditTitle: title)
         }
     }
 }
