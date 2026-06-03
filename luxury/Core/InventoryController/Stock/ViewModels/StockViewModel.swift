@@ -32,11 +32,14 @@ final class StockViewModel {
     func fetchInventoryStats() {
         Task {
             do {
-                let catalogs: [CatalogEntity] = try await SupabaseManager.shared.client
-                    .from("catalogs")
-                    .select()
-                    .execute()
-                    .value
+                let catalogs = try await CatalogService().fetchCatalogs()
+                
+                var stockDict: [UUID: Int] = [:]
+                if let profileTuple = try? await ProfileService().fetchCurrentProfile(),
+                   let staff = profileTuple.1 as? StaffModel,
+                   let boutiqueId = staff.boutiqueId {
+                    stockDict = try await InventoryService.shared.fetchAvailableStockDictionary(forBoutique: boutiqueId)
+                }
                 
                 var total = 0
                 var lowStock = 0
@@ -44,9 +47,7 @@ final class StockViewModel {
                 var newAlerts: [InventoryAlert] = []
                 
                 for catalog in catalogs {
-                    let totalCount = catalog.productIds?.count ?? 0
-                    let reservedCount = catalog.reserved?.count ?? 0
-                    let available = totalCount - reservedCount
+                    let available = stockDict[catalog.id] ?? 0
                     
                     total += available
                     

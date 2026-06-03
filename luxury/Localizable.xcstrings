@@ -2089,6 +2089,9 @@
         }
       }
     },
+    "%@%%" : {
+
+    },
     "%@%lld" : {
       "localizations" : {
         "ar" : {
@@ -4147,6 +4150,9 @@
         }
       }
     },
+    "%lld Sold" : {
+
+    },
     "%lld walk-ins" : {
       "localizations" : {
         "ar" : {
@@ -4424,6 +4430,15 @@
           }
         }
       }
+    },
+    "%lld%%" : {
+
+    },
+    "%lld%% achieved" : {
+
+    },
+    "%lld%% of Total Revenue" : {
+
     },
     "%lldh before" : {
       "localizations" : {
@@ -5650,6 +5665,7 @@
       }
     },
     "● In Stock" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -5784,6 +5800,9 @@
           }
         }
       }
+    },
+    "● In Stock (%lld)" : {
+
     },
     "● Out of Stock" : {
       "localizations" : {
@@ -20336,6 +20355,9 @@
           }
         }
       }
+    },
+    "Available: %lld" : {
+
     },
     "Avg Lifetime Value" : {
       "localizations" : {
@@ -73940,6 +73962,7 @@
       }
     },
     "No Active Reservations" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -100868,6 +100891,7 @@
       }
     },
     "Reservations" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -104810,6 +104834,9 @@
           }
         }
       }
+    },
+    "Sales Performance" : {
+
     },
     "Sales Targets" : {
       "localizations" : {
@@ -112428,6 +112455,7 @@
       }
     },
     "See All (%lld)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -130798,6 +130826,9 @@
           }
         }
       }
+    },
+    "Total Stock" : {
+
     },
     "Total Units Available" : {
       "localizations" : {

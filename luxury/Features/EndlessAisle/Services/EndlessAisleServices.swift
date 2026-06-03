@@ -13,11 +13,11 @@ public enum StockResult: Sendable, Codable, Hashable {
     case noStockAnywhere
 }
 
-public protocol InventoryService: Sendable {
+public protocol EndlessAisleInventoryService: Sendable {
     func checkStock(itemId: UUID) async throws -> StockResult
 }
 
-public final class MockInventoryService: InventoryService, @unchecked Sendable {
+public final class MockInventoryService: EndlessAisleInventoryService, @unchecked Sendable {
     private let mockItems: [UUID: EndlessAisle.Item]
     
     public init(mockItems: [UUID: EndlessAisle.Item]) {

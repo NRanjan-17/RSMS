@@ -52,3 +52,29 @@ enum StockAlertStatus: String, CaseIterable {
     case lowStock = "Low Stock"
     case outOfStock = "Out of Stock"
 }
+
+enum InventoryUnitStatus: String, Codable, CaseIterable, Equatable, Hashable {
+    case available = "Available"
+    case reserved = "Reserved"
+    case sold = "Sold"
+    case inTransit = "In Transit"
+}
+
+struct InventoryUnitEntity: Identifiable, Codable, Equatable, Hashable {
+    let id: UUID
+    let catalogId: UUID
+    let boutiqueId: UUID
+    let serialNumber: String
+    var status: InventoryUnitStatus
+    let createdAt: Date?
+    var updatedAt: Date?
+    
+    enum CodingKeys: String, CodingKey {
+        case id, status
+        case catalogId = "catalog_id"
+        case boutiqueId = "boutique_id"
+        case serialNumber = "serial_number"
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+    }
+}

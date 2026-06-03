@@ -31,15 +31,12 @@ struct CatalogEntity: Identifiable, Codable, Equatable, Hashable {
     let amount: Double
     let barCode: String
     var status: CatalogStatus
-    var reserved: [String]?
-    var productIds: [String]?
     var productImages: [String]?
     
     enum CodingKeys: String, CodingKey {
-        case id, name, description, brand, category, amount, status, reserved
+        case id, name, description, brand, category, amount, status
         case catalogId = "catalog_id"
         case barCode = "bar_code"
-        case productIds = "product_ids"
         case productImages = "product_images"
     }
     

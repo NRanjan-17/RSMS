@@ -21,6 +21,9 @@ struct CatalogDetailView: View {
     @State private var showingBulkGenerateAlert = false
     @State private var bulkQuantity: String = ""
     
+    @State private var inventoryUnits: [InventoryUnitEntity] = []
+    @State private var isLoadingInventory = true
+    
     @State private var selectedBoutiqueId: UUID? = nil
     @State private var showingBoutiquePicker = false
     @State private var pendingAction: BoutiqueAction? = nil
@@ -66,7 +69,7 @@ struct CatalogDetailView: View {
                 LabeledContent("Catalog ID", value: currentCatalog.catalogId)
                 LabeledContent("Category", value: currentCatalog.category.rawValue)
                 LabeledContent("Description", value: currentCatalog.description)
-                LabeledContent("Stock", value: "\((currentCatalog.productIds?.count ?? 0) - (currentCatalog.reserved?.count ?? 0))")
+                LabeledContent("Total Stock", value: isLoadingInventory ? "Loading..." : "\(inventoryUnits.filter { $0.status == .available }.count)")
                 LabeledContent("Amount", value: CurrencyManager.shared.format(amount: currentCatalog.amount))
                 LabeledContent("Barcode", value: currentCatalog.barCode)
             }
@@ -139,22 +142,48 @@ struct CatalogDetailView: View {
                     .padding(.vertical, 4)
                 }
                 
-                if let productIds = currentCatalog.productIds, !productIds.isEmpty {
-                    ForEach(productIds.prefix(10), id: \.self) { serial in
-                        Text(serial)
-                            .font(AppFonts.sansSerif(size: 14))
-                            .foregroundStyle(AppColors.text)
-                    }
-                    .onDelete { indexSet in
-                        viewModel.removeSerialNumbers(from: currentCatalog, at: indexSet)
-                    }
+                if isLoadingInventory {
+                    ProgressView().padding()
+                } else if !inventoryUnits.isEmpty {
+                    let grouped = Dictionary(grouping: inventoryUnits, by: { $0.boutiqueId })
+                    let sortedGroups = grouped.map { (key, value) in
+                        let name = viewModel.boutiques.first(where: { $0.id == key })?.name ?? "Unknown Boutique"
+                        return (boutiqueId: key, boutiqueName: name, units: value)
+                    }.sorted { $0.boutiqueName < $1.boutiqueName }
                     
-                    if productIds.count > 10 {
-                        Button("See All (\(productIds.count))") {
-                            showingAllSerialsSheet = true
+                    ForEach(sortedGroups, id: \.boutiqueId) { group in
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text(group.boutiqueName)
+                                    .font(AppFonts.sansSerif(size: 16, weight: .bold))
+                                    .foregroundStyle(AppColors.gold)
+                                Spacer()
+                                let available = group.units.filter { $0.status == .available }.count
+                                Text("Available: \(available)")
+                                    .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                    .foregroundStyle(AppColors.success)
+                            }
+                            .padding(.vertical, 4)
+                            
+                            ForEach(group.units, id: \.id) { unit in
+                                HStack {
+                                    Text(unit.serialNumber)
+                                        .font(AppFonts.sansSerif(size: 14))
+                                        .foregroundStyle(AppColors.text)
+                                    Spacer()
+                                    Text(unit.status.rawValue)
+                                        .font(AppFonts.sansSerif(size: 10))
+                                        .foregroundStyle(AppColors.secondary)
+                                }
+                                .padding(.vertical, 2)
+                                .padding(.leading, 8)
+                            }
+                            .onDelete { indexSet in
+                                let serialsToRemove = indexSet.map { group.units[$0].serialNumber }
+                                viewModel.removeSerialNumbers(serials: serialsToRemove, from: currentCatalog)
+                                loadInventory()
+                            }
                         }
-                        .font(AppFonts.sansSerif(size: 14, weight: .semibold))
-                        .foregroundStyle(AppColors.gold)
                         .padding(.vertical, 4)
                     }
                 } else {
@@ -163,17 +192,30 @@ struct CatalogDetailView: View {
                         .foregroundStyle(AppColors.secondary)
                 }
             }
-            Section("Reservations") {
-                if let reserved = currentCatalog.reserved, !reserved.isEmpty {
-                    ForEach(Array(reserved.enumerated()), id: \.offset) { _, reservationId in
-                        Text(reservationId)
-                            .font(AppFonts.sansSerif(size: 14))
-                            .foregroundStyle(AppColors.text)
+            
+            if !isLoadingInventory {
+                let soldStats = Dictionary(grouping: inventoryUnits.filter { $0.status == .sold }, by: { $0.boutiqueId })
+                    .map { (key, value) in
+                        let name = viewModel.boutiques.first(where: { $0.id == key })?.name ?? "Unknown Boutique"
+                        return (boutiqueName: name, soldCount: value.count)
                     }
-                } else {
-                    Text("No Active Reservations")
-                        .font(AppFonts.sansSerif(size: 14))
-                        .foregroundStyle(AppColors.secondary)
+                    .sorted { $0.soldCount > $1.soldCount }
+                
+                if !soldStats.isEmpty {
+                    Section("Sales Performance") {
+                        ForEach(soldStats, id: \.boutiqueName) { stat in
+                            HStack {
+                                Text(stat.boutiqueName)
+                                    .font(AppFonts.sansSerif(size: 14))
+                                    .foregroundStyle(AppColors.text)
+                                Spacer()
+                                Text("\(stat.soldCount) Sold")
+                                    .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                    .foregroundStyle(AppColors.success)
+                            }
+                            .padding(.vertical, 4)
+                        }
+                    }
                 }
             }
             
@@ -214,10 +256,11 @@ struct CatalogDetailView: View {
             Text("Are you sure you want to delete this catalog? This action cannot be undone.")
         }
         .fullScreenCover(isPresented: $showingBatchScanner) {
-            BatchScannerSheet(scannedSerials: $scannedSerials, existingSerials: currentCatalog.productIds ?? []) {
+            BatchScannerSheet(scannedSerials: $scannedSerials, existingSerials: inventoryUnits.map { $0.serialNumber }) {
                 if !scannedSerials.isEmpty, let bId = selectedBoutiqueId {
                     viewModel.addSerialNumbers(to: currentCatalog, serials: scannedSerials, boutiqueId: bId) {
                         showingBatchScanner = false
+                        loadInventory()
                     }
                 } else {
                     showingBatchScanner = false
@@ -287,15 +330,21 @@ struct CatalogDetailView: View {
         .sheet(isPresented: $showingAllSerialsSheet) {
             NavigationStack {
                 List {
-                    if let productIds = currentCatalog.productIds {
-                        ForEach(productIds, id: \.self) { serial in
-                            Text(serial)
+                    ForEach(inventoryUnits, id: \.id) { unit in
+                        HStack {
+                            Text(unit.serialNumber)
                                 .font(AppFonts.sansSerif(size: 14))
                                 .foregroundStyle(AppColors.text)
+                            Spacer()
+                            Text(unit.status.rawValue)
+                                .font(AppFonts.sansSerif(size: 10))
+                                .foregroundStyle(AppColors.secondary)
                         }
-                        .onDelete { indexSet in
-                            viewModel.removeSerialNumbers(from: currentCatalog, at: indexSet)
-                        }
+                    }
+                    .onDelete { indexSet in
+                        let serialsToRemove = indexSet.map { inventoryUnits[$0].serialNumber }
+                        viewModel.removeSerialNumbers(serials: serialsToRemove, from: currentCatalog)
+                        loadInventory()
                     }
                 }
                 .navigationTitle("All Serial Numbers")
@@ -310,6 +359,28 @@ struct CatalogDetailView: View {
                 }
             }
         }
+        .onAppear {
+            loadInventory()
+        }
+    }
+    
+    private func loadInventory() {
+        print("🚀 [CatalogDetailView] Loading inventory for catalog: \(currentCatalog.catalogId)")
+        Task {
+            do {
+                let units = try await InventoryService.shared.fetchInventory(forCatalog: currentCatalog.id)
+                print("✅ [CatalogDetailView] Successfully fetched \(units.count) physical units!")
+                await MainActor.run {
+                    self.inventoryUnits = units
+                    self.isLoadingInventory = false
+                }
+            } catch {
+                print("❌ [CatalogDetailView] ERROR fetching inventory: \(error)")
+                await MainActor.run {
+                    self.isLoadingInventory = false
+                }
+            }
+        }
     }
     
     private func generateBulkSerials(quantity: Int) {
@@ -320,7 +391,7 @@ struct CatalogDetailView: View {
             prefix.append("0")
         }
         
-        let existingSerials = Set(currentCatalog.productIds ?? [])
+        let existingSerials = Set(inventoryUnits.map { $0.serialNumber })
         var newSerials: [String] = []
         let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
         
@@ -335,7 +406,7 @@ struct CatalogDetailView: View {
         
         if let bId = selectedBoutiqueId {
             viewModel.addSerialNumbers(to: currentCatalog, serials: newSerials, boutiqueId: bId) {
-                // Success
+                loadInventory()
             }
         }
     }

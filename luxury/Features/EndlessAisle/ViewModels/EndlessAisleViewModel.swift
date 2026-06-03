@@ -20,9 +20,9 @@ public final class EndlessAisleViewModel {
     
     public var activeRequests: [EndlessAisle.SourcingRequest] = []
     
-    private let inventoryService: InventoryService
+    private let inventoryService: EndlessAisleInventoryService
     
-    public init() {
+    public init(inventoryService: EndlessAisleInventoryService? = nil) {
         let item1 = EndlessAisle.Item(
             id: UUID(uuidString: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")!,
             name: "Rolex GMT-Master II",
@@ -57,7 +57,7 @@ public final class EndlessAisleViewModel {
             mockDict[item.id] = item
         }
         
-        self.inventoryService = MockInventoryService(mockItems: mockDict)
+        self.inventoryService = inventoryService ?? MockInventoryService(mockItems: mockDict)
         self.mockItems = items
     }
     

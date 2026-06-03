@@ -18,23 +18,24 @@ final class StockSearchViewModel {
     func fetchItems() {
         Task {
             do {
-                let catalogs: [CatalogEntity] = try await SupabaseManager.shared.client
-                    .from("catalogs")
-                    .select()
-                    .execute()
-                    .value
+                let catalogs = try await CatalogService().fetchCatalogs()
+                
+                var stockDict: [UUID: Int] = [:]
+                if let profileTuple = try? await ProfileService().fetchCurrentProfile(),
+                   let staff = profileTuple.1 as? StaffModel,
+                   let boutiqueId = staff.boutiqueId {
+                    stockDict = try await InventoryService.shared.fetchAvailableStockDictionary(forBoutique: boutiqueId)
+                }
                 
                 var newItems: [StockItem] = []
                 for catalog in catalogs {
-                    let totalCount = catalog.productIds?.count ?? 0
-                    let reservedCount = catalog.reserved?.count ?? 0
-                    let available = totalCount - reservedCount
+                    let available = stockDict[catalog.id] ?? 0
                     
                     newItems.append(StockItem(
                         brand: catalog.brand,
                         name: catalog.name,
                         qty: available,
-                        rfid: true, // Assuming true for now
+                        rfid: true,
                         alert: available < 3
                     ))
                 }

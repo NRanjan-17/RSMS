@@ -114,7 +114,7 @@ struct RFIDView: View {
         .fullScreenCover(isPresented: $showingScanner) {
             BatchScannerSheet(
                 scannedSerials: $scannedSerials,
-                existingSerials: selectedCatalog?.productIds ?? [],
+                existingSerials: [],
                 allowsDamageReporting: true,
                 damagedItems: $damagedItems,
                 productName: selectedCatalog?.name ?? ""

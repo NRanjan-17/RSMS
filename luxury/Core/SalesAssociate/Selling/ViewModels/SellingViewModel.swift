@@ -15,6 +15,7 @@ final class SellingViewModel {
     let categories: [CatalogCategory] = CatalogCategory.allCases
     
     var catalogs: [CatalogEntity] = []
+    var availableStock: [UUID: Int] = [:]
     private let catalogService = CatalogService()
     
     var isLoading = false
@@ -38,8 +39,17 @@ final class SellingViewModel {
         Task {
             do {
                 let fetched = try await catalogService.fetchCatalogs()
+                
+                var stockDict: [UUID: Int] = [:]
+                if let profileTuple = try? await ProfileService().fetchCurrentProfile(),
+                   let staff = profileTuple.1 as? StaffModel,
+                   let boutiqueId = staff.boutiqueId {
+                    stockDict = try await InventoryService.shared.fetchAvailableStockDictionary(forBoutique: boutiqueId)
+                }
+                
                 await MainActor.run {
                     self.catalogs = fetched
+                    self.availableStock = stockDict
                     self.isLoading = false
                 }
             } catch {

@@ -17,7 +17,7 @@ struct SalesProductDetailView: View {
     @State private var viewModel = SalesProductDetailViewModel()
     
     var inStock: Bool {
-        ((catalog.productIds?.count ?? 0) - (catalog.reserved?.count ?? 0)) > 0
+        viewModel.stockCount > 0
     }
     
     var body: some View {
@@ -55,7 +55,11 @@ struct SalesProductDetailView: View {
                             .padding(.bottom, 14)
                             
                             HStack(spacing: 8) {
-                                StatusBadge(text: inStock ? LocalizedStringKey("● In Stock") : LocalizedStringKey("● Out of Stock"), status: inStock ? .success : .warning)
+                                if viewModel.isStockLoading {
+                                    ProgressView().tint(AppColors.gold)
+                                } else {
+                                    StatusBadge(text: inStock ? "● In Stock (\(viewModel.stockCount))" : "● Out of Stock", status: inStock ? .success : .warning)
+                                }
                             }
                             .padding(.bottom, 16)
                             
@@ -104,8 +108,6 @@ struct SalesProductDetailView: View {
                                             amount: catalog.amount,
                                             barCode: catalog.barCode,
                                             status: catalog.status.rawValue,
-                                            reserved: catalog.reserved,
-                                            productIds: catalog.productIds,
                                             createdAt: nil,
                                             productImages: catalog.productImages
                                         )

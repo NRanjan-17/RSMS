@@ -63,21 +63,29 @@ final class GlobalInventoryViewModel {
         
         Task {
             do {
-                // Fetch catalogs directly as inventory is stored inside productIds array
-                let catalogsResponse: [CatalogEntity] = try await client.from("catalogs").select().execute().value
+                let catalogsResponse = try await CatalogService().fetchCatalogs()
+                let boutiquesResponse: [CorporateBoutique] = try await client.from("boutiques").select().execute().value
+                let units = try await InventoryService.shared.fetchAllInventoryUnits()
+                
+                // Precompute grouped units
+                let availableUnits = units.filter { $0.status == .available }
+                let unitsByCatalog = Dictionary(grouping: availableUnits, by: { $0.catalogId })
+                let boutiqueDict = Dictionary(uniqueKeysWithValues: boutiquesResponse.map { ($0.id, $0) })
                 
                 var newSummaries: [ProductInventorySummary] = []
                 
                 for catalog in catalogsResponse {
-                    let totalQty = (catalog.productIds?.count ?? 0) - (catalog.reserved?.count ?? 0)
+                    let catalogUnits = unitsByCatalog[catalog.id] ?? []
+                    let totalQty = catalogUnits.count
                     
-                    // Since dev branch catalogs don't track location yet, assign stock to a default warehouse
+                    let unitsByBoutique = Dictionary(grouping: catalogUnits, by: { $0.boutiqueId })
                     var locations: [LocationInventoryDetail] = []
-                    if totalQty > 0 {
+                    
+                    for (bId, bUnits) in unitsByBoutique {
                         locations.append(LocationInventoryDetail(
-                            storeId: UUID(),
-                            storeName: "Central Warehouse",
-                            quantity: totalQty,
+                            storeId: bId,
+                            storeName: boutiqueDict[bId]?.name ?? "Unknown Boutique",
+                            quantity: bUnits.count,
                             isAvailable: true
                         ))
                     }

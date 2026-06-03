@@ -1,0 +1,155 @@
+import Foundation
+import Supabase
+
+final class InventoryService {
+    static let shared = InventoryService()
+    private let client = SupabaseManager.shared.client
+    
+    private init() {}
+    private var decoder: JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let dateString = try container.decode(String.self)
+            
+            // 1. Standard ISO8601
+            if let date = ISO8601DateFormatter().date(from: dateString) {
+                return date
+            }
+            
+            // 2. ISO8601 with fractional seconds
+            let fractionFormatter = ISO8601DateFormatter()
+            fractionFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            if let date = fractionFormatter.date(from: dateString) {
+                return date
+            }
+            
+            // 3. Custom Formats without Z
+            let formats = [
+                "yyyy-MM-dd'T'HH:mm:ss.SSSSSS",
+                "yyyy-MM-dd'T'HH:mm:ss.SSS",
+                "yyyy-MM-dd'T'HH:mm:ss",
+                "yyyy-MM-dd HH:mm:ss.SSSSSS",
+                "yyyy-MM-dd HH:mm:ss"
+            ]
+            
+            let dateFormatter = DateFormatter()
+            dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+            dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+            
+            for format in formats {
+                dateFormatter.dateFormat = format
+                if let date = dateFormatter.date(from: dateString) {
+                    return date
+                }
+            }
+            
+            print("❌ [InventoryService] CRITICAL DECODE ERROR: Unrecognized date format -> \(dateString)")
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode date: \(dateString)")
+        }
+        return decoder
+    }
+    
+    /// Fetches all inventory units globally (For Corporate Admin)
+    func fetchGlobalInventory() async throws -> [InventoryUnitEntity] {
+        let response = try await client
+            .from("inventory_units")
+            .select()
+            .execute()
+        return try decoder.decode([InventoryUnitEntity].self, from: response.data)
+    }
+    
+    /// Fetches all inventory units for a specific boutique (For SA, BM, IC)
+    func fetchInventory(forBoutique boutiqueId: UUID) async throws -> [InventoryUnitEntity] {
+        let response = try await client
+            .from("inventory_units")
+            .select()
+            .eq("boutique_id", value: boutiqueId.uuidString)
+            .execute()
+        return try decoder.decode([InventoryUnitEntity].self, from: response.data)
+    }
+    
+    func fetchAllInventoryUnits() async throws -> [InventoryUnitEntity] {
+        let response = try await client
+            .from("inventory_units")
+            .select()
+            .execute()
+        return try decoder.decode([InventoryUnitEntity].self, from: response.data)
+    }
+    
+    /// Fetches inventory for a specific catalog item globally
+    func fetchInventory(forCatalog catalogId: UUID) async throws -> [InventoryUnitEntity] {
+        let response = try await client
+            .from("inventory_units")
+            .select()
+            .eq("catalog_id", value: catalogId.uuidString)
+            .execute()
+        return try decoder.decode([InventoryUnitEntity].self, from: response.data)
+    }
+    
+    /// Fetches inventory for a specific catalog item in a specific boutique
+    func fetchInventory(forCatalog catalogId: UUID, boutiqueId: UUID) async throws -> [InventoryUnitEntity] {
+        let response = try await client
+            .from("inventory_units")
+            .select()
+            .eq("catalog_id", value: catalogId.uuidString)
+            .eq("boutique_id", value: boutiqueId.uuidString)
+            .execute()
+        return try decoder.decode([InventoryUnitEntity].self, from: response.data)
+    }
+    
+    /// Helper to fetch all available inventory units for a boutique and return a dictionary of [CatalogID : Available Count]
+    func fetchAvailableStockDictionary(forBoutique boutiqueId: UUID) async throws -> [UUID: Int] {
+        let inventory = try await fetchInventory(forBoutique: boutiqueId)
+        var stockDict: [UUID: Int] = [:]
+        for unit in inventory where unit.status == .available {
+            stockDict[unit.catalogId, default: 0] += 1
+        }
+        return stockDict
+    }
+    
+    /// Bulk updates the status and/or boutique of inventory units (e.g., Stock Transfers)
+    func updateInventoryStatus(serials: [String], newStatus: InventoryUnitStatus, newBoutiqueId: UUID? = nil) async throws {
+        for serial in serials {
+            var updateData: [String: AnyJSON] = [
+                "status": .string(newStatus.rawValue),
+                "updated_at": .string(ISO8601DateFormatter().string(from: Date()))
+            ]
+            if let boutiqueId = newBoutiqueId {
+                updateData["boutique_id"] = .string(boutiqueId.uuidString)
+            }
+            
+            try await client
+                .from("inventory_units")
+                .update(updateData)
+                .eq("serial_number", value: serial)
+                .execute()
+        }
+    }
+    
+    /// Creates new stock units (e.g., Receiving new shipment)
+    func createInventoryUnits(_ units: [InventoryUnitEntity]) async throws {
+        print("🚀 [InventoryService] Attempting to insert \(units.count) units into 'inventory_units' table...")
+        do {
+            let response = try await client
+                .from("inventory_units")
+                .insert(units)
+                .execute()
+            print("✅ [InventoryService] Insert successful! Response status: \(response.response.statusCode)")
+        } catch {
+            print("❌ [InventoryService] Insert failed with error: \(error)")
+            throw error
+        }
+    }
+    
+    /// Deletes specific inventory units
+    func deleteInventoryUnits(serials: [String]) async throws {
+        for serial in serials {
+            try await client
+                .from("inventory_units")
+                .delete()
+                .eq("serial_number", value: serial)
+                .execute()
+        }
+    }
+}

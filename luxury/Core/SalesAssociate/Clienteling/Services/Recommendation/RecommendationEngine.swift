@@ -21,12 +21,13 @@ actor RecommendationEngine {
     ///
     /// - Parameters:
     ///   - client: The client to recommend for.
-    ///   - catalog: The full array of `CatalogEntity`.
+    ///   - catalog: The full list of base catalog entities.
+    ///   - availableStock: Dictionary mapping Catalog UUID to available stock count in the CURRENT boutique.
     ///   - limit: Maximum number of recommendations to return.
     /// - Returns: An array of recommended `CatalogEntity` sorted by Relevance Score descending.
-    func suggestProducts(for client: ClientEntity, catalog: [CatalogEntity], limit: Int = 10) async -> [CatalogEntity] {
+    func suggestProducts(for client: ClientEntity, catalog: [CatalogEntity], availableStock: [UUID: Int], limit: Int = 10) async -> [CatalogEntity] {
         let activeCatalog = catalog.filter { item in
-            let stock = (item.productIds?.count ?? 0) - (item.reserved?.count ?? 0)
+            let stock = availableStock[item.id] ?? 0
             return item.status == .active && stock > 0
         }
         guard !activeCatalog.isEmpty else { return [] }
@@ -128,9 +129,9 @@ actor RecommendationEngine {
     // MARK: - Item-to-Item Recommendation
     
     /// Suggests complementary products (Item-to-Item) for cross-selling.
-    func suggestRelatedProducts(for targetItem: CatalogEntity, catalog: [CatalogEntity], limit: Int = 3) async -> [CatalogEntity] {
+    func suggestRelatedProducts(for targetItem: CatalogEntity, catalog: [CatalogEntity], availableStock: [UUID: Int], limit: Int = 3) async -> [CatalogEntity] {
         let activeCatalog = catalog.filter { item in
-            let stock = (item.productIds?.count ?? 0) - (item.reserved?.count ?? 0)
+            let stock = availableStock[item.id] ?? 0
             return item.status == .active && stock > 0 && item.id != targetItem.id
         }
         guard !activeCatalog.isEmpty else { return [] }
