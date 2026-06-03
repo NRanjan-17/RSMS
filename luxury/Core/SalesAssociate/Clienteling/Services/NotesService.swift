@@ -13,14 +13,16 @@ struct DBClientNote: Codable {
     let clientId: UUID
     let note: String
     let date: String
-    let author: String
+    let salesAssociateId: UUID
+    let authorName: String
     
     enum CodingKeys: String, CodingKey {
         case id
         case clientId = "client_id"
         case note
         case date
-        case author
+        case salesAssociateId = "sales_associate_id"
+        case authorName = "author_name"
     }
 }
 
@@ -57,34 +59,53 @@ final class NotesService {
     }
     
     func syncNotes(clientId: UUID) async {
-        // Supabase table 'client_notes' does not exist in schema yet.
-        // Relying on local notes only.
-        // do {
-        //     let dbNotes: [DBClientNote] = try await client
-        //         .from("client_notes")
-        //         ...
-        // }
+        do {
+            let response = try await client
+                .from("client_notes")
+                .select()
+                .eq("client_id", value: clientId.uuidString)
+                .execute()
+            
+            let dbNotes = try JSONDecoder().decode([DBClientNote].self, from: response.data)
+            let clientNotes = dbNotes.map { ClientNote(id: $0.id, note: $0.note, date: $0.date, salesAssociateId: $0.salesAssociateId, authorName: $0.authorName) }
+            // Sort by date (assuming date string is sortable or just rely on DB order if we added .order, but for now just reverse if needed, or DB order)
+            saveLocalNotes(clientNotes, for: clientId)
+        } catch {
+            print("Error syncing notes from Supabase: \(error)")
+        }
     }
     
-    func addNote(clientId: UUID, noteText: String, author: String = "Arjun Singh") async {
+    func addNote(clientId: UUID, noteText: String) async {
+        guard let session = try? await client.auth.session else {
+            print("No active session, cannot add note.")
+            return
+        }
+        let saId = session.user.id
+        var saName = session.user.userMetadata["full_name"]?.stringValue ?? "Sales Associate"
+        
+        if let staff: StaffModel = try? await client.from("staff").select().eq("auth_user_id", value: saId).single().execute().value {
+            saName = staff.name.isEmpty ? saName : staff.name
+        }
+        
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM dd"
         let dateStr = formatter.string(from: Date())
         
-        let newNote = ClientNote(note: noteText, date: dateStr, author: author)
+        let newNote = ClientNote(note: noteText, date: dateStr, salesAssociateId: saId, authorName: saName)
         
         var current = fetchNotes(clientId: clientId)
         current.insert(newNote, at: 0)
         saveLocalNotes(current, for: clientId)
         
-        // Sync to Supabase disabled (table 'client_notes' not in schema)
-        /*
         do {
-            ...
+            let dbNote = DBClientNote(id: newNote.id, clientId: clientId, note: noteText, date: dateStr, salesAssociateId: saId, authorName: saName)
+            try await client
+                .from("client_notes")
+                .insert(dbNote)
+                .execute()
         } catch {
-            ...
+            print("Error adding note to Supabase: \(error)")
         }
-        */
     }
     
     func deleteNote(clientId: UUID, noteId: UUID) async {
@@ -93,7 +114,16 @@ final class NotesService {
         current.removeAll { $0.id == noteId }
         saveLocalNotes(current, for: clientId)
         
-        // 2. Perform background synchronization disabled (table 'client_notes' not in schema)
+        // 2. Perform background synchronization
+        do {
+            try await client
+                .from("client_notes")
+                .delete()
+                .eq("id", value: noteId.uuidString)
+                .execute()
+        } catch {
+            print("Error deleting note from Supabase: \(error)")
+        }
     }
     
     func updateNote(clientId: UUID, noteId: UUID, noteText: String) async {
@@ -104,6 +134,18 @@ final class NotesService {
             saveLocalNotes(current, for: clientId)
         }
         
-        // 2. Perform background sync disabled (table 'client_notes' not in schema)
+        // 2. Perform background sync
+        do {
+            struct UpdateNoteRequest: Codable {
+                let note: String
+            }
+            try await client
+                .from("client_notes")
+                .update(UpdateNoteRequest(note: noteText))
+                .eq("id", value: noteId.uuidString)
+                .execute()
+        } catch {
+            print("Error updating note in Supabase: \(error)")
+        }
     }
 }

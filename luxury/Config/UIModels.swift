@@ -224,7 +224,8 @@ struct ClientNote: Identifiable, Hashable, Codable {
     var id: UUID = UUID()
     var note: String
     let date: String
-    let author: String
+    let salesAssociateId: UUID
+    let authorName: String
 }
 
 struct ClientPurchase: Identifiable, Hashable, Codable {
