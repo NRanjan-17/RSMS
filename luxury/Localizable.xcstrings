@@ -138,6 +138,7 @@
       }
     },
     "· Encrypted" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -541,6 +542,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "（已存檔）"
+          }
+        }
+      }
+    },
+    "%@ -> %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ -> %2$@"
           }
         }
       }
@@ -1397,6 +1408,9 @@
         }
       }
     },
+    "%@ is requesting this item from your boutique." : {
+
+    },
     "%@ of Target" : {
       "localizations" : {
         "ar" : {
@@ -1805,6 +1819,16 @@
         }
       }
     },
+    "%@, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@"
+          }
+        }
+      }
+    },
     "%@, %@ - %@" : {
       "localizations" : {
         "ar" : {
@@ -1943,6 +1967,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@, %2$@ - %3$@"
+          }
+        }
+      }
+    },
+    "%@, %@ · %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@ · %3$lld"
+          }
+        }
+      }
+    },
+    "%@, %@ · %lld available" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@ · %3$lld available"
           }
         }
       }
@@ -5941,6 +5985,7 @@
       }
     },
     "✓ Pipeline Sourced Successfully" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -7573,6 +7618,7 @@
       }
     },
     "ACTIVE SOURCING PIPELINES" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -14645,6 +14691,7 @@
       }
     },
     "Approve and Request from Paris" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -17228,6 +17275,9 @@
         }
       }
     },
+    "Arrived" : {
+
+    },
     "Assessing stock routes..." : {
       "localizations" : {
         "ar" : {
@@ -17501,6 +17551,7 @@
       }
     },
     "Assign Sourced Item & Fulfill Order" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -19133,6 +19184,7 @@
       }
     },
     "Authorize Stock Transfer" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -19541,6 +19593,7 @@
       }
     },
     "AVAILABILITY ASSESSMENT" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -19949,6 +20002,7 @@
       }
     },
     "Available for transfer from %@." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -41452,6 +41506,7 @@
       }
     },
     "Destination: DLF Emporio, Delhi" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -46212,6 +46267,7 @@
       }
     },
     "Endless Aisle Lookup" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -46620,6 +46676,7 @@
       }
     },
     "Enough items in inventory to fulfill this order." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -58180,6 +58237,7 @@
       }
     },
     "HISTORY & LOGS" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -59948,6 +60006,7 @@
       }
     },
     "INCOMING REQUESTS (PARIS TO DELHI)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -64306,6 +64365,7 @@
       }
     },
     "Item out of stock at all regional locations." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -65938,6 +65998,7 @@
       }
     },
     "LATEST EVENT:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -66888,6 +66949,9 @@
           }
         }
       }
+    },
+    "Loading catalog availability..." : {
+
     },
     "Loading catalogs..." : {
       "localizations" : {
@@ -71921,6 +71985,9 @@
         }
       }
     },
+    "Needs Review" : {
+
+    },
     "Net Discrepancy" : {
       "localizations" : {
         "ar" : {
@@ -73689,6 +73756,9 @@
         }
       }
     },
+    "No active catalog items found." : {
+
+    },
     "No active employees yet" : {
       "localizations" : {
         "ar" : {
@@ -74641,6 +74711,9 @@
           }
         }
       }
+    },
+    "No boutiques currently have an available serial-numbered unit." : {
+
     },
     "No boutiques registered yet" : {
       "localizations" : {
@@ -75595,6 +75668,7 @@
       }
     },
     "No incoming requests awaiting Paris manager authorization." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -77363,6 +77437,7 @@
       }
     },
     "No outgoing requests awaiting Delhi manager approval." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -79539,6 +79614,7 @@
       }
     },
     "No recent transfer requests recorded." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -84843,6 +84919,7 @@
       }
     },
     "Out of Stock Locally" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -84979,6 +85056,7 @@
       }
     },
     "OUTGOING REQUESTS (DELHI TO PARIS)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -92050,6 +92128,16 @@
         }
       }
     },
+    "Prepare serial %@ for %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare serial %1$@ for %2$@."
+          }
+        }
+      }
+    },
     "Price" : {
       "localizations" : {
         "ar" : {
@@ -96129,6 +96217,9 @@
           }
         }
       }
+    },
+    "Ready" : {
+
     },
     "Ready for Pickup" : {
       "localizations" : {
@@ -100483,6 +100574,7 @@
       }
     },
     "Request Transfer from Paris Boutique" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -100619,6 +100711,7 @@
       }
     },
     "Requested by Inventory Controller (Delhi)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -100753,6 +100846,9 @@
           }
         }
       }
+    },
+    "Requested by local inventory control for %@." : {
+
     },
     "Requests" : {
       "localizations" : {
@@ -103612,6 +103708,7 @@
       }
     },
     "ROLE SIMULATOR SHORTCUTS:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -107285,6 +107382,9 @@
           }
         }
       }
+    },
+    "Scan serial number or SKU" : {
+
     },
     "Scan Session Details" : {
       "localizations" : {
@@ -114223,6 +114323,9 @@
         }
       }
     },
+    "Select source boutique" : {
+
+    },
     "Selling" : {
       "localizations" : {
         "ar" : {
@@ -119800,6 +119903,7 @@
       }
     },
     "SKU: %@  ·  Delhi: %lld  ·  Paris: %lld" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -119937,6 +120041,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "SKU： %1$@  · 德里： %2$lld  · 巴黎： %3$lld"
+          }
+        }
+      }
+    },
+    "SKU: %@ · Local available: %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "SKU: %1$@ · Local available: %2$lld"
           }
         }
       }
@@ -120356,6 +120470,7 @@
       }
     },
     "Source: %@  ➔  Delhi" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -120490,6 +120605,9 @@
           }
         }
       }
+    },
+    "Sourced item has arrived. Receive it from Endless Aisle before fulfillment." : {
+
     },
     "Staff\nApplication." : {
       "localizations" : {
@@ -121852,6 +121970,7 @@
       }
     },
     "Status: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -122260,6 +122379,7 @@
       }
     },
     "STOCK ITEM SOURCE LIST" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -127428,6 +127548,7 @@
       }
     },
     "This item is in stock at DLF Emporio, Delhi. Sourcing not required." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {

@@ -172,7 +172,7 @@ struct SFSVerificationView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                                 .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.warning.opacity(0.3), lineWidth: 0.5))
                                 
-                                if let request = EndlessAisleViewModel.shared.activeRequests.first(where: { $0.item.id == order.productId }) {
+                                if let request = EndlessAisleViewModel.shared.activeRequests.first(where: { $0.originalOrderId == order.id || $0.item.id == order.productId }) {
                                     VStack(alignment: .leading, spacing: 12) {
                                         HStack {
                                             VStack(alignment: .leading, spacing: 2) {
@@ -185,78 +185,18 @@ struct SFSVerificationView: View {
                                                     .lineLimit(2)
                                             }
                                             Spacer()
-                                            StatusBadge(text: LocalizedStringKey(request.status.rawValue), status: request.status == .dispatched ? .success : .pending)
+                                            StatusBadge(text: LocalizedStringKey(endlessAisleStatusText(request.status)), status: endlessAisleBadgeStatus(request.status))
                                         }
                                         
-                                        if request.status == .dispatched && (request.history.last?.contains("Delivered") == true || request.history.contains(where: { $0.contains("Delivered") })) {
+                                        if request.status == .arrived {
                                             VStack(alignment: .leading, spacing: 10) {
                                                 HStack(spacing: 8) {
                                                     Image(systemName: "bell.badge.fill")
                                                         .foregroundStyle(AppColors.success)
-                                                    Text("Enough items in inventory to fulfill this order.")
+                                                    Text("Sourced item has arrived. Receive it from Endless Aisle before fulfillment.")
                                                         .font(AppFonts.sansSerif(size: 12, weight: .bold))
                                                         .foregroundStyle(AppColors.success)
                                                 }
-                                                
-                                                Button(action: {
-                                                    isUpdating = true
-                                                    Task {
-                                                        if let profile = try? await ProfileService().fetchCurrentProfile(),
-                                                           let staff = profile.1 as? StaffModel, let storeId = staff.boutiqueId {
-                                                            let inventoryList = try? await viewModel.fetchInventoryHandler(order.productId, storeId)
-                                                            if let firstInventory = inventoryList?.first {
-                                                                _ = try? await SupabaseManager.shared.client
-                                                                    .from("inventory")
-                                                                    .update(["quantity": 1])
-                                                                    .eq("id", value: firstInventory.id)
-                                                                    .execute()
-                                                            } else {
-                                                                let newItem = InventoryItem(
-                                                                    id: UUID(),
-                                                                    storeId: storeId,
-                                                                    skuId: order.productId,
-                                                                    quantity: 1,
-                                                                    productAvailable: true
-                                                                )
-                                                                _ = try? await SupabaseManager.shared.client
-                                                                    .from("inventory")
-                                                                    .insert(newItem)
-                                                                    .execute()
-                                                            }
-                                                        }
-                                                        
-                                                        let success = await viewModel.updateStatusToSecured(orderId: order.id)
-                                                        if success {
-                                                            if let reqIdx = EndlessAisleViewModel.shared.activeRequests.firstIndex(where: { $0.item.id == order.productId }) {
-                                                                EndlessAisleViewModel.shared.activeRequests.remove(at: reqIdx)
-                                                            }
-                                                            router.pop()
-                                                        } else {
-                                                            await MainActor.run {
-                                                                alertMessage = viewModel.errorMessage ?? "Failed to fulfill order."
-                                                                showAlert = true
-                                                            }
-                                                        }
-                                                        isUpdating = false
-                                                    }
-                                                }) {
-                                                    HStack {
-                                                        if isUpdating {
-                                                            ProgressView()
-                                                                .tint(AppColors.background)
-                                                                .controlSize(.small)
-                                                        } else {
-                                                            Text("Assign Sourced Item & Fulfill Order")
-                                                        }
-                                                    }
-                                                    .font(AppFonts.sansSerif(size: 13, weight: .bold))
-                                                    .foregroundStyle(AppColors.background)
-                                                    .frame(maxWidth: .infinity)
-                                                    .frame(height: 40)
-                                                    .background(AppColors.success)
-                                                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                }
-                                                .disabled(isUpdating)
                                             }
                                             .padding(12)
                                             .background(AppColors.success.opacity(0.1))
@@ -275,10 +215,9 @@ struct SFSVerificationView: View {
                                             name: order.productName ?? "Premium Timepiece",
                                             sku: order.productSku ?? "N/A",
                                             price: 15000.0,
-                                            stockDelhi: 0,
-                                            stockParis: 5
+                                            localQuantity: 0
                                         )
-                                        EndlessAisleViewModel.shared.createRequest(item: endlessAisleItem)
+                                        EndlessAisleViewModel.shared.requestManagerApproval(order: order, item: endlessAisleItem)
                                         localQuantity = 0
                                     }) {
                                         HStack {
@@ -550,18 +489,14 @@ struct SFSVerificationView: View {
             if let profile = try? await ProfileService().fetchCurrentProfile() {
                 userRole = profile.0
                 if let staff = profile.1 as? StaffModel, let storeId = staff.boutiqueId {
-                    let inventoryList = try? await viewModel.fetchInventoryHandler(order.productId, storeId)
-                    if let quantity = inventoryList?.first?.quantity {
-                        await MainActor.run {
-                            self.localQuantity = quantity
-                        }
-                    } else {
-                        await MainActor.run {
-                            self.localQuantity = 0
-                        }
+                    let units = try? await InventoryService.shared.fetchInventory(forCatalog: order.productId, boutiqueId: storeId)
+                    let quantity = units?.filter { $0.status == .available }.count ?? 0
+                    await MainActor.run {
+                        self.localQuantity = quantity
                     }
                 }
             }
+            EndlessAisleViewModel.shared.loadRequests()
         }
     }
     
@@ -581,6 +516,42 @@ struct SFSVerificationView: View {
             withAnimation {
                 scanError = error.localizedDescription
             }
+        }
+    }
+    
+    private func endlessAisleBadgeStatus(_ status: EndlessAisle.RequestState) -> BadgeStatus {
+        switch status {
+        case .arrived, .received, .localInStock:
+            return .success
+        case .pendingSourceDispatch:
+            return .warning
+        case .noStockAnywhere:
+            return .error
+        default:
+            return .pending
+        }
+    }
+    
+    private func endlessAisleStatusText(_ status: EndlessAisle.RequestState) -> String {
+        switch status {
+        case .checking:
+            return "Checking"
+        case .localInStock:
+            return "Local"
+        case .noStockAnywhere:
+            return "No Stock"
+        case .pendingBoutiqueManagerApproval:
+            return "Manager Review"
+        case .pendingSourceBoutiqueApproval:
+            return "Source Review"
+        case .pendingSourceDispatch:
+            return "Dispatch"
+        case .dispatched:
+            return "In Transit"
+        case .arrived:
+            return "Arrived"
+        case .received:
+            return "Received"
         }
     }
 }

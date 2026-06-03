@@ -22,9 +22,9 @@ final class FulfillmentViewModel {
     @ObservationIgnored var fetchCatalogsHandler: () async throws -> [CatalogEntity]
     @ObservationIgnored var fetchProfileHandler: () async throws -> (UserRole, Any)?
     @ObservationIgnored var fetchBoutiqueHandler: (UUID) async throws -> CorporateBoutique?
-    @ObservationIgnored var fetchInventoryHandler: (UUID, UUID) async throws -> [InventoryItem]
-    @ObservationIgnored var fetchGlobalInventoryHandler: (UUID) async throws -> [InventoryItem]
-    @ObservationIgnored var updateInventoryHandler: (UUID, Int, Int) async throws -> Void
+    @ObservationIgnored var fetchInventoryHandler: (UUID, UUID) async throws -> [InventoryUnitEntity]
+    @ObservationIgnored var fetchGlobalInventoryHandler: (UUID) async throws -> [InventoryUnitEntity]
+    @ObservationIgnored var updateInventoryHandler: (String, InventoryUnitStatus) async throws -> Void
     @ObservationIgnored var updatePurchasedItemHandler: (UUID, String, Date?) async throws -> Void
     
     init() {
@@ -45,26 +45,13 @@ final class FulfillmentViewModel {
             try await ProfileService().fetchBoutique(id: id)
         }
         self.fetchInventoryHandler = { skuId, storeId in
-            try await SupabaseManager.shared.client.from("inventory")
-                .select()
-                .eq("sku_id", value: skuId.uuidString)
-                .eq("store_id", value: storeId.uuidString)
-                .execute()
-                .value
+            try await InventoryService.shared.fetchInventory(forCatalog: skuId, boutiqueId: storeId)
         }
         self.fetchGlobalInventoryHandler = { skuId in
-            try await SupabaseManager.shared.client.from("inventory")
-                .select()
-                .eq("sku_id", value: skuId.uuidString)
-                .execute()
-                .value
+            try await InventoryService.shared.fetchInventory(forCatalog: skuId)
         }
-        self.updateInventoryHandler = { id, newQty, expectedQty in
-            try await SupabaseManager.shared.client.from("inventory")
-                .update(["quantity": newQty])
-                .eq("id", value: id.uuidString)
-                .eq("quantity", value: expectedQty)
-                .execute()
+        self.updateInventoryHandler = { serialNumber, status in
+            try await InventoryService.shared.updateInventoryStatus(serials: [serialNumber], newStatus: status)
         }
         self.updatePurchasedItemHandler = { id, status, deliveryDate in
             var payload: [String: String] = ["status": status]
@@ -206,27 +193,13 @@ final class FulfillmentViewModel {
             
             if item.status.lowercased() == "pending" {
                 let inventoryList = try await fetchInventoryHandler(item.productId, storeId)
-                var inventoryItem: InventoryItem
-                if let first = inventoryList.first {
-                    inventoryItem = first
-                } else {
-                    let newItem = InventoryItem(
-                        id: UUID(),
-                        storeId: storeId,
-                        skuId: item.productId,
-                        quantity: 5,
-                        productAvailable: true
-                    )
-                    _ = try? await SupabaseManager.shared.client.from("inventory").insert(newItem).execute()
-                    inventoryItem = newItem
-                }
-                if inventoryItem.quantity <= 0 {
+                guard let unit = inventoryList.first(where: { $0.status == .available }) else {
                     return .failure(NSError(domain: "Fulfillment", code: 6, userInfo: [NSLocalizedDescriptionKey: "Conflict: The item is already reserved or out of stock at this boutique."]))
                 }
-                try await updateInventoryHandler(inventoryItem.id, inventoryItem.quantity - 1, inventoryItem.quantity)
+                try await updateInventoryHandler(unit.serialNumber, .reserved)
             }
 
-            var payload: [String: String] = [
+            let payload: [String: String] = [
                 "status": "Ready to Pick",
                 "delivery_date": ISO8601DateFormatter().string(from: Date()),
                 "inventory_manager_id": icId
@@ -303,11 +276,11 @@ final class FulfillmentViewModel {
             try await updatePurchasedItemHandler(orderId, "Missing", nil)
             
             let inventoryList = try await fetchGlobalInventoryHandler(item.productId)
-            let availableQtyList = inventoryList.filter { $0.quantity > 0 }
+            let availableQtyList = inventoryList.filter { $0.status == .available }
             
             var targetBoutiqueName = "No alternative stores available"
             if let nextInventory = availableQtyList.first {
-                let boutique = try? await fetchBoutiqueHandler(nextInventory.storeId)
+                let boutique = try? await fetchBoutiqueHandler(nextInventory.boutiqueId)
                 if let bName = boutique?.name {
                     targetBoutiqueName = "Reassigned to \(bName)"
                 }
