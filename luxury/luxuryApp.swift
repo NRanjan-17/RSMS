@@ -18,8 +18,10 @@ struct luxuryApp: App {
     @State private var languageManager = LanguageManager.shared
     
     init() {
-        AppDependencyManager.shared.add(dependency: AppCoordinator.shared)
-        AppDependencyManager.shared.add(dependency: SalesAssociateAppState.shared)
+        let coordinator = AppCoordinator.shared
+        let saState = SalesAssociateAppState.shared
+        AppDependencyManager.shared.add(dependency: coordinator)
+        AppDependencyManager.shared.add(dependency: saState)
         
         let navAppearance = UINavigationBarAppearance()
         navAppearance.configureWithOpaqueBackground()

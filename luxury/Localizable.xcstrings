@@ -1286,16 +1286,6 @@
         }
       }
     },
-    "%@ (%lld%% OFF)" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ (%2$lld%% OFF)"
-          }
-        }
-      }
-    },
     "%@ • %@" : {
       "localizations" : {
         "ar" : {
@@ -87476,6 +87466,12 @@
         }
       }
     },
+    "Opens the Point of Sale in RSMS." : {
+
+    },
+    "Opens your upcoming appointments in RSMS." : {
+
+    },
     "OPERATIONAL LIMITS" : {
       "localizations" : {
         "ar" : {
@@ -126212,6 +126208,9 @@
         }
       }
     },
+    "Start a Sale" : {
+
+    },
     "Start Date" : {
 
     },
@@ -145960,6 +145959,9 @@
           }
         }
       }
+    },
+    "View Appointments" : {
+
     },
     "View Associates" : {
       "localizations" : {

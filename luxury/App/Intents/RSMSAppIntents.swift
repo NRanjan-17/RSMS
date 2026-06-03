@@ -6,20 +6,17 @@ struct CheckInventoryIntent: AppIntent {
     static var title: LocalizedStringResource = "Check Product Inventory"
     static var description = IntentDescription("Checks the availability of a specific product in your boutique.")
     
-    @Parameter(title: "Product Name")
-    var productName: String
+    @Parameter(title: "Product")
+    var product: ProductEntity
     
     func perform() async throws -> some IntentResult & ProvidesDialog & ShowsSnippetView {
-        // In a real app, you would query your local CoreData or a backend API here.
-        // For demonstration, we simulate finding the product.
+        let found = product.inStock ? Int.random(in: 1...5) : 0
         
-        let found = Int.random(in: 0...5)
-        
-        let dialog = IntentDialog(stringLiteral: found > 0 ? "You have \(found) units of \(productName) in stock." : "Sorry, \(productName) is currently out of stock.")
+        let dialog = IntentDialog(stringLiteral: found > 0 ? "You have \(found) units of \(product.name) in stock." : "Sorry, \(product.name) is currently out of stock.")
         
         return .result(
             dialog: dialog,
-            view: InventorySnippetView(productName: productName, count: found)
+            view: InventorySnippetView(productName: product.name, count: found)
         )
     }
 }
@@ -149,5 +146,85 @@ struct StartSaleIntent: AppIntent {
     func perform() async throws -> some IntentResult {
         saAppState.selectedTab = .pos
         return .result()
+    }
+}
+import AppIntents
+import SwiftUI
+import CoreSpotlight
+
+// MARK: - Product App Entity
+struct ProductEntity: AppEntity, IndexedEntity {
+    static var typeDisplayRepresentation: TypeDisplayRepresentation = "Product"
+    static var defaultQuery = ProductEntityQuery()
+    
+    let id: UUID
+    
+    @Property(title: "Brand")
+    var brand: String
+    
+    @Property(title: "Name")
+    var name: String
+    
+    @Property(title: "Price")
+    var price: String
+    
+    @Property(title: "In Stock")
+    var inStock: Bool
+    
+    // CoreSpotlight integration for Visual Intelligence & Spotlight Search
+    var displayRepresentation: DisplayRepresentation {
+        DisplayRepresentation(
+            title: "\(brand) - \(name)",
+            subtitle: LocalizedStringResource(stringLiteral: price),
+            image: .init(systemName: "bag.fill")
+        )
+    }
+    
+    init(id: UUID, brand: String, name: String, price: String, inStock: Bool) {
+        self.id = id
+        self.brand = brand
+        self.name = name
+        self.price = price
+        self.inStock = inStock
+    }
+    
+    init(from product: Product) {
+        self.id = product.id
+        self.brand = product.brand
+        self.name = product.name
+        self.price = product.price
+        self.inStock = product.inStock
+    }
+}
+
+// MARK: - Entity Query for Siri & Spotlight Search
+struct ProductEntityQuery: EntityQuery, EntityStringQuery {
+    func entities(for identifiers: [ProductEntity.ID]) async throws -> [ProductEntity] {
+        // Mocking a database lookup by ID
+        return identifiers.compactMap { id in
+            ProductEntity(id: id, brand: "Maison", name: "Sample Product", price: "$1,000", inStock: true)
+        }
+    }
+    
+    func entities(matching string: String) async throws -> [ProductEntity] {
+        // Mocking a text search for Visual Intelligence & Siri
+        let lowercased = string.lowercased()
+        let allProducts = [
+            ProductEntity(id: UUID(), brand: "Maison", name: "Classic Tote", price: "$1,200", inStock: true),
+            ProductEntity(id: UUID(), brand: "Maison", name: "Silk Scarf", price: "$350", inStock: true),
+            ProductEntity(id: UUID(), brand: "Maison", name: "Leather Wallet", price: "$500", inStock: false)
+        ]
+        
+        return allProducts.filter { product in
+            product.name.lowercased().contains(lowercased) || product.brand.lowercased().contains(lowercased)
+        }
+    }
+    
+    func suggestedEntities() async throws -> [ProductEntity] {
+        // Suggested items for Spotlight/Siri predictive suggestions
+        return [
+            ProductEntity(id: UUID(), brand: "Maison", name: "Classic Tote", price: "$1,200", inStock: true),
+            ProductEntity(id: UUID(), brand: "Maison", name: "Silk Scarf", price: "$350", inStock: true)
+        ]
     }
 }

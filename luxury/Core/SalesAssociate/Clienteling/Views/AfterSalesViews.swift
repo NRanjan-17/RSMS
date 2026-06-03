@@ -426,7 +426,7 @@ struct AfterSalesIntakeView: View {
                                         creatorName = staff.name
                                     } else if let manager = profile.1 as? CorporateBoutique {
                                         boutiqueId = manager.id
-                                        creatorName = manager.managerName ?? "Manager"
+                                        creatorName = manager.managerName
                                     } else {
                                         await MainActor.run { 
                                             errorMessage = String(localized: "Boutique ID not found on profile")
