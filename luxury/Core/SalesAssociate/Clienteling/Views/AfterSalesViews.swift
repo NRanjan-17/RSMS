@@ -420,10 +420,13 @@ struct AfterSalesIntakeView: View {
                                     }
                                     
                                     let boutiqueId: UUID
+                                    let creatorName: String
                                     if let staff = profile.1 as? StaffModel, let bid = staff.boutiqueId {
                                         boutiqueId = bid
+                                        creatorName = staff.name
                                     } else if let manager = profile.1 as? CorporateBoutique {
                                         boutiqueId = manager.id
+                                        creatorName = manager.managerName ?? "Manager"
                                     } else {
                                         await MainActor.run { 
                                             errorMessage = String(localized: "Boutique ID not found on profile")
@@ -444,13 +447,27 @@ struct AfterSalesIntakeView: View {
                                     let match = pItems.first(where: { $0.id == pid })
                                     let productId = match?.productId ?? pid
                                     
+                                    let astId = UUID()
+                                    var photoUrls: [String] = []
+                                    
+                                    for img in uploadedImages {
+                                        if let data = img.jpegData(compressionQuality: 0.7) {
+                                            let asset = PickedImageAsset(data: data, fileExtension: "jpg", contentType: "image/jpeg")
+                                            let url = try await StorageService().uploadASTPhoto(image: asset, astId: astId)
+                                            photoUrls.append(url)
+                                        }
+                                    }
+                                    
                                     _ = try await ASTService.shared.createAST(
+                                        id: astId,
                                         productId: productId,
                                         clientId: client.id,
                                         boutiqueId: boutiqueId,
                                         warrantyStatus: dynamicWarrantyText ?? "Valid",
                                         description: issue,
-                                        remark: "Created via AST Intake UI. \(uploadedImages.count) photos."
+                                        remark: "Created via AST Intake UI. \(photoUrls.count) photos uploaded.",
+                                        photoUrls: photoUrls,
+                                        createdBy: creatorName
                                     )
                                     
                                     await MainActor.run {

@@ -49,12 +49,14 @@ final class ASTViewModel {
         Task {
             do {
                 _ = try await ASTService.shared.createAST(
+                    id: UUID(),
                     productId: productId,
                     clientId: selectedClient?.id,
                     boutiqueId: boutiqueId,
                     warrantyStatus: warrantyStatus,
                     description: description,
-                    remark: remark
+                    remark: remark,
+                    photoUrls: []
                 )
                 
                 await MainActor.run {

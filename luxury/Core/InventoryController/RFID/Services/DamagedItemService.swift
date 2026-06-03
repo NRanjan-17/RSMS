@@ -35,7 +35,7 @@ final class DamagedItemService {
             warrantyStatus: nil,
             description: draft.description,
             remark: "Supplier notification queued from delivery scan.",
-            metadata: ASTMetadata(
+            metadata: DamagedASTMetadata(
                 serialNumber: draft.serial,
                 photoURL: photoURL,
                 source: "delivery_scan",
@@ -65,7 +65,7 @@ private struct ASTInsert: Encodable {
     let warrantyStatus: String?
     let description: String
     let remark: String?
-    let metadata: ASTMetadata
+    let metadata: DamagedASTMetadata
 
     enum CodingKeys: String, CodingKey {
         case status, description, remark, metadata
@@ -76,7 +76,7 @@ private struct ASTInsert: Encodable {
     }
 }
 
-private struct ASTMetadata: Encodable {
+private struct DamagedASTMetadata: Encodable {
     let serialNumber: String
     let photoURL: String
     let source: String

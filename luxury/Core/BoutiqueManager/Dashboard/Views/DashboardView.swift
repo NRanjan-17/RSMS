@@ -68,9 +68,9 @@ struct DashboardView: View {
 
                         HStack(spacing: 10) {
                             CustomOutlineButton(
-                                title: "Refund Queue",
+                                title: "After Sales Tickets",
                                 icon: AnyView(Image(systemName: "arrow.uturn.backward.circle")),
-                                action: { router.push(BMRoute.refundApproval) }
+                                action: { router.push(BMRoute.astQueue) }
                             )
                             CustomOutlineButton(
                                 title: "Write-Off",
@@ -83,7 +83,7 @@ struct DashboardView: View {
 
                         VStack(alignment: .leading, spacing: 16) {
                             HStack {
-                                Text("PENDING APPOINTMENTS")
+                                Text("APPOINTMENTS")
                                     .font(AppFonts.sansSerif(size: 11, weight: .bold))
                                     .foregroundStyle(AppColors.secondary)
                                     .kerning(1.5)
@@ -94,8 +94,8 @@ struct DashboardView: View {
                             }
                             .padding(.horizontal, 24)
 
-                            if viewModel.pendingAppointments.isEmpty {
-                                Text("No pending appointments")
+                            if viewModel.pendingAppointments.isEmpty && viewModel.appointments.isEmpty {
+                                Text("No appointments found")
                                     .font(AppFonts.sansSerif(size: 13))
                                     .foregroundStyle(AppColors.secondary)
                                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -103,148 +103,102 @@ struct DashboardView: View {
                                     .padding(.vertical, 8)
                             } else {
                                 VStack(spacing: 12) {
-                                    ForEach(Array(viewModel.pendingAppointments.prefix(5))) { appointment in
+                                    ForEach(viewModel.pendingAppointments) { appointment in
                                         Button(action: {
                                             router.push(BMRoute.appointmentDetail(appointment))
                                         }) {
-                                        HStack(spacing: 12) {
-                                            VStack(alignment: .leading, spacing: 4) {
-                                                Text(appointment.formattedTime)
-                                                    .font(AppFonts.sansSerif(size: 14, weight: .bold))
-                                                    .foregroundStyle(AppColors.gold)
-                                                Text(appointment.displayAppointmentType.uppercased())
-                                                    .font(AppFonts.sansSerif(size: 8, weight: .bold))
-                                                    .foregroundStyle(AppColors.tertiary)
-                                            }
-                                            .frame(width: 65, alignment: .leading)
-                                            
-                                            VStack(alignment: .leading, spacing: 6) {
-                                                Text(appointment.client?.name ?? "Unknown Client")
-                                                    .font(AppFonts.serif(size: 17, weight: .medium))
-                                                    .foregroundStyle(AppColors.text)
-                                                    .lineLimit(1)
-                                                    .minimumScaleFactor(0.8)
+                                            HStack(spacing: 12) {
+                                                VStack(alignment: .leading, spacing: 4) {
+                                                    Text(appointment.formattedTime)
+                                                        .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                                        .foregroundStyle(AppColors.gold)
+                                                    Text(appointment.displayAppointmentType.uppercased())
+                                                        .font(AppFonts.sansSerif(size: 8, weight: .bold))
+                                                        .foregroundStyle(AppColors.tertiary)
+                                                }
+                                                .frame(width: 65, alignment: .leading)
                                                 
-                                                Text("Unassigned")
-                                                    .font(AppFonts.sansSerif(size: 10, weight: .semibold))
-                                                    .foregroundStyle(AppColors.warning)
-                                                    .padding(.horizontal, 8)
-                                                    .padding(.vertical, 3)
-                                                    .background(AppColors.warning.opacity(0.15))
+                                                VStack(alignment: .leading, spacing: 6) {
+                                                    Text(appointment.client?.name ?? "Unknown Client")
+                                                        .font(AppFonts.serif(size: 17, weight: .medium))
+                                                        .foregroundStyle(AppColors.text)
+                                                        .lineLimit(1)
+                                                        .minimumScaleFactor(0.8)
+                                                    
+                                                    Text("Unassigned")
+                                                        .font(AppFonts.sansSerif(size: 10, weight: .semibold))
+                                                        .foregroundStyle(AppColors.warning)
+                                                        .padding(.horizontal, 8)
+                                                        .padding(.vertical, 3)
+                                                        .background(AppColors.warning.opacity(0.15))
+                                                        .clipShape(Capsule())
+                                                }
+                                                
+                                                Spacer(minLength: 8)
+                                                
+                                                Text("Review")
+                                                    .font(AppFonts.sansSerif(size: 12, weight: .bold))
+                                                    .foregroundStyle(AppColors.background)
+                                                    .padding(.horizontal, 14)
+                                                    .padding(.vertical, 8)
+                                                    .background(AppColors.gold)
                                                     .clipShape(Capsule())
                                             }
-                                            
-                                            Spacer(minLength: 8)
-                                            
-                                            Text("Review")
-                                                .font(AppFonts.sansSerif(size: 12, weight: .bold))
-                                                .foregroundStyle(AppColors.background)
-                                                .padding(.horizontal, 14)
-                                                .padding(.vertical, 8)
-                                                .background(AppColors.gold)
-                                                .clipShape(Capsule())
-                                        }
-                                        .padding(.vertical, 16)
-                                        .padding(.horizontal, 16)
-                                        .background(AppColors.surface)
-                                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 16)
-                                                .stroke(AppColors.gold15, lineWidth: 0.5)
-                                        )
+                                            .padding(.vertical, 16)
+                                            .padding(.horizontal, 16)
+                                            .background(AppColors.surface)
+                                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 16)
+                                                    .stroke(AppColors.gold15, lineWidth: 0.5)
+                                            )
                                         }
                                         .buttonStyle(.plain)
                                     }
-                                
-                                    if viewModel.pendingAppointments.count > 5 {
+
+                                    ForEach(viewModel.appointments) { appointment in
                                         Button(action: {
-                                            router.push(BMRoute.pendingAppointmentsList(viewModel.pendingAppointments))
+                                            router.presentFullScreen(BMRoute.appointmentDetail(appointment))
                                         }) {
-                                            Text("View All Pending")
-                                                .font(AppFonts.sansSerif(size: 14, weight: .semibold))
-                                                .foregroundStyle(AppColors.gold)
-                                                .frame(maxWidth: .infinity)
-                                                .padding(.vertical, 16)
-                                                .background(AppColors.surface)
-                                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                                            HStack(spacing: 16) {
+                                                VStack(alignment: .leading, spacing: 4) {
+                                                    Text(appointment.formattedTime)
+                                                        .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                                        .foregroundStyle(AppColors.gold)
+                                                    Text(appointment.displayAppointmentType.uppercased())
+                                                        .font(AppFonts.sansSerif(size: 8, weight: .bold))
+                                                        .foregroundStyle(AppColors.tertiary)
+                                                }
+                                                .frame(width: 70, alignment: .leading)
+                                                
+                                                VStack(alignment: .leading, spacing: 2) {
+                                                    Text(appointment.client?.name ?? "Unknown Client")
+                                                        .font(AppFonts.serif(size: 17, weight: .medium))
+                                                        .foregroundStyle(AppColors.text)
+                                                    Text("Advisor: \(viewModel.advisorName(for: appointment.assignedTo))")
+                                                        .font(AppFonts.sansSerif(size: 12))
+                                                        .foregroundStyle(AppColors.secondary)
+                                                }
+                                                
+                                                Spacer()
+                                                
+                                                Image(systemName: "chevron.right")
+                                                    .font(AppFonts.sansSerif(size: 12))
+                                                    .foregroundStyle(AppColors.tertiary)
+                                            }
+                                            .padding(20)
+                                            .background(AppColors.surface)
+                                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 16)
+                                                    .stroke(AppColors.gold15, lineWidth: 0.5)
+                                            )
                                         }
-                                        .padding(.top, 4)
+                                        .buttonStyle(.plain)
                                     }
                                 }
                                 .padding(.horizontal, 24)
                             }
-                        }
-
-                        VStack(alignment: .leading, spacing: 16) {
-                            HStack {
-                                Text(viewModel.showAllAppointments ? "ALL APPOINTMENTS" : "UPCOMING APPOINTMENTS")
-                                    .font(AppFonts.sansSerif(size: 11, weight: .bold))
-                                    .foregroundStyle(AppColors.secondary)
-                                    .kerning(1.5)
-                                Spacer()
-                                Button(action: {
-                                    router.push(BMRoute.allAppointments)
-                                }) {
-                                    Text("View All")
-                                        .font(AppFonts.sansSerif(size: 12, weight: .medium))
-                                        .foregroundStyle(AppColors.gold)
-                                }
-                            }
-                            .padding(.horizontal, 24)
-
-                            VStack(spacing: 12) {
-                                if viewModel.appointments.isEmpty {
-                                    Text("No appointments found")
-                                        .font(AppFonts.sansSerif(size: 13))
-                                        .foregroundStyle(AppColors.secondary)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .padding(.horizontal, 24)
-                                        .padding(.vertical, 8)
-                                } else {
-                                    ForEach(viewModel.appointments) { appointment in
-                                        Button(action: {
-                                        router.presentFullScreen(BMRoute.appointmentDetail(appointment))
-                                    }) {
-                                        HStack(spacing: 16) {
-                                            VStack(alignment: .leading, spacing: 4) {
-                                                Text(appointment.formattedTime)
-                                                    .font(AppFonts.sansSerif(size: 14, weight: .bold))
-                                                    .foregroundStyle(AppColors.gold)
-                                                Text(appointment.displayAppointmentType.uppercased())
-                                                    .font(AppFonts.sansSerif(size: 8, weight: .bold))
-                                                    .foregroundStyle(AppColors.tertiary)
-                                            }
-                                            .frame(width: 70, alignment: .leading)
-                                            
-                                            VStack(alignment: .leading, spacing: 2) {
-                                                Text(appointment.client?.name ?? "Unknown Client")
-                                                    .font(AppFonts.serif(size: 17, weight: .medium))
-                                                    .foregroundStyle(AppColors.text)
-                                                Text("Advisor: \(viewModel.advisorName(for: appointment.assignedTo))")
-                                                    .font(AppFonts.sansSerif(size: 12))
-                                                    .foregroundStyle(AppColors.secondary)
-                                            }
-                                            
-                                            Spacer()
-                                            
-                                            Image(systemName: "chevron.right")
-                                                .font(AppFonts.sansSerif(size: 12))
-                                                .foregroundStyle(AppColors.tertiary)
-                                        }
-                                        .padding(20)
-                                        .background(AppColors.surface)
-                                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 16)
-                                                .stroke(AppColors.gold15, lineWidth: 0.5)
-                                        )
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                                }
-                            }
-                            .padding(.horizontal, 24)
                         }
 
                         VStack(alignment: .leading, spacing: 16) {
