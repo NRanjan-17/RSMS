@@ -24,9 +24,7 @@ struct AuditView: View {
                         let counts = viewModel.scheduledCounts
                         ForEach(counts, id: \.id) { count in
                             Button(action: {
-                                if count.status == "Due" {
-                                    router.presentFullScreen(ICRoute.activeAudit(count))
-                                } else if count.status == "Signed Off" || count.status == "Submitted" {
+                                if count.status == "Signed Off" || count.status == "Submitted" {
                                     router.push(ICRoute.varianceReport(count))
                                 } else {
                                     router.presentFullScreen(ICRoute.auditDetail(count))
@@ -86,6 +84,9 @@ struct AuditView: View {
                 .scrollContentBackground(.hidden)
                 .background(AppColors.background)
             }
+        }
+        .onAppear {
+            viewModel.refreshData()
         }
         .toolbar(.hidden, for: .navigationBar)
     }
