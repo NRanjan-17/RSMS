@@ -682,9 +682,30 @@ struct AuditSession: Identifiable, Hashable, Codable {
     var storeName: String
     var controllerName: String
     var isSubmitted: Bool
-    var expectedItems: [AuditCountItem]
+    var yetToScanItems: [YetToScanItem]
+    var scannedUnitIds: [UUID]
     var varianceReport: VarianceReport?
     var unexpectedScannedItems: [UnexpectedScannedItem]?
+}
+
+struct YetToScanItem: Identifiable, Codable, Hashable {
+    let id: UUID
+    let serialNumber: String
+    let catalogId: UUID?
+    let name: String
+    let brand: String
+}
+
+struct YetToScanNetworkResponse: Codable {
+    let id: UUID
+    let serial_number: String
+    let catalog_id: UUID?
+    let catalogs: CatalogNetworkResponse?
+    
+    struct CatalogNetworkResponse: Codable {
+        let name: String
+        let brand: String
+    }
 }
 
 struct AuditCountItem: Identifiable, Hashable, Codable {

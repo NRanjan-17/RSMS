@@ -107,7 +107,7 @@ struct BatchScannerSheet: View {
                     }
                     .padding(.vertical, 12)
                     .padding(.horizontal, 24)
-                    .background(hudStatus == .success ? AppColors.success : (hudStatus == .duplicate ? AppColors.error : AppColors.warning))
+                    .background(hudStatus == .success ? AppColors.success : (hudStatus == .duplicate ? AppColors.error : Color.blue))
                     .clipShape(Capsule())
                     .transition(.move(edge: .top).combined(with: .opacity))
                     .shadow(radius: 5)
@@ -135,18 +135,6 @@ struct BatchScannerSheet: View {
         } message: {
             Text("The item '\(duplicateAlertItem)' has already been scanned in this session.")
         }
-        .alert("Unexpected Item", isPresented: $showingUnexpectedAlert) {
-            Button("Cancel", role: .cancel) {}
-            Button("Verify & Include") {
-                withAnimation {
-                    scannedSerials.append(unexpectedAlertItem)
-                }
-                showHUD(message: "Scanned: \(unexpectedAlertItem)", status: .success)
-                scannerService.playSuccessFeedback()
-            }
-        } message: {
-            Text("The item '\(unexpectedAlertItem)' does not match the expected count list. Verify before including.")
-        }
     }
 
     private func handleScannedCode(_ code: String) {
@@ -162,10 +150,11 @@ struct BatchScannerSheet: View {
         }
 
         if let expected = expectedSerials, !expected.contains(trimmed) {
-            scannerService.playErrorFeedback()
-            showHUD(message: "Unexpected: \(trimmed)", status: .unexpected)
-            unexpectedAlertItem = trimmed
-            showingUnexpectedAlert = true
+            scannerService.playSuccessFeedback()
+            showHUD(message: "New Item Found: \(trimmed)", status: .unexpected)
+            withAnimation {
+                scannedSerials.append(trimmed)
+            }
             return
         }
 
