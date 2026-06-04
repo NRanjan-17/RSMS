@@ -29,7 +29,7 @@ actor RecommendationEngine {
         guard !activeCatalog.isEmpty else { return [] }
         
         let purchasedProductIds = client.productsPurchased ?? []
-        let purchasedItems = catalog.filter { purchasedProductIds.contains(item.id) }
+        let purchasedItems = catalog.filter { purchasedProductIds.contains($0.id) }
         
         var purchasedTextVectors: [[Float]] = []
         var purchasedVisualVectors: [[Float]] = []
