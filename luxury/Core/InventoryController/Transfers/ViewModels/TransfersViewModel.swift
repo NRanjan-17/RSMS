@@ -134,7 +134,7 @@ final class TransfersViewModel {
             .value
         
         var transfers: [TransferRequest] = []
-        var latestByOriginalOrderId: [UUID: (Date, TransferRequest)] = [:]
+        var latestByOriginalOrderId: [UUID: (priority: Int, lastUpdated: Date, transfer: TransferRequest)] = [:]
         
         for row in rows {
             guard EndlessAisleLink.decode(row.transactionId) != nil else {
@@ -159,19 +159,24 @@ final class TransfersViewModel {
                 badgeStatus: transferBadge(for: request.status)
             )
             if let originalOrderId = request.originalOrderId {
+                let candidate = (
+                    priority: transferPriority(for: request.status),
+                    lastUpdated: request.lastUpdated,
+                    transfer: transfer
+                )
                 if let existing = latestByOriginalOrderId[originalOrderId] {
-                    if request.lastUpdated >= existing.0 {
-                        latestByOriginalOrderId[originalOrderId] = (request.lastUpdated, transfer)
+                    if candidate.priority > existing.priority || (candidate.priority == existing.priority && candidate.lastUpdated >= existing.lastUpdated) {
+                        latestByOriginalOrderId[originalOrderId] = candidate
                     }
                 } else {
-                    latestByOriginalOrderId[originalOrderId] = (request.lastUpdated, transfer)
+                    latestByOriginalOrderId[originalOrderId] = candidate
                 }
             } else {
                 transfers.append(transfer)
             }
         }
         
-        transfers.append(contentsOf: latestByOriginalOrderId.values.map(\.1))
+        transfers.append(contentsOf: latestByOriginalOrderId.values.map(\.transfer))
         return transfers.sorted { $0.reference < $1.reference }
     }
     
@@ -329,10 +334,25 @@ final class TransfersViewModel {
             return .neutral
         }
     }
+
+    private func transferPriority(for status: EndlessAisle.RequestState) -> Int {
+        switch status {
+        case .received:
+            return 4
+        case .arrived:
+            return 3
+        case .dispatched:
+            return 2
+        case .pendingSourceDispatch:
+            return 1
+        case .pendingBoutiqueManagerApproval, .pendingSourceBoutiqueApproval, .checking, .localInStock, .noStockAnywhere:
+            return 0
+        }
+    }
     
     private func isPending(_ status: String) -> Bool {
         let s = status.lowercased()
-        return s == "submitted" || s == "pending approval" || s == "pending receipt" || s == "pending"
+        return s == "submitted" || s == "pending approval" || s == "approved" || s == "pending receipt" || s == "pending"
     }
     
     private func isInTransit(_ status: String) -> Bool {
