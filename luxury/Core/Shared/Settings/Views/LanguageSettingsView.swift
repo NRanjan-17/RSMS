@@ -40,18 +40,23 @@ struct LanguageSettingsView: View {
                 // Header
                 HStack {
                     Button(action: { dismiss() }) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .medium))
-                            .foregroundStyle(.white)
+                        ZStack {
+                            Circle()
+                                .fill(AppColors.surface2)
+                                .frame(width: 44, height: 44)
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundStyle(.white)
+                        }
                     }
                     Spacer()
                     Text("Language")
-                        .font(AppFonts.serif(size: 20, weight: .medium))
+                        .font(AppFonts.sansSerif(size: 18, weight: .semibold))
                         .foregroundStyle(.white)
                     Spacer()
                     // Invisible spacer for balance
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 20, weight: .medium))
+                    Circle()
+                        .frame(width: 44, height: 44)
                         .opacity(0)
                 }
                 .padding(.horizontal, 24)
