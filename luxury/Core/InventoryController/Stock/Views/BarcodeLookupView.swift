@@ -41,7 +41,7 @@ struct BarcodeLookupView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                CustomHeader(title: "Barcode Lookup", showBackButton: true, backAction: { dismiss() })
+                CustomHeader(title: "Barcode Lookup", showBackButton: true, backAction: { dismiss() }, isInline: true)
                 
                 // Camera / Scanner View
                 ZStack {
@@ -117,57 +117,7 @@ struct BarcodeLookupView: View {
                 .padding(.horizontal, 24)
                 .padding(.bottom, 16)
                 
-                if isSimulator {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("SIMULATED SCANNING ACTIONS")
-                            .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                            .foregroundStyle(AppColors.secondary)
-                            .kerning(1.5)
-                            .padding(.horizontal, 24)
-                        
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 12) {
-                                ForEach(viewModel.expectedItems) { item in
-                                    Button(action: {
-                                        handleScannedCode(item.barCode)
-                                    }) {
-                                        HStack {
-                                            Image(systemName: "barcode.viewfinder")
-                                                .font(AppFonts.sansSerif(size: 12))
-                                            Text("Scan \(item.name)")
-                                                .font(AppFonts.sansSerif(size: 12, weight: .semibold))
-                                        }
-                                        .padding(.horizontal, 14)
-                                        .padding(.vertical, 8)
-                                        .background(AppColors.surface)
-                                        .foregroundStyle(AppColors.gold)
-                                        .clipShape(Capsule())
-                                        .overlay(Capsule().stroke(AppColors.gold50, lineWidth: 0.5))
-                                    }
-                                }
-                                
-                                Button(action: {
-                                    handleScannedCode("UNKNOWN-BARCODE-\(Int.random(in: 100...999))")
-                                }) {
-                                    HStack {
-                                        Image(systemName: "exclamationmark.triangle")
-                                            .font(AppFonts.sansSerif(size: 12))
-                                        Text("Scan Unexpected")
-                                            .font(AppFonts.sansSerif(size: 12, weight: .semibold))
-                                    }
-                                    .padding(.horizontal, 14)
-                                    .padding(.vertical, 8)
-                                    .background(AppColors.surface)
-                                    .foregroundStyle(AppColors.error)
-                                    .clipShape(Capsule())
-                                    .overlay(Capsule().stroke(AppColors.error.opacity(0.5), lineWidth: 0.5))
-                                }
-                            }
-                            .padding(.horizontal, 24)
-                        }
-                    }
-                    .padding(.bottom, 16)
-                }
+
                 
                 ScrollView {
                     VStack(spacing: 20) {

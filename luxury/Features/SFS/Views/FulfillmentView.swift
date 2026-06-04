@@ -25,20 +25,7 @@ struct FulfillmentView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                HStack(spacing: 16) {
-                    Button(action: { router.pop() }) {
-                        Image(systemName: "chevron.left")
-                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
-                            .foregroundStyle(AppColors.gold)
-                    }
-                    .accessibilityLabel("Back")
-                    Text("SFS Orders")
-                        .font(AppFonts.sansSerif(size: 13, weight: .medium))
-                        .foregroundStyle(AppColors.gold)
-                    Spacer()
-                }
-                .padding(.horizontal, 24)
-                .padding(.vertical, 16)
+                CustomHeader(title: "SFS Orders", showBackButton: true, backAction: { router.pop() }, isInline: true)
                 
                 HStack(spacing: 0) {
                     Button(action: {

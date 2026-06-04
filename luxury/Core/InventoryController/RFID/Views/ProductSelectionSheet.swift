@@ -27,11 +27,12 @@ struct ProductSelectionSheet: View {
     }
     
     var body: some View {
-        NavigationStack {
+        ZStack {
             ZStack {
                 AppColors.background.ignoresSafeArea()
                 
                 VStack(spacing: 0) {
+                    CustomHeader(title: "Select Product", showBackButton: true, backAction: { dismiss() }, isInline: true)
                     // Search Bar
                     HStack {
                         Image(systemName: "magnifyingglass")
@@ -117,15 +118,6 @@ struct ProductSelectionSheet: View {
                             .padding(.vertical, 12)
                         }
                     }
-                }
-            }
-            .navigationTitle("Select Product")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }
-                        .foregroundStyle(AppColors.gold)
-                        .font(AppFonts.sansSerif(size: 16))
                 }
             }
             .onAppear {
