@@ -50,15 +50,31 @@ final class ActiveAuditViewModel {
             
             var allExpectedItems: [YetToScanItem] = []
             do {
-                let response: [YetToScanNetworkResponse] = try await SupabaseManager.shared.client
-                    .from("inventory_units")
-                    .select("id, serial_number, catalog_id, catalogs(id, name, brand, catalog_id)")
-                    .eq("boutique_id", value: storeId.uuidString)
-                    .eq("status", value: "Available")
-                    .execute()
-                    .value
+                var allResponses: [YetToScanNetworkResponse] = []
+                var offset = 0
+                let chunkSize = 1000
+                var hasMore = true
                 
-                allExpectedItems = response.map { res in
+                while hasMore {
+                    let response: [YetToScanNetworkResponse] = try await SupabaseManager.shared.client
+                        .from("inventory_units")
+                        .select("id, serial_number, catalog_id, catalogs(id, name, brand, catalog_id)")
+                        .eq("boutique_id", value: storeId.uuidString)
+                        .eq("status", value: "Available")
+                        .range(from: offset, to: offset + chunkSize - 1)
+                        .execute()
+                        .value
+                    
+                    allResponses.append(contentsOf: response)
+                    
+                    if response.count < chunkSize {
+                        hasMore = false
+                    } else {
+                        offset += chunkSize
+                    }
+                }
+                
+                allExpectedItems = allResponses.map { res in
                     YetToScanItem(
                         id: res.id,
                         serialNumber: res.serial_number,
@@ -127,15 +143,31 @@ final class ActiveAuditViewModel {
             let staff = profileTuple?.1 as? StaffModel
             let storeId = staff?.boutiqueId ?? UUID()
             
-            let response: [YetToScanNetworkResponse] = try await SupabaseManager.shared.client
-                .from("inventory_units")
-                .select("id, serial_number, catalog_id, catalogs(name, brand)")
-                .eq("boutique_id", value: storeId.uuidString)
-                .eq("status", value: "Available")
-                .execute()
-                .value
+            var allResponses: [YetToScanNetworkResponse] = []
+            var offset = 0
+            let chunkSize = 1000
+            var hasMore = true
             
-            let items: [YetToScanItem] = response.map { res in
+            while hasMore {
+                let response: [YetToScanNetworkResponse] = try await SupabaseManager.shared.client
+                    .from("inventory_units")
+                    .select("id, serial_number, catalog_id, catalogs(name, brand)")
+                    .eq("boutique_id", value: storeId.uuidString)
+                    .eq("status", value: "Available")
+                    .range(from: offset, to: offset + chunkSize - 1)
+                    .execute()
+                    .value
+                
+                allResponses.append(contentsOf: response)
+                
+                if response.count < chunkSize {
+                    hasMore = false
+                } else {
+                    offset += chunkSize
+                }
+            }
+            
+            let items: [YetToScanItem] = allResponses.map { res in
                 YetToScanItem(
                     id: res.id,
                     serialNumber: res.serial_number,
@@ -310,13 +342,33 @@ final class ActiveAuditViewModel {
             }
             
             // Build real VarianceReportItems
-            let allUnitsResponse: [YetToScanNetworkResponse] = (try? await SupabaseManager.shared.client
-                .from("inventory_units")
-                .select("id, serial_number, catalog_id, catalogs(id, name, brand, catalog_id)")
-                .eq("boutique_id", value: storeId.uuidString)
-                .eq("status", value: "Available")
-                .execute()
-                .value) ?? []
+            var allUnitsResponse: [YetToScanNetworkResponse] = []
+            do {
+                var offset = 0
+                let chunkSize = 1000
+                var hasMore = true
+                
+                while hasMore {
+                    let response: [YetToScanNetworkResponse] = try await SupabaseManager.shared.client
+                        .from("inventory_units")
+                        .select("id, serial_number, catalog_id, catalogs(id, name, brand, catalog_id)")
+                        .eq("boutique_id", value: storeId.uuidString)
+                        .eq("status", value: "Available")
+                        .range(from: offset, to: offset + chunkSize - 1)
+                        .execute()
+                        .value
+                    
+                    allUnitsResponse.append(contentsOf: response)
+                    
+                    if response.count < chunkSize {
+                        hasMore = false
+                    } else {
+                        offset += chunkSize
+                    }
+                }
+            } catch {
+                print("Failed to fetch all inventory units for variance report: \(error)")
+            }
             
             struct CatalogSummary {
                 let id: UUID
