@@ -39051,6 +39051,9 @@
         }
       }
     },
+    "Copy Link" : {
+
+    },
     "Corporate admin registration is not available." : {
       "localizations" : {
         "ar" : {
@@ -73089,6 +73092,9 @@
         }
       }
     },
+    "Join Call Now" : {
+
+    },
     "Keep Editing" : {
       "localizations" : {
         "ar" : {
@@ -78260,6 +78266,9 @@
           }
         }
       }
+    },
+    "Meeting Link: %@" : {
+
     },
     "Mismatch detected. Submit the scanned quantity to correct inventory." : {
       "localizations" : {
@@ -124953,6 +124962,9 @@
         }
       }
     },
+    "Send via Email" : {
+
+    },
     "Senior Client Advisor" : {
       "localizations" : {
         "ar" : {
@@ -151362,6 +151374,9 @@
           }
         }
       }
+    },
+    "Video Consultation Setup" : {
+
     },
     "View active store planograms" : {
       "localizations" : {
