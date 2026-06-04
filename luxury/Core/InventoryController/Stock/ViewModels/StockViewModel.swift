@@ -119,12 +119,18 @@ final class StockViewModel {
     func fetchSFSCount() {
         Task {
             do {
-                let items: [PurchasedItemEntity] = try await SupabaseManager.shared.client
+                var query = SupabaseManager.shared.client
                     .from("purchased_items")
                     .select()
                     .eq("status", value: "Pending")
-                    .execute()
-                    .value
+                
+                if let profileTuple = try? await ProfileService().fetchCurrentProfile(),
+                   let staff = profileTuple.1 as? StaffModel,
+                   let boutiqueId = staff.boutiqueId {
+                    query = query.eq("boutique_id", value: boutiqueId.uuidString)
+                }
+                
+                let items: [PurchasedItemEntity] = try await query.execute().value
                 
                 await MainActor.run {
                     self.sfsOrdersCount = "\(items.count)"

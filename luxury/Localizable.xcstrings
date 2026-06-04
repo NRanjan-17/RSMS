@@ -3770,6 +3770,16 @@
         }
       }
     },
+    "%lld %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld %2$@"
+          }
+        }
+      }
+    },
     "%lld Active Audits • %lld Archived Records" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4191,6 +4201,9 @@
         }
       }
     },
+    "%lld count submitted and awaiting sign-off." : {
+
+    },
     "%lld In Boutique" : {
       "localizations" : {
         "ar" : {
@@ -4600,6 +4613,7 @@
       }
     },
     "%lld Items" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -15098,6 +15112,7 @@
       }
     },
     "All items matched — no variance found." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -17957,6 +17972,7 @@
 
     },
     "Archived Product" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -24217,6 +24233,12 @@
         }
       }
     },
+    "AWAITING APPROVAL" : {
+
+    },
+    "AWAITING SIGN-OFF" : {
+
+    },
     "Back" : {
       "localizations" : {
         "ar" : {
@@ -26259,6 +26281,9 @@
           }
         }
       }
+    },
+    "Boutique Count Report" : {
+
     },
     "Boutique Details" : {
       "localizations" : {
@@ -39881,6 +39906,7 @@
       }
     },
     "Counted by %@ on %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -40022,7 +40048,11 @@
         }
       }
     },
+    "Counted on %@" : {
+
+    },
     "Counted: %lld" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -48335,6 +48365,7 @@
 
     },
     "DISCREPANT ITEMS" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -48744,6 +48775,16 @@
     },
     "Do you want to change the date?" : {
 
+    },
+    "Do you want to mark all not scanned items as missing? This will create a report containing %lld missing items and %lld new items." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Do you want to mark all not scanned items as missing? This will create a report containing %1$lld missing items and %2$lld new items."
+          }
+        }
+      }
     },
     "Done" : {
       "localizations" : {
@@ -66565,6 +66606,9 @@
         }
       }
     },
+    "In Progress" : {
+
+    },
     "in stock" : {
       "localizations" : {
         "ar" : {
@@ -69563,6 +69607,9 @@
       }
     },
     "Inventory Audit Approval" : {
+
+    },
+    "Inventory Audit Pending Review" : {
 
     },
     "Inventory Check" : {
@@ -78157,6 +78204,7 @@
       }
     },
     "MATCHED ITEMS" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -85373,6 +85421,7 @@
       }
     },
     "No matched items found in active view." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -85779,6 +85828,12 @@
           }
         }
       }
+    },
+    "No missing items." : {
+
+    },
+    "No new items." : {
+
     },
     "No notes recorded yet" : {
       "localizations" : {
@@ -86323,6 +86378,9 @@
           }
         }
       }
+    },
+    "No pending audits for review." : {
+
     },
     "No pending requests" : {
       "localizations" : {
@@ -89318,6 +89376,9 @@
           }
         }
       }
+    },
+    "No successful items." : {
+
     },
     "No target set" : {
       "localizations" : {
@@ -95986,6 +96047,9 @@
           }
         }
       }
+    },
+    "Pending Review" : {
+
     },
     "Per Client Average" : {
       "localizations" : {
@@ -120918,6 +120982,7 @@
       }
     },
     "Section A: Missing Items (DB mismatch)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -121054,6 +121119,7 @@
       }
     },
     "Section B: Unexpected / New Items" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -121190,6 +121256,7 @@
       }
     },
     "Section C: Verified & Confirmed" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -128968,6 +129035,9 @@
         }
       }
     },
+    "Sign-off Error" : {
+
+    },
     "SIMULATED SCANNING ACTIONS" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -133611,6 +133681,9 @@
         }
       }
     },
+    "Submission Failed" : {
+
+    },
     "Submit" : {
       "localizations" : {
         "ar" : {
@@ -134290,6 +134363,9 @@
           }
         }
       }
+    },
+    "Submitted by Controller • Awaiting Sign-off" : {
+
     },
     "SUBMITTED BY STORE INVENTORY" : {
       "localizations" : {
@@ -141366,6 +141442,9 @@
         }
       }
     },
+    "Total Expected" : {
+
+    },
     "Total Locations with Stock" : {
       "localizations" : {
         "ar" : {
@@ -141773,6 +141852,9 @@
           }
         }
       }
+    },
+    "Total Scanned" : {
+
     },
     "Total SKU" : {
       "localizations" : {
@@ -154980,6 +155062,9 @@
       }
     },
     "Yes" : {
+
+    },
+    "Yes, Submit" : {
 
     },
     "You have unsaved changes. Are you sure you want to go back? Your changes will be lost." : {
