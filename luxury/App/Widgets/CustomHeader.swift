@@ -18,14 +18,7 @@ struct CustomHeader: View {
     
     var body: some View {
         HStack(spacing: 12) {
-            if showBackButton, let action = backAction {
-                Button(action: action) {
-                    Image(systemName: "chevron.left")
-                        .font(AppFonts.sansSerif(size: 20, weight: .semibold))
-                        .foregroundStyle(AppColors.gold)
-                }
-                .accessibilityLabel("Back")
-            }
+            // Removed custom back button to rely on native iOS back button
             Text(title)
                 .font(AppFonts.serif(size: 28, weight: .semibold))
                 .foregroundStyle(.white)

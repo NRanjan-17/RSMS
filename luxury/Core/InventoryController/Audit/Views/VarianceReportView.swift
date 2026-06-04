@@ -17,15 +17,10 @@ struct VarianceReportView: View {
         }
         return VarianceReport(
             id: audit.id,
-            boutiqueName: "Main Boutique",
+            boutiqueName: audit.scope,
             date: Date(),
-            controllerName: "Alex Mercer",
-            items: [
-                VarianceReportItem(id: UUID(), productName: "Rolex Submariner Date", sku: "RX-126610", expectedQty: 5, countedQty: 4, variance: -1, isArchivedProduct: false),
-                VarianceReportItem(id: UUID(), productName: "Omega Seamaster 300M", sku: "OM-21030", expectedQty: 8, countedQty: 8, variance: 0, isArchivedProduct: false),
-                VarianceReportItem(id: UUID(), productName: "Audemars Piguet Royal Oak", sku: "AP-15500", expectedQty: 2, countedQty: 3, variance: 1, isArchivedProduct: false),
-                VarianceReportItem(id: UUID(), productName: "Patek Philippe Aquanaut", sku: "PP-5167", expectedQty: 1, countedQty: 0, variance: -1, isArchivedProduct: true)
-            ]
+            controllerName: "Unknown",
+            items: []
         )
     }
     

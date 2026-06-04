@@ -5,6 +5,7 @@ import Observation
 final class AuditViewModel {
     var scheduledCounts: [RSMSCycleCount] = []
     var recentAudits: [RSMSCycleCount] = []
+    var isLoading: Bool = true
     
     private let profileService = ProfileService()
     private let cycleCountService = CycleCountService()
@@ -15,7 +16,13 @@ final class AuditViewModel {
     
     func refreshData() {
         Task {
-            do {
+            await loadData()
+        }
+    }
+    
+    func loadData() async {
+        await MainActor.run { self.isLoading = true }
+        do {
                 guard let profile = try await profileService.fetchCurrentProfile(),
                       profile.0 == .inventoryController,
                       let staff = profile.1 as? StaffModel,
@@ -70,9 +77,11 @@ final class AuditViewModel {
                 await MainActor.run {
                     self.scheduledCounts = scheduled
                     self.recentAudits = completed
+                    self.isLoading = false
                 }
             } catch {
                 print("Failed to fetch audits: \(error)")
+                await MainActor.run { self.isLoading = false }
             }
         }
     }

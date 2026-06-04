@@ -79,12 +79,12 @@ final class ShrinkReportViewModel {
                 for audit in audits {
                     guard let discrepancies = audit.discrepancies else { continue }
                     for disc in discrepancies {
-                        let isMissing = disc.type.lowercased() == "missing"
+                        let isMissing = (disc.type ?? "missing").lowercased() == "missing"
                         writeOffs.append(RSMSVarianceItem(
-                            name: disc.name,
+                            name: disc.name ?? "Unknown Item",
                             expected: isMissing ? 1 : 0,
                             actual: isMissing ? 0 : 1,
-                            reason: disc.detail
+                            reason: disc.detail ?? "No details provided"
                         ))
                     }
                 }

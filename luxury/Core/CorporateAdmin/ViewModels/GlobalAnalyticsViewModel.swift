@@ -202,7 +202,6 @@ final class GlobalAnalyticsViewModel {
         }
     }
 
-    // TODO: upgrade to WebSocket/SSE
     func startFulfillmentPolling() {
         sfsPollingTask = Task { @MainActor [weak self] in
             while !Task.isCancelled {

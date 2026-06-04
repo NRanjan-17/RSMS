@@ -71,7 +71,7 @@ struct StoreView: View {
                                 Button(action: { router.push(BMRoute.cycleCountSignoff) }) {
                                     HStack {
                                         VStack(alignment: .leading, spacing: 4) {
-                                            Text("Cycle Count Sign-off")
+                                            Text("Inventory Audit Approval")
                                                 .font(AppFonts.serif(size: 18, weight: .medium))
                                                 .foregroundStyle(.white)
                                             Text("\(viewModel.pendingCycleCountsCount) Audit ready for review")

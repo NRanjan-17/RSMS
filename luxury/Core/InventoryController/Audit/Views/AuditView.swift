@@ -13,75 +13,109 @@ struct AuditView: View {
             VStack(spacing: 0) {
                 CustomHeader(title: "Inventory Audit")
                 
-                List {
-                    Section {
-                        let counts = viewModel.scheduledCounts
-                        ForEach(counts, id: \.id) { count in
-                            Button(action: {
-                                if count.status == "UPCOMING" {
-                                    withAnimation { showUpcomingToast = true }
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-                                        withAnimation { showUpcomingToast = false }
-                                    }
-                                } else if count.status == "SIGNED OFF" || count.status == "Signed Off" || count.status == "Submitted" {
-                                    router.push(ICRoute.varianceReport(count))
-                                } else {
-                                    router.presentFullScreen(ICRoute.auditDetail(count))
-                                }
-                            }) {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(count.title)
-                                            .font(AppFonts.serif(size: 17, weight: .medium))
-                                            .foregroundStyle(AppColors.text)
-                                        HStack(spacing: 8) {
-                                            Text(count.scope)
-                                            Text("•")
-                                            Text(count.date)
-                                        }
-                                        .font(AppFonts.sansSerif(size: 12))
-                                        .foregroundStyle(AppColors.secondary)
-                                    }
-                                    Spacer()
-                                    StatusBadge(text: LocalizedStringKey(count.status), status: count.badgeStatus)
-                                }
+                if viewModel.isLoading {
+                    List {
+                        Section {
+                            ForEach(0..<2, id: \.self) { _ in
+                                SkeletonAuditRow()
+                                    .listRowBackground(AppColors.surface)
                             }
-                            .listRowBackground(AppColors.surface)
+                        } header: {
+                            Text("SCHEDULED COUNTS")
+                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                .foregroundStyle(AppColors.secondary)
                         }
-                    } header: {
-                        Text("SCHEDULED COUNTS")
-                            .font(AppFonts.sansSerif(size: 11, weight: .bold))
-                            .foregroundStyle(AppColors.secondary)
+                        
+                        Section {
+                            ForEach(0..<3, id: \.self) { _ in
+                                SkeletonAuditRow()
+                                    .listRowBackground(AppColors.surface)
+                            }
+                        } header: {
+                            Text("RECENT SIGN-OFFS")
+                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                .foregroundStyle(AppColors.secondary)
+                        }
                     }
-                    
-                    Section {
-                        let audits = viewModel.recentAudits
-                        ForEach(audits, id: \.id) { count in
-                            Button(action: { router.push(ICRoute.varianceReport(count)) }) {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(count.title)
-                                            .font(AppFonts.serif(size: 17, weight: .medium))
-                                            .foregroundStyle(AppColors.text)
-                                        Text(count.date)
+                    .scrollContentBackground(.hidden)
+                    .background(AppColors.background)
+                    .refreshable {
+                        await viewModel.loadData()
+                    }
+                } else {
+                    List {
+                        Section {
+                            let counts = viewModel.scheduledCounts
+                            ForEach(counts, id: \.id) { count in
+                                Button(action: {
+                                    if count.status == "UPCOMING" {
+                                        withAnimation { showUpcomingToast = true }
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                                            withAnimation { showUpcomingToast = false }
+                                        }
+                                    } else if count.status == "SIGNED OFF" || count.status == "Signed Off" || count.status == "Submitted" {
+                                        router.push(ICRoute.varianceReport(count))
+                                    } else {
+                                        router.presentFullScreen(ICRoute.auditDetail(count))
+                                    }
+                                }) {
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(count.title)
+                                                .font(AppFonts.serif(size: 17, weight: .medium))
+                                                .foregroundStyle(AppColors.text)
+                                            HStack(spacing: 8) {
+                                                Text(count.scope)
+                                                Text("•")
+                                                Text(count.date)
+                                            }
                                             .font(AppFonts.sansSerif(size: 12))
                                             .foregroundStyle(AppColors.secondary)
+                                        }
+                                        Spacer()
+                                        StatusBadge(text: LocalizedStringKey(count.status), status: count.badgeStatus)
                                     }
-                                    Spacer()
-                                    StatusBadge(text: LocalizedStringKey(count.status), status: count.badgeStatus)
                                 }
+                                .listRowBackground(AppColors.surface)
                             }
-                            .listRowBackground(AppColors.surface)
+                        } header: {
+                            Text("SCHEDULED COUNTS")
+                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                .foregroundStyle(AppColors.secondary)
                         }
-                    } header: {
-                        Text("RECENT SIGN-OFFS")
-                            .font(AppFonts.sansSerif(size: 11, weight: .bold))
-                            .foregroundStyle(AppColors.secondary)
-                    }
+                        
+                        Section {
+                            let audits = viewModel.recentAudits
+                            ForEach(audits, id: \.id) { count in
+                                Button(action: { router.push(ICRoute.varianceReport(count)) }) {
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(count.title)
+                                                .font(AppFonts.serif(size: 17, weight: .medium))
+                                                .foregroundStyle(AppColors.text)
+                                            Text(count.date)
+                                                .font(AppFonts.sansSerif(size: 12))
+                                                .foregroundStyle(AppColors.secondary)
+                                        }
+                                        Spacer()
+                                        StatusBadge(text: LocalizedStringKey(count.status), status: count.badgeStatus)
+                                    }
+                                }
+                                .listRowBackground(AppColors.surface)
+                            }
+                        } header: {
+                            Text("RECENT SIGN-OFFS")
+                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                .foregroundStyle(AppColors.secondary)
+                        }
 
+                    }
+                    .scrollContentBackground(.hidden)
+                    .background(AppColors.background)
+                    .refreshable {
+                        await viewModel.loadData()
+                    }
                 }
-                .scrollContentBackground(.hidden)
-                .background(AppColors.background)
             }
             
             if showUpcomingToast {
@@ -109,5 +143,32 @@ struct AuditView: View {
             viewModel.refreshData()
         }
         .toolbar(.hidden, for: .navigationBar)
+    }
+}
+
+private struct SkeletonAuditRow: View {
+    @State private var isAnimating = false
+    
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 8) {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(AppColors.surface2)
+                    .frame(width: 120, height: 18)
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(AppColors.surface2)
+                    .frame(width: 180, height: 12)
+            }
+            Spacer()
+            RoundedRectangle(cornerRadius: 12)
+                .fill(AppColors.surface2)
+                .frame(width: 80, height: 24)
+        }
+        .padding(.vertical, 4)
+        .opacity(isAnimating ? 0.5 : 1.0)
+        .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: isAnimating)
+        .onAppear {
+            isAnimating = true
+        }
     }
 }

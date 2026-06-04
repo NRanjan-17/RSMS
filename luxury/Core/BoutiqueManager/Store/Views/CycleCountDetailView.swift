@@ -20,9 +20,9 @@ enum AuditModelStatus: String, Codable {
 
 struct DiscrepancyItem: Codable, Hashable, Identifiable {
     var id: UUID { UUID() }
-    let name: String
-    let detail: String
-    let type: String // "missing" or "new"
+    let name: String?
+    let detail: String?
+    let type: String? // "missing" or "new"
 }
 
 struct DBStoreAudit: Codable, Identifiable {
@@ -323,19 +323,38 @@ struct CycleCountDetailView: View {
         return "\(day)\(suffix)"
     }
 
-    private func executeDayUpdate(for dayString: String) {
-        var dayNum = 1
-        if dayString == "1st Day" { dayNum = 1 }
-        else if dayString == "15th Day" { dayNum = 15 }
-        else if dayString == "Last Day" { 
+    private func dayNumber(for dayString: String) -> Int {
+        if dayString == "1st Day" { return 1 }
+        if dayString == "15th Day" { return 15 }
+        if dayString == "Last Day" {
             let range = Calendar.current.range(of: .day, in: .month, for: Date())
-            dayNum = range?.count ?? 28
+            return range?.count ?? 28
         }
-        else { dayNum = Int(dayString.replacingOccurrences(of: "st", with: "").replacingOccurrences(of: "nd", with: "").replacingOccurrences(of: "rd", with: "").replacingOccurrences(of: "th", with: "")) ?? 1 }
-        
+        return Int(dayString.replacingOccurrences(of: "st", with: "").replacingOccurrences(of: "nd", with: "").replacingOccurrences(of: "rd", with: "").replacingOccurrences(of: "th", with: "")) ?? 1
+    }
+
+    private func syncCustomDate(from dayString: String) {
+        let dayNum = dayNumber(for: dayString)
+        var components = Calendar.current.dateComponents([.year, .month], from: Date())
+        components.day = dayNum
+        if let newDate = Calendar.current.date(from: components) {
+            customDate = newDate
+        }
+    }
+
+    private func executeDayUpdate(for dayString: String) {
+        let dayNum = dayNumber(for: dayString)
         viewModel.updateFixedDay(day: dayNum)
-        
-        viewModel.updateFixedDay(day: dayNum)
+    }
+
+    private var displayVariance: String {
+        guard let latest = viewModel.completedAudits.first else { return "N/A" }
+        return latest.variance > 0 ? "+\(latest.variance)" : "\(latest.variance)"
+    }
+    
+    private var displayAccuracy: String {
+        guard let latest = viewModel.completedAudits.first else { return "N/A" }
+        return (latest.accuracy / 100.0).formatted(.percent.precision(.fractionLength(1)))
     }
 
     var body: some View {
@@ -348,49 +367,96 @@ struct CycleCountDetailView: View {
                         
                         // 1. Top Section - Summary Metric Cards (First Block)
                         HStack(spacing: 12) {
-                            MetricCard(title: "Variance", value: "-1", subtitle: "Net Discrepancy", icon: "arrow.up.arrow.down")
-                            MetricCard(title: "Accuracy", value: (0.982).formatted(.percent.precision(.fractionLength(1))), subtitle: "Store Performance", icon: "percent")
+                            MetricCard(title: "Variance", value: displayVariance, subtitle: "Net Discrepancy", icon: "arrow.up.arrow.down")
+                            MetricCard(title: "Accuracy", value: displayAccuracy, subtitle: "Store Performance", icon: "percent")
                         }
                         .padding(.horizontal, 24)
 
-                        // 2. Middle Section - Tapable Full-Width "Audit Report" Card (Second Block)
-                        Button(action: {
-                            router.push(BMRoute.auditReportHub)
-                        }) {
-                            HStack {
-                                Image(systemName: "doc.text.magnifyingglass")
-                                    .font(.system(size: 18))
-                                    .foregroundStyle(AppColors.gold)
-                                    .frame(width: 36, height: 36)
-                                    .background(AppColors.gold.opacity(0.1))
-                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                        // 2. Middle Section - Reports & Actions
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("REPORTS & ACTIONS")
+                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                .foregroundStyle(AppColors.secondary)
+                                .kerning(1.5)
+                                .padding(.horizontal, 24)
                                 
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Audit Report")
-                                        .font(AppFonts.serif(size: 17, weight: .semibold))
-                                        .foregroundStyle(.white)
-                                    
-                                    Text("\(viewModel.openCount) Active Audits • \(viewModel.closedCount) Archived Records")
-                                        .font(AppFonts.sansSerif(size: 13))
-                                        .foregroundStyle(AppColors.secondary)
+                            VStack(spacing: 12) {
+                                Button(action: {
+                                    router.push(BMRoute.auditReportHub)
+                                }) {
+                                    HStack {
+                                        Image(systemName: "doc.text.magnifyingglass")
+                                            .font(.system(size: 18))
+                                            .foregroundStyle(AppColors.gold)
+                                            .frame(width: 36, height: 36)
+                                            .background(AppColors.gold.opacity(0.1))
+                                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                                        
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text("Audit Report")
+                                                .font(AppFonts.serif(size: 17, weight: .semibold))
+                                                .foregroundStyle(.white)
+                                            
+                                            Text("\(viewModel.closedCount) Archived Records")
+                                                .font(AppFonts.sansSerif(size: 13))
+                                                .foregroundStyle(AppColors.secondary)
+                                        }
+                                        
+                                        Spacer()
+                                        
+                                        Image(systemName: "chevron.right")
+                                            .font(.system(size: 14, weight: .semibold))
+                                            .foregroundStyle(AppColors.secondary)
+                                    }
+                                    .padding(16)
+                                    .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .stroke(AppColors.border, lineWidth: 1)
+                                    )
                                 }
+                                .buttonStyle(PlainButtonStyle())
                                 
-                                Spacer()
-                                
-                                Image(systemName: "chevron.right")
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundStyle(AppColors.secondary)
+                                Button(action: {
+                                    router.push(BMRoute.writeOffApproval)
+                                }) {
+                                    HStack {
+                                        Image(systemName: "exclamationmark.triangle")
+                                            .font(.system(size: 18))
+                                            .foregroundStyle(AppColors.gold)
+                                            .frame(width: 36, height: 36)
+                                            .background(AppColors.gold.opacity(0.1))
+                                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                                        
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text("Write-Off Logs")
+                                                .font(AppFonts.serif(size: 17, weight: .semibold))
+                                                .foregroundStyle(.white)
+                                            
+                                            Text("Review and approve damaged items")
+                                                .font(AppFonts.sansSerif(size: 13))
+                                                .foregroundStyle(AppColors.secondary)
+                                        }
+                                        
+                                        Spacer()
+                                        
+                                        Image(systemName: "chevron.right")
+                                            .font(.system(size: 14, weight: .semibold))
+                                            .foregroundStyle(AppColors.secondary)
+                                    }
+                                    .padding(16)
+                                    .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .stroke(AppColors.border, lineWidth: 1)
+                                    )
+                                }
+                                .buttonStyle(PlainButtonStyle())
                             }
-                            .padding(16)
-                            .background(AppColors.surface)
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .stroke(AppColors.border, lineWidth: 1)
-                            )
                             .padding(.horizontal, 24)
                         }
-                        .buttonStyle(PlainButtonStyle())
 
                         // 3. Lower Section - Simplified Audit Schedule & Date Picker (Third Block)
                         VStack(alignment: .leading, spacing: 12) {
@@ -412,40 +478,42 @@ struct CycleCountDetailView: View {
                                         .foregroundStyle(.white)
                                 }
                                 
-                                // Day Picker Pill Matrix (Simplified)
-                                HStack(spacing: 8) {
-                                    ForEach(["1st Day", "15th Day", "Last Day"], id: \.self) { day in
-                                        Button(action: {
-                                            pendingSelectedDay = day
-                                            showConfirmAlert = true
-                                        }) {
-                                            Text(day)
-                                                .font(AppFonts.sansSerif(size: 12, weight: .semibold))
-                                                .frame(maxWidth: .infinity)
-                                                .padding(.vertical, 10)
-                                                .background(selectedDay == day ? AppColors.gold : AppColors.background)
-                                                .foregroundStyle(selectedDay == day ? Color.black : AppColors.text)
-                                                .clipShape(Capsule())
-                                                .overlay(
-                                                    Capsule()
-                                                        .stroke(selectedDay == day ? Color.clear : AppColors.border, lineWidth: 1)
-                                                )
+                                // Day of Month Menu
+                                Menu {
+                                    Picker("Reschedule", selection: Binding(
+                                        get: { Calendar.current.component(.day, from: customDate) },
+                                        set: { newDay in
+                                            var comps = Calendar.current.dateComponents([.year, .month], from: Date())
+                                            comps.day = newDay
+                                            if let newDate = Calendar.current.date(from: comps) {
+                                                customDate = newDate
+                                                pendingSelectedDay = formatDayAsOrdinal(newDay)
+                                                showConfirmAlert = true
+                                            }
+                                        }
+                                    )) {
+                                        ForEach(1...31, id: \.self) { day in
+                                            Text("\(day)").tag(day)
                                         }
                                     }
-                                    
-                                    Button(action: {
-                                        showDatePicker = true
-                                    }) {
+                                } label: {
+                                    HStack(spacing: 8) {
                                         Image(systemName: "calendar")
-                                            .font(.system(size: 14, weight: .semibold))
-                                            .foregroundStyle(isCustomDateSelected ? Color.black : AppColors.gold)
-                                            .frame(width: 38, height: 38)
-                                            .background(isCustomDateSelected ? AppColors.gold : AppColors.background)
-                                            .clipShape(Circle())
-                                            .overlay(
-                                                Circle().stroke(isCustomDateSelected ? Color.clear : AppColors.border, lineWidth: 1)
-                                            )
+                                            .font(.system(size: 16))
+                                            .foregroundStyle(AppColors.gold)
+                                        Text("Reschedule Date")
+                                            .font(AppFonts.sansSerif(size: 13, weight: .semibold))
+                                            .foregroundStyle(AppColors.secondary)
+                                        Spacer()
+                                        Image(systemName: "chevron.up.chevron.down")
+                                            .font(.system(size: 12))
+                                            .foregroundStyle(AppColors.gold50)
                                     }
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 12)
+                                    .background(AppColors.background)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 1))
                                 }
                                 .padding(.top, 4)
                             }
@@ -478,45 +546,14 @@ struct CycleCountDetailView: View {
                 } else {
                     selectedDay = "1st Day"
                 }
+                syncCustomDate(from: selectedDay)
             }
         }
-        .sheet(isPresented: $showDatePicker) {
-            VStack(spacing: 0) {
-                Text("Select Audit Date")
-                    .font(AppFonts.serif(size: 20, weight: .bold))
-                    .foregroundStyle(.white)
-                    .padding(.top, 24)
-                    .padding(.bottom, 16)
-                
-                DatePicker("Audit Date", selection: $customDate, displayedComponents: .date)
-                    .datePickerStyle(.graphical)
-                    .tint(AppColors.gold)
-                    .padding(16)
-                    .background(AppColors.surface)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.border, lineWidth: 1))
-                    .padding(.horizontal, 24)
-                
-                Spacer()
-                
-                CustomButton(title: "Confirm Date") {
-                    let day = Calendar.current.component(.day, from: customDate)
-                    pendingSelectedDay = formatDayAsOrdinal(day)
-                    showDatePicker = false
-                    
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        showConfirmAlert = true
-                    }
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 32)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(AppColors.background.ignoresSafeArea())
-            .presentationDetents([.medium, .large])
-        }
+
         .alert("Reschedule Audit", isPresented: $showConfirmAlert) {
-            Button("Cancel", role: .cancel) { }
+            Button("Cancel", role: .cancel) {
+                syncCustomDate(from: selectedDay)
+            }
             Button("Confirm") {
                 selectedDay = pendingSelectedDay
                 executeDayUpdate(for: pendingSelectedDay)
@@ -526,26 +563,16 @@ struct CycleCountDetailView: View {
         }
         .navigationTitle("Audit Sign-off")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
         .toolbarBackground(AppColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(AppColors.gold)
-                }
-            }
-        }
     }
 }
 
 // MARK: - Screen 1: The New Full-Screen Audit Report Hub
 struct AuditReportHubView: View {
     @Environment(Router.self) private var router
-    @State private var selectedTab: String = "Active"
+    @State private var selectedTab: String = "Completed"
     @State private var viewModel = CycleCountViewModel.shared
     
     private var activeTabAudits: [DBStoreAudit] {
@@ -619,7 +646,6 @@ struct AuditReportHubView: View {
             VStack(spacing: 0) {
                 // Apple Native Segmented Control
                 Picker("Tab", selection: $selectedTab) {
-                    Text("Active").tag("Active")
                     Text("Upcoming").tag("Upcoming")
                     Text("Completed").tag("Completed")
                 }
@@ -632,41 +658,7 @@ struct AuditReportHubView: View {
                 // Toggle List Views
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 20) {
-                        if selectedTab == "Active" {
-                            Text("CURRENT OPEN STORE CHECKS")
-                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
-                                .foregroundStyle(AppColors.secondary)
-                                .kerning(1.5)
-                                .padding(.horizontal, 24)
-                                .padding(.top, 12)
-                            
-                            let todayStr: String = {
-                                let f = DateFormatter()
-                                f.dateFormat = "yyyy-MM-dd"
-                                return f.string(from: Date())
-                            }()
-                            
-                            VStack(spacing: 12) {
-                                ForEach(activeTabAudits) { audit in
-                                    ActiveAuditRow(
-                                        status: viewModel.getStatusLabel(for: audit.status),
-                                        date: viewModel.getFormattedDate(from: audit.scheduledDate),
-                                        badgeColor: viewModel.getStatusColor(for: audit.status),
-                                        hideBadge: audit.scheduledDate == todayStr
-                                    ) {
-                                        router.push(BMRoute.activeAuditReportDetail(audit.id.uuidString))
-                                    }
-                                }
-                                if activeTabAudits.isEmpty {
-                                    Text("No active or pending audits.")
-                                        .font(AppFonts.sansSerif(size: 14))
-                                        .foregroundStyle(AppColors.secondary)
-                                        .padding(.vertical, 20)
-                                }
-                            }
-                            .padding(.horizontal, 24)
-                            
-                        } else if selectedTab == "Upcoming" {
+                        if selectedTab == "Upcoming" {
                             Text("PROJECTED SCHEDULE")
                                 .font(AppFonts.sansSerif(size: 11, weight: .bold))
                                 .foregroundStyle(AppColors.secondary)
@@ -711,10 +703,19 @@ struct AuditReportHubView: View {
                                     }
                                 }
                                 if completedAudits.isEmpty {
-                                    Text("No completed audits yet.")
-                                        .font(AppFonts.sansSerif(size: 14))
-                                        .foregroundStyle(AppColors.secondary)
-                                        .padding(.vertical, 20)
+                                    VStack(spacing: 8) {
+                                        Image(systemName: "tray")
+                                            .font(.system(size: 28))
+                                            .foregroundStyle(AppColors.tertiary)
+                                        Text("No completed audits yet.")
+                                            .font(AppFonts.sansSerif(size: 13))
+                                            .foregroundStyle(AppColors.secondary)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 28)
+                                    .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
                                 }
                             }
                             .padding(.horizontal, 24)
@@ -726,19 +727,9 @@ struct AuditReportHubView: View {
         }
         .navigationTitle("Audit History Hub")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
         .toolbarBackground(AppColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: { router.pop() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(AppColors.gold)
-                }
-            }
-        }
     }
 }
 
@@ -753,11 +744,11 @@ struct AuditReportDetailView: View {
     }
     
     private var missingItems: [DiscrepancyItem] {
-        audit?.discrepancies?.filter { $0.type == "missing" } ?? []
+        audit?.discrepancies?.filter { ($0.type ?? "missing") == "missing" } ?? []
     }
     
     private var newItems: [DiscrepancyItem] {
-        audit?.discrepancies?.filter { $0.type == "new" } ?? []
+        audit?.discrepancies?.filter { ($0.type ?? "missing") == "new" } ?? []
     }
     
     var body: some View {
@@ -799,7 +790,7 @@ struct AuditReportDetailView: View {
                             
                             VStack(spacing: 12) {
                                 ForEach(missingItems) { item in
-                                    BreakdownProductRow(name: item.name, detail: item.detail, status: "Missing", statusColor: AppColors.error)
+                                    BreakdownProductRow(name: item.name ?? "Unknown Item", detail: item.detail ?? "No details provided", status: "Missing", statusColor: AppColors.error)
                                 }
                             }
                         }
@@ -820,7 +811,7 @@ struct AuditReportDetailView: View {
                             
                             VStack(spacing: 12) {
                                 ForEach(newItems) { item in
-                                    BreakdownProductRow(name: item.name, detail: item.detail, status: "New Item", statusColor: AppColors.warning)
+                                    BreakdownProductRow(name: item.name ?? "Unknown Item", detail: item.detail ?? "No details provided", status: "New Item", statusColor: AppColors.warning)
                                 }
                             }
                         }
@@ -850,19 +841,9 @@ struct AuditReportDetailView: View {
         }
         .navigationTitle("Audit Breakdown")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
         .toolbarBackground(AppColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(AppColors.gold)
-                }
-            }
-        }
     }
 }
 
@@ -877,11 +858,11 @@ struct ActiveAuditReportDetailView: View {
     }
     
     private var missingItems: [DiscrepancyItem] {
-        audit?.discrepancies?.filter { $0.type == "missing" } ?? []
+        audit?.discrepancies?.filter { ($0.type ?? "missing") == "missing" } ?? []
     }
     
     private var newItems: [DiscrepancyItem] {
-        audit?.discrepancies?.filter { $0.type == "new" } ?? []
+        audit?.discrepancies?.filter { ($0.type ?? "missing") == "new" } ?? []
     }
     
     var body: some View {
@@ -921,7 +902,7 @@ struct ActiveAuditReportDetailView: View {
                                 
                                 VStack(spacing: 12) {
                                     ForEach(missingItems) { item in
-                                        BreakdownProductRow(name: item.name, detail: item.detail, status: "Missing", statusColor: AppColors.error)
+                                        BreakdownProductRow(name: item.name ?? "Unknown Item", detail: item.detail ?? "No details provided", status: "Missing", statusColor: AppColors.error)
                                     }
                                 }
                             }
@@ -942,7 +923,7 @@ struct ActiveAuditReportDetailView: View {
                                 
                                 VStack(spacing: 12) {
                                     ForEach(newItems) { item in
-                                        BreakdownProductRow(name: item.name, detail: item.detail, status: "New Item", statusColor: AppColors.warning)
+                                        BreakdownProductRow(name: item.name ?? "Unknown Item", detail: item.detail ?? "No details provided", status: "New Item", statusColor: AppColors.warning)
                                     }
                                 }
                             }
@@ -980,19 +961,9 @@ struct ActiveAuditReportDetailView: View {
         }
         .navigationTitle("Active Audit Report")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
         .toolbarBackground(AppColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: { router.pop() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(AppColors.gold)
-                }
-            }
-        }
     }
 }
 }
@@ -1154,7 +1125,7 @@ private struct CycleCountVarianceRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(item.name)
+                Text(item.name ?? "Unknown Item")
                     .font(AppFonts.serif(size: 17, weight: .medium))
                     .foregroundStyle(.white)
 

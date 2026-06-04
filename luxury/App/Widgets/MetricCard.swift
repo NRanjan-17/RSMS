@@ -14,25 +14,28 @@ struct MetricCard: View {
     let icon: String
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Image(systemName: icon)
-                    .font(AppFonts.sansSerif(size: 20))
+                    .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(AppColors.gold)
+                    .frame(width: 36, height: 36)
+                    .background(AppColors.gold.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
                     .accessibilityHidden(true)
                 Spacer()
             }
             
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text(value)
-                    .font(AppFonts.serif(size: 24, weight: .bold))
+                    .font(AppFonts.serif(size: 28, weight: .bold))
                     .foregroundStyle(AppColors.text)
                 
                 Text(title)
                     .textCase(.uppercase)
-                    .font(AppFonts.sansSerif(size: 10, weight: .semibold))
+                    .font(AppFonts.sansSerif(size: 11, weight: .bold))
                     .foregroundStyle(AppColors.secondary)
-                    .kerning(1)
+                    .kerning(1.2)
             }
             
             if let subtitle = subtitle {
@@ -41,13 +44,15 @@ struct MetricCard: View {
                     .foregroundStyle(AppColors.gold70)
             }
         }
-        .padding(16)
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(AppColors.surface)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(AppColors.gold15, lineWidth: 0.5)
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(LinearGradient(colors: [AppColors.gold.opacity(0.5), AppColors.gold.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1)
         )
+        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
         .accessibilityElement(children: .combine)
     }
 }

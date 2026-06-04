@@ -108,15 +108,116 @@ struct ASTApprovalView: View {
 struct WriteOffApprovalView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var state: ApprovalState = .waiting
-
+    @State private var viewModel = ShrinkReportViewModel()
+    
     var body: some View {
-        ManagerDecisionView(
-            title:   "Write-Off Approval",
-            heading: "Inventory write-off \(CurrencyManager.shared.symbol)8,20,000",
-            detail:  "Cycle Count CC-2026-05 · 3 variance items · Recount completed · Audit trail locked",
-            state:   $state,
-            dismiss: dismiss
-        )
+        ZStack {
+            AppColors.background.ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                CustomHeader(title: "Write-Off Approval", showBackButton: true, backAction: { dismiss() })
+                
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 24) {
+                        
+                        if viewModel.isLoading {
+                            ProgressView().tint(AppColors.gold)
+                                .frame(maxWidth: .infinity, minHeight: 300)
+                        } else if viewModel.recentWriteOffs.isEmpty {
+                            VStack(spacing: 12) {
+                                Image(systemName: "checkmark.shield.fill")
+                                    .font(.system(size: 40))
+                                    .foregroundStyle(AppColors.success)
+                                Text("No pending write-offs.")
+                                    .font(AppFonts.sansSerif(size: 16))
+                                    .foregroundStyle(AppColors.secondary)
+                            }
+                            .frame(maxWidth: .infinity, minHeight: 300)
+                        } else {
+                            // Status Badge
+                            StatusBadge(
+                                text: LocalizedStringKey(state.rawValue),
+                                status: state == .approved ? .success : state == .rejected ? .error : .pending
+                            )
+                            .padding(.horizontal, 24)
+                            
+                            // Dynamic Details
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Inventory Write-Off \(viewModel.totalShrinkValue)")
+                                    .font(AppFonts.serif(size: 28, weight: .bold))
+                                    .foregroundStyle(.white)
+                                
+                                Text("\(viewModel.recentWriteOffs.count) variance items • Audit trail locked")
+                                    .font(AppFonts.sansSerif(size: 14))
+                                    .foregroundStyle(AppColors.secondary)
+                            }
+                            .padding(.horizontal, 24)
+                            
+                            // Variance Items List
+                            VStack(alignment: .leading, spacing: 16) {
+                                Text("DISCREPANCY DETAILS")
+                                    .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                    .foregroundStyle(AppColors.secondary)
+                                    .kerning(1.5)
+                                    .padding(.horizontal, 24)
+                                
+                                VStack(spacing: 0) {
+                                    ForEach(viewModel.recentWriteOffs) { item in
+                                        HStack(alignment: .top) {
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                Text(item.name)
+                                                    .font(AppFonts.sansSerif(size: 14, weight: .semibold))
+                                                    .foregroundStyle(.white)
+                                                Text(item.reason)
+                                                    .font(AppFonts.sansSerif(size: 12))
+                                                    .foregroundStyle(AppColors.error)
+                                            }
+                                            Spacer()
+                                            
+                                            let variance = item.actual - item.expected
+                                            Text(variance > 0 ? "+\(variance)" : "\(variance)")
+                                                .font(AppFonts.sansSerif(size: 16, weight: .bold))
+                                                .foregroundStyle(variance > 0 ? AppColors.success : AppColors.error)
+                                        }
+                                        .padding(.vertical, 16)
+                                        .padding(.horizontal, 20)
+                                        .background(AppColors.surface)
+                                        
+                                        Divider().background(AppColors.border)
+                                    }
+                                }
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                                .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 1))
+                                .padding(.horizontal, 24)
+                            }
+                            
+                            // Approve / Reject Actions
+                            if state == .waiting {
+                                VStack(spacing: 12) {
+                                    CustomButton(title: "Approve Write-Off", action: {
+                                        state = .approved
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { dismiss() }
+                                    })
+                                    
+                                    CustomOutlineButton(title: "Reject & Request Recount", icon: AnyView(EmptyView()), action: {
+                                        state = .rejected
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { dismiss() }
+                                    })
+                                }
+                                .padding(.horizontal, 24)
+                                .padding(.top, 24)
+                            }
+                        }
+                    }
+                    .padding(.top, 16)
+                    .padding(.bottom, 40)
+                }
+            }
+        }
+        .navigationTitle("")
+        .onAppear {
+            viewModel.fetchInventory()
+        }
     }
 }
 
