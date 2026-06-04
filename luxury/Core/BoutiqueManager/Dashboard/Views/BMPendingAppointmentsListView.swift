@@ -6,18 +6,24 @@
 //
 
 import SwiftUI
+import Supabase
+import PostgREST
 
 struct BMPendingAppointmentsListView: View {
     @Environment(Router.self) private var router
-    let appointments: [AppointmentEntity]
+    @State private var localAppointments: [AppointmentEntity]
     
     @State private var searchText = ""
     
+    init(appointments: [AppointmentEntity]) {
+        self._localAppointments = State(initialValue: appointments)
+    }
+    
     var filteredAppointments: [AppointmentEntity] {
         if searchText.isEmpty {
-            return appointments
+            return localAppointments
         } else {
-            return appointments.filter {
+            return localAppointments.filter {
                 ($0.client?.name.localizedCaseInsensitiveContains(searchText) == true) ||
                 $0.displayAppointmentType.localizedCaseInsensitiveContains(searchText)
             }
@@ -149,5 +155,36 @@ struct BMPendingAppointmentsListView: View {
         }
         .navigationBarHidden(true)
         .toolbar(.hidden, for: .tabBar)
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("RefreshAppointments"))) { _ in
+            Task {
+                await fetchPendingAppointments()
+            }
+        }
+    }
+    
+    private func fetchPendingAppointments() async {
+        do {
+            if let (_, profile) = try await ProfileService().fetchCurrentProfile(),
+               let boutique = profile as? CorporateBoutique {
+                
+                let fetched: [AppointmentEntity] = try await SupabaseManager.shared.client
+                    .from("appointment")
+                    .select("*, client(*)")
+                    .eq("boutique_id", value: boutique.id)
+                    .eq("status", value: "pending")
+                    .order("timestamp", ascending: true)
+                    .execute()
+                    .value
+                
+                await MainActor.run {
+                    self.localAppointments = fetched
+                    if fetched.isEmpty {
+                        router.pop() // Automatically go back if no more pending
+                    }
+                }
+            }
+        } catch {
+            print("Failed to fetch pending appointments: \(error)")
+        }
     }
 }

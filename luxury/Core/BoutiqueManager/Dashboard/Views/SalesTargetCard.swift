@@ -67,7 +67,6 @@ struct SalesTargetCard: View {
                         .foregroundStyle(AppColors.secondary)
                 }
                 Spacer()
-                StatusBadge(text: LocalizedStringKey(pacingStatus.rawValue), status: pacingStatus.badgeStatus)
             }
         }
         .padding(20)
@@ -125,13 +124,6 @@ private struct PacingProgressBar: View {
                     .fill(AppColors.gold)
                     .frame(width: fillW, height: 6)
                     .animation(.easeOut(duration: 0.8), value: actualProgress)
-
-                if !isExceeded {
-                    Capsule()
-                        .fill(AppColors.text.opacity(0.7))
-                        .frame(width: 2, height: 16)
-                        .offset(x: needleX - 1, y: -5)
-                }
             }
         }
         .frame(height: 16)

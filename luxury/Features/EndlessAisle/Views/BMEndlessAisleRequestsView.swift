@@ -91,11 +91,18 @@ public struct BMEndlessAisleRequestsView: View {
                 .padding(.horizontal, 24)
             
             if requests.isEmpty {
-                Text(emptyText)
-                    .font(AppFonts.sansSerif(size: 13))
-                    .foregroundStyle(AppColors.secondary)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 10)
+                HStack {
+                    Spacer()
+                    Text(emptyText)
+                        .font(AppFonts.sansSerif(size: 14))
+                        .foregroundStyle(AppColors.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.vertical, 24)
+                    Spacer()
+                }
+                .background(AppColors.surface)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .padding(.horizontal, 24)
             } else {
                 VStack(spacing: 12) {
                     ForEach(requests, content: content)
