@@ -197,20 +197,6 @@ struct GlobalMetricCard: View {
                     .foregroundStyle(AppColors.gold)
                     .frame(height: 20)
                 Spacer()
-                if kpi.trend != 0 {
-                    HStack(spacing: 2) {
-                        Image(systemName: kpi.trend > 0 ? "arrow.up.right" : "arrow.down.right")
-                        Text((abs(kpi.trend) / 100).formatted(.percent.precision(.fractionLength(1))))
-                    }
-                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                    .foregroundStyle(kpi.trend > 0 ? AppColors.success : AppColors.error)
-                    .frame(height: 20)
-                } else {
-                    Text((0.0).formatted(.percent))
-                        .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                        .opacity(0)
-                        .frame(height: 20)
-                }
             }
             
             Spacer(minLength: 16)

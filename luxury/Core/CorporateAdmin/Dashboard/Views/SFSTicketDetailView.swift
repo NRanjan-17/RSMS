@@ -16,12 +16,6 @@ struct SFSTicketDetailView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                CustomHeader(
-                    title: "Ticket Details",
-                    showBackButton: true,
-                    backAction: { router.pop() }
-                )
-                
                 ScrollView {
                     VStack(spacing: 24) {
                         // Main Ticket Card
@@ -78,8 +72,8 @@ struct SFSTicketDetailView: View {
                 }
             }
         }
-        .navigationBarHidden(true)
-        .toolbar(.hidden, for: .tabBar)
+        .navigationTitle("Ticket Details")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

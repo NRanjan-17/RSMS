@@ -527,7 +527,6 @@ struct GlobalKPI: Identifiable, Hashable {
     let id = UUID()
     let label: String
     let type: KPIType
-    let trend: Double
     let icon: String
 }
 

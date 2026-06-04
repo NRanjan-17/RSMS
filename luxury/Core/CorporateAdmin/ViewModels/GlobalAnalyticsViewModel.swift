@@ -32,7 +32,7 @@ final class GlobalAnalyticsViewModel {
             var boutiquesResponse: [CorporateBoutique] = []
             var staffResponse: [StaffModel] = []
             var catalogs: [CatalogEntity] = []
-            var orders: [OrderEntity] = []
+            var transactions: [SATransactionEntity] = []
             
             do {
                 boutiquesResponse = try await client.from("boutiques").select().eq("status", value: "approved").execute().value
@@ -53,9 +53,9 @@ final class GlobalAnalyticsViewModel {
             }
             
             do {
-                orders = try await client.from("order").select().execute().value
+                transactions = try await client.from("transaction").select().execute().value
             } catch {
-                print("Order fetch error: \(error)")
+                print("Transaction fetch error: \(error)")
             }
             
             // Calculate inventory value
@@ -77,60 +77,14 @@ final class GlobalAnalyticsViewModel {
             
             let now = Date()
             let calendar = Calendar.current
-            let startOfToday = calendar.startOfDay(for: now)
-            let startOfYesterday = calendar.date(byAdding: .day, value: -1, to: startOfToday)!
-            let thirtyDaysAgo = calendar.date(byAdding: .day, value: -30, to: now)!
-            let sixtyDaysAgo = calendar.date(byAdding: .day, value: -60, to: now)!
             
             var totalRevenue = 0.0
-            var todayRevenue = 0.0
-            var yesterdayRevenue = 0.0
-            var revenueByMonth: [String: Double] = [:]
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "MMM"
             
-            for tx in orders {
-                totalRevenue += tx.totalPrice
-                if let date = tx.dateOfPurchase {
-                    let monthStr = dateFormatter.string(from: date)
-                    revenueByMonth[monthStr, default: 0.0] += tx.totalPrice
-                    
-                    if date >= startOfToday {
-                        todayRevenue += tx.totalPrice
-                    } else if date >= startOfYesterday && date < startOfToday {
-                        yesterdayRevenue += tx.totalPrice
-                    }
-                }
+            for tx in transactions {
+                totalRevenue += tx.transactionAmount
             }
             
-            // Calculate revenue trend (day-over-day %)
-            let revenueTrend: Double = yesterdayRevenue > 0
-                ? ((todayRevenue - yesterdayRevenue) / yesterdayRevenue) * 100.0
-                : (todayRevenue > 0 ? 100.0 : 0.0)
-            
-            // Calculate boutique trend (added in last 30 days vs previous 30 days)
-            let recentBoutiques = boutiquesResponse.filter { $0.createdAt >= thirtyDaysAgo }.count
-            let previousBoutiques = boutiquesResponse.filter { $0.createdAt >= sixtyDaysAgo && $0.createdAt < thirtyDaysAgo }.count
-            let boutiqueTrend: Double = previousBoutiques > 0
-                ? (Double(recentBoutiques - previousBoutiques) / Double(previousBoutiques)) * 100.0
-                : (recentBoutiques > 0 ? 100.0 : 0.0)
-            
-            // Calculate staff trend (added in last 30 days vs previous 30 days)
-            let recentStaff = staffResponse.filter { $0.createdAt >= thirtyDaysAgo }.count
-            let previousStaff = staffResponse.filter { $0.createdAt >= sixtyDaysAgo && $0.createdAt < thirtyDaysAgo }.count
-            let staffTrend: Double = previousStaff > 0
-                ? (Double(recentStaff - previousStaff) / Double(previousStaff)) * 100.0
-                : (recentStaff > 0 ? 100.0 : 0.0)
-            
-            // Calculate inventory trend (recent catalog value vs older)
-            let recentInventoryItems = catalogs.filter {
-                let totalStock = stockDict[$0.id] ?? 0
-                return totalStock > 0
-            }
-            let totalItems = catalogs.count
-            let inventoryTrend: Double = totalItems > 0
-                ? (Double(recentInventoryItems.count) / Double(totalItems)) * 100.0 - 50.0
-                : 0.0
+            // Trend logic removed per user request
             
             // Format daily revenue chart data for dashboard glimpse
             var dailyChartData: [RevenueData] = []
@@ -143,20 +97,20 @@ final class GlobalAnalyticsViewModel {
                     let startOfDay = calendar.startOfDay(for: date)
                     let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
                     
-                    let dailyTotal = orders.filter { tx in
-                        guard let txDate = tx.dateOfPurchase else { return false }
+                    let dailyTotal = transactions.filter { tx in
+                        guard let txDate = tx.dateOfTransaction else { return false }
                         return txDate >= startOfDay && txDate < endOfDay
-                    }.reduce(0.0) { $0 + $1.totalPrice }
+                    }.reduce(0.0) { $0 + $1.transactionAmount }
                     
                     dailyChartData.append(RevenueData(month: label, amount: dailyTotal))
                 }
             }
             
             let newKpis = [
-                GlobalKPI(label: "Global Revenue", type: .currency(totalRevenue), trend: revenueTrend, icon: "chart.line.uptrend.xyaxis"),
-                GlobalKPI(label: "Active Boutiques", type: .string("\(boutiquesResponse.count)"), trend: 0.0, icon: "building.2.fill"),
-                GlobalKPI(label: "Total Staff", type: .string("\(staffResponse.count)"), trend: 0.0, icon: "person.3.fill"),
-                GlobalKPI(label: "Inventory Value", type: .currency(totalInventoryValue), trend: inventoryTrend, icon: "shippingbox.fill")
+                GlobalKPI(label: "Global Revenue", type: .currency(totalRevenue), icon: "chart.line.uptrend.xyaxis"),
+                GlobalKPI(label: "Active Boutiques", type: .string("\(boutiquesResponse.count)"), icon: "building.2.fill"),
+                GlobalKPI(label: "Total Staff", type: .string("\(staffResponse.count)"), icon: "person.3.fill"),
+                GlobalKPI(label: "Inventory Value", type: .currency(totalInventoryValue), icon: "shippingbox.fill")
             ]
             
             await MainActor.run {
