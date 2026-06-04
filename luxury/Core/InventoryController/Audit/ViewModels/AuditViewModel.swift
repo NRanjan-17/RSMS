@@ -50,7 +50,7 @@ final class AuditViewModel {
                         badgeStatus: .success
                     )
                     completed.append(count)
-                } else if dbAudit.status == .inProgress {
+                } else if dbAudit.status == .due {
                     let count = RSMSCycleCount(
                         id: dbAudit.id,
                         title: "Full Audit",
@@ -60,6 +60,16 @@ final class AuditViewModel {
                         badgeStatus: .success
                     )
                     completed.append(count)
+                } else if dbAudit.status == .inProgress {
+                    let count = RSMSCycleCount(
+                        id: dbAudit.id,
+                        title: "Full Audit",
+                        date: formattedDate,
+                        scope: "Full Store",
+                        status: "In Progress",
+                        badgeStatus: .warning
+                    )
+                    scheduled.append(count)
                 } else {
                     var statusStr = "UPCOMING"
                     var badge: BadgeStatus = .neutral

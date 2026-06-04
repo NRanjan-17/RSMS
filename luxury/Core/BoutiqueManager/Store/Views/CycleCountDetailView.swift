@@ -77,17 +77,32 @@ final class CycleCountService {
             .value
     }
     
-    func signOffAudit(auditId: UUID, userId: UUID) async throws {
+    func signOffAudit(
+        auditId: UUID,
+        userId: UUID,
+        variance: Int,
+        accuracy: Double,
+        totalScanned: Int,
+        discrepancies: [DiscrepancyItem]
+    ) async throws {
         struct UpdatePayload: Codable {
             let status: String
             let signed_off_by: UUID
             let signed_off_at: String
+            let variance: Int
+            let accuracy: Double
+            let total_scanned: Int
+            let discrepancies: [DiscrepancyItem]
         }
         
         let payload = UpdatePayload(
             status: AuditModelStatus.signedOff.rawValue,
             signed_off_by: userId,
-            signed_off_at: ISO8601DateFormatter().string(from: Date())
+            signed_off_at: ISO8601DateFormatter().string(from: Date()),
+            variance: variance,
+            accuracy: accuracy,
+            total_scanned: totalScanned,
+            discrepancies: discrepancies
         )
         
         try await client.from("audits")
@@ -188,6 +203,8 @@ final class CycleCountViewModel {
                     if let manager = profile?.1 as? CorporateBoutique {
                         self.boutiqueId = manager.id
                     }
+                }
+                if currentUserId == nil {
                     if let session = try? await SupabaseManager.shared.client.auth.session {
                         self.currentUserId = session.user.id
                     }
@@ -214,15 +231,85 @@ final class CycleCountViewModel {
         }
     }
     
-    func signOffAudit(auditId: UUID, onSuccess: @escaping () -> Void) {
+    func signOffAudit(
+        auditId: UUID,
+        variance: Int,
+        accuracy: Double,
+        totalScanned: Int,
+        discrepancies: [DiscrepancyItem],
+        onSuccess: @escaping () -> Void
+    ) {
         guard let userId = currentUserId else { return }
         
         Task {
             do {
-                try await service.signOffAudit(auditId: auditId, userId: userId)
-                await MainActor.run {
-                    self.loadAudits()
-                    onSuccess()
+                // Fetch manager profile to resolve email
+                let profile = try await profileService.fetchCurrentProfile()
+                var managerEmail = ""
+                if let manager = profile?.1 as? CorporateBoutique {
+                    managerEmail = manager.managerEmail
+                }
+                
+                // Query public.staff for manager's staff id
+                var staffId: UUID? = nil
+                if !managerEmail.isEmpty {
+                    struct StaffRecord: Codable {
+                        let id: UUID
+                    }
+                    let staffList: [StaffRecord] = try await SupabaseManager.shared.client
+                        .from("staff")
+                        .select("id")
+                        .eq("email", value: managerEmail)
+                        .execute()
+                        .value
+                    staffId = staffList.first?.id
+                }
+                
+                // Fallback to first available staff member for this boutique to satisfy foreign key constraint
+                if staffId == nil, let bId = boutiqueId {
+                    struct StaffRecord: Codable {
+                        let id: UUID
+                    }
+                    let fallbackList: [StaffRecord] = try await SupabaseManager.shared.client
+                        .from("staff")
+                        .select("id")
+                        .eq("boutique_id", value: bId.uuidString)
+                        .limit(1)
+                        .execute()
+                        .value
+                    staffId = fallbackList.first?.id
+                }
+                
+                guard let finalStaffId = staffId else {
+                    throw NSError(
+                        domain: "RSMS",
+                        code: 404,
+                        userInfo: [NSLocalizedDescriptionKey: "No staff profile record found in public.staff table for this boutique to execute sign-off validation."]
+                    )
+                }
+                
+                try await service.signOffAudit(
+                    auditId: auditId,
+                    userId: finalStaffId,
+                    variance: variance,
+                    accuracy: accuracy,
+                    totalScanned: totalScanned,
+                    discrepancies: discrepancies
+                )
+                
+                // Fetch latest audits immediately to update state arrays synchronously
+                if let bId = boutiqueId {
+                    let audits = try await service.fetchAudits(boutiqueId: bId)
+                    await MainActor.run {
+                        self.activeAudits = audits.filter { $0.status != .signedOff }
+                        self.completedAudits = audits.filter { $0.status == .signedOff }
+                        onSuccess()
+                    }
+                } else {
+                    await MainActor.run {
+                        self.loadAudits()
+                        onSuccess()
+                    }
                 }
             } catch {
                 await MainActor.run {
@@ -299,7 +386,7 @@ final class CycleCountViewModel {
     func getStatusLabel(for status: AuditModelStatus) -> String {
         switch status {
         case .scheduled: return "Scheduled"
-        case .due: return "Due"
+        case .due: return "Pending Review"
         case .inProgress: return "In Progress"
         case .signedOff: return "Completed"
         }
@@ -308,7 +395,7 @@ final class CycleCountViewModel {
     func getStatusColor(for status: AuditModelStatus) -> Color {
         switch status {
         case .scheduled: return AppColors.blue
-        case .due: return AppColors.warning
+        case .due: return AppColors.gold
         case .inProgress: return AppColors.gold
         case .signedOff: return AppColors.success
         }
@@ -417,6 +504,60 @@ struct CycleCountDetailView: View {
                             MetricCard(title: "Accuracy", value: displayAccuracy, subtitle: "Store Performance", icon: "percent")
                         }
                         .padding(.horizontal, 24)
+
+                        // Pending Audits Section (if any are awaiting sign-off)
+                        let pendingAudits = viewModel.activeAudits.filter { $0.status == .due || $0.status == .inProgress }
+                        if !pendingAudits.isEmpty {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("AWAITING APPROVAL")
+                                    .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                    .foregroundStyle(AppColors.secondary)
+                                    .kerning(1.5)
+                                    .padding(.horizontal, 24)
+                                    
+                                VStack(spacing: 12) {
+                                    ForEach(pendingAudits) { audit in
+                                        Button(action: {
+                                            router.push(BMRoute.activeAuditReportDetail(audit.id.uuidString))
+                                        }) {
+                                            HStack {
+                                                Image(systemName: "clock.badge.checkmark")
+                                                    .font(.system(size: 18))
+                                                    .foregroundStyle(AppColors.gold)
+                                                    .frame(width: 36, height: 36)
+                                                    .background(AppColors.gold.opacity(0.1))
+                                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                
+                                                VStack(alignment: .leading, spacing: 4) {
+                                                    Text(viewModel.getFormattedDate(from: audit.scheduledDate))
+                                                        .font(AppFonts.serif(size: 17, weight: .semibold))
+                                                        .foregroundStyle(.white)
+                                                    
+                                                    Text(audit.status == .due ? "Submitted by Controller • Awaiting Sign-off" : "In Progress")
+                                                        .font(AppFonts.sansSerif(size: 13))
+                                                        .foregroundStyle(AppColors.secondary)
+                                                }
+                                                
+                                                Spacer()
+                                                
+                                                Image(systemName: "chevron.right")
+                                                    .font(.system(size: 14, weight: .semibold))
+                                                    .foregroundStyle(AppColors.secondary)
+                                            }
+                                            .padding(16)
+                                            .background(AppColors.surface)
+                                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 16)
+                                                    .stroke(AppColors.border, lineWidth: 1)
+                                            )
+                                        }
+                                        .buttonStyle(PlainButtonStyle())
+                                    }
+                                }
+                                .padding(.horizontal, 24)
+                            }
+                        }
 
                         // 2. Middle Section - Reports & Actions
                         VStack(alignment: .leading, spacing: 12) {
@@ -623,31 +764,27 @@ struct CycleCountDetailView: View {
 // MARK: - Screen 1: The New Full-Screen Audit Report Hub
 struct AuditReportHubView: View {
     @Environment(Router.self) private var router
-    @State private var selectedTab: String = "Completed"
+    @State private var selectedTab: String = "Pending Review"
     @State private var viewModel = CycleCountViewModel.shared
+    
+    private var pendingReviewAudits: [DBStoreAudit] {
+        viewModel.activeAudits.filter { $0.status == .due || $0.status == .inProgress }
+    }
     
     private var activeTabAudits: [DBStoreAudit] {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         let today = formatter.string(from: Date())
         
-        let allActive = viewModel.activeAudits.filter { audit in
+        return viewModel.activeAudits.filter { audit in
             let isCurrent = (audit.scheduledDate == today) || (audit.status == .inProgress)
             let isPending = (audit.scheduledDate < today) && (audit.status != .signedOff)
             return isCurrent || isPending
         }
-        
-        if let currentUserId = viewModel.currentUserId {
-            return allActive.filter { $0.createdBy == nil || $0.createdBy == currentUserId }
-        }
-        return allActive
     }
     
     private var completedAudits: [DBStoreAudit] {
-        if let currentUserId = viewModel.currentUserId {
-            return viewModel.completedAudits.filter { $0.createdBy == nil || $0.createdBy == currentUserId }
-        }
-        return viewModel.completedAudits
+        viewModel.completedAudits
     }
     
     private func formatDayAsOrdinal(_ day: Int) -> String {
@@ -705,6 +842,7 @@ struct AuditReportHubView: View {
             VStack(spacing: 0) {
                 // Apple Native Segmented Control
                 Picker("Tab", selection: $selectedTab) {
+                    Text("Pending Review").tag("Pending Review")
                     Text("Upcoming").tag("Upcoming")
                     Text("Completed").tag("Completed")
                 }
@@ -717,7 +855,43 @@ struct AuditReportHubView: View {
                 // Toggle List Views
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 20) {
-                        if selectedTab == "Upcoming" {
+                        if selectedTab == "Pending Review" {
+                            Text("AWAITING SIGN-OFF")
+                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                .foregroundStyle(AppColors.secondary)
+                                .kerning(1.5)
+                                .padding(.horizontal, 24)
+                                .padding(.top, 12)
+                            
+                            VStack(spacing: 12) {
+                                ForEach(pendingReviewAudits) { audit in
+                                    ActiveAuditRow(
+                                        status: audit.status == .due ? "Submitted" : "In Progress",
+                                        date: viewModel.getFormattedDate(from: audit.scheduledDate),
+                                        badgeColor: audit.status == .due ? AppColors.success : AppColors.gold
+                                    ) {
+                                        router.push(BMRoute.activeAuditReportDetail(audit.id.uuidString))
+                                    }
+                                }
+                                if pendingReviewAudits.isEmpty {
+                                    VStack(spacing: 8) {
+                                        Image(systemName: "tray.fill")
+                                            .font(.system(size: 28))
+                                            .foregroundStyle(AppColors.tertiary)
+                                        Text("No pending audits for review.")
+                                            .font(AppFonts.sansSerif(size: 13))
+                                            .foregroundStyle(AppColors.secondary)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 28)
+                                    .background(AppColors.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
+                                }
+                            }
+                            .padding(.horizontal, 24)
+                            
+                        } else if selectedTab == "Upcoming" {
                             Text("PROJECTED SCHEDULE")
                                 .font(AppFonts.sansSerif(size: 11, weight: .bold))
                                 .foregroundStyle(AppColors.secondary)
@@ -789,6 +963,9 @@ struct AuditReportHubView: View {
         .toolbarBackground(AppColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .onAppear {
+            viewModel.loadAudits()
+        }
     }
 }
 
@@ -797,6 +974,16 @@ struct AuditReportDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel = CycleCountViewModel.shared
     let auditTitle: String // actually auditId.uuidString
+    
+    @State private var verifiedItems: [YetToScanItem] = []
+    @State private var isLoadingVerified = false
+    
+    @State private var missingExpanded = true
+    @State private var newExpanded = true
+    @State private var successfulExpanded = false
+    
+    @State private var shareURL: URL?
+    @State private var showShareSheet = false
     
     private var audit: DBStoreAudit? {
         viewModel.completedAudits.first { $0.id.uuidString == auditTitle } ?? viewModel.activeAudits.first { $0.id.uuidString == auditTitle }
@@ -810,92 +997,291 @@ struct AuditReportDetailView: View {
         audit?.discrepancies?.filter { ($0.type ?? "missing") == "new" } ?? []
     }
     
+    private var report: VarianceReport {
+        VarianceReport(
+            id: audit?.id ?? UUID(),
+            boutiqueName: "Boutique Audit",
+            date: audit?.signedOffAt ?? Date(),
+            controllerName: "Manager Verified",
+            items: []
+        )
+    }
+    
+    private var filteredItems: [VarianceReportItem] {
+        var list: [VarianceReportItem] = []
+        for item in missingItems {
+            list.append(
+                VarianceReportItem(
+                    id: UUID(),
+                    productName: item.name ?? "Unknown Item",
+                    sku: item.detail ?? "Missing",
+                    expectedQty: 1,
+                    countedQty: 0,
+                    variance: -1,
+                    isArchivedProduct: false
+                )
+            )
+        }
+        for item in newItems {
+            list.append(
+                VarianceReportItem(
+                    id: UUID(),
+                    productName: item.name ?? "Unknown Item",
+                    sku: item.detail ?? "New",
+                    expectedQty: 0,
+                    countedQty: 1,
+                    variance: 1,
+                    isArchivedProduct: false
+                )
+            )
+        }
+        for item in verifiedItems {
+            list.append(
+                VarianceReportItem(
+                    id: UUID(),
+                    productName: item.name,
+                    sku: "Serial: \(item.serialNumber)",
+                    expectedQty: 1,
+                    countedQty: 1,
+                    variance: 0,
+                    isArchivedProduct: false
+                )
+            )
+        }
+        return list.sorted { abs($0.variance) > abs($1.variance) }
+    }
+    
+    private func fetchVerifiedItems() async {
+        guard let scannedUnitIds = audit?.scannedUnitIds, !scannedUnitIds.isEmpty else { return }
+        await MainActor.run { isLoadingVerified = true }
+        do {
+            let response: [YetToScanNetworkResponse] = try await SupabaseManager.shared.client
+                .from("inventory_units")
+                .select("id, serial_number, catalog_id, catalogs(id, name, brand, catalog_id)")
+                .in("id", values: scannedUnitIds)
+                .execute()
+                .value
+            
+            let items: [YetToScanItem] = response.map { res in
+                YetToScanItem(
+                    id: res.id,
+                    serialNumber: res.serial_number,
+                    catalogId: res.catalog_id,
+                    name: res.catalogs?.name ?? "Unknown",
+                    brand: res.catalogs?.brand ?? "Unknown"
+                )
+            }
+            await MainActor.run {
+                self.verifiedItems = items
+                self.isLoadingVerified = false
+            }
+        } catch {
+            print("Failed to fetch verified items: \(error)")
+            await MainActor.run { isLoadingVerified = false }
+        }
+    }
+    
+    private func generateCSV() -> URL? {
+        var csvString = "Item Name,SKU,Expected Qty,Counted Qty,Variance\n"
+        for item in filteredItems {
+            let escapedName = item.productName.replacingOccurrences(of: "\"", with: "\"\"")
+            csvString += "\"\(escapedName)\",\(item.sku),\(item.expectedQty),\(item.countedQty),\(item.variance)\n"
+        }
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("VarianceReport.csv")
+        try? csvString.write(to: url, atomically: true, encoding: .utf8)
+        return url
+    }
+    
+    @MainActor
+    private func generatePDF() -> URL? {
+        let printView = PDFReportView(report: report, filteredItems: filteredItems)
+        let renderer = ImageRenderer(content: printView)
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("VarianceReport.pdf")
+        
+        renderer.render { size, context in
+            var box = CGRect(origin: .zero, size: size)
+            guard let pdfContext = CGContext(url as CFURL, mediaBox: &box, nil) else { return }
+            pdfContext.beginPDFPage(nil)
+            context(pdfContext)
+            pdfContext.endPDFPage()
+            pdfContext.closePDF()
+        }
+        return url
+    }
+    
     var body: some View {
         ZStack {
             AppColors.background.ignoresSafeArea()
             
-            ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 28) {
-                    
-                    // Title Header
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("COUNT HEALTH BREAKDOWN")
-                            .font(AppFonts.sansSerif(size: 11, weight: .bold))
-                            .foregroundStyle(AppColors.gold)
-                            .kerning(1.5)
+            if audit == nil {
+                VStack {
+                    Spacer()
+                    ProgressView().tint(AppColors.gold)
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 28) {
                         
-                        Text(auditTitle)
-                            .font(AppFonts.serif(size: 26, weight: .bold))
-                            .foregroundStyle(.white)
-                        
-                        Text("Detailed verification report from store count")
-                            .font(AppFonts.sansSerif(size: 14))
-                            .foregroundStyle(AppColors.secondary)
-                    }
-                    .padding(.horizontal, 24)
-                    
-                    // Section A: Missing Items Container
-                    if !missingItems.isEmpty {
-                        VStack(alignment: .leading, spacing: 14) {
-                            HStack {
-                                Image(systemName: "exclamationmark.triangle.fill")
-                                    .foregroundStyle(AppColors.error)
-                                Text("Section A: Missing Items (DB mismatch)")
-                                    .font(AppFonts.sansSerif(size: 12, weight: .bold))
-                                    .foregroundStyle(AppColors.error)
-                                    .kerning(1.0)
-                            }
-                            .padding(.horizontal, 24)
+                        // Title Header
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("COUNT HEALTH BREAKDOWN")
+                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                .foregroundStyle(AppColors.gold)
+                                .kerning(1.5)
                             
-                            VStack(spacing: 12) {
-                                ForEach(missingItems) { item in
-                                    BreakdownProductRow(name: item.name ?? "Unknown Item", detail: item.detail ?? "No details provided", status: "Missing", statusColor: AppColors.error)
-                                }
-                            }
-                        }
-                    }
-                    
-                    // Section B: New Items Container
-                    if !newItems.isEmpty {
-                        VStack(alignment: .leading, spacing: 14) {
-                            HStack {
-                                Image(systemName: "questionmark.circle.fill")
-                                    .foregroundStyle(AppColors.warning)
-                                Text("Section B: Unexpected / New Items")
-                                    .font(AppFonts.sansSerif(size: 12, weight: .bold))
-                                    .foregroundStyle(AppColors.warning)
-                                    .kerning(1.0)
-                            }
-                            .padding(.horizontal, 24)
+                            Text("Boutique Count Report")
+                                .font(AppFonts.serif(size: 26, weight: .bold))
+                                .foregroundStyle(.white)
                             
-                            VStack(spacing: 12) {
-                                ForEach(newItems) { item in
-                                    BreakdownProductRow(name: item.name ?? "Unknown Item", detail: item.detail ?? "No details provided", status: "New Item", statusColor: AppColors.warning)
-                                }
-                            }
-                        }
-                    }
-                    
-                    // Section C: Verified Items Container
-                    VStack(alignment: .leading, spacing: 14) {
-                        HStack {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(AppColors.success)
-                            Text("Section C: Verified & Confirmed")
-                                .font(AppFonts.sansSerif(size: 12, weight: .bold))
-                                .foregroundStyle(AppColors.success)
-                                .kerning(1.0)
+                            Text("Detailed verification report from store count")
+                                .font(AppFonts.sansSerif(size: 14))
+                                .foregroundStyle(AppColors.secondary)
                         }
                         .padding(.horizontal, 24)
                         
-                        VStack(spacing: 12) {
-                            BreakdownProductRow(name: "Golden Ellipse Quartz", detail: "SKU: PP-GE-5738", status: "Verified", statusColor: AppColors.success)
-                            BreakdownProductRow(name: "Chronomat Automatic 36", detail: "SKU: BRT-CA-3610", status: "Verified", statusColor: AppColors.success)
-                            BreakdownProductRow(name: "Classic Fusion Titanium 45mm", detail: "SKU: HBL-CF-4500", status: "Verified", statusColor: AppColors.success)
+                        // Scrollable metrics summary row
+                        if let db = audit {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 16) {
+                                    MetricCard(title: "Total Expected", value: "\(db.totalExpected)", subtitle: nil, icon: "doc.text")
+                                        .frame(width: 150, height: 160)
+                                    MetricCard(title: "Total Scanned", value: "\(db.totalScanned)", subtitle: nil, icon: "barcode.viewfinder")
+                                        .frame(width: 150, height: 160)
+                                    MetricCard(title: "Variance", value: "\(db.variance)", subtitle: nil, icon: "exclamationmark.triangle")
+                                        .frame(width: 150, height: 160)
+                                    MetricCard(title: "Accuracy", value: String(format: "%.1f%%", db.accuracy), subtitle: nil, icon: "percent")
+                                        .frame(width: 150, height: 160)
+                                }
+                                .padding(.horizontal, 24)
+                            }
                         }
+                        
+                        // Expandable cards list
+                        VStack(spacing: 20) {
+                            // Missing Items Card
+                            ReportCardView(
+                                title: "MISSING ITEMS",
+                                quantity: missingItems.count,
+                                skuCount: missingItems.count,
+                                iconName: "xmark.circle.fill",
+                                themeColor: AppColors.error,
+                                isExpanded: $missingExpanded
+                            ) {
+                                if missingItems.isEmpty {
+                                    Text("No missing items.")
+                                        .font(AppFonts.sansSerif(size: 14))
+                                        .foregroundStyle(AppColors.secondary)
+                                        .padding(.vertical, 12)
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                } else {
+                                    VStack(spacing: 12) {
+                                        ForEach(missingItems, id: \.detail) { item in
+                                            BreakdownProductRow(name: item.name ?? "Unknown Item", detail: item.detail ?? "No details provided", status: "Yet to Scan", statusColor: AppColors.error)
+                                                .padding(.horizontal, 0)
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // New Items Card
+                            ReportCardView(
+                                title: "NEW ITEMS",
+                                quantity: newItems.count,
+                                skuCount: newItems.count,
+                                iconName: "plus.circle.fill",
+                                themeColor: AppColors.blue,
+                                isExpanded: $newExpanded
+                            ) {
+                                if newItems.isEmpty {
+                                    Text("No new items.")
+                                        .font(AppFonts.sansSerif(size: 14))
+                                        .foregroundStyle(AppColors.secondary)
+                                        .padding(.vertical, 12)
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                } else {
+                                    VStack(spacing: 12) {
+                                        ForEach(newItems, id: \.detail) { item in
+                                            BreakdownProductRow(name: item.name ?? "Unknown Item", detail: item.detail ?? "No details provided", status: "New Item", statusColor: AppColors.warning)
+                                                .padding(.horizontal, 0)
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // Successful/Verified Items Card
+                            ReportCardView(
+                                title: "SUCCESSFUL ITEMS",
+                                quantity: verifiedItems.count,
+                                skuCount: verifiedItems.count,
+                                iconName: "checkmark.circle.fill",
+                                themeColor: AppColors.success,
+                                isExpanded: $successfulExpanded
+                            ) {
+                                if isLoadingVerified {
+                                    ProgressView().tint(AppColors.gold)
+                                        .padding(.vertical, 12)
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                } else if verifiedItems.isEmpty {
+                                    Text("No successful items.")
+                                        .font(AppFonts.sansSerif(size: 14))
+                                        .foregroundStyle(AppColors.secondary)
+                                        .padding(.vertical, 12)
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                } else {
+                                    VStack(spacing: 12) {
+                                        ForEach(verifiedItems) { item in
+                                            BreakdownProductRow(name: item.name, detail: "Serial: \(item.serialNumber) • Brand: \(item.brand)", status: "Verified", statusColor: AppColors.success)
+                                                .padding(.horizontal, 0)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                        
+                        // Export Buttons
+                        HStack(spacing: 12) {
+                            Button(action: {
+                                if let url = generateCSV() {
+                                    shareURL = url
+                                    showShareSheet = true
+                                }
+                            }) {
+                                Label("Export CSV", systemImage: "doc.text.fill")
+                                    .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                    .foregroundStyle(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 50)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(.white.opacity(0.3), lineWidth: 1)
+                                    )
+                            }
+                            
+                            Button(action: {
+                                if let url = generatePDF() {
+                                    shareURL = url
+                                    showShareSheet = true
+                                }
+                            }) {
+                                Label("Export PDF", systemImage: "doc.richtext.fill")
+                                    .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                    .foregroundStyle(AppColors.background)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 50)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(AppColors.gold)
+                                    )
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 40)
                     }
+                    .padding(.vertical, 24)
                 }
-                .padding(.vertical, 24)
             }
         }
         .navigationTitle("Audit Breakdown")
@@ -903,14 +1289,31 @@ struct AuditReportDetailView: View {
         .toolbarBackground(AppColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .sheet(isPresented: $showShareSheet) {
+            if let url = shareURL {
+                ShareSheet(activityItems: [url])
+            }
+        }
+        .task {
+            await fetchVerifiedItems()
+        }
     }
 }
 
-// MARK: - Screen 3: Active Audit Discrepancy & Sign-off View
 struct ActiveAuditReportDetailView: View {
     @Environment(Router.self) private var router
     let auditTitle: String // auditId.uuidString
     @State private var viewModel = CycleCountViewModel.shared
+    
+    @State private var verifiedItems: [YetToScanItem] = []
+    @State private var isLoadingVerified = false
+    
+    @State private var missingExpanded = true
+    @State private var newExpanded = true
+    @State private var successfulExpanded = false
+    
+    @State private var shareURL: URL?
+    @State private var showShareSheet = false
     
     private var audit: DBStoreAudit? {
         viewModel.activeAudits.first { $0.id.uuidString == auditTitle }
@@ -922,6 +1325,118 @@ struct ActiveAuditReportDetailView: View {
     
     private var newItems: [DiscrepancyItem] {
         audit?.discrepancies?.filter { ($0.type ?? "missing") == "new" } ?? []
+    }
+    
+    private var report: VarianceReport {
+        VarianceReport(
+            id: audit?.id ?? UUID(),
+            boutiqueName: "Boutique Audit",
+            date: Date(),
+            controllerName: "Manager Verified",
+            items: []
+        )
+    }
+    
+    private var filteredItems: [VarianceReportItem] {
+        var list: [VarianceReportItem] = []
+        for item in missingItems {
+            list.append(
+                VarianceReportItem(
+                    id: UUID(),
+                    productName: item.name ?? "Unknown Item",
+                    sku: item.detail ?? "Missing",
+                    expectedQty: 1,
+                    countedQty: 0,
+                    variance: -1,
+                    isArchivedProduct: false
+                )
+            )
+        }
+        for item in newItems {
+            list.append(
+                VarianceReportItem(
+                    id: UUID(),
+                    productName: item.name ?? "Unknown Item",
+                    sku: item.detail ?? "New",
+                    expectedQty: 0,
+                    countedQty: 1,
+                    variance: 1,
+                    isArchivedProduct: false
+                )
+            )
+        }
+        for item in verifiedItems {
+            list.append(
+                VarianceReportItem(
+                    id: UUID(),
+                    productName: item.name,
+                    sku: "Serial: \(item.serialNumber)",
+                    expectedQty: 1,
+                    countedQty: 1,
+                    variance: 0,
+                    isArchivedProduct: false
+                )
+            )
+        }
+        return list.sorted { abs($0.variance) > abs($1.variance) }
+    }
+    
+    private func fetchVerifiedItems() async {
+        guard let scannedUnitIds = audit?.scannedUnitIds, !scannedUnitIds.isEmpty else { return }
+        await MainActor.run { isLoadingVerified = true }
+        do {
+            let response: [YetToScanNetworkResponse] = try await SupabaseManager.shared.client
+                .from("inventory_units")
+                .select("id, serial_number, catalog_id, catalogs(id, name, brand, catalog_id)")
+                .in("id", values: scannedUnitIds)
+                .execute()
+                .value
+            
+            let items: [YetToScanItem] = response.map { res in
+                YetToScanItem(
+                    id: res.id,
+                    serialNumber: res.serial_number,
+                    catalogId: res.catalog_id,
+                    name: res.catalogs?.name ?? "Unknown",
+                    brand: res.catalogs?.brand ?? "Unknown"
+                )
+            }
+            await MainActor.run {
+                self.verifiedItems = items
+                self.isLoadingVerified = false
+            }
+        } catch {
+            print("Failed to fetch verified items: \(error)")
+            await MainActor.run { isLoadingVerified = false }
+        }
+    }
+    
+    private func generateCSV() -> URL? {
+        var csvString = "Item Name,SKU,Expected Qty,Counted Qty,Variance\n"
+        for item in filteredItems {
+            let escapedName = item.productName.replacingOccurrences(of: "\"", with: "\"\"")
+            csvString += "\"\(escapedName)\",\(item.sku),\(item.expectedQty),\(item.countedQty),\(item.variance)\n"
+        }
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("VarianceReport.csv")
+        try? csvString.write(to: url, atomically: true, encoding: .utf8)
+        return url
+    }
+    
+    @MainActor
+    private func generatePDF() -> URL? {
+        let printView = PDFReportView(report: report, filteredItems: filteredItems)
+        let renderer = ImageRenderer(content: printView)
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("VarianceReport.pdf")
+        
+        renderer.render { size, context in
+            var box = CGRect(origin: .zero, size: size)
+            guard let pdfContext = CGContext(url as CFURL, mediaBox: &box, nil) else { return }
+            pdfContext.beginPDFPage(nil)
+            context(pdfContext)
+            pdfContext.endPDFPage()
+            pdfContext.closePDF()
+        }
+        return url
     }
     
     var body: some View {
@@ -946,48 +1461,144 @@ struct ActiveAuditReportDetailView: View {
                         }
                         .padding(.horizontal, 24)
                         
-                        // Section A: Missing Items Container
-                        if !missingItems.isEmpty {
-                            VStack(alignment: .leading, spacing: 14) {
-                                HStack {
-                                    Image(systemName: "exclamationmark.triangle.fill")
-                                        .foregroundStyle(AppColors.error)
-                                    Text("Section A: Missing Items (DB mismatch)")
-                                        .font(AppFonts.sansSerif(size: 12, weight: .bold))
-                                        .foregroundStyle(AppColors.error)
-                                        .kerning(1.0)
+                        // Scrollable metrics summary row
+                        if let db = audit {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 16) {
+                                    MetricCard(title: "Total Expected", value: "\(db.totalExpected)", subtitle: nil, icon: "doc.text")
+                                        .frame(width: 150, height: 160)
+                                    MetricCard(title: "Total Scanned", value: "\(db.totalScanned)", subtitle: nil, icon: "barcode.viewfinder")
+                                        .frame(width: 150, height: 160)
+                                    MetricCard(title: "Variance", value: "\(db.variance)", subtitle: nil, icon: "exclamationmark.triangle")
+                                        .frame(width: 150, height: 160)
+                                    MetricCard(title: "Accuracy", value: String(format: "%.1f%%", db.accuracy), subtitle: nil, icon: "percent")
+                                        .frame(width: 150, height: 160)
                                 }
                                 .padding(.horizontal, 24)
-                                
-                                VStack(spacing: 12) {
-                                    ForEach(missingItems) { item in
-                                        BreakdownProductRow(name: item.name ?? "Unknown Item", detail: item.detail ?? "No details provided", status: "Missing", statusColor: AppColors.error)
+                            }
+                        }
+                        
+                        // Expandable cards list
+                        VStack(spacing: 20) {
+                            // Missing Items Card
+                            ReportCardView(
+                                title: "MISSING ITEMS",
+                                quantity: missingItems.count,
+                                skuCount: missingItems.count,
+                                iconName: "xmark.circle.fill",
+                                themeColor: AppColors.error,
+                                isExpanded: $missingExpanded
+                            ) {
+                                if missingItems.isEmpty {
+                                    Text("No missing items.")
+                                        .font(AppFonts.sansSerif(size: 14))
+                                        .foregroundStyle(AppColors.secondary)
+                                        .padding(.vertical, 12)
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                } else {
+                                    VStack(spacing: 12) {
+                                        ForEach(missingItems, id: \.detail) { item in
+                                            BreakdownProductRow(name: item.name ?? "Unknown Item", detail: item.detail ?? "No details provided", status: "Yet to Scan", statusColor: AppColors.error)
+                                                .padding(.horizontal, 0)
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // New Items Card
+                            ReportCardView(
+                                title: "NEW ITEMS",
+                                quantity: newItems.count,
+                                skuCount: newItems.count,
+                                iconName: "plus.circle.fill",
+                                themeColor: AppColors.blue,
+                                isExpanded: $newExpanded
+                            ) {
+                                if newItems.isEmpty {
+                                    Text("No new items.")
+                                        .font(AppFonts.sansSerif(size: 14))
+                                        .foregroundStyle(AppColors.secondary)
+                                        .padding(.vertical, 12)
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                } else {
+                                    VStack(spacing: 12) {
+                                        ForEach(newItems, id: \.detail) { item in
+                                            BreakdownProductRow(name: item.name ?? "Unknown Item", detail: item.detail ?? "No details provided", status: "New Item", statusColor: AppColors.warning)
+                                                .padding(.horizontal, 0)
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // Successful/Verified Items Card
+                            ReportCardView(
+                                title: "SUCCESSFUL ITEMS",
+                                quantity: verifiedItems.count,
+                                skuCount: verifiedItems.count,
+                                iconName: "checkmark.circle.fill",
+                                themeColor: AppColors.success,
+                                isExpanded: $successfulExpanded
+                            ) {
+                                if isLoadingVerified {
+                                    ProgressView().tint(AppColors.gold)
+                                        .padding(.vertical, 12)
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                } else if verifiedItems.isEmpty {
+                                    Text("No successful items.")
+                                        .font(AppFonts.sansSerif(size: 14))
+                                        .foregroundStyle(AppColors.secondary)
+                                        .padding(.vertical, 12)
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                } else {
+                                    VStack(spacing: 12) {
+                                        ForEach(verifiedItems) { item in
+                                            BreakdownProductRow(name: item.name, detail: "Serial: \(item.serialNumber) • Brand: \(item.brand)", status: "Verified", statusColor: AppColors.success)
+                                                .padding(.horizontal, 0)
+                                        }
                                     }
                                 }
                             }
                         }
+                        .padding(.horizontal, 24)
                         
-                        // Section B: New Items Container
-                        if !newItems.isEmpty {
-                            VStack(alignment: .leading, spacing: 14) {
-                                HStack {
-                                    Image(systemName: "questionmark.circle.fill")
-                                        .foregroundStyle(AppColors.warning)
-                                    Text("Section B: Unexpected / New Items")
-                                        .font(AppFonts.sansSerif(size: 12, weight: .bold))
-                                        .foregroundStyle(AppColors.warning)
-                                        .kerning(1.0)
+                        // Export Buttons
+                        HStack(spacing: 12) {
+                            Button(action: {
+                                if let url = generateCSV() {
+                                    shareURL = url
+                                    showShareSheet = true
                                 }
-                                .padding(.horizontal, 24)
-                                
-                                VStack(spacing: 12) {
-                                    ForEach(newItems) { item in
-                                        BreakdownProductRow(name: item.name ?? "Unknown Item", detail: item.detail ?? "No details provided", status: "New Item", statusColor: AppColors.warning)
-                                    }
+                            }) {
+                                Label("Export CSV", systemImage: "doc.text.fill")
+                                    .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                    .foregroundStyle(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 50)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(.white.opacity(0.3), lineWidth: 1)
+                                    )
+                            }
+                            
+                            Button(action: {
+                                if let url = generatePDF() {
+                                    shareURL = url
+                                    showShareSheet = true
                                 }
+                            }) {
+                                Label("Export PDF", systemImage: "doc.richtext.fill")
+                                    .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                                    .foregroundStyle(AppColors.background)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 50)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(AppColors.gold)
+                                    )
                             }
                         }
-                        
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 20)
                     }
                     .padding(.vertical, 24)
                 }
@@ -997,7 +1608,19 @@ struct ActiveAuditReportDetailView: View {
                     VStack {
                         CustomButton(title: "Sign-off Audit", action: {
                             if let a = audit {
-                                viewModel.signOffAudit(auditId: a.id) {
+                                let totalScanned = verifiedItems.count
+                                let totalExpected = missingItems.count + verifiedItems.count
+                                let accuracy = totalExpected > 0 ? (Double(totalScanned) / Double(totalExpected)) * 100.0 : 100.0
+                                let liveDiscrepancies = missingItems + newItems
+                                let variance = missingItems.count + newItems.count
+                                
+                                viewModel.signOffAudit(
+                                    auditId: a.id,
+                                    variance: variance,
+                                    accuracy: accuracy,
+                                    totalScanned: totalScanned,
+                                    discrepancies: liveDiscrepancies
+                                ) {
                                     router.pop() // Navigate back on sign-off approval
                                 }
                             } else {
@@ -1017,17 +1640,33 @@ struct ActiveAuditReportDetailView: View {
                         }
                     )
                 }
+            }
         }
         .navigationTitle("Active Audit Report")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(AppColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .sheet(isPresented: $showShareSheet) {
+            if let url = shareURL {
+                ShareSheet(activityItems: [url])
+            }
+        }
+        .task {
+            await fetchVerifiedItems()
+        }
+        .alert("Sign-off Error", isPresented: Binding(
+            get: { viewModel.errorMessage != nil },
+            set: { show in
+                if !show { viewModel.errorMessage = nil }
+            }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(viewModel.errorMessage ?? "An unknown error occurred.")
+        }
     }
 }
-}
-
-// MARK: - Row Subviews
 
 private struct ActiveAuditRow: View {
     let status: String
@@ -1212,5 +1851,160 @@ private struct CycleCountVarianceRow: View {
         .padding(.horizontal, 24)
         .padding(.vertical, 18)
         .background(AppColors.surface)
+    }
+}
+
+private struct ReportCardView<Content: View>: View {
+    let title: String
+    let quantity: Int
+    let skuCount: Int
+    let iconName: String
+    let themeColor: Color
+    @Binding var isExpanded: Bool
+    @ViewBuilder let content: () -> Content
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            Button(action: {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    isExpanded.toggle()
+                }
+            }) {
+                HStack(spacing: 16) {
+                    ZStack {
+                        Circle()
+                            .fill(themeColor.opacity(0.12))
+                            .frame(width: 40, height: 40)
+                        Image(systemName: iconName)
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(themeColor)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(title)
+                            .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                            .foregroundStyle(AppColors.secondary)
+                            .kerning(1.0)
+                        
+                        HStack(spacing: 6) {
+                            Text("\(quantity) \(quantity == 1 ? "unit" : "units")")
+                                .font(AppFonts.sansSerif(size: 15, weight: .bold))
+                                .foregroundStyle(.white)
+                            
+                            Text("•")
+                                .foregroundStyle(AppColors.tertiary)
+                            
+                            Text("\(skuCount) \(skuCount == 1 ? "SKU" : "SKUs")")
+                                .font(AppFonts.sansSerif(size: 12))
+                                .foregroundStyle(AppColors.secondary)
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(AppColors.tertiary)
+                        .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 14)
+                .background(AppColors.surface)
+            }
+            .buttonStyle(.plain)
+            
+            if isExpanded {
+                VStack(spacing: 0) {
+                    Divider().background(AppColors.border)
+                    
+                    VStack(spacing: 0) {
+                        content()
+                    }
+                    .padding(16)
+                    .background(AppColors.surface2.opacity(0.3))
+                }
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(isExpanded ? themeColor.opacity(0.3) : AppColors.gold15, lineWidth: 0.5)
+        )
+    }
+}
+
+private struct ShareSheet: UIViewControllerRepresentable {
+    let activityItems: [Any]
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
+    }
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+
+private struct PDFReportView: View {
+    let report: VarianceReport
+    let filteredItems: [VarianceReportItem]
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Text("INVENTORY VARIANCE REPORT")
+                .font(AppFonts.sansSerif(size: 24, weight: .bold))
+                .foregroundStyle(.black)
+            
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Boutique: \(report.boutiqueName)")
+                    Text("Date: \(report.date.formatted())")
+                    Text("Controller: \(report.controllerName)")
+                }
+                .font(AppFonts.sansSerif(size: 12))
+                .foregroundStyle(AppColors.secondary)
+                Spacer()
+            }
+            
+            Divider()
+            
+            Text("Line Items")
+                .font(AppFonts.sansSerif(size: 16, weight: .bold))
+                .foregroundStyle(.black)
+            
+            VStack(spacing: 8) {
+                HStack {
+                    Text("Item").font(AppFonts.sansSerif(size: 11, weight: .bold)).frame(maxWidth: .infinity, alignment: .leading)
+                    Text("SKU").font(AppFonts.sansSerif(size: 11, weight: .bold)).frame(width: 80, alignment: .leading)
+                    Text("Expected").font(AppFonts.sansSerif(size: 11, weight: .bold)).frame(width: 60, alignment: .trailing)
+                    Text("Counted").font(AppFonts.sansSerif(size: 11, weight: .bold)).frame(width: 60, alignment: .trailing)
+                    Text("Variance").font(AppFonts.sansSerif(size: 11, weight: .bold)).frame(width: 60, alignment: .trailing)
+                }
+                .foregroundStyle(.black)
+                
+                Divider()
+                
+                ForEach(filteredItems) { item in
+                    HStack {
+                        HStack {
+                            Text(item.productName)
+                            if item.isArchivedProduct {
+                                Text("(Archived)")
+                            }
+                        }
+                        .font(AppFonts.sansSerif(size: 10))
+                        .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        
+                        Text(item.sku).font(AppFonts.sansSerif(size: 10)).frame(width: 80, alignment: .leading)
+                        Text("\(item.expectedQty)").font(AppFonts.sansSerif(size: 10)).frame(width: 60, alignment: .trailing)
+                        Text("\(item.countedQty)").font(AppFonts.sansSerif(size: 10)).frame(width: 60, alignment: .trailing)
+                        Text("\(item.variance > 0 ? "+" : "")\(item.variance)").font(AppFonts.sansSerif(size: 10, weight: .bold))
+                            .foregroundStyle(item.variance > 0 ? AppColors.success : (item.variance < 0 ? AppColors.error : Color.black))
+                            .frame(width: 60, alignment: .trailing)
+                    }
+                    .foregroundStyle(.black)
+                }
+            }
+        }
+        .padding(40)
+        .frame(width: 595, height: 842)
+        .background(Color.white)
     }
 }

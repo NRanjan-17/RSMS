@@ -44,19 +44,65 @@ final class ActiveAuditViewModel {
     
     func startSession() async {
         if let cached = AuditPersistence.shared.loadSession(id: audit.id) {
+            let profileTuple = try? await fetchProfileHandler()
+            let staff = profileTuple?.1 as? StaffModel
+            let storeId = staff?.boutiqueId ?? UUID()
+            
+            var allExpectedItems: [YetToScanItem] = []
+            do {
+                let response: [YetToScanNetworkResponse] = try await SupabaseManager.shared.client
+                    .from("inventory_units")
+                    .select("id, serial_number, catalog_id, catalogs(id, name, brand, catalog_id)")
+                    .eq("boutique_id", value: storeId.uuidString)
+                    .eq("status", value: "Available")
+                    .execute()
+                    .value
+                
+                allExpectedItems = response.map { res in
+                    YetToScanItem(
+                        id: res.id,
+                        serialNumber: res.serial_number,
+                        catalogId: res.catalog_id,
+                        name: res.catalogs?.name ?? "Unknown",
+                        brand: res.catalogs?.brand ?? "Unknown"
+                    )
+                }
+            } catch {
+                print("Failed to fetch expected items for session restore: \(error)")
+            }
+            
+            var rebuiltScannedItems: [ScannedAuditItem] = []
+            for unitId in cached.scannedUnitIds {
+                if let matched = allExpectedItems.first(where: { $0.id == unitId }) {
+                    rebuiltScannedItems.append(ScannedAuditItem(name: matched.serialNumber, ok: true))
+                } else {
+                    rebuiltScannedItems.append(ScannedAuditItem(name: unitId.uuidString, ok: true))
+                }
+            }
+            
+            let unexpectedItems = cached.unexpectedScannedItems ?? []
+            var rebuiltNewlyAddedItems: [ScannedAuditItem] = []
+            for item in unexpectedItems {
+                var resolvedName = item.barcode
+                if let catalogResponse: [CatalogEntity] = try? await SupabaseManager.shared.client
+                    .from("catalogs")
+                    .select()
+                    .eq("bar_code", value: item.barcode)
+                    .execute()
+                    .value, let catalog = catalogResponse.first {
+                    resolvedName = catalog.name
+                }
+                rebuiltNewlyAddedItems.append(ScannedAuditItem(name: resolvedName, ok: false))
+            }
+            
             await MainActor.run {
                 self.yetToScanItems = cached.yetToScanItems
                 self.scannedUnitIds = cached.scannedUnitIds
                 self.totalExpected = cached.yetToScanItems.count + cached.scannedUnitIds.count
-                self.unexpectedScannedItems = cached.unexpectedScannedItems ?? []
-                self.totalScanned = cached.scannedUnitIds.count + self.unexpectedScannedItems.count
-                
-                var list: [ScannedAuditItem] = []
-                for item in self.unexpectedScannedItems {
-                    list.append(ScannedAuditItem(name: item.barcode, ok: false))
-                }
-                self.newlyAddedItems = list
-                self.scannedItems = []
+                self.unexpectedScannedItems = unexpectedItems
+                self.totalScanned = cached.scannedUnitIds.count + unexpectedItems.count
+                self.scannedItems = rebuiltScannedItems
+                self.newlyAddedItems = rebuiltNewlyAddedItems
             }
             return
         }
@@ -235,11 +281,102 @@ final class ActiveAuditViewModel {
             }
             
             for unexpected in unexpectedScannedItems {
+                var itemName = "Unexpected Scan"
+                var itemDetail = "Barcode: \(unexpected.barcode)"
+                
+                do {
+                    let catalogsResponse: [CatalogEntity] = try await SupabaseManager.shared.client
+                        .from("catalogs")
+                        .select()
+                        .eq("bar_code", value: unexpected.barcode)
+                        .execute()
+                        .value
+                    
+                    if let catalog = catalogsResponse.first {
+                        itemName = catalog.name
+                        itemDetail = "Barcode: \(unexpected.barcode) (New SKU)"
+                    }
+                } catch {
+                    print("Failed to resolve catalog for unexpected barcode \(unexpected.barcode): \(error)")
+                }
+                
                 discrepancies.append(
                     DiscrepancyItem(
-                        name: "Unexpected Scan",
-                        detail: "Barcode: \(unexpected.barcode)",
+                        name: itemName,
+                        detail: itemDetail,
                         type: "new"
+                    )
+                )
+            }
+            
+            // Build real VarianceReportItems
+            let allUnitsResponse: [YetToScanNetworkResponse] = (try? await SupabaseManager.shared.client
+                .from("inventory_units")
+                .select("id, serial_number, catalog_id, catalogs(id, name, brand, catalog_id)")
+                .eq("boutique_id", value: storeId.uuidString)
+                .eq("status", value: "Available")
+                .execute()
+                .value) ?? []
+            
+            struct CatalogSummary {
+                let id: UUID
+                let name: String
+                let sku: String
+                var expectedQty: Int = 0
+                var countedQty: Int = 0
+            }
+            
+            var summaries: [UUID: CatalogSummary] = [:]
+            
+            for res in allUnitsResponse {
+                guard let catId = res.catalog_id, let catInfo = res.catalogs else { continue }
+                let sku = catInfo.catalog_id ?? "Unknown SKU"
+                
+                if summaries[catId] == nil {
+                    summaries[catId] = CatalogSummary(id: catId, name: catInfo.name, sku: sku)
+                }
+                
+                summaries[catId]?.expectedQty += 1
+                if scannedUnitIds.contains(res.id) {
+                    summaries[catId]?.countedQty += 1
+                }
+            }
+            
+            for unexpected in unexpectedScannedItems {
+                do {
+                    let catalogsResponse: [CatalogEntity] = try await SupabaseManager.shared.client
+                        .from("catalogs")
+                        .select()
+                        .eq("bar_code", value: unexpected.barcode)
+                        .execute()
+                        .value
+                    
+                    if let catalog = catalogsResponse.first {
+                        let catId = catalog.id
+                        if summaries[catId] == nil {
+                            summaries[catId] = CatalogSummary(id: catId, name: catalog.name, sku: catalog.catalogId)
+                        }
+                        summaries[catId]?.countedQty += 1
+                    } else {
+                        let dummyId = UUID()
+                        summaries[dummyId] = CatalogSummary(id: dummyId, name: "Unexpected: \(unexpected.barcode)", sku: unexpected.barcode, expectedQty: 0, countedQty: 1)
+                    }
+                } catch {
+                    print("Failed to fetch catalog details for barcode: \(unexpected.barcode)")
+                }
+            }
+            
+            for (_, summary) in summaries {
+                let varQty = summary.countedQty - summary.expectedQty
+                reportItems.append(
+                    VarianceReportItem(
+                        id: UUID(),
+                        productName: summary.name,
+                        sku: summary.sku,
+                        expectedQty: summary.expectedQty,
+                        countedQty: summary.countedQty,
+                        variance: varQty,
+                        isArchivedProduct: false
                     )
                 )
             }
@@ -249,7 +386,7 @@ final class ActiveAuditViewModel {
                 boutiqueName: storeName,
                 date: Date(),
                 controllerName: controllerName,
-                items: reportItems 
+                items: reportItems
             )
             
             struct SubmitAuditPayload: Codable {
@@ -264,7 +401,7 @@ final class ActiveAuditViewModel {
             
             let variance = yetToScanItems.count + unexpectedScannedItems.count
             let payload = SubmitAuditPayload(
-                status: "in_progress",
+                status: "due",
                 total_expected: totalExpected,
                 total_scanned: totalScanned,
                 variance: variance,

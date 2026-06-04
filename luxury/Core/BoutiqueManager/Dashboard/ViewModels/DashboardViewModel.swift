@@ -36,6 +36,7 @@ final class DashboardViewModel {
     private var monitorTask: Task<Void, Never>?
     private var sfsPollingTask: Task<Void, Never>?
     var sfsFulfillments: [PurchasedItemEntity] = []
+    var pendingAuditsCount: Int = 0
     
     var showAllAppointments: Bool = false {
         didSet {
@@ -96,6 +97,7 @@ final class DashboardViewModel {
         fetchTodaySales()
         fetchAppointments()
         fetchAvailableStaff()
+        fetchPendingAuditsCount()
         startSalesPolling()
         startNetworkMonitoring()
         startFulfillmentPolling()
@@ -239,6 +241,33 @@ final class DashboardViewModel {
         }
     }
 
+    func fetchPendingAuditsCount() {
+        Task {
+            do {
+                if let (_, profile) = try await ProfileService().fetchCurrentProfile(),
+                   let boutique = profile as? CorporateBoutique {
+                    let response = try await SupabaseManager.shared.client
+                        .from("audits")
+                        .select("id")
+                        .eq("boutique_id", value: boutique.id.uuidString)
+                        .eq("status", value: "due")
+                        .execute()
+                    
+                    struct AuditID: Codable {
+                        let id: UUID
+                    }
+                    let decoder = JSONDecoder()
+                    let fetched = try decoder.decode([AuditID].self, from: response.data)
+                    await MainActor.run {
+                        self.pendingAuditsCount = fetched.count
+                    }
+                }
+            } catch {
+                print("Failed to fetch pending audits count: \(error)")
+            }
+        }
+    }
+
     // TODO: upgrade to WebSocket/SSE
     private func startFulfillmentPolling() {
         sfsPollingTask = Task { @MainActor [weak self] in
@@ -299,6 +328,7 @@ final class DashboardViewModel {
     func refreshAll() async {
         fetchAppointments()
         fetchAvailableStaff()
+        fetchPendingAuditsCount()
         await fetchSFSFulfillments()
     }
     
