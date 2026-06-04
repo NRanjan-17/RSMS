@@ -35,7 +35,7 @@ final class TransfersViewModel {
     private let client = SupabaseManager.shared.client
     private var channel: RealtimeChannelV2?
     
-    func fetchTransfers() {
+    func fetchTransfers(retryCount: Int = 0) {
         isLoading = true
         errorMessage = nil
         
@@ -60,9 +60,14 @@ final class TransfersViewModel {
                     self.isLoading = false
                 }
             } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                    self.isLoading = false
+                if retryCount < 3 && error.localizedDescription.contains("current profile") {
+                    try? await Task.sleep(for: .milliseconds(400))
+                    await self.fetchTransfers(retryCount: retryCount + 1)
+                } else {
+                    await MainActor.run {
+                        self.errorMessage = error.localizedDescription
+                        self.isLoading = false
+                    }
                 }
             }
         }
