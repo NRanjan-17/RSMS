@@ -21,9 +21,23 @@ final class ClientInsightsViewModel {
         isLoading = true
         Task {
             do {
+                guard let profileTuple = try? await ProfileService().fetchCurrentProfile(),
+                      let staff = profileTuple.1 as? StaffModel,
+                      let bId = staff.boutiqueId else {
+                    await MainActor.run { isLoading = false }
+                    return
+                }
+                
                 let client = SupabaseManager.shared.client
                 let clients: [ClientEntity] = try await client.from("client").select().execute().value
-                let txs: [SATransactionEntity] = try await client.from("transaction").select().execute().value
+                let txs: [SATransactionEntity] = try await client.from("transaction")
+                    .select()
+                    .eq("boutique_id", value: bId)
+                    .execute()
+                    .value
+                
+                let boutiqueClientIds = Set(txs.compactMap { $0.clientId })
+                let boutiqueClients = clients.filter { boutiqueClientIds.contains($0.id) }
                 
                 var uhnwCount = 0
                 var vipCount = 0
@@ -33,7 +47,7 @@ final class ClientInsightsViewModel {
                 var vipRevenue = 0.0
                 var standardRevenue = 0.0
                 
-                for c in clients {
+                for c in boutiqueClients {
                     let clientTxs = txs.filter { $0.clientId == c.id }
                     let clientTotal = clientTxs.reduce(0.0) { $0 + $1.transactionAmount }
                     
@@ -50,9 +64,9 @@ final class ClientInsightsViewModel {
                     }
                 }
                 
-                let totalClients = clients.count
+                let totalClientsCount = boutiqueClients.count
                 let overallRevenue = txs.reduce(0.0) { $0 + $1.transactionAmount }
-                let avg = totalClients > 0 ? overallRevenue / Double(totalClients) : 0.0
+                let avg = totalClientsCount > 0 ? overallRevenue / Double(totalClientsCount) : 0.0
                 
                 let newTierBreakdown = [
                     TierMetric(tier: "UHNW", count: uhnwCount, revenue: CurrencyManager.shared.format(amount: uhnwRevenue)),
@@ -61,7 +75,7 @@ final class ClientInsightsViewModel {
                 ]
                 
                 await MainActor.run {
-                    self.totalClients = totalClients
+                    self.totalClients = totalClientsCount
                     self.avgLTV = CurrencyManager.shared.format(amount: avg)
                     self.tierBreakdown = newTierBreakdown
                     self.isLoading = false

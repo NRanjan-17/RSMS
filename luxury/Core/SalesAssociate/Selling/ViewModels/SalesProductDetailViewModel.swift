@@ -1,3 +1,10 @@
+//
+//  SalesProductDetailViewModel.swift
+//  luxury
+//
+//  Created by Aditya Chauhan on 15/05/26.
+//
+
 import Foundation
 import Observation
 
@@ -15,15 +22,12 @@ final class SalesProductDetailViewModel {
         isStockLoading = true
         Task {
             do {
-                // Fetch catalogs of the same category, excluding the current one
                 let allCatalogs = try await catalogService.fetchCatalogs()
                 
-                // Fetch the actual physical stock for the CURRENT logged-in boutique
                 let profileTuple = try? await ProfileService().fetchCurrentProfile()
                 guard let staff = profileTuple?.1 as? StaffModel, let boutiqueId = staff.boutiqueId else { return }
                 let stockDict = try await InventoryService.shared.fetchAvailableStockDictionary(forBoutique: boutiqueId)
                 
-                // Use AI Recommendation Engine to find true cross-selling pairings inside this boutique
                 let recommended = await RecommendationEngine.shared.suggestRelatedProducts(for: catalog, catalog: allCatalogs, availableStock: stockDict, limit: 3)
                 
                 await MainActor.run {

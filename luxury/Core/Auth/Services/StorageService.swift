@@ -47,17 +47,38 @@ final class StorageService {
     }
     
     private func upload(image: PickedImageAsset, path: String) async throws {
-        try await client.storage
-            .from(bucket)
-            .upload(
-                path,
-                data: image.data,
-                options: FileOptions(
-                    cacheControl: "3600",
-                    contentType: image.contentType,
-                    upsert: true
-                )
-            )
+        var attempts = 0
+        let maxAttempts = 3
+        var lastError: Error?
+        
+        while attempts < maxAttempts {
+            attempts += 1
+            do {
+                try await client.storage
+                    .from(bucket)
+                    .upload(
+                        path,
+                        data: image.data,
+                        options: FileOptions(
+                            cacheControl: "3600",
+                            contentType: image.contentType,
+                            upsert: true
+                        )
+                    )
+                return // Success!
+            } catch {
+                lastError = error
+                print("Storage upload attempt \(attempts) failed with error: \(error). Retrying...")
+                if attempts < maxAttempts {
+                    // Wait 1 second before retrying
+                    try? await Task.sleep(nanoseconds: 1_000_000_000)
+                }
+            }
+        }
+        
+        if let lastError {
+            throw lastError
+        }
     }
     
     private func storageObjectURL(path: String) -> URL {

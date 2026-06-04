@@ -180,7 +180,7 @@ struct POSView: View {
                                                     Text(applied.title)
                                                         .font(AppFonts.serif(size: 14, weight: .semibold))
                                                         .foregroundStyle(.white)
-                                                    Text("\(Int(applied.discountPercentage))% OFF")
+                                                    Text("\(applied.discountPercentage / 100, format: .percent.precision(.fractionLength(0))) OFF")
                                                         .font(AppFonts.sansSerif(size: 11, weight: .bold))
                                                         .foregroundStyle(AppColors.gold)
                                                 }

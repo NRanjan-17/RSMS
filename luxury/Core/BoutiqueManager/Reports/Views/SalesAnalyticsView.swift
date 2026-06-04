@@ -44,7 +44,7 @@ struct SalesAnalyticsView: View {
                                             Text(category.name)
                                                 .font(AppFonts.serif(size: 17, weight: .medium))
                                                 .foregroundStyle(.white)
-                                            Text("\(category.percentage.formatted(.percent.precision(.fractionLength(0)))) of Total Revenue")
+                                            Text("\(category.percentage, format: .percent.precision(.fractionLength(0))) of Total Revenue")
                                                 .font(AppFonts.sansSerif(size: 12))
                                                 .foregroundStyle(AppColors.secondary)
                                         }
@@ -75,5 +75,8 @@ struct SalesAnalyticsView: View {
         .toolbarBackground(AppColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .task {
+            await viewModel.fetchData()
+        }
     }
 }

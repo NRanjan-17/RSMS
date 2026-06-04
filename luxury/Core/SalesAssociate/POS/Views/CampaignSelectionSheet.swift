@@ -46,7 +46,7 @@ struct CampaignSelectionSheet: View {
                                         Text(campaign.title)
                                             .font(AppFonts.serif(size: 16, weight: .medium))
                                             .foregroundStyle(.white)
-                                        Text("\(Int(campaign.discountPercentage))% OFF")
+                                        Text("\(campaign.discountPercentage / 100, format: .percent.precision(.fractionLength(0))) OFF")
                                             .font(AppFonts.sansSerif(size: 13, weight: .bold))
                                             .foregroundStyle(AppColors.gold)
                                     }

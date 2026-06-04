@@ -61,22 +61,35 @@ struct CachedAsyncImage<Content: View, Placeholder: View>: View {
             return
         }
         
-        // 2. Fetch from Network
-        do {
-            let (data, _) = try await URLSession.shared.data(from: url)
-            if let downloadedImage = UIImage(data: data) {
-                await MainActor.run {
-                    self.phase = .success(Image(uiImage: downloadedImage))
+        // 2. Fetch from Network with retries
+        var attempts = 0
+        let maxAttempts = 3
+        while attempts < maxAttempts {
+            attempts += 1
+            do {
+                let (data, _) = try await URLSession.shared.data(from: url)
+                if let downloadedImage = UIImage(data: data) {
+                    await MainActor.run {
+                        self.phase = .success(Image(uiImage: downloadedImage))
+                    }
+                    await CacheManager.shared.storeImage(downloadedImage, bucket: "catalog", key: key)
+                    return // Success!
+                } else {
+                    // Non-network error (cannot decode data), don't retry
+                    await MainActor.run {
+                        self.phase = .failure(URLError(.cannotDecodeRawData))
+                    }
+                    return
                 }
-                await CacheManager.shared.storeImage(downloadedImage, bucket: "catalog", key: key)
-            } else {
-                await MainActor.run {
-                    self.phase = .failure(URLError(.cannotDecodeRawData))
+            } catch {
+                if attempts >= maxAttempts {
+                    await MainActor.run {
+                        self.phase = .failure(error)
+                    }
+                } else {
+                    // Wait 1 second before retrying on transient network failure
+                    try? await Task.sleep(nanoseconds: 1_000_000_000)
                 }
-            }
-        } catch {
-            await MainActor.run {
-                self.phase = .failure(error)
             }
         }
     }

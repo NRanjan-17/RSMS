@@ -63,7 +63,8 @@ final class SizePreferenceService {
         // Sync to Supabase in background
         Task {
             do {
-                let saId = try? await client.auth.session.user.id
+                let session = try? await client.auth.session
+                let saId = session?.user.id
                 let dbSize = DBSizePreference(
                     clientId: clientId,
                     salesAssociateId: saId,

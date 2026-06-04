@@ -80,5 +80,8 @@ struct StaffPerformanceReportView: View {
         .toolbarBackground(AppColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .task {
+            await viewModel.fetchData()
+        }
     }
 }

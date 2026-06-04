@@ -7,13 +7,91 @@
 
 import Foundation
 import Observation
+import Supabase
 
 @Observable
 final class StaffPerformanceViewModel {
-    var staffMetrics: [StaffMetric] = [
-        StaffMetric(name: "Aman Gupta", commission: "\(CurrencyManager.shared.symbol)18,375", conversion: (0.32).formatted(.percent), interactions: 45),
-        StaffMetric(name: "Priya R.", commission: "\(CurrencyManager.shared.symbol)12,450", conversion: (0.28).formatted(.percent), interactions: 38),
-        StaffMetric(name: "Suresh V.", commission: "\(CurrencyManager.shared.symbol)9,200", conversion: (0.24).formatted(.percent), interactions: 42),
-        StaffMetric(name: "Ananya M.", commission: "\(CurrencyManager.shared.symbol)0", conversion: (0.0).formatted(.percent), interactions: 12)
-    ]
+    var staffMetrics: [StaffMetric] = []
+    var isLoading = false
+    
+    func fetchData() async {
+        await MainActor.run { isLoading = true }
+        do {
+            guard let profileTuple = try? await ProfileService().fetchCurrentProfile(),
+                  let staff = profileTuple.1 as? StaffModel,
+                  let bId = staff.boutiqueId else {
+                await MainActor.run { isLoading = false }
+                return
+            }
+            
+            // Fetch all staff in this boutique
+            let allStaff: [StaffModel] = try await SupabaseManager.shared.client
+                .from("staff")
+                .select()
+                .eq("boutique_id", value: bId)
+                .execute()
+                .value
+                
+            // Fetch all transactions for this boutique
+            let txs: [SATransactionEntity] = try await SupabaseManager.shared.client
+                .from("transaction")
+                .select()
+                .eq("boutique_id", value: bId)
+                .execute()
+                .value
+                
+            // Fetch appointments and filter by staff in this boutique
+            let staffIds = Set(allStaff.map { $0.id })
+            let appts: [AppointmentEntity] = try await SupabaseManager.shared.client
+                .from("appointment")
+                .select()
+                .execute()
+                .value
+            let boutiqueAppts = appts.filter { appt in
+                if let assignedTo = appt.assignedTo {
+                    return staffIds.contains(assignedTo)
+                }
+                return false
+            }
+                
+            var newMetrics: [StaffMetric] = []
+            
+            for s in allStaff {
+                if s.role != .salesAssociate { continue }
+                let sTxs = txs.filter { $0.staffId == s.id }
+                let sAppts = boutiqueAppts.filter { $0.assignedTo == s.id }
+                
+                let revenue = sTxs.reduce(0.0) { $0 + $1.transactionAmount }
+                
+                // Commission: derive from target achievement percentage
+                // If staff has a daily sales target, commission scales with performance
+                let target = s.dailySalesTarget ?? 0
+                let commission: Double
+                if target > 0 {
+                    let achievement = min(revenue / target, 2.0)  // Cap at 200%
+                    commission = revenue * (0.03 + achievement * 0.02) // 3-7% sliding scale
+                } else {
+                    commission = revenue * 0.05 // Default 5% if no target set
+                }
+                
+                let interactions = sAppts.count + sTxs.count
+                let conversion = interactions > 0 ? Double(sTxs.count) / Double(interactions) : 0.0
+                
+                newMetrics.append(StaffMetric(
+                    name: s.name,
+                    commission: CurrencyManager.shared.format(amount: commission),
+                    conversion: "\(Int(round(conversion * 100.0)))%",
+                    interactions: interactions
+                ))
+            }
+            
+            await MainActor.run {
+                self.staffMetrics = newMetrics.sorted { $0.interactions > $1.interactions }
+                self.isLoading = false
+            }
+        } catch {
+            print("Failed to fetch StaffPerformance: \(error)")
+            await MainActor.run { self.isLoading = false }
+        }
+    }
 }
