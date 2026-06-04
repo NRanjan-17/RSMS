@@ -4052,6 +4052,9 @@
         }
       }
     },
+    "%lld Available" : {
+
+    },
     "%lld Clients" : {
       "localizations" : {
         "ar" : {
@@ -5548,6 +5551,12 @@
         }
       }
     },
+    "%lld total" : {
+
+    },
+    "%lld Total" : {
+
+    },
     "%lld variance items • Audit trail locked" : {
 
     },
@@ -6780,6 +6789,9 @@
           }
         }
       }
+    },
+    "+%lld more" : {
+
     },
     "×%lld" : {
       "localizations" : {
@@ -23659,6 +23671,7 @@
       }
     },
     "Available: %lld" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -46529,6 +46542,9 @@
         }
       }
     },
+    "Destination" : {
+
+    },
     "DESTINATION" : {
       "localizations" : {
         "ar" : {
@@ -67207,6 +67223,9 @@
         }
       }
     },
+    "Incoming and outgoing stock movements will appear here as soon as they are created or updated." : {
+
+    },
     "INDIVIDUAL ASSOCIATE TARGETS" : {
       "localizations" : {
         "ar" : {
@@ -74021,6 +74040,9 @@
           }
         }
       }
+    },
+    "Live" : {
+
     },
     "LIVE INVENTORY" : {
       "localizations" : {
@@ -89667,6 +89689,9 @@
           }
         }
       }
+    },
+    "No Transfer Activity" : {
+
     },
     "No Transfer History Found" : {
       "localizations" : {
@@ -109812,6 +109837,9 @@
         }
       }
     },
+    "Request sent to the source boutique manager." : {
+
+    },
     "Requested by local inventory control for %@." : {
       "localizations" : {
         "ar" : {
@@ -120294,6 +120322,9 @@
         }
       }
     },
+    "Search serial numbers" : {
+
+    },
     "Search Staff" : {
       "localizations" : {
         "ar" : {
@@ -125054,6 +125085,9 @@
           }
         }
       }
+    },
+    "Sent" : {
+
     },
     "Serial Number" : {
       "localizations" : {
@@ -129962,6 +129996,9 @@
           }
         }
       }
+    },
+    "Source" : {
+
     },
     "SOURCE" : {
       "localizations" : {

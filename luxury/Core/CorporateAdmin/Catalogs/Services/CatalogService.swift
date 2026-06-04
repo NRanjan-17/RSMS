@@ -12,12 +12,24 @@ final class CatalogService {
     private let client = SupabaseManager.shared.client
     
     func fetchCatalogs() async throws -> [CatalogEntity] {
-        let response: [CatalogEntity] = try await client
-            .from("catalogs")
-            .select()
-            .execute()
-            .value
-        return response
+        let cacheBucket = "catalog"
+        let cacheKey = "all_catalogs"
+        
+        do {
+            let response: [CatalogEntity] = try await client
+                .from("catalogs")
+                .select()
+                .execute()
+                .value
+            
+            await CacheManager.shared.storeObject(response, bucket: cacheBucket, key: cacheKey)
+            return response
+        } catch {
+            if let cached = await CacheManager.shared.getObject([CatalogEntity].self, bucket: cacheBucket, key: cacheKey) {
+                return cached
+            }
+            throw error
+        }
     }
     
     func addCatalog(_ catalog: CatalogEntity) async throws {

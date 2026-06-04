@@ -30,11 +30,25 @@ final class GlobalRevenueViewModel {
         errorMessage = nil
         
         do {
-            let fetched: [SATransactionEntity] = try await client.from("transaction").select("*, client(*)")
-                .order("date_of_transaction", ascending: false)
-                .execute()
-                .value
-            
+            var fetched: [SATransactionEntity] = []
+            var offset = 0
+            let limit = 1000
+            var hasMore = true
+            while hasMore {
+                let batch: [SATransactionEntity] = try await client.from("transaction")
+                    .select("*, client(*)")
+                    .order("date_of_transaction", ascending: false)
+                    .range(from: offset, to: offset + limit - 1)
+                    .execute()
+                    .value
+                
+                fetched.append(contentsOf: batch)
+                if batch.count < limit {
+                    hasMore = false
+                } else {
+                    offset += limit
+                }
+            }
             await MainActor.run {
                 self.allTransactions = fetched
                 self.transactions = fetched

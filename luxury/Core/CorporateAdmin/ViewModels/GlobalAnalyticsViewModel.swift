@@ -53,7 +53,23 @@ final class GlobalAnalyticsViewModel {
             }
             
             do {
-                transactions = try await client.from("transaction").select().execute().value
+                var offset = 0
+                let limit = 1000
+                var hasMore = true
+                while hasMore {
+                    let batch: [SATransactionEntity] = try await client.from("transaction")
+                        .select()
+                        .range(from: offset, to: offset + limit - 1)
+                        .execute()
+                        .value
+                    
+                    transactions.append(contentsOf: batch)
+                    if batch.count < limit {
+                        hasMore = false
+                    } else {
+                        offset += limit
+                    }
+                }
             } catch {
                 print("Transaction fetch error: \(error)")
             }

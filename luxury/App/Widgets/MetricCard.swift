@@ -38,6 +38,8 @@ struct MetricCard: View {
                     .kerning(1.2)
             }
             
+            Spacer(minLength: 0)
+            
             if let subtitle = subtitle {
                 Text(subtitle)
                     .font(AppFonts.sansSerif(size: 11))
@@ -45,7 +47,7 @@ struct MetricCard: View {
             }
         }
         .padding(20)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(AppColors.surface)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(

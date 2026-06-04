@@ -166,6 +166,10 @@ struct CorporateAdminProfileView: View {
                             .padding(.bottom, 60)
                     }
                 }
+                .refreshable {
+                    await viewModel.fetchProfile()
+                    await fetchCurrency()
+                }
             }
         }
         .toolbar(.hidden, for: .navigationBar)

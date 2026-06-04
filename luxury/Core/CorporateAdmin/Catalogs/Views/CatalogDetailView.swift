@@ -152,39 +152,29 @@ struct CatalogDetailView: View {
                     }.sorted { $0.boutiqueName < $1.boutiqueName }
                     
                     ForEach(sortedGroups, id: \.boutiqueId) { group in
-                        VStack(alignment: .leading, spacing: 8) {
+                        NavigationLink(destination: BoutiqueSerialsView(
+                            boutiqueName: group.boutiqueName,
+                            units: group.units,
+                            currentCatalog: currentCatalog,
+                            onRefresh: { loadInventory() }
+                        )) {
                             HStack {
                                 Text(group.boutiqueName)
                                     .font(AppFonts.sansSerif(size: 16, weight: .bold))
-                                    .foregroundStyle(AppColors.gold)
+                                    .foregroundStyle(AppColors.text)
                                 Spacer()
                                 let available = group.units.filter { $0.status == .available }.count
-                                Text("Available: \(available)")
-                                    .font(AppFonts.sansSerif(size: 14, weight: .bold))
-                                    .foregroundStyle(AppColors.success)
+                                VStack(alignment: .trailing, spacing: 2) {
+                                    Text("\(group.units.count) Total")
+                                        .font(AppFonts.sansSerif(size: 12))
+                                        .foregroundStyle(AppColors.secondary)
+                                    Text("\(available) Available")
+                                        .font(AppFonts.sansSerif(size: 12, weight: .bold))
+                                        .foregroundStyle(AppColors.success)
+                                }
                             }
                             .padding(.vertical, 4)
-                            
-                            ForEach(group.units, id: \.id) { unit in
-                                HStack {
-                                    Text(unit.serialNumber)
-                                        .font(AppFonts.sansSerif(size: 14))
-                                        .foregroundStyle(AppColors.text)
-                                    Spacer()
-                                    Text(unit.status.rawValue)
-                                        .font(AppFonts.sansSerif(size: 10))
-                                        .foregroundStyle(AppColors.secondary)
-                                }
-                                .padding(.vertical, 2)
-                                .padding(.leading, 8)
-                            }
-                            .onDelete { indexSet in
-                                let serialsToRemove = indexSet.map { group.units[$0].serialNumber }
-                                viewModel.removeSerialNumbers(serials: serialsToRemove, from: currentCatalog)
-                                loadInventory()
-                            }
                         }
-                        .padding(.vertical, 4)
                     }
                 } else {
                     Text("No physical products added yet.")
@@ -424,6 +414,42 @@ struct CatalogDetailView: View {
     }
 }
 
-
-
- 
+struct BoutiqueSerialsView: View {
+    let boutiqueName: String
+    let units: [InventoryUnitEntity]
+    let currentCatalog: CatalogEntity
+    let onRefresh: () -> Void
+    @Environment(CatalogsViewModel.self) private var viewModel
+    
+    @State private var searchText = ""
+    
+    var filteredUnits: [InventoryUnitEntity] {
+        if searchText.isEmpty { return units }
+        return units.filter { $0.serialNumber.localizedCaseInsensitiveContains(searchText) }
+    }
+    
+    var body: some View {
+        List {
+            ForEach(filteredUnits, id: \.id) { unit in
+                HStack {
+                    Text(unit.serialNumber)
+                        .font(AppFonts.sansSerif(size: 14))
+                        .foregroundStyle(AppColors.text)
+                    Spacer()
+                    Text(unit.status.rawValue)
+                        .font(AppFonts.sansSerif(size: 10))
+                        .foregroundStyle(unit.status == .available ? AppColors.success : AppColors.secondary)
+                }
+                .padding(.vertical, 4)
+            }
+            .onDelete { indexSet in
+                let serialsToRemove = indexSet.map { filteredUnits[$0].serialNumber }
+                viewModel.removeSerialNumbers(serials: serialsToRemove, from: currentCatalog)
+                onRefresh()
+            }
+        }
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search serial numbers")
+        .navigationTitle(boutiqueName)
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}

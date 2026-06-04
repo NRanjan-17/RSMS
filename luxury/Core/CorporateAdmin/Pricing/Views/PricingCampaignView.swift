@@ -58,7 +58,14 @@ struct PricingCampaignView: View {
                     }
                     .padding(.bottom, 100)
                 }
+                .refreshable {
+                    await viewModel.fetchCampaigns()
+                    await viewModel.fetchBoutiques()
+                }
             }
+        }
+        .task {
+            await viewModel.fetchCampaigns()
         }
         .sheet(isPresented: $showCreateSheet) {
             CreateCampaignView(viewModel: viewModel)

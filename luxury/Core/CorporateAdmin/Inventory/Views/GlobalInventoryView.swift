@@ -33,7 +33,7 @@ struct GlobalInventoryView: View {
                     
                     InventoryKPIBox(
                         title: "Total Value",
-                        value: CurrencyManager.shared.format(amount: viewModel.totalInventoryValue),
+                        value: CurrencyManager.shared.formatCompact(amount: viewModel.totalInventoryValue),
                         icon: "shippingbox.fill",
                         color: AppColors.gold
                     )

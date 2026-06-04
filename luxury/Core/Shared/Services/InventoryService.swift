@@ -57,75 +57,132 @@ final class InventoryService {
     
     /// Fetches all inventory units for a specific boutique (For SA, BM, IC)
     func fetchInventory(forBoutique boutiqueId: UUID) async throws -> [InventoryUnitEntity] {
-        var allUnits: [InventoryUnitEntity] = []
-        var offset = 0
-        let limit = 1000
-        var hasMore = true
+        let cacheBucket = "inventory"
+        let cacheKey = "boutique_\(boutiqueId.uuidString)"
         
-        while hasMore {
-            let response = try await client
-                .from("inventory_units")
-                .select()
-                .eq("boutique_id", value: boutiqueId.uuidString)
-                .range(from: offset, to: offset + limit - 1)
-                .execute()
+        do {
+            var allUnits: [InventoryUnitEntity] = []
+            var offset = 0
+            let chunkSize = 1000
+            var hasMore = true
             
-            let batch = try decoder.decode([InventoryUnitEntity].self, from: response.data)
-            allUnits.append(contentsOf: batch)
-            
-            if batch.count < limit {
-                hasMore = false
-            } else {
-                offset += limit
+            while hasMore {
+                let response = try await client
+                    .from("inventory_units")
+                    .select()
+                    .eq("boutique_id", value: boutiqueId.uuidString)
+                    .range(from: offset, to: offset + chunkSize - 1)
+                    .execute()
+                
+                let batch = try decoder.decode([InventoryUnitEntity].self, from: response.data)
+                allUnits.append(contentsOf: batch)
+                
+                if batch.count < chunkSize {
+                    hasMore = false
+                } else {
+                    offset += chunkSize
+                }
             }
+            
+            await CacheManager.shared.storeObject(allUnits, bucket: cacheBucket, key: cacheKey)
+            return allUnits
+        } catch {
+            if let cached = await CacheManager.shared.getObject([InventoryUnitEntity].self, bucket: cacheBucket, key: cacheKey) {
+                return cached
+            }
+            throw error
         }
-        return allUnits
     }
     
     func fetchAllInventoryUnits() async throws -> [InventoryUnitEntity] {
-        var allUnits: [InventoryUnitEntity] = []
-        var offset = 0
-        let limit = 1000
-        var hasMore = true
+        let cacheBucket = "inventory"
+        let cacheKey = "all_inventory"
         
-        while hasMore {
-            let response = try await client
-                .from("inventory_units")
-                .select()
-                .range(from: offset, to: offset + limit - 1)
-                .execute()
+        do {
+            var allUnits: [InventoryUnitEntity] = []
+            var offset = 0
+            let chunkSize = 1000
+            var hasMore = true
             
-            let batch = try decoder.decode([InventoryUnitEntity].self, from: response.data)
-            allUnits.append(contentsOf: batch)
-            
-            if batch.count < limit {
-                hasMore = false
-            } else {
-                offset += limit
+            while hasMore {
+                let response = try await client
+                    .from("inventory_units")
+                    .select()
+                    .range(from: offset, to: offset + chunkSize - 1)
+                    .execute()
+                
+                let batch = try decoder.decode([InventoryUnitEntity].self, from: response.data)
+                allUnits.append(contentsOf: batch)
+                
+                if batch.count < chunkSize {
+                    hasMore = false
+                } else {
+                    offset += chunkSize
+                }
             }
+            await CacheManager.shared.storeObject(allUnits, bucket: cacheBucket, key: cacheKey)
+            return allUnits
+        } catch {
+            if let cached = await CacheManager.shared.getObject([InventoryUnitEntity].self, bucket: cacheBucket, key: cacheKey) {
+                return cached
+            }
+            throw error
         }
-        return allUnits
     }
     
     /// Fetches inventory for a specific catalog item globally
     func fetchInventory(forCatalog catalogId: UUID) async throws -> [InventoryUnitEntity] {
-        let response = try await client
-            .from("inventory_units")
-            .select()
-            .eq("catalog_id", value: catalogId.uuidString)
-            .execute()
-        return try decoder.decode([InventoryUnitEntity].self, from: response.data)
+        var allUnits: [InventoryUnitEntity] = []
+        var offset = 0
+        let chunkSize = 1000
+        var hasMore = true
+        
+        while hasMore {
+            let response = try await client
+                .from("inventory_units")
+                .select()
+                .eq("catalog_id", value: catalogId.uuidString)
+                .range(from: offset, to: offset + chunkSize - 1)
+                .execute()
+            
+            let batch = try decoder.decode([InventoryUnitEntity].self, from: response.data)
+            allUnits.append(contentsOf: batch)
+            
+            if batch.count < chunkSize {
+                hasMore = false
+            } else {
+                offset += chunkSize
+            }
+        }
+        return allUnits
     }
     
     /// Fetches inventory for a specific catalog item in a specific boutique
     func fetchInventory(forCatalog catalogId: UUID, boutiqueId: UUID) async throws -> [InventoryUnitEntity] {
-        let response = try await client
-            .from("inventory_units")
-            .select()
-            .eq("catalog_id", value: catalogId.uuidString)
-            .eq("boutique_id", value: boutiqueId.uuidString)
-            .execute()
-        return try decoder.decode([InventoryUnitEntity].self, from: response.data)
+        var allUnits: [InventoryUnitEntity] = []
+        var offset = 0
+        let chunkSize = 1000
+        var hasMore = true
+        
+        while hasMore {
+            let response = try await client
+                .from("inventory_units")
+                .select()
+                .eq("catalog_id", value: catalogId.uuidString)
+                .eq("boutique_id", value: boutiqueId.uuidString)
+                .range(from: offset, to: offset + chunkSize - 1)
+                .execute()
+            
+            let batch = try decoder.decode([InventoryUnitEntity].self, from: response.data)
+            allUnits.append(contentsOf: batch)
+            
+            if batch.count < chunkSize {
+                hasMore = false
+            } else {
+                offset += chunkSize
+            }
+        }
+        return allUnits
     }
     
     /// Helper to fetch all available inventory units for a boutique and return a dictionary of [CatalogID : Available Count]

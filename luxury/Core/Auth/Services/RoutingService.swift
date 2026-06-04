@@ -28,13 +28,19 @@ final class RoutingService {
     }
     
     func observeAuth() {
-        authService.observeAuthState { [weak self] _, session in
+        authService.observeAuthState { [weak self] event, session in
             Task {
-                let activeSession = (session?.isExpired == true) ? nil : session
-                await self?.updateRoute(for: activeSession)
-                if activeSession != nil {
+                if event == .signedOut {
+                    await self?.updateRoute(for: nil)
+                    await self?.unsubscribeFromProfile()
+                    return
+                }
+                
+                if let session = session {
+                    await self?.updateRoute(for: session)
                     await self?.subscribeToProfile()
                 } else {
+                    await self?.updateRoute(for: nil)
                     await self?.unsubscribeFromProfile()
                 }
             }
@@ -84,7 +90,7 @@ final class RoutingService {
     }
     
     func updateRoute(for session: Session?) async {
-        guard let session = session, !session.isExpired else {
+        guard let session = session else {
             await MainActor.run {
                 currentDestination = .auth
             }

@@ -13,7 +13,7 @@ actor CacheManager {
     }()
     
     private var memoryCache: [String: Data] = [:]
-    private let maxMemoryCacheSize = 150 * 1024 * 1024 // 150MB
+    private let maxMemoryCacheSize = 250 * 1024 * 1024 // 250MB
     private var currentMemorySize = 0
     
     private func bucketDirectory(for bucket: String) -> URL {
@@ -61,6 +61,30 @@ actor CacheManager {
     
     func storeImage(_ image: UIImage, bucket: String, key: String, quality: CGFloat = 0.8) {
         guard let data = image.jpegData(compressionQuality: quality) else { return }
+        store(data: data, bucket: bucket, key: key)
+    }
+    
+    // MARK: - Text
+    
+    func getText(bucket: String, key: String) -> String? {
+        guard let data = getData(bucket: bucket, key: key) else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+    
+    func storeText(_ text: String, bucket: String, key: String) {
+        guard let data = text.data(using: .utf8) else { return }
+        store(data: data, bucket: bucket, key: key)
+    }
+    
+    // MARK: - Objects (Codable)
+    
+    func getObject<T: Decodable>(_ type: T.Type, bucket: String, key: String) -> T? {
+        guard let data = getData(bucket: bucket, key: key) else { return nil }
+        return try? JSONDecoder().decode(T.self, from: data)
+    }
+    
+    func storeObject<T: Encodable>(_ object: T, bucket: String, key: String) {
+        guard let data = try? JSONEncoder().encode(object) else { return }
         store(data: data, bucket: bucket, key: key)
     }
     
