@@ -107,11 +107,11 @@ struct PurchaseDetailsView: View {
     }
     
     private var displayAdvisorName: String {
-        return details?.staff?.name ?? "Arjun Singh"
+        return details?.staff?.name ?? purchase.advisorName ?? "Priya Sharma"
     }
     
     private var displayAdvisorId: String {
-        return details?.staff?.id.uuidString ?? "Unknown Advisor"
+        return details?.staff?.id.uuidString ?? purchase.advisorId ?? "Unknown Advisor"
     }
     
     var body: some View {
@@ -206,7 +206,7 @@ struct PurchaseDetailsView: View {
                                     .font(AppFonts.sansSerif(size: 12))
                                     .foregroundStyle(AppColors.secondary)
                                 Spacer()
-                                Text("BTQ-MUM-01")
+                                Text(purchase.boutiqueId ?? "BTQ-MUM-01")
                                     .font(AppFonts.sansSerif(size: 13, weight: .medium))
                                     .foregroundStyle(.white)
                             }
@@ -217,7 +217,7 @@ struct PurchaseDetailsView: View {
                                     .font(AppFonts.sansSerif(size: 12))
                                     .foregroundStyle(AppColors.secondary)
                                 Spacer()
-                                Text("Maison Mumbai")
+                                Text(purchase.boutiqueName ?? "Maison Mumbai")
                                     .font(AppFonts.sansSerif(size: 13, weight: .medium))
                                     .foregroundStyle(.white)
                             }
@@ -228,7 +228,7 @@ struct PurchaseDetailsView: View {
                                     .font(AppFonts.sansSerif(size: 12))
                                     .foregroundStyle(AppColors.secondary)
                                 Spacer()
-                                Text("Taj Mahal Palace, Mumbai")
+                                Text(purchase.boutiqueLocation ?? "Taj Mahal Palace, Mumbai")
                                     .font(AppFonts.sansSerif(size: 13, weight: .medium))
                                     .foregroundStyle(.white)
                             }

@@ -53,12 +53,45 @@ final class PurchaseHistoryService {
             
             if !dbItems.isEmpty {
                 let productIds = dbItems.map { $0.productId }
+                let boutiqueIds = dbItems.compactMap { $0.boutiqueId?.uuidString }
+                let saIds = dbItems.compactMap { $0.salesAssociateId?.uuidString }
+                
                 let dbCatalogs: [CatalogEntity] = try await client
                     .from("catalogs")
                     .select()
                     .in("id", values: productIds.map { $0.uuidString })
                     .execute()
                     .value
+                
+                struct MinimalBoutique: Codable {
+                    let id: UUID
+                    let name: String
+                    let city: String?
+                }
+                struct MinimalCorporateAdmin: Codable {
+                    let id: UUID
+                    let name: String?
+                }
+                
+                var dbBoutiques: [MinimalBoutique] = []
+                if !boutiqueIds.isEmpty {
+                    dbBoutiques = (try? await client
+                        .from("boutiques")
+                        .select("id, name, city")
+                        .in("id", values: boutiqueIds)
+                        .execute()
+                        .value) ?? []
+                }
+                
+                var dbAdvisors: [MinimalCorporateAdmin] = []
+                if !saIds.isEmpty {
+                    dbAdvisors = (try? await client
+                        .from("corporate_admins")
+                        .select("id, name")
+                        .in("id", values: saIds)
+                        .execute()
+                        .value) ?? []
+                }
                 
                 let formatter = DateFormatter()
                 formatter.dateFormat = "d MMM yyyy"
@@ -68,7 +101,23 @@ final class PurchaseHistoryService {
                         let itemDate = item.reservedDate ?? item.createdAt ?? Date()
                         let dateStr = formatter.string(from: itemDate)
                         let imageUrl = cat.productImages?.first ?? ""
-                        return ClientPurchase(id: item.id, name: cat.name, price: cat.amount, date: dateStr, productId: cat.id, imageUrl: imageUrl)
+                        
+                        let bq = dbBoutiques.first(where: { $0.id == item.boutiqueId })
+                        let sa = dbAdvisors.first(where: { $0.id == item.salesAssociateId })
+                        
+                        return ClientPurchase(
+                            id: item.id, 
+                            name: cat.name, 
+                            price: cat.amount, 
+                            date: dateStr, 
+                            productId: cat.id, 
+                            imageUrl: imageUrl,
+                            boutiqueId: bq?.id.uuidString,
+                            boutiqueName: bq?.name,
+                            boutiqueLocation: bq?.city,
+                            advisorId: sa?.id.uuidString,
+                            advisorName: sa?.name
+                        )
                     }
                     return nil
                 }

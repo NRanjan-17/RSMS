@@ -646,6 +646,7 @@ struct AfterSalesTrackingView: View {
     
     private func stageState(for stage: AfterSalesStage) -> StageState {
         let isRejected = astStatus.lowercased() == "rejected" || astStatus.lowercased() == "declined"
+        let statusLower = astStatus.lowercased()
         
         let currentRank = rank(for: astStatus)
         let stageRank = rank(for: stage)
@@ -656,10 +657,23 @@ struct AfterSalesTrackingView: View {
             else { return .upcoming }
         }
         
-        if astStatus.lowercased() == "ready" {
+        if statusLower == "ready" {
             return .completed
         }
         
+        if statusLower == "in_progress" {
+            if stageRank < 3 { return .completed }
+            else if stageRank == 3 { return .active }
+            else { return .upcoming }
+        }
+        
+        if statusLower == "dispatched" {
+            if stageRank < 4 { return .completed }
+            else if stageRank == 4 { return .active }
+            else { return .upcoming }
+        }
+        
+        // For "open" and "approved", the current stage is completed, next is active.
         if stageRank <= currentRank {
             return .completed
         } else if stageRank == currentRank + 1 {

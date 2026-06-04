@@ -65,8 +65,12 @@ struct ASTApprovalView: View {
             Text("Ticket has been successfully \(state.rawValue).")
         }
         .onAppear {
-            if ast.status.lowercased() == "approved" { state = .approved }
-            if ast.status.lowercased() == "rejected" { state = .rejected }
+            let lower = ast.status.lowercased()
+            if ["approved", "in_progress", "dispatched", "ready"].contains(lower) {
+                state = .approved
+            } else if lower == "rejected" || lower == "declined" {
+                state = .rejected
+            }
         }
         .task {
             if let clientId = ast.clientId {

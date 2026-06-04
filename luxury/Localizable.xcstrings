@@ -1003,6 +1003,7 @@
       }
     },
     "%@ · LTV %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -25660,6 +25661,7 @@
       }
     },
     "BTQ-MUM-01" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -71658,6 +71660,7 @@
       }
     },
     "Maison Mumbai" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -129940,6 +129943,7 @@
 
     },
     "Taj Mahal Palace, Mumbai" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
