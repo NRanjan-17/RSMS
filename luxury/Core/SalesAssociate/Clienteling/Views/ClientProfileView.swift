@@ -162,19 +162,7 @@ struct ClientProfileView: View {
             set: { if !$0 { viewModel.generatedMeetUrl = nil } }
         )) {
             if let url = viewModel.generatedMeetUrl {
-                ZStack(alignment: .topTrailing) {
-                    JitsiWebView(urlString: url.absoluteString)
-                    
-                    Button(action: {
-                        viewModel.generatedMeetUrl = nil
-                    }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 30))
-                            .foregroundColor(.white)
-                            .background(Circle().fill(Color.black.opacity(0.5)))
-                    }
-                    .padding()
-                }
+                NativeVideoCallView(meetingURL: url)
             }
         }
         .navigationTitle("Clients")

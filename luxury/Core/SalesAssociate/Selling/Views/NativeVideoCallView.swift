@@ -16,6 +16,7 @@ struct NativeVideoCallView: View {
     
     @State private var isScreenSharing = false
     @State private var isWhiteboardActive = false
+    @State private var isControlsVisible = true
     
     var body: some View {
         ZStack {
@@ -52,10 +53,18 @@ struct NativeVideoCallView: View {
             
             // UI Overlay
             VStack {
-                // Top Bar
+                if isControlsVisible {
+                    // Top Bar
                 HStack {
                     StatusBadge(text: "Live Consultation", status: .success)
                     Spacer()
+                    ShareLink(item: meetingURL) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 18))
+                            .foregroundStyle(.white)
+                            .padding(12)
+                            .glassEffectWithFallback(in: .circle)
+                    }
                     Button(action: {
                         dailyManager.flipCamera()
                     }) {
@@ -68,6 +77,7 @@ struct NativeVideoCallView: View {
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 16)
+                }
                 
                 Spacer()
                 
@@ -86,15 +96,16 @@ struct NativeVideoCallView: View {
                                 .font(.largeTitle)
                         }
                     }
-                    .frame(width: 120, height: 180)
+                    .frame(width: isControlsVisible ? 120 : 80, height: isControlsVisible ? 180 : 120)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
                     .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 1))
                     .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
-                    .padding(.trailing, 24)
-                    .padding(.bottom, 16)
+                    .padding(.trailing, isControlsVisible ? 24 : 12)
+                    .padding(.bottom, isControlsVisible ? 16 : 12)
                 }
                 
-                // Liquid Glass Control Bar
+                if isControlsVisible {
+                    // Liquid Glass Control Bar
                 HStack(spacing: 24) {
                     ControlButton(
                         icon: dailyManager.isMuted ? "mic.slash.fill" : "mic.fill",
@@ -148,8 +159,15 @@ struct NativeVideoCallView: View {
                 .glassEffectWithFallback(in: .capsule)
                 .shadow(color: .black.opacity(0.15), radius: 20, y: 10)
                 .padding(.bottom, 24)
+                }
             }
             .zIndex(2) // Ensure the UI Overlay is always on top of the whiteboard
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                isControlsVisible.toggle()
+            }
         }
         .onAppear {
             dailyManager.join(url: meetingURL)

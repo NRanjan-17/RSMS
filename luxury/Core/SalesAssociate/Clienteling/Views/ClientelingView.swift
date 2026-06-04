@@ -174,7 +174,7 @@ struct ClientelingView: View {
                         }
                     } label: {
                         ZStack {
-                            RoundedRectangle(cornerRadius: 14)
+                            Circle()
                                 .fill(AppColors.gold)
                                 .frame(width: 48, height: 48)
                                 .shadow(color: AppColors.gold.opacity(0.3), radius: 10, y: 4)
@@ -183,6 +183,7 @@ struct ClientelingView: View {
                                 .font(AppFonts.sansSerif(size: 20, weight: .bold))
                                 .foregroundStyle(AppColors.background)
                         }
+                        .contentShape(Circle())
             }
             .padding(.trailing, 20)
             .padding(.bottom, 20)

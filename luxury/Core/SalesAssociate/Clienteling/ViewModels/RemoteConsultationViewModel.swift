@@ -66,37 +66,30 @@ final class RemoteConsultationViewModel {
         struct Params: Encodable {
             let clientEmail: String
             let salesAssociateName: String
+            let meetLink: String
         }
-        
-        struct ResponseData: Decodable {
-            let success: Bool?
-            let meetLink: String?
-            let message: String?
-            let error: String?
-        }
-        
-        // Use a generic name if profile hasn't been fetched
-        let saName = "Sales Associate"
-        let params = Params(clientEmail: client.email ?? "", salesAssociateName: saName)
         
         do {
-            let result: ResponseData = try await SupabaseManager.shared.client.functions.invoke(
+            let roomUrl = try await DailyAPIService.createRoom(apiKey: VideoConfig.dailyAPIKey)
+            
+            // Send the email in the background via the new Edge Function
+            let params = Params(clientEmail: client.email ?? "", salesAssociateName: "Sales Associate", meetLink: roomUrl)
+            struct ResponseData: Decodable { let success: Bool? }
+            _ = try? await SupabaseManager.shared.client.functions.invoke(
                 "create-remote-consultation",
                 options: FunctionInvokeOptions(body: params)
             )
             
             await MainActor.run {
                 self.isGeneratingLink = false
-                if let error = result.error {
-                    self.errorMessage = error
-                } else if let link = result.meetLink, let url = URL(string: link) {
+                if let url = URL(string: roomUrl) {
                     self.generatedUrl = url
                 } else {
-                    self.errorMessage = result.message ?? "Failed to generate video link."
+                    self.errorMessage = "Failed to generate video link."
                 }
             }
         } catch {
-            print("🚨 EDGE FUNCTION FAILED WITH ERROR: \(error)")
+            print("EDGE FUNCTION FAILED WITH ERROR: \(error)")
             await MainActor.run {
                 self.isGeneratingLink = false
                 self.errorMessage = "Debug Error: \(error.localizedDescription)"

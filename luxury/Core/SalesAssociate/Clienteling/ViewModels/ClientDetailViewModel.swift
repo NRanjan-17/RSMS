@@ -346,34 +346,30 @@ final class ClientDetailViewModel {
             meetLinkAlertMessage = nil
         }
         
+
         struct Params: Encodable {
             let clientEmail: String
             let salesAssociateName: String
+            let meetLink: String
         }
-        
-        struct ResponseData: Decodable {
-            let success: Bool?
-            let meetLink: String?
-            let message: String?
-            let error: String?
-        }
-        
-        let params = Params(clientEmail: client.email ?? "", salesAssociateName: salesAssociateName)
         
         do {
-            let result: ResponseData = try await SupabaseManager.shared.client.functions.invoke(
-                "create-remote-consultation", 
+            let roomUrl = try await DailyAPIService.createRoom(apiKey: VideoConfig.dailyAPIKey)
+            
+            // Send the email in the background via the new Edge Function
+            let params = Params(clientEmail: client.email ?? "", salesAssociateName: salesAssociateName, meetLink: roomUrl)
+            struct ResponseData: Decodable { let success: Bool? }
+            _ = try? await SupabaseManager.shared.client.functions.invoke(
+                "create-remote-consultation",
                 options: FunctionInvokeOptions(body: params)
             )
             
             await MainActor.run {
                 isGeneratingMeetLink = false
-                if let error = result.error {
-                    meetLinkAlertMessage = error
-                } else if let link = result.meetLink, let url = URL(string: link) {
+                if let url = URL(string: roomUrl) {
                     self.generatedMeetUrl = url
                 } else {
-                    meetLinkAlertMessage = result.message ?? "Failed to generate meeting link."
+                    meetLinkAlertMessage = "Invalid URL generated"
                 }
             }
         } catch {

@@ -19861,6 +19861,7 @@
       }
     },
     "Are you sure you want to reschedule the monthly audit window?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -33480,6 +33481,7 @@
       }
     },
     "Client receives curated products, split tender estimate, and secure payment handoff placeholder." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -38104,6 +38106,9 @@
         }
       }
     },
+    "Connection successful. You are currently the only participant." : {
+
+    },
     "CONSULTATION TYPE" : {
       "localizations" : {
         "ar" : {
@@ -41240,6 +41245,9 @@
           }
         }
       }
+    },
+    "Creating secure video room..." : {
+
     },
     "Critical" : {
       "extractionState" : "manual",
@@ -48733,6 +48741,9 @@
           }
         }
       }
+    },
+    "Do you want to change the date?" : {
+
     },
     "Done" : {
       "localizations" : {
@@ -64374,6 +64385,9 @@
           }
         }
       }
+    },
+    "Generating Secure Room..." : {
+
     },
     "Gift Invoice (Hide Prices)" : {
       "localizations" : {
@@ -80865,6 +80879,9 @@
           }
         }
       }
+    },
+    "NEW ITEMS" : {
+
     },
     "New Password" : {
       "localizations" : {
@@ -101690,6 +101707,7 @@
       }
     },
     "Private video consultation" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -105089,6 +105107,9 @@
           }
         }
       }
+    },
+    "QUICK ACTIONS" : {
+
     },
     "QUICK LINKS" : {
       "localizations" : {
@@ -109040,6 +109061,9 @@
           }
         }
       }
+    },
+    "Remote Consultation" : {
+
     },
     "Remove" : {
       "localizations" : {
@@ -124566,6 +124590,16 @@
         }
       }
     },
+    "Send a video consultation link to %@ at %@?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Send a video consultation link to %1$@ at %2$@?"
+          }
+        }
+      }
+    },
     "Send Code" : {
       "localizations" : {
         "ar" : {
@@ -131392,6 +131426,9 @@
         }
       }
     },
+    "Start" : {
+
+    },
     "Start a Sale" : {
       "localizations" : {
         "ar" : {
@@ -131527,6 +131564,9 @@
           }
         }
       }
+    },
+    "Start Consultation" : {
+
     },
     "Start Date" : {
       "localizations" : {
@@ -131799,6 +131839,9 @@
           }
         }
       }
+    },
+    "Start Remote Consultation" : {
+
     },
     "Status" : {
       "localizations" : {
@@ -154935,6 +154978,9 @@
           }
         }
       }
+    },
+    "Yes" : {
+
     },
     "You have unsaved changes. Are you sure you want to go back? Your changes will be lost." : {
       "localizations" : {

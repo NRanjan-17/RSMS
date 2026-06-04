@@ -171,19 +171,7 @@ struct RemoteConsultationView: View {
             set: { if !$0 { viewModel.generatedUrl = nil } }
         )) {
             if let url = viewModel.generatedUrl {
-                ZStack(alignment: .topTrailing) {
-                    JitsiWebView(urlString: url.absoluteString)
-                    
-                    Button(action: {
-                        viewModel.generatedUrl = nil
-                    }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 30))
-                            .foregroundColor(.white)
-                            .background(Circle().fill(Color.black.opacity(0.5)))
-                    }
-                    .padding()
-                }
+                NativeVideoCallView(meetingURL: url)
             }
         }
     }

@@ -15,7 +15,7 @@ class DailyManager: NSObject, ObservableObject, CallClientDelegate {
     
     @Published var localVideoTrack: VideoTrack?
     @Published var remoteVideoTrack: VideoTrack?
-    @Published var isMuted = false
+    @Published var isMuted = true
     @Published var isCameraOff = true
     
     override init() {
@@ -27,7 +27,7 @@ class DailyManager: NSObject, ObservableObject, CallClientDelegate {
         Task {
             do {
                 // Ensure the hardware is turned off before we even connect to the room
-                _ = try await callClient.updateInputs(.set(camera: .set(isEnabled: .set(false))))
+                _ = try await callClient.updateInputs(.set(camera: .set(isEnabled: .set(false)), microphone: .set(isEnabled: .set(false))))
                 _ = try await callClient.join(url: url)
             } catch {
                 print("Failed to join call: \(error)")

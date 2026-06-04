@@ -27,19 +27,7 @@ struct RemoteSellingView: View {
                     VStack(alignment: .leading, spacing: 18) {
                         StatusBadge(text: appointmentLinked ? LocalizedStringKey("Appointment Linked") : LocalizedStringKey("Draft"), status: appointmentLinked ? .success : .pending)
                         
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text("Private video consultation")
-                                .font(AppFonts.serif(size: 22, weight: .medium))
-                                .foregroundStyle(.white)
-                            Text("Client receives curated products, split tender estimate, and secure payment handoff placeholder.")
-                                .font(AppFonts.sansSerif(size: 13))
-                                .foregroundStyle(AppColors.secondary)
-                                .lineSpacing(4)
-                        }
-                        .padding(16)
-                        .background(AppColors.surface)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                        
+
                         Toggle("Link to Unknown Client 2:30 PM appointment", isOn: $appointmentLinked)
                             .font(AppFonts.sansSerif(size: 13))
                             .foregroundStyle(AppColors.text)
@@ -127,26 +115,3 @@ private struct FlowHeader: View {
     }
 }
 
-import WebKit
-
-struct JitsiWebView: UIViewRepresentable {
-    let url: URL
-
-    func makeUIView(context: Context) -> WKWebView {
-        let configuration = WKWebViewConfiguration()
-        configuration.allowsInlineMediaPlayback = true
-        configuration.mediaTypesRequiringUserActionForPlayback = []
-        
-        let webView = WKWebView(frame: .zero, configuration: configuration)
-        webView.isOpaque = false
-        webView.backgroundColor = UIColor(AppColors.background)
-        webView.scrollView.isScrollEnabled = false // Prevent bouncy scrolling
-        
-        return webView
-    }
-
-    func updateUIView(_ uiView: WKWebView, context: Context) {
-        let request = URLRequest(url: url)
-        uiView.load(request)
-    }
-}
