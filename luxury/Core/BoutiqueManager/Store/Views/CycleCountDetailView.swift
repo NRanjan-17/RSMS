@@ -501,7 +501,9 @@ struct CycleCountDetailView: View {
                         // 1. Top Section - Summary Metric Cards (First Block)
                         HStack(spacing: 12) {
                             MetricCard(title: "Variance", value: displayVariance, subtitle: "Net Discrepancy", icon: "arrow.up.arrow.down")
+                                .frame(height: 160)
                             MetricCard(title: "Accuracy", value: displayAccuracy, subtitle: "Store Performance", icon: "percent")
+                                .frame(height: 160)
                         }
                         .padding(.horizontal, 24)
 
@@ -1055,14 +1057,20 @@ struct AuditReportDetailView: View {
         guard let scannedUnitIds = audit?.scannedUnitIds, !scannedUnitIds.isEmpty else { return }
         await MainActor.run { isLoadingVerified = true }
         do {
-            let response: [YetToScanNetworkResponse] = try await SupabaseManager.shared.client
-                .from("inventory_units")
-                .select("id, serial_number, catalog_id, catalogs(id, name, brand, catalog_id)")
-                .in("id", values: scannedUnitIds)
-                .execute()
-                .value
+            var allResponses: [YetToScanNetworkResponse] = []
+            let chunkSize = 1000
+            for i in stride(from: 0, to: scannedUnitIds.count, by: chunkSize) {
+                let chunk = Array(scannedUnitIds[i..<min(i + chunkSize, scannedUnitIds.count)])
+                let response: [YetToScanNetworkResponse] = try await SupabaseManager.shared.client
+                    .from("inventory_units")
+                    .select("id, serial_number, catalog_id, catalogs(id, name, brand, catalog_id)")
+                    .in("id", values: chunk)
+                    .execute()
+                    .value
+                allResponses.append(contentsOf: response)
+            }
             
-            let items: [YetToScanItem] = response.map { res in
+            let items: [YetToScanItem] = allResponses.map { res in
                 YetToScanItem(
                     id: res.id,
                     serialNumber: res.serial_number,
@@ -1146,13 +1154,13 @@ struct AuditReportDetailView: View {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 16) {
                                     MetricCard(title: "Total Expected", value: "\(db.totalExpected)", subtitle: nil, icon: "doc.text")
-                                        .frame(width: 150, height: 160)
+                                        .frame(width: 160, height: 160)
                                     MetricCard(title: "Total Scanned", value: "\(db.totalScanned)", subtitle: nil, icon: "barcode.viewfinder")
-                                        .frame(width: 150, height: 160)
+                                        .frame(width: 160, height: 160)
                                     MetricCard(title: "Variance", value: "\(db.variance)", subtitle: nil, icon: "exclamationmark.triangle")
-                                        .frame(width: 150, height: 160)
+                                        .frame(width: 160, height: 160)
                                     MetricCard(title: "Accuracy", value: String(format: "%.1f%%", db.accuracy), subtitle: nil, icon: "percent")
-                                        .frame(width: 150, height: 160)
+                                        .frame(width: 160, height: 160)
                                 }
                                 .padding(.horizontal, 24)
                             }
@@ -1176,9 +1184,9 @@ struct AuditReportDetailView: View {
                                         .padding(.vertical, 12)
                                         .frame(maxWidth: .infinity, alignment: .center)
                                 } else {
-                                    VStack(spacing: 12) {
+                                    LazyVStack(spacing: 12) {
                                         ForEach(missingItems, id: \.detail) { item in
-                                            BreakdownProductRow(name: item.name ?? "Unknown Item", detail: item.detail ?? "No details provided", status: "Yet to Scan", statusColor: AppColors.error)
+                                            BreakdownProductRow(name: item.name ?? "Unknown Item", detail: item.detail ?? "No details provided", status: "", statusColor: AppColors.error)
                                                 .padding(.horizontal, 0)
                                         }
                                     }
@@ -1201,7 +1209,7 @@ struct AuditReportDetailView: View {
                                         .padding(.vertical, 12)
                                         .frame(maxWidth: .infinity, alignment: .center)
                                 } else {
-                                    VStack(spacing: 12) {
+                                    LazyVStack(spacing: 12) {
                                         ForEach(newItems, id: \.detail) { item in
                                             BreakdownProductRow(name: item.name ?? "Unknown Item", detail: item.detail ?? "No details provided", status: "New Item", statusColor: AppColors.warning)
                                                 .padding(.horizontal, 0)
@@ -1230,7 +1238,7 @@ struct AuditReportDetailView: View {
                                         .padding(.vertical, 12)
                                         .frame(maxWidth: .infinity, alignment: .center)
                                 } else {
-                                    VStack(spacing: 12) {
+                                    LazyVStack(spacing: 12) {
                                         ForEach(verifiedItems) { item in
                                             BreakdownProductRow(name: item.name, detail: "Serial: \(item.serialNumber) • Brand: \(item.brand)", status: "Verified", statusColor: AppColors.success)
                                                 .padding(.horizontal, 0)
@@ -1385,14 +1393,20 @@ struct ActiveAuditReportDetailView: View {
         guard let scannedUnitIds = audit?.scannedUnitIds, !scannedUnitIds.isEmpty else { return }
         await MainActor.run { isLoadingVerified = true }
         do {
-            let response: [YetToScanNetworkResponse] = try await SupabaseManager.shared.client
-                .from("inventory_units")
-                .select("id, serial_number, catalog_id, catalogs(id, name, brand, catalog_id)")
-                .in("id", values: scannedUnitIds)
-                .execute()
-                .value
+            var allResponses: [YetToScanNetworkResponse] = []
+            let chunkSize = 1000
+            for i in stride(from: 0, to: scannedUnitIds.count, by: chunkSize) {
+                let chunk = Array(scannedUnitIds[i..<min(i + chunkSize, scannedUnitIds.count)])
+                let response: [YetToScanNetworkResponse] = try await SupabaseManager.shared.client
+                    .from("inventory_units")
+                    .select("id, serial_number, catalog_id, catalogs(id, name, brand, catalog_id)")
+                    .in("id", values: chunk)
+                    .execute()
+                    .value
+                allResponses.append(contentsOf: response)
+            }
             
-            let items: [YetToScanItem] = response.map { res in
+            let items: [YetToScanItem] = allResponses.map { res in
                 YetToScanItem(
                     id: res.id,
                     serialNumber: res.serial_number,
@@ -1466,13 +1480,13 @@ struct ActiveAuditReportDetailView: View {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 16) {
                                     MetricCard(title: "Total Expected", value: "\(db.totalExpected)", subtitle: nil, icon: "doc.text")
-                                        .frame(width: 150, height: 160)
+                                        .frame(width: 160, height: 160)
                                     MetricCard(title: "Total Scanned", value: "\(db.totalScanned)", subtitle: nil, icon: "barcode.viewfinder")
-                                        .frame(width: 150, height: 160)
+                                        .frame(width: 160, height: 160)
                                     MetricCard(title: "Variance", value: "\(db.variance)", subtitle: nil, icon: "exclamationmark.triangle")
-                                        .frame(width: 150, height: 160)
+                                        .frame(width: 160, height: 160)
                                     MetricCard(title: "Accuracy", value: String(format: "%.1f%%", db.accuracy), subtitle: nil, icon: "percent")
-                                        .frame(width: 150, height: 160)
+                                        .frame(width: 160, height: 160)
                                 }
                                 .padding(.horizontal, 24)
                             }
@@ -1496,9 +1510,9 @@ struct ActiveAuditReportDetailView: View {
                                         .padding(.vertical, 12)
                                         .frame(maxWidth: .infinity, alignment: .center)
                                 } else {
-                                    VStack(spacing: 12) {
+                                    LazyVStack(spacing: 12) {
                                         ForEach(missingItems, id: \.detail) { item in
-                                            BreakdownProductRow(name: item.name ?? "Unknown Item", detail: item.detail ?? "No details provided", status: "Yet to Scan", statusColor: AppColors.error)
+                                            BreakdownProductRow(name: item.name ?? "Unknown Item", detail: item.detail ?? "No details provided", status: "", statusColor: AppColors.error)
                                                 .padding(.horizontal, 0)
                                         }
                                     }
@@ -1521,7 +1535,7 @@ struct ActiveAuditReportDetailView: View {
                                         .padding(.vertical, 12)
                                         .frame(maxWidth: .infinity, alignment: .center)
                                 } else {
-                                    VStack(spacing: 12) {
+                                    LazyVStack(spacing: 12) {
                                         ForEach(newItems, id: \.detail) { item in
                                             BreakdownProductRow(name: item.name ?? "Unknown Item", detail: item.detail ?? "No details provided", status: "New Item", statusColor: AppColors.warning)
                                                 .padding(.horizontal, 0)
@@ -1550,7 +1564,7 @@ struct ActiveAuditReportDetailView: View {
                                         .padding(.vertical, 12)
                                         .frame(maxWidth: .infinity, alignment: .center)
                                 } else {
-                                    VStack(spacing: 12) {
+                                    LazyVStack(spacing: 12) {
                                         ForEach(verifiedItems) { item in
                                             BreakdownProductRow(name: item.name, detail: "Serial: \(item.serialNumber) • Brand: \(item.brand)", status: "Verified", statusColor: AppColors.success)
                                                 .padding(.horizontal, 0)
@@ -1792,14 +1806,16 @@ private struct BreakdownProductRow: View {
             
             Spacer()
             
-            Text(status.uppercased())
-                .font(AppFonts.sansSerif(size: 10, weight: .bold))
-                .foregroundStyle(statusColor)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(statusColor.opacity(0.1))
-                .clipShape(Capsule())
-                .overlay(Capsule().stroke(statusColor.opacity(0.3), lineWidth: 1))
+            if !status.isEmpty {
+                Text(status.uppercased())
+                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                    .foregroundStyle(statusColor)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(statusColor.opacity(0.1))
+                    .clipShape(Capsule())
+                    .overlay(Capsule().stroke(statusColor.opacity(0.3), lineWidth: 1))
+            }
         }
         .padding(16)
         .background(Color(white: 0.05))

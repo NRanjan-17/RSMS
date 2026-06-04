@@ -30,12 +30,16 @@ struct MetricCard: View {
                 Text(value)
                     .font(AppFonts.serif(size: 28, weight: .bold))
                     .foregroundStyle(AppColors.text)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
                 
                 Text(title)
                     .textCase(.uppercase)
                     .font(AppFonts.sansSerif(size: 11, weight: .bold))
                     .foregroundStyle(AppColors.secondary)
                     .kerning(1.2)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
             }
             
             Spacer(minLength: 0)
