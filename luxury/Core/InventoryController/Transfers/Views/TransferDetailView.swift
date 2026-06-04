@@ -132,9 +132,9 @@ struct TransferDetailView: View {
                         }
                         .padding(.horizontal, 24)
                         .padding(.vertical, 20)
-                    } else if status == "in transit" {
+                    } else if status == "in transit" || status == "pending receipt" {
                         VStack {
-                            CustomButton(title: "Complete Transfer (Receive)", action: {
+                            CustomButton(title: status == "pending receipt" ? "Receive Transfer" : "Complete Transfer (Receive)", action: {
                                 completeTransfer()
                             })
                         }
