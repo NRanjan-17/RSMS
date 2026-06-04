@@ -283,10 +283,10 @@ struct ProductLaunchDetailView: View {
                                 
                                 Text(guest.tier)
                                     .font(AppFonts.sansSerif(size: 8, weight: .bold))
-                                    .foregroundStyle(guest.tier == "UHNW" ? AppColors.success : AppColors.warning)
+                                    .foregroundStyle(guest.tier == "Platinum" ? AppColors.success : AppColors.warning)
                                     .padding(.horizontal, 5)
                                     .padding(.vertical, 2)
-                                    .background(guest.tier == "UHNW" ? AppColors.success.opacity(0.15) : AppColors.warning.opacity(0.15))
+                                    .background(guest.tier == "Platinum" ? AppColors.success.opacity(0.15) : AppColors.warning.opacity(0.15))
                                     .clipShape(RoundedRectangle(cornerRadius: 4))
                             }
                             if guest.reminderSent {

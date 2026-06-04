@@ -462,7 +462,14 @@ struct AfterSalesIntakeView: View {
                                     var photoUrls: [String] = []
                                     
                                     for img in uploadedImages {
-                                        if let data = img.jpegData(compressionQuality: 0.7) {
+                                        // Resize image to prevent massive payload timeouts (Code=-1005)
+                                        let targetSize = CGSize(width: 800, height: 800 * (img.size.height / img.size.width))
+                                        let renderer = UIGraphicsImageRenderer(size: targetSize)
+                                        let resizedImage = renderer.image { _ in
+                                            img.draw(in: CGRect(origin: .zero, size: targetSize))
+                                        }
+                                        
+                                        if let data = resizedImage.jpegData(compressionQuality: 0.3) {
                                             let asset = PickedImageAsset(data: data, fileExtension: "jpg", contentType: "image/jpeg")
                                             let url = try await StorageService().uploadASTPhoto(image: asset, astId: astId)
                                             photoUrls.append(url)

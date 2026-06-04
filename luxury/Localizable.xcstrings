@@ -98091,6 +98091,9 @@
         }
       }
     },
+    "Platinum" : {
+
+    },
     "Please accept the terms and conditions." : {
       "localizations" : {
         "ar" : {
@@ -145257,6 +145260,7 @@
       }
     },
     "UHNW" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {

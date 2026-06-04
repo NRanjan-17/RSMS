@@ -14,16 +14,16 @@ import PostgREST
 final class ClientelingViewModel {
     var searchText: String = ""
     var selectedFilter: String = "All"
-    let filters: [String] = ["All", "UHNW", "VIP", "Standard"]
+    let filters: [String] = ["All", "Platinum", "Gold", "Silver"]
     
     var isLoading = false
     var errorMessage: String? = nil
     
     var stats: [ClientStat] = [
         ClientStat(value: "0", label: "Total"),
-        ClientStat(value: "0", label: "UHNW"),
-        ClientStat(value: "0", label: "VIP"),
-        ClientStat(value: "0", label: "Standard")
+        ClientStat(value: "0", label: "Platinum"),
+        ClientStat(value: "0", label: "Gold"),
+        ClientStat(value: "0", label: "Silver")
     ]
     
     var clients: [Client] = []
@@ -85,7 +85,7 @@ final class ClientelingViewModel {
                 }
                 struct CatalogFetch: Codable {
                     let id: UUID
-                    let price: Double
+                    let amount: Double
                 }
                 
                 let allPurchases: [PurchasedItemFetch] = try await SupabaseManager.shared.client
@@ -96,11 +96,11 @@ final class ClientelingViewModel {
                 
                 let allCatalogs: [CatalogFetch] = try await SupabaseManager.shared.client
                     .from("catalogs")
-                    .select("id, price")
+                    .select("id, amount")
                     .execute()
                     .value
                 
-                let catalogPriceMap = Dictionary(uniqueKeysWithValues: allCatalogs.map { ($0.id, $0.price) })
+                let catalogPriceMap = Dictionary(uniqueKeysWithValues: allCatalogs.map { ($0.id, $0.amount) })
                 
                 var ltvMap: [UUID: Double] = [:]
                 var lastVisitMap: [UUID: Date] = [:]
@@ -174,15 +174,15 @@ final class ClientelingViewModel {
         
         await MainActor.run {
             let totalCount = self.clients.count
-            let uhnwCount = self.clients.filter { $0.tier == .uhnw }.count
-            let vipCount = self.clients.filter { $0.tier == .vip }.count
-            let standardCount = self.clients.filter { $0.tier == .standard }.count
+            let platinumCount = self.clients.filter { $0.tier == .platinum }.count
+            let goldCount = self.clients.filter { $0.tier == .gold }.count
+            let silverCount = self.clients.filter { $0.tier == .silver }.count
             
             self.stats = [
                 ClientStat(value: "\(totalCount)", label: "Total"),
-                ClientStat(value: "\(uhnwCount)", label: "UHNW"),
-                ClientStat(value: "\(vipCount)", label: "VIP"),
-                ClientStat(value: "\(standardCount)", label: "Standard")
+                ClientStat(value: "\(platinumCount)", label: "Platinum"),
+                ClientStat(value: "\(goldCount)", label: "Gold"),
+                ClientStat(value: "\(silverCount)", label: "Silver")
             ]
             isLoading = false
         }
@@ -193,15 +193,15 @@ final class ClientelingViewModel {
         clients.removeAll { $0.id == id }
         
         let totalCount = self.clients.count
-        let uhnwCount = self.clients.filter { $0.tier == .uhnw }.count
-        let vipCount = self.clients.filter { $0.tier == .vip }.count
-        let standardCount = self.clients.filter { $0.tier == .standard }.count
+        let platinumCount = self.clients.filter { $0.tier == .platinum }.count
+        let goldCount = self.clients.filter { $0.tier == .gold }.count
+        let silverCount = self.clients.filter { $0.tier == .silver }.count
         
         self.stats = [
             ClientStat(value: "\(totalCount)", label: "Total"),
-            ClientStat(value: "\(uhnwCount)", label: "UHNW"),
-            ClientStat(value: "\(vipCount)", label: "VIP"),
-            ClientStat(value: "\(standardCount)", label: "Standard")
+            ClientStat(value: "\(platinumCount)", label: "Platinum"),
+            ClientStat(value: "\(goldCount)", label: "Gold"),
+            ClientStat(value: "\(silverCount)", label: "Silver")
         ]
     }
 }

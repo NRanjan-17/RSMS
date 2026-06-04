@@ -128,15 +128,15 @@ struct ScannedAuditItem: Identifiable, Hashable {
 }
 
 enum ClientTier: String, CaseIterable, Hashable {
-    case standard = "Standard"
-    case vip = "VIP"
-    case uhnw = "UHNW"
+    case silver = "Silver"
+    case gold = "Gold"
+    case platinum = "Platinum"
     
     var badgeStatus: BadgeStatus {
         switch self {
-        case .standard: return .neutral
-        case .vip: return .warning
-        case .uhnw: return .success
+        case .silver: return .neutral
+        case .gold: return .warning
+        case .platinum: return .success
         }
     }
 }
@@ -182,7 +182,7 @@ extension Client {
         self.id = entity.id
         self.name = entity.name
         
-        let clientTier = ClientTier(rawValue: entity.tier ?? "Standard") ?? .standard
+        let clientTier = ClientTier(rawValue: entity.tier ?? "Silver") ?? .silver
         self.tier = clientTier
         
         let hasPurchases = !(entity.productsPurchased?.isEmpty ?? true)
@@ -193,11 +193,11 @@ extension Client {
             self.ltv = storedLTV
         } else if hasPurchases {
             switch clientTier {
-            case .standard:
+            case .silver:
                 self.ltv = 450000.0
-            case .vip:
+            case .gold:
                 self.ltv = 2800000.0
-            case .uhnw:
+            case .platinum:
                 self.ltv = 11500000.0
             }
         } else {

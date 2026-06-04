@@ -40,7 +40,7 @@ struct PaymentView: View {
                                 Text("Unknown Client")
                                     .font(AppFonts.sansSerif(size: 11, weight: .medium))
                                     .foregroundStyle(AppColors.secondary)
-                                StatusBadge(text: LocalizedStringKey("UHNW"), status: .success)
+                                StatusBadge(text: LocalizedStringKey("Platinum"), status: .success)
                             }
                             .padding(.horizontal, 12)
                             .padding(.vertical, 5)

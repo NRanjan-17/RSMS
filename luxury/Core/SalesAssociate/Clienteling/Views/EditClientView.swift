@@ -169,7 +169,7 @@ struct EditClientView: View {
                                 .padding(.top, 4)
                             
                             HStack(spacing: 8) {
-                                let tiers = ["Standard", "VIP", "UHNW"]
+                                let tiers = ["Silver", "Gold", "Platinum"]
                                 ForEach(tiers, id: \.self) { t in
                                     let isSelected = selectedTier == t
                                     Text(t)

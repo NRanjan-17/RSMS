@@ -13,7 +13,7 @@ struct NewClientView: View {
     @State private var lastName: String = ""
     @State private var mobile: String = ""
     @State private var email: String = ""
-    @State private var selectedTier: String = "VIP"
+    @State private var selectedTier: String = "Gold"
     @State private var dobDate: Date = Date()
     @State private var hasDobSet: Bool = false
     @State private var maritalStatus: String = "Single"
@@ -110,7 +110,7 @@ struct NewClientView: View {
                                 .padding(.top, 4)
                             
                             HStack(spacing: 8) {
-                                let tiers = ["Standard", "VIP", "UHNW"]
+                                let tiers = ["Silver", "Gold", "Platinum"]
                                 ForEach(tiers, id: \.self) { t in
                                     let isSelected = selectedTier == t
                                     Text(t)

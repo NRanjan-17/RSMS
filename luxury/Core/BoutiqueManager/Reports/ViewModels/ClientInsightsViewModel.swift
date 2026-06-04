@@ -39,28 +39,28 @@ final class ClientInsightsViewModel {
                 let boutiqueClientIds = Set(txs.compactMap { $0.clientId })
                 let boutiqueClients = clients.filter { boutiqueClientIds.contains($0.id) }
                 
-                var uhnwCount = 0
-                var vipCount = 0
-                var standardCount = 0
+                var platinumCount = 0
+                var goldCount = 0
+                var silverCount = 0
                 
-                var uhnwRevenue = 0.0
-                var vipRevenue = 0.0
-                var standardRevenue = 0.0
+                var platinumRevenue = 0.0
+                var goldRevenue = 0.0
+                var silverRevenue = 0.0
                 
                 for c in boutiqueClients {
                     let clientTxs = txs.filter { $0.clientId == c.id }
                     let clientTotal = clientTxs.reduce(0.0) { $0 + $1.transactionAmount }
                     
-                    let tierString = (c.tier ?? "Standard").lowercased()
-                    if tierString.contains("uhnw") {
-                        uhnwCount += 1
-                        uhnwRevenue += clientTotal
-                    } else if tierString.contains("vip") {
-                        vipCount += 1
-                        vipRevenue += clientTotal
+                    let tierString = (c.tier ?? "Silver").lowercased()
+                    if tierString.contains("platinum") {
+                        platinumCount += 1
+                        platinumRevenue += clientTotal
+                    } else if tierString.contains("gold") {
+                        goldCount += 1
+                        goldRevenue += clientTotal
                     } else {
-                        standardCount += 1
-                        standardRevenue += clientTotal
+                        silverCount += 1
+                        silverRevenue += clientTotal
                     }
                 }
                 
@@ -69,9 +69,9 @@ final class ClientInsightsViewModel {
                 let avg = totalClientsCount > 0 ? overallRevenue / Double(totalClientsCount) : 0.0
                 
                 let newTierBreakdown = [
-                    TierMetric(tier: "UHNW", count: uhnwCount, revenue: CurrencyManager.shared.format(amount: uhnwRevenue)),
-                    TierMetric(tier: "VIP", count: vipCount, revenue: CurrencyManager.shared.format(amount: vipRevenue)),
-                    TierMetric(tier: "Standard", count: standardCount, revenue: CurrencyManager.shared.format(amount: standardRevenue))
+                    TierMetric(tier: "Platinum", count: platinumCount, revenue: CurrencyManager.shared.format(amount: platinumRevenue)),
+                    TierMetric(tier: "Gold", count: goldCount, revenue: CurrencyManager.shared.format(amount: goldRevenue)),
+                    TierMetric(tier: "Silver", count: silverCount, revenue: CurrencyManager.shared.format(amount: silverRevenue))
                 ]
                 
                 await MainActor.run {

@@ -13,7 +13,7 @@ import UIKit
 
 @Observable
 final class ClientDetailViewModel {
-    static let defaultClient = Client(name: "Unknown", tier: .standard, lastVisit: "Unknown", ltv: 0.0, initial: "U", isHot: false)
+    static let defaultClient = Client(name: "Unknown", tier: .silver, lastVisit: "Unknown", ltv: 0.0, initial: "U", isHot: false)
     
     var client: Client {
         didSet {
