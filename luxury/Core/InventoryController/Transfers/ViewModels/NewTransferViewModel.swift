@@ -103,8 +103,12 @@ final class NewTransferViewModel {
         }
         
         do {
+            let trimmedBarcode = barcode.trimmingCharacters(in: .whitespacesAndNewlines)
             let catalogs = try await fetchCatalogsHandler()
-            guard let catalogItem = catalogs.first(where: { $0.barCode.lowercased() == barcode.lowercased() || $0.catalogId.lowercased() == barcode.lowercased() }) else {
+            guard let catalogItem = catalogs.first(where: { 
+                $0.barCode.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == trimmedBarcode.lowercased() || 
+                $0.catalogId.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == trimmedBarcode.lowercased() 
+            }) else {
                 return .failure(NSError(domain: "Transfer", code: 4, userInfo: [NSLocalizedDescriptionKey: "Invalid SKU/Barcode scanned."]))
             }
             

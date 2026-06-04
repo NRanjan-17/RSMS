@@ -130,12 +130,12 @@ final class CycleCountService {
         let scheduledDateStr = dateFormatter.string(from: targetDate)
         
         if let latest = activeAudits.first {
-            struct UpdatePayload: Codable {
-                let fixed_day: Int
-                let scheduled_date: String
-            }
+            let updatePayload: [String: AnyJSON] = [
+                "fixed_day": .integer(day),
+                "scheduled_date": .string(scheduledDateStr)
+            ]
             try await client.from("audits")
-                .update(UpdatePayload(fixed_day: day, scheduled_date: scheduledDateStr))
+                .update(updatePayload)
                 .eq("id", value: latest.id)
                 .execute()
         } else {
@@ -144,14 +144,12 @@ final class CycleCountService {
                 let scheduled_date: String
                 let fixed_day: Int
                 let status: String
-                let created_by: UUID?
             }
             let payload = InsertAudit(
                 boutique_id: boutiqueId,
                 scheduled_date: scheduledDateStr,
                 fixed_day: day,
-                status: AuditModelStatus.scheduled.rawValue,
-                created_by: createdBy
+                status: AuditModelStatus.scheduled.rawValue
             )
             try await client.from("audits")
                 .insert(payload)
@@ -234,19 +232,56 @@ final class CycleCountViewModel {
         }
     }
     
-    func updateFixedDay(day: Int) {
+    func updateFixedDayAsync(day: Int) async throws {
         guard let bId = boutiqueId else { return }
         let creatorId = currentUserId
+        try await service.updateFixedDay(boutiqueId: bId, day: day, createdBy: creatorId)
+        await MainActor.run {
+            self.loadAudits()
+        }
+    }
+    
+    func updateFixedDay(day: Int) {
         Task {
             do {
-                try await service.updateFixedDay(boutiqueId: bId, day: day, createdBy: creatorId)
-                await MainActor.run {
-                    self.loadAudits()
-                }
+                try await updateFixedDayAsync(day: day)
             } catch {
                 await MainActor.run {
                     self.errorMessage = error.localizedDescription
                 }
+            }
+        }
+    }
+    
+    func fetchCurrentAuditDate(completion: @escaping (Int) -> Void) {
+        Task {
+            do {
+                if boutiqueId == nil {
+                    let profile = try await profileService.fetchCurrentProfile()
+                    if let manager = profile?.1 as? CorporateBoutique {
+                        self.boutiqueId = manager.id
+                    }
+                }
+                guard let bId = boutiqueId else { return }
+                
+                struct AuditDay: Codable {
+                    let fixed_day: Int
+                }
+                let audits: [AuditDay] = try await SupabaseManager.shared.client.from("audits")
+                    .select("fixed_day")
+                    .eq("boutique_id", value: bId)
+                    .order("scheduled_date", ascending: false)
+                    .limit(1)
+                    .execute()
+                    .value
+                
+                if let first = audits.first {
+                    await MainActor.run {
+                        completion(first.fixed_day)
+                    }
+                }
+            } catch {
+                print("Fetch current audit date error: \(error)")
             }
         }
     }
@@ -347,7 +382,13 @@ struct CycleCountDetailView: View {
 
     private func executeDayUpdate(for dayString: String) {
         let dayNum = dayNumber(for: dayString)
-        viewModel.updateFixedDay(day: dayNum)
+        Task {
+            do {
+                try await viewModel.updateFixedDayAsync(day: dayNum)
+            } catch {
+                print("Failed to execute day update: \(error.localizedDescription)")
+            }
+        }
     }
 
     private var displayVariance: String {
@@ -493,7 +534,9 @@ struct CycleCountDetailView: View {
                                             if let newDate = Calendar.current.date(from: comps) {
                                                 customDate = newDate
                                                 pendingSelectedDay = formatDayAsOrdinal(newDay)
-                                                showConfirmAlert = true
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                                    showConfirmAlert = true
+                                                }
                                             }
                                         }
                                     )) {
@@ -540,6 +583,13 @@ struct CycleCountDetailView: View {
         }
         .onAppear {
             viewModel.loadAudits()
+            viewModel.fetchCurrentAuditDate { day in
+                if day == 1 { selectedDay = "1st Day" }
+                else if day == 15 { selectedDay = "15th Day" }
+                else if day == 28 || day == 30 || day == 31 { selectedDay = "Last Day" }
+                else { selectedDay = formatDayAsOrdinal(day) }
+                syncCustomDate(from: selectedDay)
+            }
         }
         .onChange(of: viewModel.isLoading) { _, isLoading in
             if !isLoading {
@@ -559,12 +609,12 @@ struct CycleCountDetailView: View {
             Button("Cancel", role: .cancel) {
                 syncCustomDate(from: selectedDay)
             }
-            Button("Confirm") {
+            Button("Yes") {
                 selectedDay = pendingSelectedDay
                 executeDayUpdate(for: pendingSelectedDay)
             }
         } message: {
-            Text("Are you sure you want to reschedule the monthly audit window?")
+            Text("Do you want to change the date?")
         }
         .toolbar(.hidden, for: .navigationBar)
     }

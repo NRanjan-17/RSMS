@@ -53,37 +53,6 @@ struct ActiveAuditView: View {
 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 24) {
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text("BARCODE SCAN SIMULATOR")
-                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
-                                .foregroundStyle(AppColors.secondary)
-                                .kerning(1.5)
-                                .padding(.horizontal, 24)
-                            
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 12) {
-                                    ForEach(viewModel.expectedItems) { item in
-                                        Button(action: {
-                                            let _ = viewModel.scanItem(barcode: item.barcode)
-                                        }) {
-                                            HStack {
-                                                Image(systemName: "barcode.viewfinder")
-                                                    .font(AppFonts.sansSerif(size: 14))
-                                                Text("Scan \(item.name)")
-                                                    .font(AppFonts.sansSerif(size: 13, weight: .semibold))
-                                            }
-                                            .padding(.horizontal, 16)
-                                            .padding(.vertical, 10)
-                                            .background(AppColors.surface2)
-                                            .foregroundStyle(AppColors.gold)
-                                            .clipShape(Capsule())
-                                            .overlay(Capsule().stroke(AppColors.gold50, lineWidth: 0.5))
-                                        }
-                                    }
-                                }
-                                .padding(.horizontal, 24)
-                            }
-                        }
 
                         Text("SCANNED ITEMS")
                             .font(AppFonts.sansSerif(size: 11, weight: .bold))
@@ -122,7 +91,39 @@ struct ActiveAuditView: View {
                             .padding(.horizontal, 24)
                         }
 
-                        if !viewModel.missingItems.isEmpty {
+                        if !viewModel.newlyAddedItems.isEmpty {
+                            Text("NEW ITEMS")
+                                .font(AppFonts.sansSerif(size: 11, weight: .bold))
+                                .foregroundStyle(Color.blue)
+                                .kerning(1.5)
+                                .padding(.top, 8)
+                                .padding(.horizontal, 24)
+
+                            VStack(spacing: 1) {
+                                ForEach(viewModel.newlyAddedItems) { item in
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(item.name)
+                                                .font(AppFonts.sansSerif(size: 14, weight: .medium))
+                                                .foregroundStyle(AppColors.secondary)
+                                            Text("UNEXPECTED SKU")
+                                                .font(AppFonts.sansSerif(size: 9, weight: .bold))
+                                                .foregroundStyle(Color.blue)
+                                        }
+                                        Spacer()
+                                        Image(systemName: "exclamationmark.circle.fill")
+                                            .foregroundStyle(Color.blue)
+                                    }
+                                    .padding(.horizontal, 20)
+                                    .padding(.vertical, 14)
+                                    .background(AppColors.surface)
+                                }
+                            }
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .padding(.horizontal, 24)
+                        }
+
+                        if !viewModel.yetToScanItems.isEmpty {
                             Text("MISSING ITEMS")
                                 .font(AppFonts.sansSerif(size: 11, weight: .bold))
                                 .foregroundStyle(AppColors.error)
@@ -131,10 +132,10 @@ struct ActiveAuditView: View {
                                 .padding(.horizontal, 24)
 
                             VStack(spacing: 1) {
-                                ForEach(viewModel.missingItems, id: \.self) { item in
+                                ForEach(viewModel.yetToScanItems) { item in
                                     HStack {
                                         VStack(alignment: .leading, spacing: 4) {
-                                            Text(item)
+                                            Text(item.name)
                                                 .font(AppFonts.sansSerif(size: 14, weight: .medium))
                                                 .foregroundStyle(AppColors.secondary)
                                             Text("NOT SCANNED")
@@ -201,10 +202,10 @@ struct ActiveAuditView: View {
                 existingSerials: [],
                 allowsDamageReporting: false,
                 productName: "Inventory Count",
-                expectedSerials: viewModel.expectedItems.map { $0.barcode }
+                expectedSerials: viewModel.yetToScanItems.map { $0.serialNumber }
             ) {
                 showingBatchScanner = false
-                viewModel.addScannedItems(barcodes: tempScannedSerials)
+                Task { await viewModel.addScannedItems(barcodes: tempScannedSerials) }
             }
         }
     }
