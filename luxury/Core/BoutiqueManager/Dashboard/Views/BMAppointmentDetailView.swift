@@ -35,7 +35,7 @@ struct BMAppointmentDetailView: View {
 
             VStack(spacing: 0) {
 
-                CustomHeader(title: "Appointment Details", showBackButton: true, backAction: { dismiss() })
+                CustomHeader(title: "Appointment Details", showBackButton: true, backAction: { dismiss() }, isInline: true)
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 32) {

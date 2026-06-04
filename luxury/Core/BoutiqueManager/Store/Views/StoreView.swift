@@ -89,8 +89,12 @@ struct StoreView: View {
                                 .buttonStyle(.plain)
                                 
                                 Button(action: {
-                                    // VM route. For now, pass a dummy UUID until StoreViewModel includes the actual boutique ID.
-                                    router.push(BMRoute.planogramGallery(boutiqueId: UUID()))
+                                    if let bId = viewModel.boutiqueId {
+                                        router.push(BMRoute.planogramGallery(boutiqueId: bId))
+                                    } else {
+                                        // Fallback if not loaded
+                                        router.push(BMRoute.planogramGallery(boutiqueId: UUID()))
+                                    }
                                 }) {
                                     HStack {
                                         VStack(alignment: .leading, spacing: 4) {
