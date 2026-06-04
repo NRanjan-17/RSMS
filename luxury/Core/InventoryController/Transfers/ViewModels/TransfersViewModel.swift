@@ -62,7 +62,7 @@ final class TransfersViewModel {
             } catch {
                 if retryCount < 3 && error.localizedDescription.contains("current profile") {
                     try? await Task.sleep(for: .milliseconds(400))
-                    await self.fetchTransfers(retryCount: retryCount + 1)
+                    self.fetchTransfers(retryCount: retryCount + 1)
                 } else {
                     await MainActor.run {
                         self.errorMessage = error.localizedDescription

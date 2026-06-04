@@ -14,6 +14,8 @@
 		BEAC6FFD2FBCE45A006BB496 /* Realtime in Frameworks */ = {isa = PBXBuildFile; productRef = BEAC6FFC2FBCE45A006BB496 /* Realtime */; };
 		BEAC6FFF2FBCE45A006BB496 /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = BEAC6FFE2FBCE45A006BB496 /* Storage */; };
 		BEAC70012FBCE45A006BB496 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = BEAC70002FBCE45A006BB496 /* Supabase */; };
+		E23A9DCA2FD1879F00F286A0 /* Daily in Frameworks */ = {isa = PBXBuildFile; productRef = E23A9DC92FD1879F00F286A0 /* Daily */; };
+		E23A9DCC2FD1879F00F286A0 /* DailySystemBroadcast in Frameworks */ = {isa = PBXBuildFile; productRef = E23A9DCB2FD1879F00F286A0 /* DailySystemBroadcast */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,7 +35,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E23A9DCA2FD1879F00F286A0 /* Daily in Frameworks */,
 				BEAC6FFB2FBCE45A006BB496 /* PostgREST in Frameworks */,
+				E23A9DCC2FD1879F00F286A0 /* DailySystemBroadcast in Frameworks */,
 				BEAC6FF92FBCE45A006BB496 /* Functions in Frameworks */,
 				BE1ABC082FC56B6400845BA0 /* RazorpayCheckout in Frameworks */,
 				BEAC70012FBCE45A006BB496 /* Supabase in Frameworks */,
@@ -50,6 +54,7 @@
 			isa = PBXGroup;
 			children = (
 				BEAC6E062FB6DAB5006BB496 /* luxury */,
+				E23A9DCF2FD187B200F286A0 /* Frameworks */,
 				BEAC6E052FB6DAB5006BB496 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -60,6 +65,13 @@
 				BEAC6E042FB6DAB5006BB496 /* luxury.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		E23A9DCF2FD187B200F286A0 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -89,6 +101,8 @@
 				BEAC6FFE2FBCE45A006BB496 /* Storage */,
 				BEAC70002FBCE45A006BB496 /* Supabase */,
 				BE1ABC072FC56B6400845BA0 /* RazorpayCheckout */,
+				E23A9DC92FD1879F00F286A0 /* Daily */,
+				E23A9DCB2FD1879F00F286A0 /* DailySystemBroadcast */,
 			);
 			productName = luxury;
 			productReference = BEAC6E042FB6DAB5006BB496 /* luxury.app */;
@@ -124,6 +138,7 @@
 			packageReferences = (
 				BEAC6FF52FBCE45A006BB496 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 				BE1ABC062FC56B6400845BA0 /* XCRemoteSwiftPackageReference "razorpay-pod" */,
+				E23A9DC82FD1879F00F286A0 /* XCRemoteSwiftPackageReference "daily-client-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = BEAC6E052FB6DAB5006BB496 /* Products */;
@@ -416,6 +431,14 @@
 				minimumVersion = 2.5.1;
 			};
 		};
+		E23A9DC82FD1879F00F286A0 /* XCRemoteSwiftPackageReference "daily-client-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/daily-co/daily-client-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.37.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -453,6 +476,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = BEAC6FF52FBCE45A006BB496 /* XCRemoteSwiftPackageReference "supabase-swift" */;
 			productName = Supabase;
+		};
+		E23A9DC92FD1879F00F286A0 /* Daily */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E23A9DC82FD1879F00F286A0 /* XCRemoteSwiftPackageReference "daily-client-ios" */;
+			productName = Daily;
+		};
+		E23A9DCB2FD1879F00F286A0 /* DailySystemBroadcast */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E23A9DC82FD1879F00F286A0 /* XCRemoteSwiftPackageReference "daily-client-ios" */;
+			productName = DailySystemBroadcast;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

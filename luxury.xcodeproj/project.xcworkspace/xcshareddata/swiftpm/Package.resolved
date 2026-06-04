@@ -1,6 +1,15 @@
 {
-  "originHash" : "213d601ab432d98c61923149e777d982d3919486151c23871ebc140e1c30717a",
+  "originHash" : "b7a226e43546c9b7d27b0d13a6e0f7cdf592ba9451565eb9600d913ba18904aa",
   "pins" : [
+    {
+      "identity" : "daily-client-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/daily-co/daily-client-ios",
+      "state" : {
+        "revision" : "276f9aff6bbdb36d58e763b7c0d77167ab5f51ca",
+        "version" : "0.37.0"
+      }
+    },
     {
       "identity" : "razorpay-pod",
       "kind" : "remoteSourceControl",

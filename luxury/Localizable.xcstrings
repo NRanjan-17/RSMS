@@ -32388,6 +32388,9 @@
         }
       }
     },
+    "Clear" : {
+
+    },
     "Clear %@" : {
       "localizations" : {
         "ar" : {
@@ -74052,6 +74055,9 @@
     "Live" : {
 
     },
+    "Live Consultation" : {
+
+    },
     "LIVE INVENTORY" : {
       "localizations" : {
         "ar" : {
@@ -74323,6 +74329,9 @@
           }
         }
       }
+    },
+    "Live Whiteboard" : {
+
     },
     "Loading" : {
       "localizations" : {
@@ -153286,6 +153295,9 @@
           }
         }
       }
+    },
+    "Waiting for client to join..." : {
+
     },
     "Warning" : {
       "extractionState" : "manual",

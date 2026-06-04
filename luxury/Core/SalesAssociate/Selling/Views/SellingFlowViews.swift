@@ -12,8 +12,9 @@ struct RemoteSellingView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var appointmentLinked = true
     @State private var showingVideoOptions = false
-    @State private var showingSafari = false
-    @State private var currentJitsiLink: String = ""
+    @State private var showingVideoCall = false
+    @State private var isGeneratingLink = false
+    @State private var currentMeetingLink: String = ""
     
     var body: some View {
         ZStack {
@@ -47,9 +48,12 @@ struct RemoteSellingView: View {
                             .background(AppColors.surface)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                         
-                        CustomButton(title: "Create Remote Appointment", icon: AnyView(Image(systemName: "video.fill"))) {
-                            generateJitsiLink()
+                        CustomButton(title: isGeneratingLink ? "Generating Secure Room..." : "Create Remote Appointment", icon: AnyView(Image(systemName: isGeneratingLink ? "arrow.2.circlepath" : "video.fill"))) {
+                            if !isGeneratingLink {
+                                generateMeetingLink()
+                            }
                         }
+                        .disabled(isGeneratingLink)
                     }
                     .padding(.horizontal, 24)
                     .padding(.vertical, 20)
@@ -63,52 +67,58 @@ struct RemoteSellingView: View {
         .toolbarColorScheme(.dark, for: .navigationBar)
         .confirmationDialog("Video Consultation Setup", isPresented: $showingVideoOptions, titleVisibility: .visible) {
             Button("Join Call Now") {
-                if URL(string: currentJitsiLink) != nil {
-                    showingSafari = true
+                if URL(string: currentMeetingLink) != nil {
+                    showingVideoCall = true
                 }
             }
             Button("Copy Link") {
-                UIPasteboard.general.string = currentJitsiLink
+                UIPasteboard.general.string = currentMeetingLink
             }
             Button("Send via Email") {
                 if let subject = "Your RSMS Remote Consultation".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-                   let body = "Please click the link below to join your secure remote consultation:\n\n\(currentJitsiLink)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+                   let body = "Please click the link below to join your secure remote consultation:\n\n\(currentMeetingLink)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
                    let url = URL(string: "mailto:?subject=\(subject)&body=\(body)") {
                     UIApplication.shared.open(url)
                 }
             }
             Button("Cancel", role: .cancel) { }
         } message: {
-            Text("Meeting Link: \(currentJitsiLink)")
+            Text("Meeting Link: \(currentMeetingLink)")
         }
-        .fullScreenCover(isPresented: $showingSafari) {
-            if let url = URL(string: currentJitsiLink) {
-                VStack(spacing: 0) {
-                    HStack {
-                        Spacer()
-                        Button(action: { showingSafari = false }) {
-                            Image(systemName: "xmark.circle.fill")
-                                .font(.title)
-                                .foregroundStyle(AppColors.secondary)
-                        }
-                        .padding()
-                    }
-                    .background(AppColors.background)
-                    
-                    JitsiWebView(url: url)
-                        .ignoresSafeArea(edges: .bottom)
-                }
+        .fullScreenCover(isPresented: $showingVideoCall) {
+            if let url = URL(string: currentMeetingLink) {
+                NativeVideoCallView(meetingURL: url)
             }
         }
     }
     
-    private func generateJitsiLink() {
-        if currentJitsiLink.isEmpty {
-            let roomName = "RSMS-Consultation-\(UUID().uuidString.prefix(8))"
-            // Using a public open Jitsi instance that doesn't require moderator logins
-            currentJitsiLink = "https://meet.ffmuc.net/\(roomName)"
+    private func generateMeetingLink() {
+        if !currentMeetingLink.isEmpty {
+            showingVideoOptions = true
+            return
         }
-        showingVideoOptions = true
+        
+        isGeneratingLink = true
+        
+        Task {
+            do {
+                // IMPORTANT: Replace with your actual Daily API key from dashboard.daily.co
+                let apiKey = "YOUR_DAILY_API_KEY_HERE"
+                
+                let uniqueRoomURL = try await DailyAPIService.createRoom(apiKey: apiKey)
+                
+                await MainActor.run {
+                    self.currentMeetingLink = uniqueRoomURL
+                    self.isGeneratingLink = false
+                    self.showingVideoOptions = true
+                }
+            } catch {
+                await MainActor.run {
+                    self.isGeneratingLink = false
+                    print("Failed to generate room: \(error)")
+                }
+            }
+        }
     }
 }
 
