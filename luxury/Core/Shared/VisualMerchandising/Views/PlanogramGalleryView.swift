@@ -12,20 +12,30 @@ struct PlanogramGalleryView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(alignment: .leading, spacing: 0) {
-                HStack(spacing: 16) {
+                HStack {
                     Button(action: { router.pop() }) {
-                        Image(systemName: "chevron.left")
-                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
-                            .foregroundStyle(AppColors.gold)
+                        ZStack {
+                            Circle()
+                                .fill(AppColors.surface2)
+                                .frame(width: 44, height: 44)
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundStyle(.white)
+                        }
                     }
-                    Text("Visual Merchandising")
-                        .font(AppFonts.serif(size: 24, weight: .medium))
-                        .foregroundStyle(AppColors.text)
                     Spacer()
+                    Text("Visual Merchandising")
+                        .font(AppFonts.sansSerif(size: 18, weight: .semibold))
+                        .foregroundStyle(.white)
+                    Spacer()
+                    // Invisible spacer for balance
+                    Circle()
+                        .frame(width: 44, height: 44)
+                        .opacity(0)
                 }
                 .padding(.horizontal, 24)
-                .padding(.vertical, 16)
-                
+                .padding(.top, 16)
+                .padding(.bottom, 16)
                 if viewModel.isLoading {
                     Spacer()
                     ProgressView()

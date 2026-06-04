@@ -23,6 +23,30 @@ struct SATransactionListView: View {
             
             VStack(spacing: 0) {
                 // Header
+                HStack {
+                    Button(action: { router.pop() }) {
+                        ZStack {
+                            Circle()
+                                .fill(AppColors.surface2)
+                                .frame(width: 44, height: 44)
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundStyle(.white)
+                        }
+                    }
+                    Spacer()
+                    Text("Transactions")
+                        .font(AppFonts.sansSerif(size: 18, weight: .semibold))
+                        .foregroundStyle(.white)
+                    Spacer()
+                    // Invisible spacer for balance
+                    Circle()
+                        .frame(width: 44, height: 44)
+                        .opacity(0)
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 16)
+                .padding(.bottom, 16)
                 
                 if transactions.isEmpty {
                     Spacer()
@@ -47,11 +71,7 @@ struct SATransactionListView: View {
                 }
             }
         }
-        .navigationTitle("TRANSACTIONS")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(AppColors.background, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
-        .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar(.hidden, for: .navigationBar)
     }
 }
 

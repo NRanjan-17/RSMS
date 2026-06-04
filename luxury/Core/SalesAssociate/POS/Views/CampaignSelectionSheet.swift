@@ -77,8 +77,8 @@ struct CampaignSelectionSheet: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 24))
-                            .foregroundStyle(AppColors.secondary)
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundStyle(Color.secondary)
                     }
                 }
             }
