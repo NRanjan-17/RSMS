@@ -338,53 +338,7 @@ final class ActiveAuditViewModel {
             
             AuditPersistence.shared.saveSession(session)
             
-            // Push update to Supabase audits table
-            let totalVar = reportItems.reduce(0) { $0 + abs($1.variance) }
-            let totalScanned = reportItems.reduce(0) { $0 + $1.countedQty }
-            let totalExp = reportItems.reduce(0) { $0 + $1.expectedQty }
-            let acc = totalExp > 0 ? max(0, min(100, (1.0 - Double(totalVar)/Double(totalExp)) * 100.0)) : 100.0
-            
-            struct DiscrepancyItem: Codable {
-                let name: String
-                let detail: String
-                let type: String
-            }
-            
-            var discrepancies: [DiscrepancyItem] = []
-            for item in reportItems where item.variance != 0 {
-                if item.variance < 0 {
-                    discrepancies.append(DiscrepancyItem(name: item.productName, detail: "Missing \(abs(item.variance)) units", type: "missing"))
-                } else {
-                    discrepancies.append(DiscrepancyItem(name: item.productName, detail: "Found \(item.variance) extra units", type: "new"))
-                }
-            }
-            
-            struct AuditUpdate: Codable {
-                let status: String
-                let total_expected: Int
-                let total_scanned: Int
-                let variance: Int
-                let accuracy: Double
-                let discrepancies: [DiscrepancyItem]
-                let signed_off_by: UUID
-                let signed_off_at: String
-            }
-            
-            let updatePayload = AuditUpdate(
-                status: "signed_off",
-                total_expected: totalExp,
-                total_scanned: totalScanned,
-                variance: totalVar,
-                accuracy: acc,
-                discrepancies: discrepancies,
-                signed_off_by: staff?.authUserId ?? UUID(),
-                signed_off_at: ISO8601DateFormatter().string(from: Date())
-            )
-            
-            try await SupabaseManager.shared.client.from("audits")
-                .update(updatePayload)
-                .eq("id", value: audit.id)
-                .execute()
+            // The audit is now successfully submitted to 'in_progress' state.
             
             await MainActor.run {
                 self.isLoading = false
