@@ -119,7 +119,7 @@ struct WriteOffApprovalView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                CustomHeader(title: "Write-Off Approval", showBackButton: true, backAction: { dismiss() })
+                CustomHeader(title: "Write-Off Approval", showBackButton: true, backAction: { dismiss() }, isInline: true)
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
@@ -218,7 +218,7 @@ struct WriteOffApprovalView: View {
                 }
             }
         }
-        .navigationTitle("")
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             viewModel.fetchInventory()
         }

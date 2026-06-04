@@ -22583,6 +22583,7 @@
       }
     },
     "Audit Sign-off" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {

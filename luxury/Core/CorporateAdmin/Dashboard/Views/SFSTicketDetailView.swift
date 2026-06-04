@@ -15,7 +15,10 @@ struct SFSTicketDetailView: View {
         ZStack {
             AppColors.background.ignoresSafeArea()
             
-            ScrollView {
+            VStack(spacing: 0) {
+                CustomHeader(title: "Ticket Details", showBackButton: true, backAction: { router.pop() }, isInline: true)
+                
+                ScrollView {
                 VStack(spacing: 24) {
                     // Header Status
                     VStack(spacing: 12) {
@@ -69,10 +72,10 @@ struct SFSTicketDetailView: View {
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 40)
+                }
             }
         }
-        .navigationTitle("Ticket Details")
-        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .navigationBar)
     }
 }
 

@@ -365,6 +365,8 @@ struct CycleCountDetailView: View {
             AppColors.background.ignoresSafeArea()
 
             VStack(spacing: 0) {
+                CustomHeader(title: "Inventory Audit Approval", showBackButton: true, backAction: { router.pop() }, isInline: true)
+                
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 28) {
                         
@@ -564,11 +566,7 @@ struct CycleCountDetailView: View {
         } message: {
             Text("Are you sure you want to reschedule the monthly audit window?")
         }
-        .navigationTitle("Audit Sign-off")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(AppColors.background, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
-        .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar(.hidden, for: .navigationBar)
     }
 }
 

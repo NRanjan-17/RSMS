@@ -216,7 +216,7 @@ struct BoutiqueManagerProfileView: View {
                             .padding(.horizontal, 24)
                             
                             Button(action: {
-                                // Support & Policies
+                                router.push(BMRoute.storePolicies)
                             }) {
                                 HStack {
                                     Image(systemName: "doc.text.fill")

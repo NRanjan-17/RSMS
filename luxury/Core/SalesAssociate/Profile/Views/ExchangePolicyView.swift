@@ -9,12 +9,15 @@ import SwiftUI
 
 struct ExchangePolicyView: View {
     @Environment(Router.self) private var router
+    var title: String = "Exchange Policy"
     
     var body: some View {
         ZStack {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
+                CustomHeader(title: LocalizedStringKey(title), showBackButton: true, backAction: { router.pop() }, isInline: true)
+                
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 24) {
                         PolicySection(title: "General Policy", content: "Items may be exchanged within 30 days of original purchase. Original receipt or proof of purchase is required for all exchanges. Items must be unworn, unused, and in their original condition with all tags and packaging intact.")
@@ -29,11 +32,7 @@ struct ExchangePolicyView: View {
                 }
             }
         }
-        .navigationTitle("Exchange Policy")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(AppColors.background, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
-        .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar(.hidden, for: .navigationBar)
     }
 }
 

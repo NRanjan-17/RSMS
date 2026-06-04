@@ -9,7 +9,7 @@ struct SalesTargetsView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                CustomHeader(title: "Sales Targets", showBackButton: true, backAction: { router.pop() })
+                CustomHeader(title: "Sales Targets", showBackButton: true, backAction: { router.pop() }, isInline: true)
                 
                 if viewModel.isLoading {
                     Spacer()
