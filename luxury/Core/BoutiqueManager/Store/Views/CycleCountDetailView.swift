@@ -96,7 +96,7 @@ final class CycleCountService {
             .execute()
     }
     
-    func updateFixedDay(boutiqueId: UUID, day: Int) async throws {
+    func updateFixedDay(boutiqueId: UUID, day: Int, createdBy: UUID? = nil) async throws {
         let activeAudits: [DBStoreAudit] = try await client.from("audits")
             .select()
             .eq("boutique_id", value: boutiqueId)
@@ -144,12 +144,14 @@ final class CycleCountService {
                 let scheduled_date: String
                 let fixed_day: Int
                 let status: String
+                let created_by: UUID?
             }
             let payload = InsertAudit(
                 boutique_id: boutiqueId,
                 scheduled_date: scheduledDateStr,
                 fixed_day: day,
-                status: AuditModelStatus.scheduled.rawValue
+                status: AuditModelStatus.scheduled.rawValue,
+                created_by: createdBy
             )
             try await client.from("audits")
                 .insert(payload)
@@ -234,9 +236,10 @@ final class CycleCountViewModel {
     
     func updateFixedDay(day: Int) {
         guard let bId = boutiqueId else { return }
+        let creatorId = currentUserId
         Task {
             do {
-                try await service.updateFixedDay(boutiqueId: bId, day: day)
+                try await service.updateFixedDay(boutiqueId: bId, day: day, createdBy: creatorId)
                 await MainActor.run {
                     self.loadAudits()
                 }
@@ -580,15 +583,23 @@ struct AuditReportHubView: View {
         formatter.dateFormat = "yyyy-MM-dd"
         let today = formatter.string(from: Date())
         
-        return viewModel.activeAudits.filter { audit in
+        let allActive = viewModel.activeAudits.filter { audit in
             let isCurrent = (audit.scheduledDate == today) || (audit.status == .inProgress)
             let isPending = (audit.scheduledDate < today) && (audit.status != .signedOff)
             return isCurrent || isPending
         }
+        
+        if let currentUserId = viewModel.currentUserId {
+            return allActive.filter { $0.createdBy == nil || $0.createdBy == currentUserId }
+        }
+        return allActive
     }
     
     private var completedAudits: [DBStoreAudit] {
-        viewModel.completedAudits
+        if let currentUserId = viewModel.currentUserId {
+            return viewModel.completedAudits.filter { $0.createdBy == nil || $0.createdBy == currentUserId }
+        }
+        return viewModel.completedAudits
     }
     
     private func formatDayAsOrdinal(_ day: Int) -> String {

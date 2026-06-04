@@ -666,6 +666,12 @@ struct VarianceReport: Identifiable, Hashable, Codable {
     let items: [VarianceReportItem]
 }
 
+struct UnexpectedScannedItem: Identifiable, Hashable, Codable {
+    var id: UUID = UUID()
+    let barcode: String
+    let status: String // e.g. "new_item"
+}
+
 struct AuditSession: Identifiable, Hashable, Codable {
     let id: UUID
     var title: String
@@ -678,6 +684,7 @@ struct AuditSession: Identifiable, Hashable, Codable {
     var isSubmitted: Bool
     var expectedItems: [AuditCountItem]
     var varianceReport: VarianceReport?
+    var unexpectedScannedItems: [UnexpectedScannedItem]?
 }
 
 struct AuditCountItem: Identifiable, Hashable, Codable {
@@ -686,7 +693,7 @@ struct AuditCountItem: Identifiable, Hashable, Codable {
     let name: String
     let sku: String
     let barcode: String
-    let expectedQty: Int
+    var expectedQty: Int
     var countedQty: Int
     var isArchivedProduct: Bool
 }
