@@ -11,7 +11,6 @@ struct StockView: View {
     @Environment(Router.self) private var router
     @Environment(AppCoordinator.self) private var coordinator
     @Environment(StockViewModel.self) private var viewModel
-    @State private var showingSettings = false
     
     var body: some View {
         ZStack {
@@ -23,11 +22,7 @@ struct StockView: View {
                         .font(AppFonts.serif(size: 28, weight: .semibold))
                         .foregroundStyle(.white)
                     Spacer()
-                    Button(action: { showingSettings = true }) {
-                        Image(systemName: "gearshape")
-                            .font(AppFonts.sansSerif(size: 20))
-                            .foregroundStyle(AppColors.gold)
-                    }
+
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 16)
@@ -141,10 +136,7 @@ struct StockView: View {
             viewModel.fetchInventoryStats()
             viewModel.fetchSFSCount()
         }
-        .sheet(isPresented: $showingSettings) {
-            InventoryControllerSettingsView()
-                .presentationDragIndicator(.visible)
-        }
+
     }
 }
 

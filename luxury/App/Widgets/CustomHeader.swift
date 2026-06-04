@@ -15,16 +15,45 @@ struct CustomHeader: View {
     var trailingIcon: String? = nil
     var trailingAccessibilityLabel: String? = nil
     var trailingAction: (() -> Void)? = nil
+    var isInline: Bool = false
     
     var body: some View {
         HStack(spacing: 12) {
-            // Removed custom back button to rely on native iOS back button
-            Text(title)
-                .font(AppFonts.serif(size: 28, weight: .semibold))
-                .foregroundStyle(.white)
-                .accessibilityAddTraits(.isHeader)
+            if showBackButton, let action = backAction {
+                Button(action: action) {
+                    ZStack {
+                        Circle()
+                            .fill(AppColors.surface2)
+                            .frame(width: 44, height: 44)
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundStyle(.white)
+                    }
+                }
+            }
             
-            Spacer()
+            if isInline {
+                Spacer()
+                Text(title)
+                    .font(AppFonts.sansSerif(size: 18, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .accessibilityAddTraits(.isHeader)
+                Spacer()
+                
+                if showBackButton && trailingIcon == nil {
+                    // Balance the back button
+                    Circle()
+                        .frame(width: 44, height: 44)
+                        .opacity(0)
+                }
+            } else {
+                Text(title)
+                    .font(AppFonts.serif(size: 28, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .accessibilityAddTraits(.isHeader)
+                
+                Spacer()
+            }
             
             if let icon = trailingIcon, let action = trailingAction {
                 Button(action: action) {

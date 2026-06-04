@@ -16,7 +16,7 @@ struct StockSearchView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                CustomHeader(title: "Stock Search", showBackButton: true, backAction: { dismiss() })
+                CustomHeader(title: "Stock Search", showBackButton: true, backAction: { dismiss() }, isInline: true)
                 
                 HStack(spacing: 12) {
                     Image(systemName: "magnifyingglass")

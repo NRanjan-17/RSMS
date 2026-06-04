@@ -24619,6 +24619,7 @@
       }
     },
     "Barcode & QR Scanner" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -116650,6 +116651,7 @@
       }
     },
     "Scan Unexpected" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -128902,6 +128904,7 @@
       }
     },
     "SIMULATED SCANNING ACTIONS" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
