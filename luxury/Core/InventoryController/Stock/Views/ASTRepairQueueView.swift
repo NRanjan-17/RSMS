@@ -42,13 +42,16 @@ struct ASTRepairQueueView: View {
                                 }
                             }) {
                                 Text(filter)
-                                    .font(AppFonts.sansSerif(size: 13, weight: .semibold))
-                                    .foregroundStyle(selectedFilter == filter ? AppColors.background : AppColors.gold)
+                                    .font(AppFonts.sansSerif(size: 11, weight: selectedFilter == filter ? .medium : .light))
+                                    .foregroundStyle(selectedFilter == filter ? AppColors.background : AppColors.secondary)
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 8)
-                                    .background(selectedFilter == filter ? AppColors.gold : AppColors.surface)
+                                    .background(selectedFilter == filter ? AppColors.gold : Color.clear)
                                     .clipShape(Capsule())
-                                    .overlay(Capsule().stroke(AppColors.gold, lineWidth: 1))
+                                    .overlay(
+                                        Capsule()
+                                            .stroke(selectedFilter == filter ? Color.clear : AppColors.gold15, lineWidth: 0.5)
+                                    )
                             }
                         }
                     }

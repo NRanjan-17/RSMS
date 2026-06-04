@@ -83,7 +83,7 @@ struct PurchaseDetailsView: View {
     }
     
     private var displayProductId: String {
-        return details?.catalogs?.id.uuidString ?? purchase.id.uuidString
+        return details?.catalogs?.id.uuidString ?? purchase.productId?.uuidString ?? purchase.id.uuidString
     }
     
     private var displayProductSerial: String {
@@ -426,11 +426,12 @@ struct PurchaseDetailsView: View {
                         self.details = first
                     }
                 }
+                let actualProductId = fetched.first?.productId.uuidString ?? purchase.productId?.uuidString ?? purchase.id.uuidString
                 
                 let asts: [ASTDetails] = try await SupabaseManager.shared.client
                     .from("ast")
                     .select("*, catalogs(*), client(*)")
-                    .eq("product_id", value: displayProductId)
+                    .eq("product_id", value: actualProductId)
                     .execute()
                     .value
                 

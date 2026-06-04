@@ -41,11 +41,6 @@ struct SellingView: View {
                 TextField("Search by name or SKU…", text: $viewModel.searchText)
                     .font(AppFonts.sansSerif(size: 14))
                     .foregroundStyle(AppColors.text)
-                Button(action: { router.presentFullScreen(SARoute.barcodeScanner) }) {
-                    Image(systemName: "barcode.viewfinder")
-                        .font(AppFonts.sansSerif(size: 18))
-                        .foregroundStyle(AppColors.gold)
-                }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
