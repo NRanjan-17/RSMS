@@ -145392,6 +145392,9 @@
         }
       }
     },
+    "Unable to load transfers" : {
+
+    },
     "Unassigned" : {
       "localizations" : {
         "ar" : {

@@ -203,36 +203,27 @@ struct TransferDetailView: View {
                     try await InventoryService.shared.updateInventoryStatus(serials: serials, newStatus: .inTransit)
                 }
                 
-                var allTransfers = TransferPersistence.shared.loadTransfers()
-                if let index = allTransfers.firstIndex(where: { $0.id == transfer.id }) {
-                    let updated = TransferRequest(
-                        id: transfer.id,
-                        reference: transfer.reference,
-                        source: transfer.source,
-                        destination: transfer.destination,
-                        items: transfer.items,
-                        status: "In Transit",
-                        badgeStatus: .pending
-                    )
-                    allTransfers[index] = updated
-                    TransferPersistence.shared.saveAll(allTransfers)
-                    
-                    await MainActor.run {
-                        self.transfer = updated
-                    }
-                    
-                    SystemLogService.shared.logAction(
-                        category: .inventory,
-                        severity: .info,
-                        message: "Stock Transfer \(transfer.reference) marked as In Transit.",
-                        boutiqueName: transfer.source
-                    )
-                    
-                    NotificationCenter.default.post(
-                        name: NSNotification.Name("StockTransferUpdated"),
-                        object: nil
-                    )
+                let updated = try await StockTransferService.shared.updateTransfer(
+                    id: transfer.id,
+                    status: "In Transit",
+                    badgeStatus: .pending
+                )
+                
+                await MainActor.run {
+                    self.transfer = updated
                 }
+                
+                SystemLogService.shared.logAction(
+                    category: .inventory,
+                    severity: .info,
+                    message: "Stock Transfer \(transfer.reference) marked as In Transit.",
+                    boutiqueName: transfer.source
+                )
+                
+                NotificationCenter.default.post(
+                    name: NSNotification.Name("StockTransferUpdated"),
+                    object: nil
+                )
                 
                 await MainActor.run {
                     self.isLoading = false
@@ -296,36 +287,28 @@ struct TransferDetailView: View {
                     try await InventoryService.shared.updateInventoryStatus(serials: serials, newStatus: .available, newBoutiqueId: destBoutique.id)
                 }
                 
-                var allTransfers = TransferPersistence.shared.loadTransfers()
-                if let index = allTransfers.firstIndex(where: { $0.id == transfer.id }) {
-                    let updated = TransferRequest(
-                        id: transfer.id,
-                        reference: transfer.reference,
-                        source: transfer.source,
-                        destination: transfer.destination,
-                        items: transfer.items,
-                        status: "Completed",
-                        badgeStatus: .success
-                    )
-                    allTransfers[index] = updated
-                    TransferPersistence.shared.saveAll(allTransfers)
-                    
-                    await MainActor.run {
-                        self.transfer = updated
-                    }
-                    
-                    SystemLogService.shared.logAction(
-                        category: .inventory,
-                        severity: .info,
-                        message: "Stock Transfer \(transfer.reference) completed/received at \(transfer.destination).",
-                        boutiqueName: transfer.destination
-                    )
-                    
-                    NotificationCenter.default.post(
-                        name: NSNotification.Name("StockTransferUpdated"),
-                        object: nil
-                    )
+                let updated = try await StockTransferService.shared.updateTransfer(
+                    id: transfer.id,
+                    status: "Completed",
+                    badgeStatus: .success,
+                    receivedAt: Date()
+                )
+                
+                await MainActor.run {
+                    self.transfer = updated
                 }
+                
+                SystemLogService.shared.logAction(
+                    category: .inventory,
+                    severity: .info,
+                    message: "Stock Transfer \(transfer.reference) completed/received at \(transfer.destination).",
+                    boutiqueName: transfer.destination
+                )
+                
+                NotificationCenter.default.post(
+                    name: NSNotification.Name("StockTransferUpdated"),
+                    object: nil
+                )
                 
                 await MainActor.run {
                     self.isLoading = false

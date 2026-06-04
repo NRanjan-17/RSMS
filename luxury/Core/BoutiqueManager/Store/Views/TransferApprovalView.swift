@@ -17,10 +17,9 @@ struct TransferApprovalView: View {
     @State private var searchText = ""
     @State private var selectedTransfer: TransferRequest? = nil
     @State private var showingNewTransfer = false
-
-    private var transfers: [TransferRequest] {
-        TransferPersistence.shared.loadTransfers()
-    }
+    @State private var transfers: [TransferRequest] = []
+    @State private var isLoading = false
+    @State private var errorMessage: String?
     
     var body: some View {
         NavigationStack {
@@ -96,7 +95,26 @@ struct TransferApprovalView: View {
                 ScrollView(showsIndicators: false) {
                     let filtered = filteredTransfers()
                     
-                    if filtered.isEmpty {
+                    if isLoading {
+                        ProgressView()
+                            .tint(AppColors.gold)
+                            .padding(.top, 32)
+                    } else if let errorMessage {
+                        VStack(spacing: 16) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.system(size: 44))
+                                .foregroundStyle(AppColors.secondary)
+                            Text("Unable to load transfers")
+                                .font(AppFonts.serif(size: 18, weight: .medium))
+                                .foregroundStyle(.white)
+                            Text(errorMessage)
+                                .font(AppFonts.sansSerif(size: 13))
+                                .foregroundStyle(AppColors.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 40)
+                        }
+                        .padding(.top, 80)
+                    } else if filtered.isEmpty {
                         VStack(spacing: 16) {
                             Image(systemName: selectedSegment == 0 ? "checkmark.circle" : "shippingbox")
                                 .font(.system(size: 48))
@@ -233,8 +251,44 @@ struct TransferApprovalView: View {
                 NewTransferView()
             }
         }
+        .task {
+            await loadTransfers()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("StockTransferUpdated"))) { _ in
+            Task { await loadTransfers() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("StockTransferReceived"))) { _ in
+            Task { await loadTransfers() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("StockTransferApproved"))) { _ in
+            Task { await loadTransfers() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("StockTransferRejected"))) { _ in
+            Task { await loadTransfers() }
+        }
     } // Closes NavigationStack
 } // Closes body
+    
+    private func loadTransfers() async {
+        await MainActor.run {
+            isLoading = true
+            errorMessage = nil
+        }
+        
+        do {
+            let fetched = try await StockTransferService.shared.fetchTransfers()
+            await MainActor.run {
+                self.transfers = fetched
+                self.isLoading = false
+            }
+        } catch {
+            await MainActor.run {
+                self.errorMessage = error.localizedDescription
+                self.transfers = []
+                self.isLoading = false
+            }
+        }
+    }
     
     private func filteredTransfers() -> [TransferRequest] {
         let isAwaitingSegment = selectedSegment == 0
@@ -259,64 +313,64 @@ struct TransferApprovalView: View {
     }
     
     private func approveTransfer(_ transfer: TransferRequest) {
-        var allTransfers = TransferPersistence.shared.loadTransfers()
-        if let index = allTransfers.firstIndex(where: { $0.id == transfer.id }) {
-            let updated = TransferRequest(
-                id: transfer.id,
-                reference: transfer.reference,
-                source: transfer.source,
-                destination: transfer.destination,
-                items: transfer.items,
-                status: "Approved",
-                badgeStatus: .success
-            )
-            allTransfers[index] = updated
-            TransferPersistence.shared.saveAll(allTransfers)
-            
-            SystemLogService.shared.logAction(
-                category: .inventory,
-                severity: .info,
-                message: "Stock Transfer \(transfer.reference) approved by Boutique Manager.",
-                boutiqueName: transfer.source
-            )
-            
-            NotificationCenter.default.post(
-                name: NSNotification.Name("StockTransferApproved"),
-                object: nil,
-                userInfo: ["reference": transfer.reference]
-            )
-            
+        Task {
+            do {
+                _ = try await StockTransferService.shared.updateTransfer(
+                    id: transfer.id,
+                    status: "Approved",
+                    badgeStatus: .success
+                )
+                
+                SystemLogService.shared.logAction(
+                    category: .inventory,
+                    severity: .info,
+                    message: "Stock Transfer \(transfer.reference) approved by Boutique Manager.",
+                    boutiqueName: transfer.source
+                )
+                
+                NotificationCenter.default.post(
+                    name: NSNotification.Name("StockTransferApproved"),
+                    object: nil,
+                    userInfo: ["reference": transfer.reference]
+                )
+                
+                await loadTransfers()
+            } catch {
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                }
+            }
         }
     }
     
     private func rejectTransfer(_ transfer: TransferRequest) {
-        var allTransfers = TransferPersistence.shared.loadTransfers()
-        if let index = allTransfers.firstIndex(where: { $0.id == transfer.id }) {
-            let updated = TransferRequest(
-                id: transfer.id,
-                reference: transfer.reference,
-                source: transfer.source,
-                destination: transfer.destination,
-                items: transfer.items,
-                status: "Rejected",
-                badgeStatus: .error
-            )
-            allTransfers[index] = updated
-            TransferPersistence.shared.saveAll(allTransfers)
-            
-            SystemLogService.shared.logAction(
-                category: .inventory,
-                severity: .warning,
-                message: "Stock Transfer \(transfer.reference) rejected by Boutique Manager.",
-                boutiqueName: transfer.source
-            )
-            
-            NotificationCenter.default.post(
-                name: NSNotification.Name("StockTransferRejected"),
-                object: nil,
-                userInfo: ["reference": transfer.reference]
-            )
-            
+        Task {
+            do {
+                _ = try await StockTransferService.shared.updateTransfer(
+                    id: transfer.id,
+                    status: "Rejected",
+                    badgeStatus: .error
+                )
+                
+                SystemLogService.shared.logAction(
+                    category: .inventory,
+                    severity: .warning,
+                    message: "Stock Transfer \(transfer.reference) rejected by Boutique Manager.",
+                    boutiqueName: transfer.source
+                )
+                
+                NotificationCenter.default.post(
+                    name: NSNotification.Name("StockTransferRejected"),
+                    object: nil,
+                    userInfo: ["reference": transfer.reference]
+                )
+                
+                await loadTransfers()
+            } catch {
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                }
+            }
         }
     }
 }
