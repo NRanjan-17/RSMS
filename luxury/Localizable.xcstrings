@@ -11819,6 +11819,7 @@
       }
     },
     "Add Phone Number" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -57167,6 +57168,7 @@
       }
     },
     "Enter the 6-digit code sent to %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -64513,6 +64515,7 @@
       }
     },
     "Failed to send SMS: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -65329,6 +65332,7 @@
       }
     },
     "Failed to verify code: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -83432,6 +83436,9 @@
         }
       }
     },
+    "MONTHLY REVENUE" : {
+
+    },
     "MTD Sales" : {
       "localizations" : {
         "ar" : {
@@ -88611,6 +88618,7 @@
       }
     },
     "No factor ID found. Please try again." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -102351,6 +102359,7 @@
       }
     },
     "Phone Number" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -102487,6 +102496,7 @@
       }
     },
     "PHONE NUMBER (with country code)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -102623,6 +102633,7 @@
       }
     },
     "Phone number is required" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -102759,6 +102770,7 @@
       }
     },
     "Phone Setup" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -104527,6 +104539,7 @@
       }
     },
     "Please enter the 6-digit code" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -115010,6 +115023,7 @@
       }
     },
     "Remote" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -128619,6 +128633,7 @@
       }
     },
     "Secure your account with an SMS verification code." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -131754,6 +131769,7 @@
       }
     },
     "Send Code" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -148772,6 +148788,7 @@
       }
     },
     "TODAY'S REVENUE" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -158840,6 +158857,7 @@
       }
     },
     "VERIFICATION CODE" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -159656,6 +159674,7 @@
       }
     },
     "Verify & Enable" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {

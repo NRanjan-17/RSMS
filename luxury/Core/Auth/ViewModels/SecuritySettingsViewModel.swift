@@ -20,9 +20,6 @@ final class SecuritySettingsViewModel {
     var isAuthenticatorEnabled = false
     var enrolledFactors: [Auth.Factor] = []
     
-    var isPhoneMFAEnabled = false
-    var enrolledPhoneFactors: [Auth.Factor] = []
-    
     private let client = SupabaseManager.shared.client
     
     func checkMFAStatus() {
@@ -32,9 +29,6 @@ final class SecuritySettingsViewModel {
                 await MainActor.run {
                     self.enrolledFactors = factors.totp.filter { $0.status == .verified }
                     self.isAuthenticatorEnabled = !self.enrolledFactors.isEmpty
-                    
-                    self.enrolledPhoneFactors = factors.phone.filter { $0.status == .verified }
-                    self.isPhoneMFAEnabled = !self.enrolledPhoneFactors.isEmpty
                 }
             } catch {
                 print("Failed to check MFA status: \(error)")

@@ -10,7 +10,6 @@ struct SecuritySettingsView: View {
     @State private var viewModel = SecuritySettingsViewModel()
     @Environment(\.dismiss) private var dismiss
     @State private var showMFAEnrollment = false
-    @State private var showPhoneMFAEnrollment = false
     
     var body: some View {
         ZStack {
@@ -125,66 +124,6 @@ struct SecuritySettingsView: View {
                                     }
                                 }
                                 .padding(.top, 8)
-                                
-                                Divider().background(AppColors.border)
-                                    .padding(.vertical, 8)
-                                
-                                Text("Phone Number")
-                                    .font(AppFonts.sansSerif(size: 13, weight: .bold))
-                                    .foregroundStyle(AppColors.secondary)
-                                    .textCase(.uppercase)
-                                    .padding(.bottom, 8)
-                                
-                                if !viewModel.isPhoneMFAEnabled {
-                                    HStack {
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text("Not configured")
-                                                .font(AppFonts.sansSerif(size: 13))
-                                                .foregroundStyle(AppColors.secondary)
-                                        }
-                                        Spacer()
-                                    }
-                                } else {
-                                    ForEach(viewModel.enrolledPhoneFactors, id: \.id) { factor in
-                                        HStack {
-                                            VStack(alignment: .leading, spacing: 4) {
-                                                Text(factor.friendlyName ?? "Phone OTP")
-                                                    .font(AppFonts.sansSerif(size: 15, weight: .medium))
-                                                    .foregroundStyle(.white)
-                                                Text("Enabled")
-                                                    .font(AppFonts.sansSerif(size: 13))
-                                                    .foregroundStyle(AppColors.success)
-                                            }
-                                            Spacer()
-                                            
-                                            Button("Remove") {
-                                                viewModel.unenrollFactor(factorId: factor.id)
-                                            }
-                                            .font(AppFonts.sansSerif(size: 13, weight: .bold))
-                                            .foregroundStyle(AppColors.error)
-                                        }
-                                        if factor.id != viewModel.enrolledPhoneFactors.last?.id {
-                                            Divider().background(AppColors.border)
-                                        }
-                                    }
-                                }
-                                
-                                Divider().background(AppColors.border)
-                                
-                                Button(action: {
-                                    showPhoneMFAEnrollment = true
-                                }) {
-                                    HStack {
-                                        Image(systemName: "plus.circle.fill")
-                                            .font(AppFonts.sansSerif(size: 16))
-                                            .foregroundStyle(AppColors.gold)
-                                        Text("Add Phone Number")
-                                            .font(AppFonts.sansSerif(size: 14, weight: .bold))
-                                            .foregroundStyle(AppColors.gold)
-                                        Spacer()
-                                    }
-                                }
-                                .padding(.top, 8)
                             }
                             .padding(16)
                             .background(AppColors.surface)
@@ -222,11 +161,6 @@ struct SecuritySettingsView: View {
             viewModel.checkMFAStatus()
         }) {
             MFASetupView(isFromSettings: true)
-        }
-        .fullScreenCover(isPresented: $showPhoneMFAEnrollment, onDismiss: {
-            viewModel.checkMFAStatus()
-        }) {
-            PhoneMFASetupView()
         }
     }
 }
