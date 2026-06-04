@@ -36,6 +36,7 @@ struct CorporateAdminCanvas: View {
                     .navigationDestination(for: CARoute.self) { route in
                         destination(for: route, router: analyticsRouter)
                     }
+
                     .fullScreenCover(item: $analyticsRouter.presentedFullScreen) { route in
                         destination(for: route.value as! CARoute, router: analyticsRouter)
                     }
@@ -145,7 +146,9 @@ struct CorporateAdminCanvas: View {
         case .planograms:
             PlanogramManagementView()
         case .clientInsights:
-            ClientInsightsView()
+            ClientInsightsView(onDirectoryTap: {
+                router.push(CARoute.clientDirectory)
+            })
         case .globalRevenue:
             GlobalRevenueView()
         case .pricingCampaigns:
@@ -160,6 +163,12 @@ struct CorporateAdminCanvas: View {
             SFSTicketsListView(tickets: tickets)
         case .transactionsList(let txs):
             CATransactionsListView(transactions: txs)
+        case .clientProfile(let client):
+            ClientProfileView(client: client)
+        case .clientDirectory:
+            ClientDirectoryListView(onClientTap: { client in
+                router.push(CARoute.clientProfile(client))
+            })
         @unknown default:
             // Fallback to a neutral view to satisfy exhaustiveness and aid forward-compatibility
             EmptyView()

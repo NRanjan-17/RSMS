@@ -35,6 +35,7 @@ enum BMRoute: Hashable {
     case staffPerformanceReport
     case shrinkReport
     case clientInsights
+    case reportsAnalytics
     case transferApproval
     case newTransfer
     case cycleCountSignoff
@@ -42,6 +43,8 @@ enum BMRoute: Hashable {
     case astQueue
     case astApproval(AST)
     case afterSalesTracking(ASTDetails)
+    case clientProfile(Client)
+    case clientDirectory
     case writeOffApproval
     case staffRequestDetail(StaffModel)
     case pendingStaff
@@ -114,6 +117,8 @@ enum CARoute: Hashable {
     case sfsTicketDetail(PurchasedItemEntity)
     case sfsTicketsList([PurchasedItemEntity])
     case transactionsList([SATransactionEntity])
+    case clientProfile(Client)
+    case clientDirectory
 }
 
 enum AppRoutes: Hashable {

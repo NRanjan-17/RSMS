@@ -17,28 +17,36 @@ final class StaffPerformanceViewModel {
     func fetchData() async {
         await MainActor.run { isLoading = true }
         do {
-            guard let profileTuple = try? await ProfileService().fetchCurrentProfile(),
-                  let staff = profileTuple.1 as? StaffModel,
-                  let bId = staff.boutiqueId else {
+            guard let profileTuple = try? await ProfileService().fetchCurrentProfile() else {
+                await MainActor.run { isLoading = false }
+                return
+            }
+            
+            let bId: UUID?
+            if let staff = profileTuple.1 as? StaffModel, let boutiqueId = staff.boutiqueId {
+                bId = boutiqueId
+            } else if let boutique = profileTuple.1 as? CorporateBoutique {
+                bId = boutique.id
+            } else if profileTuple.0 == .corporateAdmin {
+                bId = nil
+            } else {
                 await MainActor.run { isLoading = false }
                 return
             }
             
             // Fetch all staff in this boutique
-            let allStaff: [StaffModel] = try await SupabaseManager.shared.client
-                .from("staff")
-                .select()
-                .eq("boutique_id", value: bId)
-                .execute()
-                .value
+            var staffQuery = SupabaseManager.shared.client.from("staff").select()
+            if let boutiqueId = bId {
+                staffQuery = staffQuery.eq("boutique_id", value: boutiqueId)
+            }
+            let allStaff: [StaffModel] = (try? await staffQuery.execute().value) ?? []
                 
             // Fetch all transactions for this boutique
-            let txs: [SATransactionEntity] = try await SupabaseManager.shared.client
-                .from("transaction")
-                .select()
-                .eq("boutique_id", value: bId)
-                .execute()
-                .value
+            var txQuery = SupabaseManager.shared.client.from("transaction").select()
+            if let boutiqueId = bId {
+                txQuery = txQuery.eq("boutique_id", value: boutiqueId)
+            }
+            let txs: [SATransactionEntity] = (try? await txQuery.execute().value) ?? []
                 
             // Fetch appointments and filter by staff in this boutique
             let staffIds = Set(allStaff.map { $0.id })

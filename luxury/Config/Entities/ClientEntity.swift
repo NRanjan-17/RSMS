@@ -29,3 +29,30 @@ struct ClientEntity: Identifiable, Codable, Hashable, Equatable {
         case dateOfAnniversary = "date_of_anniversary"
     }
 }
+
+extension ClientEntity {
+    func toUIModel() -> Client {
+        let parsedTier: ClientTier
+        switch (self.tier ?? "").lowercased() {
+        case "platinum": parsedTier = .platinum
+        case "gold": parsedTier = .gold
+        case "silver": parsedTier = .silver
+        default: parsedTier = .silver
+        }
+        
+        return Client(
+            id: self.id,
+            name: self.name,
+            tier: parsedTier,
+            lastVisit: "Unknown", // Can be dynamically calculated or fetched separately
+            ltv: 0.0, // Should ideally be calculated from transactions
+            initial: String(self.name.prefix(1)),
+            phone: self.phone,
+            email: self.email,
+            dob: self.dob,
+            maritalStatus: self.maritalStatus,
+            dateOfAnniversary: self.dateOfAnniversary,
+            createdAt: self.createdAt
+        )
+    }
+}

@@ -78,18 +78,7 @@ struct AuthenticationView: View {
                         )
                     }
                     
-                    HStack(spacing: 14) {
-                        Rectangle().fill(AppColors.tertiary).frame(height: 0.5)
-                        Text("or continue with")
-                            .font(AppFonts.sansSerif(size: 11))
-                            .foregroundStyle(AppColors.tertiary)
-                        Rectangle().fill(AppColors.tertiary).frame(height: 0.5)
-                    }
-                    .padding(.vertical, 24)
-                    
-                    SocialButton(icon: "apple.logo", title: "Sign in with Apple") {
-                        showComingSoon = true
-                    }
+
                     
                     Spacer().frame(height: 40)
                 }

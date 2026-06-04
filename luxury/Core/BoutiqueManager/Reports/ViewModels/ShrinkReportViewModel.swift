@@ -28,9 +28,19 @@ final class ShrinkReportViewModel {
                 errorMessage = nil
             }
             do {
-                guard let profileTuple = try? await ProfileService().fetchCurrentProfile(),
-                      let staff = profileTuple.1 as? StaffModel,
-                      let bId = staff.boutiqueId else {
+                guard let profileTuple = try? await ProfileService().fetchCurrentProfile() else {
+                    await MainActor.run { isLoading = false }
+                    return
+                }
+                
+                let bId: UUID?
+                if let staff = profileTuple.1 as? StaffModel, let boutiqueId = staff.boutiqueId {
+                    bId = boutiqueId
+                } else if let boutique = profileTuple.1 as? CorporateBoutique {
+                    bId = boutique.id
+                } else if profileTuple.0 == .corporateAdmin {
+                    bId = nil
+                } else {
                     await MainActor.run { isLoading = false }
                     return
                 }
@@ -46,10 +56,14 @@ final class ShrinkReportViewModel {
                 let newStockDict = try await InventoryService.shared.fetchAvailableStockDictionary(forBoutique: bId)
                 
                 // 3. Fetch audits for this boutique to compute shrink data
-                let audits: [DBStoreAudit] = (try? await SupabaseManager.shared.client
+                var auditsQuery = SupabaseManager.shared.client
                     .from("audits")
                     .select()
-                    .eq("boutique_id", value: bId)
+                if let boutiqueId = bId {
+                    auditsQuery = auditsQuery.eq("boutique_id", value: boutiqueId)
+                }
+                
+                let audits: [DBStoreAudit] = (try? await auditsQuery
                     .order("created_at", ascending: false)
                     .execute()
                     .value) ?? []

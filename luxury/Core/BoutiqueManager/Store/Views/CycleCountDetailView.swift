@@ -1838,7 +1838,7 @@ private struct CycleCountVarianceRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(item.name ?? "Unknown Item")
+                Text(item.name)
                     .font(AppFonts.serif(size: 17, weight: .medium))
                     .foregroundStyle(.white)
 

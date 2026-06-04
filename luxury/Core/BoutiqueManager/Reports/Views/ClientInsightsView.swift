@@ -10,6 +10,9 @@ import SwiftUI
 struct ClientInsightsView: View {
     @State private var viewModel = ClientInsightsViewModel()
     @Environment(\.dismiss) private var dismiss
+    @Environment(Router.self) private var router
+    
+    var onDirectoryTap: (() -> Void)? = nil
     
     var body: some View {
         ZStack {
@@ -20,7 +23,12 @@ struct ClientInsightsView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 28) {
                         HStack(spacing: 12) {
-                            MetricCard(title: "Total Clients", value: "\(viewModel.totalClients)", subtitle: "Active Profiles", icon: "person.2.fill")
+                            Button(action: {
+                                onDirectoryTap?()
+                            }) {
+                                MetricCard(title: "Total Clients", value: "\(viewModel.totalClients)", subtitle: "Active Profiles", icon: "person.2.fill")
+                            }
+                            .buttonStyle(.plain)
                             MetricCard(title: "Avg Lifetime Value", value: viewModel.avgLTV, subtitle: "Per Client Average", icon: "chart.line.uptrend.xyaxis")
                         }
                         .padding(.horizontal, 24)
@@ -61,7 +69,11 @@ struct ClientInsightsView: View {
                         }
                     }
                     .padding(.top, 12)
-                    .padding(.bottom, 40)
+                    
+
+                    
+                    Spacer()
+                        .frame(height: 40)
                 }
             }
         }

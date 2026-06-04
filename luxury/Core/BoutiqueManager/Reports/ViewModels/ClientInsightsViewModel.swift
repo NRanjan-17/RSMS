@@ -14,6 +14,7 @@ final class ClientInsightsViewModel {
     var totalClients: Int = 0
     var avgLTV: String = "\(CurrencyManager.shared.symbol)0"
     var tierBreakdown: [TierMetric] = []
+    var clients: [ClientEntity] = []
     
     var isLoading = false
     
@@ -21,23 +22,38 @@ final class ClientInsightsViewModel {
         isLoading = true
         Task {
             do {
-                guard let profileTuple = try? await ProfileService().fetchCurrentProfile(),
-                      let staff = profileTuple.1 as? StaffModel,
-                      let bId = staff.boutiqueId else {
+                guard let profileTuple = try? await ProfileService().fetchCurrentProfile() else {
+                    await MainActor.run { isLoading = false }
+                    return
+                }
+                
+                let bId: UUID?
+                if let staff = profileTuple.1 as? StaffModel, let boutiqueId = staff.boutiqueId {
+                    bId = boutiqueId
+                } else if let boutique = profileTuple.1 as? CorporateBoutique {
+                    bId = boutique.id
+                } else if profileTuple.0 == .corporateAdmin {
+                    bId = nil
+                } else {
                     await MainActor.run { isLoading = false }
                     return
                 }
                 
                 let client = SupabaseManager.shared.client
                 let clients: [ClientEntity] = try await client.from("client").select().execute().value
-                let txs: [SATransactionEntity] = try await client.from("transaction")
-                    .select()
-                    .eq("boutique_id", value: bId)
-                    .execute()
-                    .value
+                var query = client.from("transaction").select()
+                if let boutiqueId = bId {
+                    query = query.eq("boutique_id", value: boutiqueId)
+                }
+                let txs: [SATransactionEntity] = try await query.execute().value
                 
                 let boutiqueClientIds = Set(txs.compactMap { $0.clientId })
-                let boutiqueClients = clients.filter { boutiqueClientIds.contains($0.id) }
+                let boutiqueClients: [ClientEntity]
+                if bId == nil {
+                    boutiqueClients = clients
+                } else {
+                    boutiqueClients = clients.filter { boutiqueClientIds.contains($0.id) }
+                }
                 
                 var platinumCount = 0
                 var goldCount = 0
@@ -78,6 +94,7 @@ final class ClientInsightsViewModel {
                     self.totalClients = totalClientsCount
                     self.avgLTV = CurrencyManager.shared.format(amount: avg)
                     self.tierBreakdown = newTierBreakdown
+                    self.clients = boutiqueClients
                     self.isLoading = false
                 }
             } catch {

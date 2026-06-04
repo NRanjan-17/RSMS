@@ -105,7 +105,11 @@ struct BoutiqueManagerCanvas: View {
         case .shrinkReport:
             ShrinkReportView()
         case .clientInsights:
-            ClientInsightsView()
+            ClientInsightsView(onDirectoryTap: {
+                router.push(BMRoute.clientDirectory)
+            })
+        case .reportsAnalytics:
+            ReportsView()
         case .transferApproval:
             TransferApprovalView()
         case .newTransfer:
@@ -120,6 +124,12 @@ struct BoutiqueManagerCanvas: View {
             ASTApprovalView(ast: ast)
         case .afterSalesTracking(let ast):
             AfterSalesTrackingView(ast: ast)
+        case .clientProfile(let client):
+            ClientProfileView(client: client)
+        case .clientDirectory:
+            ClientDirectoryListView(onClientTap: { client in
+                router.push(BMRoute.clientProfile(client))
+            })
         case .writeOffApproval:
             WriteOffApprovalView()
         case .endlessAisleRequests:

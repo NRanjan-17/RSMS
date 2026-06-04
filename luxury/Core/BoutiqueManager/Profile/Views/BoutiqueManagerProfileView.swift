@@ -69,7 +69,9 @@ struct BoutiqueManagerProfileView: View {
                                 .padding(.horizontal, 24)
                             
                             VStack(spacing: 12) {
-                                NavigationLink(destination: ReportsView()) {
+                                Button(action: {
+                                    router.push(BMRoute.reportsAnalytics)
+                                }) {
                                     HStack {
                                         Image(systemName: "chart.bar.doc.horizontal.fill")
                                             .font(AppFonts.sansSerif(size: 18))

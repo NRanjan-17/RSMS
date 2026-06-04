@@ -185,9 +185,15 @@ final class InventoryService {
         return allUnits
     }
     
-    /// Helper to fetch all available inventory units for a boutique and return a dictionary of [CatalogID : Available Count]
-    func fetchAvailableStockDictionary(forBoutique boutiqueId: UUID) async throws -> [UUID: Int] {
-        let inventory = try await fetchInventory(forBoutique: boutiqueId)
+    /// Helper to fetch all available inventory units for a boutique (or globally if nil) and return a dictionary of [CatalogID : Available Count]
+    func fetchAvailableStockDictionary(forBoutique boutiqueId: UUID? = nil) async throws -> [UUID: Int] {
+        let inventory: [InventoryUnitEntity]
+        if let bId = boutiqueId {
+            inventory = try await fetchInventory(forBoutique: bId)
+        } else {
+            inventory = try await fetchGlobalInventory()
+        }
+        
         var stockDict: [UUID: Int] = [:]
         for unit in inventory where unit.status == .available {
             stockDict[unit.catalogId, default: 0] += 1

@@ -21,21 +21,33 @@ final class SalesAnalyticsViewModel {
     
     func fetchData() async {
         await MainActor.run { isLoading = true }
-        do {
-            guard let profileTuple = try? await ProfileService().fetchCurrentProfile(),
-                  let staff = profileTuple.1 as? StaffModel,
-                  let bId = staff.boutiqueId else {
+            guard let profileTuple = try? await ProfileService().fetchCurrentProfile() else {
+                await MainActor.run { isLoading = false }
+                return
+            }
+            
+            let bId: UUID?
+            var staffTarget: Double? = nil
+            
+            if let staff = profileTuple.1 as? StaffModel, let boutiqueId = staff.boutiqueId {
+                bId = boutiqueId
+                staffTarget = staff.dailySalesTarget
+            } else if let boutique = profileTuple.1 as? CorporateBoutique {
+                bId = boutique.id
+                // Boutique managers might not have personal daily sales targets, they use the boutique's target
+            } else if profileTuple.0 == .corporateAdmin {
+                bId = nil
+            } else {
                 await MainActor.run { isLoading = false }
                 return
             }
             
             // 1. Fetch all transactions for this boutique
-            let txs: [SATransactionEntity] = try await SupabaseManager.shared.client
-                .from("transaction")
-                .select()
-                .eq("boutique_id", value: bId)
-                .execute()
-                .value
+            var txQuery = SupabaseManager.shared.client.from("transaction").select()
+            if let boutiqueId = bId {
+                txQuery = txQuery.eq("boutique_id", value: boutiqueId)
+            }
+            let txs: [SATransactionEntity] = (try? await txQuery.execute().value) ?? []
                 
             // 2. Fetch boutique daily target
             struct BoutiqueTarget: Codable {
@@ -44,13 +56,15 @@ final class SalesAnalyticsViewModel {
                     case dailySalesTarget = "daily_sales_target"
                 }
             }
-            let boutiqueTargets: [BoutiqueTarget] = (try? await SupabaseManager.shared.client
-                .from("boutiques")
-                .select("daily_sales_target")
-                .eq("id", value: bId)
-                .execute()
-                .value) ?? []
-            let bTarget = boutiqueTargets.first?.dailySalesTarget ?? 200000.0
+            
+            var targetQuery = SupabaseManager.shared.client.from("boutiques").select("daily_sales_target")
+            if let boutiqueId = bId {
+                targetQuery = targetQuery.eq("id", value: boutiqueId)
+            }
+            
+            let boutiqueTargets: [BoutiqueTarget] = (try? await targetQuery.execute().value) ?? []
+            let bTarget = boutiqueTargets.compactMap { $0.dailySalesTarget }.reduce(0, +)
+
                 
             // 3. Calculate time-based revenue (Today, WTD, MTD)
             let now = Date()
@@ -89,12 +103,13 @@ final class SalesAnalyticsViewModel {
                     case productId = "product_id"
                 }
             }
-            let purchasedItems: [PurchasedItemMin] = (try? await SupabaseManager.shared.client
-                .from("purchased_items")
-                .select("product_id")
-                .eq("boutique_id", value: bId)
-                .execute()
-                .value) ?? []
+            
+            var purchasedQuery = SupabaseManager.shared.client.from("purchased_items").select("product_id")
+            if let boutiqueId = bId {
+                purchasedQuery = purchasedQuery.eq("boutique_id", value: boutiqueId)
+            }
+            
+            let purchasedItems: [PurchasedItemMin] = (try? await purchasedQuery.execute().value) ?? []
             
             // 5. Fetch catalogs to map product_id -> category + amount
             let catalogs: [CatalogEntity] = (try? await SupabaseManager.shared.client
@@ -143,13 +158,9 @@ final class SalesAnalyticsViewModel {
                 self.todaySales = CurrencyManager.shared.format(amount: tSales)
                 self.wtdSales = CurrencyManager.shared.format(amount: wSales)
                 self.mtdSales = CurrencyManager.shared.format(amount: mSales)
-                self.todayTarget = CurrencyManager.shared.format(amount: staff.dailySalesTarget ?? bTarget)
+                self.todayTarget = CurrencyManager.shared.format(amount: staffTarget ?? bTarget)
                 self.categories = newCategories
                 self.isLoading = false
             }
-        } catch {
-            print("Failed to fetch SalesAnalytics: \(error)")
-            await MainActor.run { self.isLoading = false }
-        }
     }
 }
