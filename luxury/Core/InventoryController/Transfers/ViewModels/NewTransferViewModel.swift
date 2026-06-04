@@ -29,8 +29,7 @@ final class NewTransferViewModel {
     @ObservationIgnored var fetchBoutiquesHandler: () async throws -> [CorporateBoutique]
     @ObservationIgnored var fetchProfileHandler: () async throws -> (UserRole, Any)?
     @ObservationIgnored var fetchCatalogsHandler: () async throws -> [CatalogEntity]
-    @ObservationIgnored var fetchInventoryHandler: (UUID, UUID) async throws -> [InventoryItem]
-    @ObservationIgnored var updateInventoryHandler: (UUID, Int, Int) async throws -> Void
+    @ObservationIgnored var fetchInventoryHandler: (UUID, UUID) async throws -> [InventoryUnitEntity]
     
     init() {
         self.fetchBoutiquesHandler = {
@@ -52,21 +51,7 @@ final class NewTransferViewModel {
                 .value
         }
         self.fetchInventoryHandler = { skuId, storeId in
-            try await SupabaseManager.shared.client
-                .from("inventory")
-                .select()
-                .eq("sku_id", value: skuId.uuidString)
-                .eq("store_id", value: storeId.uuidString)
-                .execute()
-                .value
-        }
-        self.updateInventoryHandler = { id, newQty, expectedQty in
-            try await SupabaseManager.shared.client
-                .from("inventory")
-                .update(["quantity": newQty])
-                .eq("id", value: id.uuidString)
-                .eq("quantity", value: expectedQty)
-                .execute()
+            try await InventoryService.shared.fetchInventory(forCatalog: skuId, boutiqueId: storeId)
         }
     }
     
@@ -128,8 +113,9 @@ final class NewTransferViewModel {
             }
             
             let inventoryList = try await fetchInventoryHandler(catalogItem.id, sourceId)
-            
-            guard let firstInventory = inventoryList.first, firstInventory.quantity > 0 else {
+            let availableCount = inventoryList.filter { $0.status == .available }.count
+
+            guard availableCount > 0 else {
                 return .failure(NSError(domain: "Transfer", code: 3, userInfo: [NSLocalizedDescriptionKey: "Warning: \(catalogItem.name) is not available at the source location."]))
             }
             
@@ -138,7 +124,7 @@ final class NewTransferViewModel {
                     sku: catalogItem.barCode,
                     name: catalogItem.name,
                     qty: 1,
-                    availableQty: firstInventory.quantity
+                    availableQty: availableCount
                 )
                 self.items.append(newItem)
             }
@@ -162,23 +148,23 @@ final class NewTransferViewModel {
                 return .failure(NSError(domain: "Transfer", code: 7, userInfo: [NSLocalizedDescriptionKey: "Error: Destination boutique is no longer available."]))
             }
             
+            let catalogs = try await fetchCatalogsHandler()
+            
             for item in items {
-                let catalogs = try await fetchCatalogsHandler()
                 guard let catalogItem = catalogs.first(where: { $0.barCode.lowercased() == item.sku.lowercased() }) else {
                     throw NSError(domain: "Transfer", code: 8, userInfo: [NSLocalizedDescriptionKey: "No stock record found for \(item.name)."])
                 }
                 
                 let inventoryList = try await fetchInventoryHandler(catalogItem.id, sourceId)
-                
-                guard let firstInventory = inventoryList.first else {
+                let availableCount = inventoryList.filter { $0.status == .available }.count
+
+                guard availableCount > 0 else {
                     throw NSError(domain: "Transfer", code: 8, userInfo: [NSLocalizedDescriptionKey: "No stock record found for \(item.name)."])
                 }
-                
-                if firstInventory.quantity < item.qty {
-                    throw NSError(domain: "Transfer", code: 9, userInfo: [NSLocalizedDescriptionKey: "Insufficient stock for \(item.name) (requested: \(item.qty), available: \(firstInventory.quantity))."])
+
+                if availableCount < item.qty {
+                    throw NSError(domain: "Transfer", code: 9, userInfo: [NSLocalizedDescriptionKey: "Insufficient stock for \(item.name) (requested: \(item.qty), available: \(availableCount))."])
                 }
-                
-                try await updateInventoryHandler(firstInventory.id, firstInventory.quantity - item.qty, firstInventory.quantity)
             }
             
             let newRequest = TransferRequest(

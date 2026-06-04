@@ -13,11 +13,14 @@ struct TransferApprovalView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(Router.self) private var router
     
-    @State private var transfers: [TransferRequest] = []
     @State private var selectedSegment = 0 // 0: Awaiting Action, 1: History
     @State private var searchText = ""
     @State private var selectedTransfer: TransferRequest? = nil
     @State private var showingNewTransfer = false
+
+    private var transfers: [TransferRequest] {
+        TransferPersistence.shared.loadTransfers()
+    }
     
     var body: some View {
         NavigationStack {
@@ -230,20 +233,14 @@ struct TransferApprovalView: View {
                 NewTransferView()
             }
         }
-        .onAppear {
-            reloadTransfers()
-        }
     } // Closes NavigationStack
 } // Closes body
-    
-    private func reloadTransfers() {
-        self.transfers = TransferPersistence.shared.loadTransfers()
-    }
     
     private func filteredTransfers() -> [TransferRequest] {
         let isAwaitingSegment = selectedSegment == 0
         
         let filteredByStatus = transfers.filter { transfer in
+            guard transfer.reference.hasPrefix("TR-") else { return false }
             let isPending = transfer.status.lowercased() == "submitted" || transfer.status.lowercased() == "pending approval"
             return isAwaitingSegment ? isPending : !isPending
         }
@@ -289,7 +286,6 @@ struct TransferApprovalView: View {
                 userInfo: ["reference": transfer.reference]
             )
             
-            reloadTransfers()
         }
     }
     
@@ -321,7 +317,6 @@ struct TransferApprovalView: View {
                 userInfo: ["reference": transfer.reference]
             )
             
-            reloadTransfers()
         }
     }
 }

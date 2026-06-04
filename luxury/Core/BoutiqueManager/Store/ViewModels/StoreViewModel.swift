@@ -64,7 +64,8 @@ final class StoreViewModel {
     func fetchPendingTransfersCount() {
         let transfers = TransferPersistence.shared.loadTransfers()
         self.pendingTransfersCount = transfers.filter { 
-            $0.status.lowercased() == "submitted" || $0.status.lowercased() == "pending approval"
+            $0.reference.hasPrefix("TR-") &&
+            ($0.status.lowercased() == "submitted" || $0.status.lowercased() == "pending approval")
         }.count
     }
     

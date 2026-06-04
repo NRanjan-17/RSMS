@@ -24,6 +24,8 @@ public final class EndlessAisleViewModel {
     public var destinationReceiveRequests: [EndlessAisle.SourcingRequest] = []
     
     private let client = SupabaseManager.shared.client
+    private var requestChannel: RealtimeChannelV2?
+    private var requestListeningTask: Task<Void, Never>?
     
     public func loadRequests() {
         isLoading = true
@@ -96,6 +98,57 @@ public final class EndlessAisleViewModel {
             }
         }
     }
+
+    public func startObservingRequests() async {
+        guard requestChannel == nil else { return }
+        guard let boutiqueId = try? await currentBoutiqueId() else { return }
+        
+        let channel = client.realtimeV2.channel("endless_aisle_requests_\(boutiqueId.uuidString)")
+        let inserts = channel.postgresChange(
+            InsertAction.self,
+            schema: "public",
+            table: "purchased_items",
+            filter: .eq("boutique_id", value: boutiqueId.uuidString)
+        )
+        let updates = channel.postgresChange(
+            UpdateAction.self,
+            schema: "public",
+            table: "purchased_items",
+            filter: .eq("boutique_id", value: boutiqueId.uuidString)
+        )
+        
+        requestChannel = channel
+        requestListeningTask = Task {
+            await withTaskGroup(of: Void.self) { group in
+                group.addTask {
+                    for await _ in inserts {
+                        await MainActor.run {
+                            self.loadRequests()
+                        }
+                    }
+                }
+                group.addTask {
+                    for await _ in updates {
+                        await MainActor.run {
+                            self.loadRequests()
+                        }
+                    }
+                }
+            }
+        }
+        
+        try? await channel.subscribeWithError()
+    }
+    
+    public func stopObservingRequests() async {
+        requestListeningTask?.cancel()
+        requestListeningTask = nil
+        
+        if let channel = requestChannel {
+            await client.removeChannel(channel)
+            requestChannel = nil
+        }
+    }
     
     func requestManagerApproval(order: PurchasedItemEntity, item: EndlessAisle.Item) {
         isSaving = true
@@ -156,56 +209,56 @@ public final class EndlessAisleViewModel {
         }
     }
     
-    public func approveRequesterManager(request: EndlessAisle.SourcingRequest, sourceBoutique: EndlessAisle.BoutiqueStock) {
+    public func approveRequesterManager(request: EndlessAisle.SourcingRequest, sourceBoutique: EndlessAisle.BoutiqueStock) async throws {
         guard let originalOrderId = request.originalOrderId,
               let destinationBoutiqueId = request.destinationBoutiqueId else {
-            return
+            throw endlessAisleError("Request details are incomplete.")
         }
         
         isSaving = true
         errorMessage = nil
         
-        Task {
-            do {
-                let original: PurchasedItemEntity = try await client
-                    .from("purchased_items")
-                    .select()
-                    .eq("id", value: originalOrderId.uuidString)
-                    .single()
-                    .execute()
-                    .value
-                
-                let requestPayload: [String: AnyJSON] = [
-                    "uid": .string(original.uid.uuidString),
-                    "product_id": .string(original.productId.uuidString),
-                    "reserved_date": .string(ISO8601DateFormatter().string(from: Date())),
-                    "transaction_id": .string(EndlessAisleLink.encode(originalOrderId: original.id, originalTransactionId: original.transactionId, destinationBoutiqueId: destinationBoutiqueId)),
-                    "status": .string(EndlessAisleStatus.sourceReview),
-                    "created_at": .string(ISO8601DateFormatter().string(from: Date())),
-                    "boutique_id": .string(sourceBoutique.id.uuidString)
-                ]
-                
-                try await client
-                    .from("purchased_items")
-                    .insert(requestPayload)
-                    .execute()
-                
-                try await updatePurchasedItem(id: original.id, status: EndlessAisleStatus.requested)
-                SystemLogService.shared.logAction(
-                    category: .inventory,
-                    severity: .info,
-                    message: "Endless Aisle request sent to \(sourceBoutique.name) for \(request.item.name)."
-                )
-                await MainActor.run {
-                    self.isSaving = false
-                    self.loadRequests()
-                }
-            } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                    self.isSaving = false
-                }
+        do {
+            let original: PurchasedItemEntity = try await client
+                .from("purchased_items")
+                .select()
+                .eq("id", value: originalOrderId.uuidString)
+                .single()
+                .execute()
+                .value
+            
+            let requestPayload: [String: AnyJSON] = [
+                "uid": .string(original.uid.uuidString),
+                "product_id": .string(original.productId.uuidString),
+                "reserved_date": .string(ISO8601DateFormatter().string(from: Date())),
+                "transaction_id": .string(EndlessAisleLink.encode(originalOrderId: original.id, originalTransactionId: original.transactionId, destinationBoutiqueId: destinationBoutiqueId)),
+                "status": .string(EndlessAisleStatus.sourceReview),
+                "created_at": .string(ISO8601DateFormatter().string(from: Date())),
+                "boutique_id": .string(sourceBoutique.id.uuidString)
+            ]
+            
+            try await client
+                .from("purchased_items")
+                .insert(requestPayload)
+                .execute()
+            
+            try await updatePurchasedItem(id: original.id, status: EndlessAisleStatus.requested)
+            SystemLogService.shared.logAction(
+                category: .inventory,
+                severity: .info,
+                message: "Endless Aisle request sent to \(sourceBoutique.name) for \(request.item.name)."
+            )
+            
+            await MainActor.run {
+                self.isSaving = false
+                self.loadRequests()
             }
+        } catch {
+            await MainActor.run {
+                self.errorMessage = error.localizedDescription
+                self.isSaving = false
+            }
+            throw error
         }
     }
     
@@ -373,7 +426,7 @@ public final class EndlessAisleViewModel {
         Task {
             let sources = await availableSourceBoutiques(for: request)
             if let first = sources.first {
-                approveRequesterManager(request: request, sourceBoutique: first)
+                try? await approveRequesterManager(request: request, sourceBoutique: first)
             }
         }
     }

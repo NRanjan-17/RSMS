@@ -25,7 +25,6 @@ struct TransferDetailView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Header with Back Button
                 HStack(spacing: 16) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
@@ -119,7 +118,6 @@ struct TransferDetailView: View {
                     .padding(.bottom, 40)
                 }
                 
-                // Action Buttons at the bottom
                 if isLoading {
                     ProgressView()
                         .tint(AppColors.gold)
@@ -163,32 +161,89 @@ struct TransferDetailView: View {
     }
     
     private func shipTransfer() {
-        var allTransfers = TransferPersistence.shared.loadTransfers()
-        if let index = allTransfers.firstIndex(where: { $0.id == transfer.id }) {
-            let updated = TransferRequest(
-                id: transfer.id,
-                reference: transfer.reference,
-                source: transfer.source,
-                destination: transfer.destination,
-                items: transfer.items,
-                status: "In Transit",
-                badgeStatus: .pending
-            )
-            allTransfers[index] = updated
-            TransferPersistence.shared.saveAll(allTransfers)
-            self.transfer = updated
-            
-            SystemLogService.shared.logAction(
-                category: .inventory,
-                severity: .info,
-                message: "Stock Transfer \(transfer.reference) marked as In Transit.",
-                boutiqueName: transfer.source
-            )
-            
-            NotificationCenter.default.post(
-                name: NSNotification.Name("StockTransferUpdated"),
-                object: nil
-            )
+        isLoading = true
+        Task {
+            do {
+                let boutiques: [CorporateBoutique] = try await SupabaseManager.shared.client
+                    .from("boutiques")
+                    .select()
+                    .execute()
+                    .value
+                
+                let catalogs: [CatalogEntity] = try await SupabaseManager.shared.client
+                    .from("catalogs")
+                    .select()
+                    .execute()
+                    .value
+                
+                guard let sourceBoutique = boutiques.first(where: {
+                    $0.name.localizedCaseInsensitiveCompare(transfer.source) == .orderedSame
+                }) else {
+                    throw NSError(domain: "Transfer", code: 12, userInfo: [NSLocalizedDescriptionKey: "Source store '\(transfer.source)' not found in database."])
+                }
+                
+                for item in transfer.items {
+                    guard let catalogItem = catalogs.first(where: {
+                        $0.barCode.lowercased() == item.sku.lowercased() ||
+                        $0.catalogId.lowercased() == item.sku.lowercased()
+                    }) else {
+                        throw NSError(domain: "Transfer", code: 11, userInfo: [NSLocalizedDescriptionKey: "Product with SKU '\(item.sku)' not found in catalogs."])
+                    }
+                    
+                    let inventoryList = try await InventoryService.shared.fetchInventory(forCatalog: catalogItem.id, boutiqueId: sourceBoutique.id)
+                    let serials = inventoryList
+                        .filter { $0.status == .available }
+                        .prefix(item.qty)
+                        .map(\.serialNumber)
+                    
+                    guard serials.count == item.qty else {
+                        throw NSError(domain: "Transfer", code: 13, userInfo: [NSLocalizedDescriptionKey: "Not enough available units to dispatch \(item.name)."])
+                    }
+                    
+                    try await InventoryService.shared.updateInventoryStatus(serials: serials, newStatus: .inTransit)
+                }
+                
+                var allTransfers = TransferPersistence.shared.loadTransfers()
+                if let index = allTransfers.firstIndex(where: { $0.id == transfer.id }) {
+                    let updated = TransferRequest(
+                        id: transfer.id,
+                        reference: transfer.reference,
+                        source: transfer.source,
+                        destination: transfer.destination,
+                        items: transfer.items,
+                        status: "In Transit",
+                        badgeStatus: .pending
+                    )
+                    allTransfers[index] = updated
+                    TransferPersistence.shared.saveAll(allTransfers)
+                    
+                    await MainActor.run {
+                        self.transfer = updated
+                    }
+                    
+                    SystemLogService.shared.logAction(
+                        category: .inventory,
+                        severity: .info,
+                        message: "Stock Transfer \(transfer.reference) marked as In Transit.",
+                        boutiqueName: transfer.source
+                    )
+                    
+                    NotificationCenter.default.post(
+                        name: NSNotification.Name("StockTransferUpdated"),
+                        object: nil
+                    )
+                }
+                
+                await MainActor.run {
+                    self.isLoading = false
+                }
+            } catch {
+                await MainActor.run {
+                    self.alertMessage = error.localizedDescription
+                    self.showAlert = true
+                    self.isLoading = false
+                }
+            }
         }
     }
     
@@ -208,6 +263,12 @@ struct TransferDetailView: View {
                     .execute()
                     .value
                 
+                guard let sourceBoutique = boutiques.first(where: {
+                    $0.name.localizedCaseInsensitiveCompare(transfer.source) == .orderedSame
+                }) else {
+                    throw NSError(domain: "Transfer", code: 12, userInfo: [NSLocalizedDescriptionKey: "Source store '\(transfer.source)' not found in database."])
+                }
+                
                 guard let destBoutique = boutiques.first(where: {
                     $0.name.localizedCaseInsensitiveCompare(transfer.destination) == .orderedSame
                 }) else {
@@ -222,34 +283,17 @@ struct TransferDetailView: View {
                         throw NSError(domain: "Transfer", code: 11, userInfo: [NSLocalizedDescriptionKey: "Product with SKU '\(item.sku)' not found in catalogs."])
                     }
                     
-                    let inventoryList: [InventoryItem] = try await SupabaseManager.shared.client
-                        .from("inventory")
-                        .select()
-                        .eq("sku_id", value: catalogItem.id.uuidString)
-                        .eq("store_id", value: destBoutique.id.uuidString)
-                        .execute()
-                        .value
+                    let inventoryList = try await InventoryService.shared.fetchInventory(forCatalog: catalogItem.id, boutiqueId: sourceBoutique.id)
+                    let serials = inventoryList
+                        .filter { $0.status == .inTransit || $0.status == .reserved || $0.status == .available }
+                        .prefix(item.qty)
+                        .map(\.serialNumber)
                     
-                    if let firstInventory = inventoryList.first {
-                        let newQty = firstInventory.quantity + item.qty
-                        _ = try await SupabaseManager.shared.client
-                            .from("inventory")
-                            .update(["quantity": newQty])
-                            .eq("id", value: firstInventory.id.uuidString)
-                            .execute()
-                    } else {
-                        let newInventoryItem = InventoryItem(
-                            id: UUID(),
-                            storeId: destBoutique.id,
-                            skuId: catalogItem.id,
-                            quantity: item.qty,
-                            productAvailable: true
-                        )
-                        _ = try await SupabaseManager.shared.client
-                            .from("inventory")
-                            .insert(newInventoryItem)
-                            .execute()
+                    guard serials.count == item.qty else {
+                        throw NSError(domain: "Transfer", code: 14, userInfo: [NSLocalizedDescriptionKey: "Not enough in-transit units to complete \(item.name)."])
                     }
+                    
+                    try await InventoryService.shared.updateInventoryStatus(serials: serials, newStatus: .available, newBoutiqueId: destBoutique.id)
                 }
                 
                 var allTransfers = TransferPersistence.shared.loadTransfers()
