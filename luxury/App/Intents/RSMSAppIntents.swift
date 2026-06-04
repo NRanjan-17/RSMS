@@ -63,6 +63,8 @@ struct ViewDailyTargetsIntent: AppIntent {
 
 // Provider to automatically register these shortcuts
 struct RSMSAppShortcuts: AppShortcutsProvider {
+    static var shortcutTileColor: ShortcutTileColor { .blue }
+    
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
             intent: CheckInventoryIntent(),

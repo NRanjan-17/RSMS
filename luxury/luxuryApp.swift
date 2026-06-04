@@ -23,6 +23,9 @@ struct luxuryApp: App {
         AppDependencyManager.shared.add(dependency: coordinator)
         AppDependencyManager.shared.add(dependency: saState)
         
+        // Register App Intents / Siri Shortcuts
+        RSMSAppShortcuts.updateAppShortcutParameters()
+        
         let navAppearance = UINavigationBarAppearance()
         navAppearance.configureWithOpaqueBackground()
         navAppearance.backgroundColor = UIColor(AppColors.background)
