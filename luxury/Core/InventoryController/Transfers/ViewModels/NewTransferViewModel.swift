@@ -171,22 +171,22 @@ final class NewTransferViewModel {
                 }
             }
             
-            let newRequest = TransferRequest(
+            let sourceStoreName = sourceStore?.name ?? "Source Store"
+            let destinationStoreName = destinationStore?.name ?? "Dest Store"
+            let newRequest = try await StockTransferService.shared.createTransfer(
                 reference: "TR-\(Int.random(in: 1000...9999))",
-                source: sourceStore?.name ?? "Source Store",
-                destination: destinationStore?.name ?? "Dest Store",
-                items: items,
-                status: "Submitted",
-                badgeStatus: .neutral
+                sourceBoutiqueId: sourceId,
+                destinationBoutiqueId: destId,
+                source: sourceStoreName,
+                destination: destinationStoreName,
+                items: items
             )
-            
-            TransferPersistence.shared.saveTransfer(newRequest)
             
             SystemLogService.shared.logAction(
                 category: .inventory,
                 severity: .info,
-                message: "Stock Transfer \(newRequest.reference) initiated from \(newRequest.source) to \(newRequest.destination) with \(newRequest.itemCount) items.",
-                boutiqueName: sourceStore?.name
+                message: "Stock Transfer \(newRequest.reference) initiated from \(sourceStoreName) to \(destinationStoreName) with \(newRequest.itemCount) items.",
+                boutiqueName: sourceStoreName
             )
             
             NotificationCenter.default.post(
