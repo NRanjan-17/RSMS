@@ -34,6 +34,7 @@ final class TransfersViewModel {
     
     private let client = SupabaseManager.shared.client
     private var channel: RealtimeChannelV2?
+    private var manualChannel: RealtimeChannelV2?
     
     func fetchTransfers(retryCount: Int = 0) {
         isLoading = true
@@ -42,9 +43,9 @@ final class TransfersViewModel {
         Task {
             do {
                 try await startObservingLiveTransfers()
+                try await startObservingManualTransfers()
                 let context = try await transferContext()
-                let manualTransfers = TransferPersistence.shared.loadTransfers()
-                    .filter { $0.reference.hasPrefix("TR-") }
+                let manualTransfers = try await StockTransferService.shared.fetchTransfers(for: context.boutiqueId)
                     .compactMap { boardItem(for: $0, context: context, isLive: false) }
                 
                 let liveTransfers = try await fetchLiveTransfers(context: context)
@@ -79,6 +80,10 @@ final class TransfersViewModel {
                 await client.removeChannel(channel)
                 self.channel = nil
             }
+            if let manualChannel {
+                await client.removeChannel(manualChannel)
+                self.manualChannel = nil
+            }
         }
     }
     
@@ -108,6 +113,24 @@ final class TransfersViewModel {
         }
         
         try await liveChannel.subscribeWithError()
+    }
+
+    private func startObservingManualTransfers() async throws {
+        guard manualChannel == nil else { return }
+        
+        let transferChannel = client.realtimeV2.channel("stock_transfers_live_feed")
+        let changes = transferChannel.postgresChange(AnyAction.self, schema: "public", table: "stock_transfers")
+        manualChannel = transferChannel
+        
+        Task {
+            for await _ in changes {
+                await MainActor.run {
+                    self.fetchTransfers()
+                }
+            }
+        }
+        
+        try await transferChannel.subscribeWithError()
     }
     
     private func fetchLiveTransfers(context: TransferContext) async throws -> [TransferRequest] {

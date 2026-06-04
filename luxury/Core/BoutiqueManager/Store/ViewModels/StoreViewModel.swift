@@ -63,11 +63,22 @@ final class StoreViewModel {
     }
     
     func fetchPendingTransfersCount() {
-        let transfers = TransferPersistence.shared.loadTransfers()
-        self.pendingTransfersCount = transfers.filter { 
-            $0.reference.hasPrefix("TR-") &&
-            ($0.status.lowercased() == "submitted" || $0.status.lowercased() == "pending approval")
-        }.count
+        Task {
+            do {
+                var boutiqueId: UUID?
+                if let profile = try? await ProfileService().fetchCurrentProfile(),
+                   let manager = profile.1 as? CorporateBoutique {
+                    boutiqueId = manager.id
+                }
+                
+                let count = try await StockTransferService.shared.fetchPendingCount(for: boutiqueId)
+                await MainActor.run {
+                    self.pendingTransfersCount = count
+                }
+            } catch {
+                print("StoreViewModel: Failed to fetch pending transfers count: \(error)")
+            }
+        }
     }
     
     func fetchPendingAuditsCount() async {
