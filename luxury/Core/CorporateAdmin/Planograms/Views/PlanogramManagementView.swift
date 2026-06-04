@@ -12,32 +12,26 @@ struct PlanogramManagementView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(alignment: .leading, spacing: 0) {
-                HStack(spacing: 12) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "chevron.left")
-                            .font(AppFonts.sansSerif(size: 20, weight: .semibold))
-                            .foregroundStyle(AppColors.gold)
-                    }
-                    Text("Planograms")
-                        .font(AppFonts.serif(size: 32, weight: .medium))
-                        .foregroundStyle(AppColors.text)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.5)
-                    Spacer()
-                    Button(action: {
-                        isShowingCreateSheet = true
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "plus")
-                            Text("New")
+                ZStack {
+                    HStack {
+                        Button(action: { dismiss() }) {
+                            Image(systemName: "chevron.left")
+                                .font(AppFonts.sansSerif(size: 20, weight: .semibold))
+                                .foregroundStyle(AppColors.gold)
                         }
-                        .font(AppFonts.sansSerif(size: 14, weight: .semibold))
-                        .foregroundStyle(AppColors.background)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .background(AppColors.gold)
-                        .clipShape(Capsule())
+                        Spacer()
+                        Button(action: {
+                            isShowingCreateSheet = true
+                        }) {
+                            Image(systemName: "plus")
+                                .font(AppFonts.sansSerif(size: 20, weight: .semibold))
+                                .foregroundStyle(AppColors.gold)
+                        }
                     }
+                    
+                    Text("Planograms")
+                        .font(AppFonts.sansSerif(size: 18, weight: .semibold))
+                        .foregroundStyle(AppColors.text)
                 }
                 .padding(.horizontal, 24)
                 .padding(.vertical, 16)

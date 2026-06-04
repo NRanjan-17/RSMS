@@ -61,7 +61,7 @@ struct PlanogramGalleryView: View {
                     Spacer()
                 } else {
                     ScrollView {
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 160), spacing: 16)], spacing: 16) {
+                        LazyVGrid(columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)], spacing: 16) {
                             ForEach(viewModel.activePlanograms) { planogram in
                                 Button(action: {
                                     selectedPlanogram = planogram
@@ -71,12 +71,29 @@ struct PlanogramGalleryView: View {
                                             image
                                                 .resizable()
                                                 .aspectRatio(contentMode: .fill)
-                                                .frame(height: 200)
-                                                .clipped()
+                                                .frame(height: 160)
+                                                .frame(maxWidth: .infinity)
+                                                .clipShape(
+                                                    UnevenRoundedRectangle(
+                                                        topLeadingRadius: 16,
+                                                        bottomLeadingRadius: 0,
+                                                        bottomTrailingRadius: 0,
+                                                        topTrailingRadius: 16
+                                                    )
+                                                )
                                         } placeholder: {
-                                            Rectangle()
+                                            RoundedRectangle(cornerRadius: 0)
                                                 .fill(AppColors.surface)
-                                                .frame(height: 200)
+                                                .frame(height: 160)
+                                                .frame(maxWidth: .infinity)
+                                                .clipShape(
+                                                    UnevenRoundedRectangle(
+                                                        topLeadingRadius: 16,
+                                                        bottomLeadingRadius: 0,
+                                                        bottomTrailingRadius: 0,
+                                                        topTrailingRadius: 16
+                                                    )
+                                                )
                                                 .overlay(ProgressView().tint(AppColors.gold))
                                         }
                                         
@@ -84,6 +101,8 @@ struct PlanogramGalleryView: View {
                                             .font(AppFonts.sansSerif(size: 14, weight: .bold))
                                             .foregroundStyle(AppColors.text)
                                             .lineLimit(1)
+                                            .truncationMode(.tail)
+                                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                                             .padding(.horizontal, 12)
                                             .padding(.top, 4)
                                         
@@ -92,10 +111,13 @@ struct PlanogramGalleryView: View {
                                                 .font(AppFonts.sansSerif(size: 11))
                                                 .foregroundStyle(AppColors.secondary)
                                                 .lineLimit(2)
+                                                .truncationMode(.tail)
+                                                .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                                                 .padding(.horizontal, 12)
                                         }
                                         Spacer().frame(height: 8)
                                     }
+                                    .frame(maxWidth: .infinity)
                                     .background(AppColors.surface)
                                     .clipShape(RoundedRectangle(cornerRadius: 16))
                                     .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 1))

@@ -17,6 +17,7 @@ final class StoreViewModel {
     var activeCampaigns: [PricingCampaign] = []
     
     var events: [StoreEvent] = []
+    var boutiqueId: UUID?
     
     private let localEventsKey = "luxury_local_events"
     
@@ -65,13 +66,17 @@ final class StoreViewModel {
     func fetchPendingTransfersCount() {
         Task {
             do {
-                var boutiqueId: UUID?
+                var fetchedBoutiqueId: UUID?
                 if let profile = try? await ProfileService().fetchCurrentProfile(),
                    let manager = profile.1 as? CorporateBoutique {
-                    boutiqueId = manager.id
+                    fetchedBoutiqueId = manager.id
                 }
                 
-                let count = try await StockTransferService.shared.fetchPendingCount(for: boutiqueId)
+                await MainActor.run {
+                    self.boutiqueId = fetchedBoutiqueId
+                }
+                
+                let count = try await StockTransferService.shared.fetchPendingCount(for: fetchedBoutiqueId)
                 await MainActor.run {
                     self.pendingTransfersCount = count
                 }
