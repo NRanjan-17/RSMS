@@ -15,65 +15,97 @@ struct SFSTicketDetailView: View {
         ZStack {
             AppColors.background.ignoresSafeArea()
             
-            VStack(spacing: 0) {
-                ScrollView {
-                    VStack(spacing: 24) {
-                        // Main Ticket Card
-                        VStack(spacing: 0) {
-                            // Top Section
-                            VStack(spacing: 8) {
-                                Text("SFS Ticket Details")
-                                    .font(AppFonts.sansSerif(size: 14))
-                                    .foregroundStyle(AppColors.secondary)
-                                
-                                let displayStatus = ticket.status.lowercased() == "ready to pick" ? "Ready" : ticket.status.capitalized
-                                let statusType: BadgeStatus = ticket.status.lowercased() == "ready to pick" ? .success :
-                                                              ticket.status.lowercased() == "secured" ? .neutral : .warning
-                                
-                                StatusBadge(text: LocalizedStringKey(displayStatus), status: statusType)
-                                    .padding(.top, 4)
-                            }
-                            .padding(.vertical, 32)
-                            
-                            Divider().background(AppColors.gold15)
-                            
-                            // Details Section
-                            VStack(spacing: 16) {
-                                DetailRow(label: "Order ID", value: String(ticket.id.uuidString.uppercased()))
-                                DetailRow(label: "Transaction ID", value: ticket.transactionId)
-                                DetailRow(label: "Product ID", value: String(ticket.productId.uuidString.uppercased()))
-                                
-                                if let name = ticket.productName {
-                                    DetailRow(label: "Product Name", value: name)
-                                }
-                                
-                                if let brand = ticket.productBrand {
-                                    DetailRow(label: "Brand", value: brand)
-                                }
-                                
-                                if let sku = ticket.productSku {
-                                    DetailRow(label: "SKU", value: sku)
-                                }
-                                
-                                DetailRow(label: "Date Reserved", value: ticket.reservedDate.formatted(date: .abbreviated, time: .shortened))
-                                
-                                if let delivery = ticket.deliveryDate {
-                                    DetailRow(label: "Delivery Date", value: delivery.formatted(date: .abbreviated, time: .shortened))
-                                }
-                            }
-                            .padding(24)
-                        }
-                        .background(AppColors.surface)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 1))
-                        .padding(.horizontal, 24)
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Header Status
+                    VStack(spacing: 12) {
+                        Image(systemName: "ticket.fill")
+                            .font(.system(size: 40))
+                            .foregroundStyle(AppColors.gold)
+                        
+                        Text("SFS Ticket")
+                            .font(AppFonts.serif(size: 24, weight: .semibold))
+                            .foregroundStyle(.white)
+                        
+                        let displayStatus = ticket.status.lowercased() == "ready to pick" ? "Ready" : ticket.status.capitalized
+                        let statusType: BadgeStatus = ticket.status.lowercased() == "ready to pick" ? .success :
+                                                      ticket.status.lowercased() == "secured" ? .neutral : .warning
+                        
+                        StatusBadge(text: LocalizedStringKey(displayStatus), status: statusType)
                     }
-                    .padding(.vertical, 24)
+                    .padding(.top, 32)
+                    .padding(.bottom, 8)
+                    
+                    // Product Information Card
+                    if ticket.productName != nil || ticket.productBrand != nil || ticket.productSku != nil {
+                        CardSection(title: "Product Information", icon: "bag.fill") {
+                            if let name = ticket.productName {
+                                DetailRow(label: "Name", value: name)
+                            }
+                            if let brand = ticket.productBrand {
+                                DetailRow(label: "Brand", value: brand)
+                            }
+                            if let sku = ticket.productSku {
+                                DetailRow(label: "SKU", value: sku)
+                            }
+                            DetailRow(label: "Product ID", value: String(ticket.productId.uuidString.prefix(8).uppercased()))
+                        }
+                    }
+                    
+                    // Order Details Card
+                    CardSection(title: "Order Details", icon: "doc.text.fill") {
+                        DetailRow(label: "Order ID", value: String(ticket.id.uuidString.prefix(8).uppercased()))
+                        DetailRow(label: "Transaction ID", value: String(ticket.transactionId.prefix(8).uppercased()))
+                    }
+                    
+                    // Timeline Card
+                    CardSection(title: "Timeline", icon: "calendar") {
+                        DetailRow(label: "Reserved On", value: ticket.reservedDate.formatted(date: .abbreviated, time: .shortened))
+                        
+                        if let delivery = ticket.deliveryDate {
+                            DetailRow(label: "Delivery Date", value: delivery.formatted(date: .abbreviated, time: .shortened))
+                        }
+                    }
                 }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 40)
             }
         }
         .navigationTitle("Ticket Details")
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+private struct CardSection<Content: View>: View {
+    let title: String
+    let icon: String
+    let content: Content
+    
+    init(title: String, icon: String, @ViewBuilder content: () -> Content) {
+        self.title = title
+        self.icon = icon
+        self.content = content()
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .foregroundStyle(AppColors.gold)
+                Text(title)
+                    .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                    .foregroundStyle(AppColors.gold)
+            }
+            .padding(.bottom, 4)
+            
+            VStack(spacing: 12) {
+                content
+            }
+        }
+        .padding(20)
+        .background(AppColors.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 1))
     }
 }
 
@@ -82,15 +114,16 @@ private struct DetailRow: View {
     let value: String
     
     var body: some View {
-        HStack {
+        HStack(alignment: .top) {
             Text(label)
                 .font(AppFonts.sansSerif(size: 14))
                 .foregroundStyle(AppColors.secondary)
-            Spacer()
+            Spacer(minLength: 16)
             Text(value)
                 .font(AppFonts.sansSerif(size: 14, weight: .medium))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.trailing)
         }
+        Divider().background(AppColors.gold15)
     }
 }

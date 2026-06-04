@@ -23,6 +23,8 @@ struct CatalogDetailView: View {
     
     @State private var inventoryUnits: [InventoryUnitEntity] = []
     @State private var isLoadingInventory = true
+    @State private var sortedGroups: [(boutiqueId: UUID, boutiqueName: String, units: [InventoryUnitEntity])] = []
+    @State private var soldStats: [(boutiqueName: String, soldCount: Int)] = []
     
     @State private var selectedBoutiqueId: UUID? = nil
     @State private var showingBoutiquePicker = false
@@ -144,13 +146,7 @@ struct CatalogDetailView: View {
                 
                 if isLoadingInventory {
                     ProgressView().padding()
-                } else if !inventoryUnits.isEmpty {
-                    let grouped = Dictionary(grouping: inventoryUnits, by: { $0.boutiqueId })
-                    let sortedGroups = grouped.map { (key, value) in
-                        let name = viewModel.boutiques.first(where: { $0.id == key })?.name ?? "Unknown Boutique"
-                        return (boutiqueId: key, boutiqueName: name, units: value)
-                    }.sorted { $0.boutiqueName < $1.boutiqueName }
-                    
+                } else if !sortedGroups.isEmpty {
                     ForEach(sortedGroups, id: \.boutiqueId) { group in
                         NavigationLink(destination: BoutiqueSerialsView(
                             boutiqueName: group.boutiqueName,
@@ -184,13 +180,6 @@ struct CatalogDetailView: View {
             }
             
             if !isLoadingInventory {
-                let soldStats = Dictionary(grouping: inventoryUnits.filter { $0.status == .sold }, by: { $0.boutiqueId })
-                    .map { (key, value) in
-                        let name = viewModel.boutiques.first(where: { $0.id == key })?.name ?? "Unknown Boutique"
-                        return (boutiqueName: name, soldCount: value.count)
-                    }
-                    .sorted { $0.soldCount > $1.soldCount }
-                
                 if !soldStats.isEmpty {
                     Section("Sales Performance") {
                         ForEach(soldStats, id: \.boutiqueName) { stat in
@@ -360,8 +349,25 @@ struct CatalogDetailView: View {
             do {
                 let units = try await InventoryService.shared.fetchInventory(forCatalog: currentCatalog.id)
                 print("[CatalogDetailView] Successfully fetched \(units.count) physical units!")
+                
+                // Process groupings in background
+                let grouped = Dictionary(grouping: units, by: { $0.boutiqueId })
+                let newSortedGroups = grouped.map { (key, value) in
+                    let name = viewModel.boutiques.first(where: { $0.id == key })?.name ?? "Unknown Boutique"
+                    return (boutiqueId: key, boutiqueName: name, units: value)
+                }.sorted { $0.boutiqueName < $1.boutiqueName }
+                
+                let newSoldStats = Dictionary(grouping: units.filter { $0.status == .sold }, by: { $0.boutiqueId })
+                    .map { (key, value) in
+                        let name = viewModel.boutiques.first(where: { $0.id == key })?.name ?? "Unknown Boutique"
+                        return (boutiqueName: name, soldCount: value.count)
+                    }
+                    .sorted { $0.soldCount > $1.soldCount }
+                
                 await MainActor.run {
                     self.inventoryUnits = units
+                    self.sortedGroups = newSortedGroups
+                    self.soldStats = newSoldStats
                     self.isLoadingInventory = false
                 }
             } catch {
@@ -448,6 +454,9 @@ struct BoutiqueSerialsView: View {
                 onRefresh()
             }
         }
+        .listStyle(.insetGrouped)
+        .environment(\.defaultMinListHeaderHeight, 0)
+        .padding(.top, -24)
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search serial numbers")
         .navigationTitle(boutiqueName)
         .navigationBarTitleDisplayMode(.inline)

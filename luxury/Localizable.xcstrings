@@ -127268,7 +127268,11 @@
         }
       }
     },
+    "SFS Ticket" : {
+
+    },
     "SFS Ticket Details" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
