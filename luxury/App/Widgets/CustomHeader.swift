@@ -38,6 +38,8 @@ struct CustomHeader: View {
                     .font(AppFonts.sansSerif(size: 18, weight: .semibold))
                     .foregroundStyle(.white)
                     .accessibilityAddTraits(.isHeader)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
                 Spacer()
                 
                 if showBackButton && trailingIcon == nil {

@@ -71,27 +71,14 @@ public struct BMEndlessAisleRequestsView: View {
     }
     
     private var header: some View {
-        HStack(spacing: 16) {
-            Button(action: { dismiss() }) {
-                Image(systemName: "chevron.left")
-                    .font(AppFonts.sansSerif(size: 20, weight: .semibold))
-                    .foregroundStyle(AppColors.gold)
-            }
-            
-            Text("Endless Aisle Approvals")
-                .font(AppFonts.serif(size: 24, weight: .semibold))
-                .foregroundStyle(AppColors.text)
-            
-            Spacer()
-            
-            Button(action: { viewModel.loadRequests() }) {
-                Image(systemName: "arrow.clockwise")
-                    .font(AppFonts.sansSerif(size: 18, weight: .semibold))
-                    .foregroundStyle(AppColors.gold)
-            }
-        }
-        .padding(.horizontal, 24)
-        .padding(.vertical, 16)
+        CustomHeader(
+            title: "Endless Aisle Approvals",
+            showBackButton: true,
+            backAction: { dismiss() },
+            trailingIcon: "arrow.clockwise",
+            trailingAction: { viewModel.loadRequests() },
+            isInline: true
+        )
     }
     
     @ViewBuilder

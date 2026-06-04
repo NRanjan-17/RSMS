@@ -168,6 +168,8 @@ struct BoutiqueManagerCanvas: View {
             AuditReportDetailView(auditTitle: title)
         case .activeAuditReportDetail(let title):
             ActiveAuditReportDetailView(auditTitle: title)
+        case .storePolicies:
+            ExchangePolicyView(title: "Store Policies")
         }
     }
 }

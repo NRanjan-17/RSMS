@@ -58,6 +58,7 @@ enum BMRoute: Hashable {
     case auditReportHub
     case auditReportDetail(String)
     case activeAuditReportDetail(String)
+    case storePolicies
 }
 
 enum ICRoute: Hashable {
