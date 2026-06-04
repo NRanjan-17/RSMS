@@ -106541,6 +106541,9 @@
         }
       }
     },
+    "Receive Transfer" : {
+
+    },
     "RECEIVED" : {
       "localizations" : {
         "ar" : {
