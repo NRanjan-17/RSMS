@@ -84,6 +84,4 @@ final class AuditViewModel {
             await MainActor.run { self.isLoading = false }
         }
     }
-}
-
 
