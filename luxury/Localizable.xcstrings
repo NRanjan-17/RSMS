@@ -5548,6 +5548,9 @@
         }
       }
     },
+    "%lld total" : {
+
+    },
     "%lld variance items • Audit trail locked" : {
 
     },
@@ -6780,6 +6783,9 @@
           }
         }
       }
+    },
+    "+%lld more" : {
+
     },
     "×%lld" : {
       "localizations" : {
@@ -41220,6 +41226,9 @@
         }
       }
     },
+    "Creating secure video room..." : {
+
+    },
     "Critical" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -46528,6 +46537,9 @@
           }
         }
       }
+    },
+    "Destination" : {
+
     },
     "DESTINATION" : {
       "localizations" : {
@@ -67207,6 +67219,9 @@
         }
       }
     },
+    "Incoming and outgoing stock movements will appear here as soon as they are created or updated." : {
+
+    },
     "INDIVIDUAL ASSOCIATE TARGETS" : {
       "localizations" : {
         "ar" : {
@@ -74021,6 +74036,9 @@
           }
         }
       }
+    },
+    "Live" : {
+
     },
     "LIVE INVENTORY" : {
       "localizations" : {
@@ -89668,6 +89686,9 @@
         }
       }
     },
+    "No Transfer Activity" : {
+
+    },
     "No Transfer History Found" : {
       "localizations" : {
         "ar" : {
@@ -105045,6 +105066,9 @@
         }
       }
     },
+    "QUICK ACTIONS" : {
+
+    },
     "QUICK LINKS" : {
       "localizations" : {
         "ar" : {
@@ -108993,6 +109017,9 @@
         }
       }
     },
+    "Remote Consultation" : {
+
+    },
     "Remove" : {
       "localizations" : {
         "ar" : {
@@ -109811,6 +109838,9 @@
           }
         }
       }
+    },
+    "Request sent to the source boutique manager." : {
+
     },
     "Requested by local inventory control for %@." : {
       "localizations" : {
@@ -124511,6 +124541,16 @@
         }
       }
     },
+    "Send a video consultation link to %@ at %@?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Send a video consultation link to %1$@ at %2$@?"
+          }
+        }
+      }
+    },
     "Send Code" : {
       "localizations" : {
         "ar" : {
@@ -125054,6 +125094,9 @@
           }
         }
       }
+    },
+    "Sent" : {
+
     },
     "Serial Number" : {
       "localizations" : {
@@ -129963,6 +130006,9 @@
         }
       }
     },
+    "Source" : {
+
+    },
     "SOURCE" : {
       "localizations" : {
         "ar" : {
@@ -131323,6 +131369,9 @@
         }
       }
     },
+    "Start" : {
+
+    },
     "Start a Sale" : {
       "localizations" : {
         "ar" : {
@@ -131458,6 +131507,9 @@
           }
         }
       }
+    },
+    "Start Consultation" : {
+
     },
     "Start Date" : {
       "localizations" : {
@@ -131730,6 +131782,9 @@
           }
         }
       }
+    },
+    "Start Remote Consultation" : {
+
     },
     "Status" : {
       "localizations" : {
