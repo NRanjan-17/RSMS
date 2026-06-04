@@ -11,15 +11,54 @@ import Supabase
 
 @Observable
 final class ShrinkReportViewModel {
+    var searchText: String = ""
+    var filterStatus: StockAlertStatus? = nil
+    
     var totalShrinkValue: String = "\(CurrencyManager.shared.symbol)0"
     var accuracy: String = (1.0).formatted(.percent.precision(.fractionLength(1)))
-    
     var recentWriteOffs: [RSMSVarianceItem] = []
     
-    var liveInventory: [CatalogEntity] = []
-    var stockDict: [UUID: Int] = [:]
-    var isLoading: Bool = false
-    var errorMessage: String? = nil
+    var summaries: [ProductInventorySummary] = []
+    
+    var isLoading = false
+    var errorMessage: String?
+    
+    private let client = SupabaseManager.shared.client
+    
+    var filteredSummaries: [ProductInventorySummary] {
+        var result = summaries
+        
+        if let filterStatus = filterStatus {
+            result = result.filter { $0.alertStatus == filterStatus }
+        }
+        
+        if !searchText.isEmpty {
+            result = result.filter { summary in
+                summary.product.name.localizedCaseInsensitiveContains(searchText) ||
+                summary.product.brand.localizedCaseInsensitiveContains(searchText) ||
+                summary.product.catalogId.localizedCaseInsensitiveContains(searchText) ||
+                summary.product.barCode.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+        
+        return result
+    }
+    
+    var totalItemsCount: Int {
+        summaries.reduce(0) { $0 + $1.totalQuantity }
+    }
+    
+    var totalInventoryValue: Double {
+        summaries.reduce(0.0) { $0 + ($1.product.amount * Double($1.totalQuantity)) }
+    }
+    
+    var lowStockCount: Int {
+        summaries.filter { $0.alertStatus == .lowStock }.count
+    }
+    
+    var outOfStockCount: Int {
+        summaries.filter { $0.alertStatus == .outOfStock }.count
+    }
     
     func fetchInventory() {
         Task {
@@ -45,20 +84,46 @@ final class ShrinkReportViewModel {
                     return
                 }
                 
-                // 1. Fetch catalogs for live inventory
-                let fetched: [CatalogEntity] = try await SupabaseManager.shared.client
-                    .from("catalogs")
-                    .select()
-                    .execute()
-                    .value
+                let catalogsResponse = try await CatalogService().fetchCatalogs()
+                let boutiquesResponse: [CorporateBoutique] = try await client.from("boutiques").select().execute().value
                 
-                // 2. Fetch available stock dictionary
-                let newStockDict = try await InventoryService.shared.fetchAvailableStockDictionary(forBoutique: bId)
+                let allUnits: [InventoryUnitEntity]
+                if let boutiqueId = bId {
+                    allUnits = try await InventoryService.shared.fetchInventory(forBoutique: boutiqueId)
+                } else {
+                    allUnits = try await InventoryService.shared.fetchAllInventoryUnits()
+                }
                 
-                // 3. Fetch audits for this boutique to compute shrink data
-                var auditsQuery = SupabaseManager.shared.client
-                    .from("audits")
-                    .select()
+                let availableUnits = allUnits.filter { $0.status == .available }
+                let unitsByCatalog = Dictionary(grouping: availableUnits, by: { $0.catalogId })
+                let boutiqueDict = Dictionary(uniqueKeysWithValues: boutiquesResponse.map { ($0.id, $0) })
+                
+                var newSummaries: [ProductInventorySummary] = []
+                
+                for catalog in catalogsResponse {
+                    let catalogUnits = unitsByCatalog[catalog.id] ?? []
+                    let totalQty = catalogUnits.count
+                    
+                    let unitsByBoutique = Dictionary(grouping: catalogUnits, by: { $0.boutiqueId })
+                    var locations: [LocationInventoryDetail] = []
+                    
+                    for (locId, bUnits) in unitsByBoutique {
+                        locations.append(LocationInventoryDetail(
+                            storeId: locId,
+                            storeName: boutiqueDict[locId]?.name ?? "Unknown Boutique",
+                            quantity: bUnits.count,
+                            isAvailable: true
+                        ))
+                    }
+                    
+                    newSummaries.append(ProductInventorySummary(
+                        product: catalog,
+                        totalQuantity: totalQty,
+                        locations: locations
+                    ))
+                }
+                
+                var auditsQuery = client.from("audits").select()
                 if let boutiqueId = bId {
                     auditsQuery = auditsQuery.eq("boutique_id", value: boutiqueId)
                 }
@@ -68,18 +133,11 @@ final class ShrinkReportViewModel {
                     .execute()
                     .value) ?? []
                 
-                // 4. Compute shrink metrics from audit data
-                let catalogDict = Dictionary(uniqueKeysWithValues: fetched.map { ($0.id, $0) })
-                
-                // Total variance across all audits (negative variance = shrink)
                 let totalVariance = audits.reduce(0) { $0 + $1.variance }
-                
-                // Estimate shrink value based on missing items and average catalog price
-                let avgPrice: Double = fetched.isEmpty ? 0 : fetched.reduce(0.0) { $0 + $1.amount } / Double(fetched.count)
+                let avgPrice: Double = catalogsResponse.isEmpty ? 0 : catalogsResponse.reduce(0.0) { $0 + $1.amount } / Double(catalogsResponse.count)
                 let shrinkUnits = abs(min(totalVariance, 0))
                 let shrinkValue = Double(shrinkUnits) * avgPrice
                 
-                // Average accuracy across completed audits
                 let completedAudits = audits.filter { $0.status == .signedOff || $0.status == .inProgress }
                 let avgAccuracy: Double
                 if completedAudits.isEmpty {
@@ -88,7 +146,6 @@ final class ShrinkReportViewModel {
                     avgAccuracy = completedAudits.reduce(0.0) { $0 + $1.accuracy } / Double(completedAudits.count) / 100.0
                 }
                 
-                // 5. Build recent write-offs from audit discrepancies
                 var writeOffs: [RSMSVarianceItem] = []
                 for audit in audits {
                     guard let discrepancies = audit.discrepancies else { continue }
@@ -102,12 +159,10 @@ final class ShrinkReportViewModel {
                         ))
                     }
                 }
-                // Limit to most recent 10 write-offs
                 let recentItems = Array(writeOffs.prefix(10))
                 
                 await MainActor.run {
-                    self.liveInventory = fetched
-                    self.stockDict = newStockDict
+                    self.summaries = newSummaries.sorted(by: { $0.product.name < $1.product.name })
                     self.totalShrinkValue = CurrencyManager.shared.format(amount: shrinkValue)
                     self.accuracy = avgAccuracy.formatted(.percent.precision(.fractionLength(1)))
                     self.recentWriteOffs = recentItems

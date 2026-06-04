@@ -7327,6 +7327,7 @@
       }
     },
     "+ New Event" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -11001,6 +11002,7 @@
       }
     },
     "Actual: %lld" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -60422,6 +60424,7 @@
       }
     },
     "Expected: %lld" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -69670,6 +69673,7 @@
       }
     },
     "in stock" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -73752,6 +73756,7 @@
       }
     },
     "Inventory Health" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -78111,6 +78116,7 @@
       }
     },
     "LIVE INVENTORY" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -83553,6 +83559,7 @@
       }
     },
     "MTD Write-offs" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -89001,6 +89008,7 @@
       }
     },
     "No inventory data found." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -112813,6 +112821,7 @@
       }
     },
     "RECENT DISCREPANCIES" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -120294,6 +120303,7 @@
       }
     },
     "RSVPs" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -135684,6 +135694,7 @@
       }
     },
     "Shrink & Inventory" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -135820,6 +135831,7 @@
       }
     },
     "Shrink Value" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -156231,6 +156243,7 @@
       }
     },
     "UPCOMING EVENTS" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {

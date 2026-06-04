@@ -87,9 +87,7 @@ struct ReportsView: View {
         switch title {
         case "Sales Analytics":
             return .salesAnalytics
-        case "Staff Performance":
-            return .staffPerformanceReport
-        case "Shrink & Inventory":
+        case "Inventory":
             return .shrinkReport
         case "Client Insights":
             return .clientInsights
