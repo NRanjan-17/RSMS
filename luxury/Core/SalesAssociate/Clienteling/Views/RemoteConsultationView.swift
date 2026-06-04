@@ -171,7 +171,20 @@ struct RemoteConsultationView: View {
             set: { if !$0 { viewModel.generatedUrl = nil } }
         )) {
             if let url = viewModel.generatedUrl {
-                NativeVideoCallView(meetingURL: url)
+                ZStack(alignment: .topTrailing) {
+                    JitsiWebView(url: url)
+                        .ignoresSafeArea()
+                    
+                    Button(action: { viewModel.generatedUrl = nil }) {
+                        Text("Close")
+                            .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                            .foregroundStyle(AppColors.text)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                    }
+                    .background(.ultraThinMaterial, in: Capsule())
+                    .padding()
+                }
             }
         }
     }

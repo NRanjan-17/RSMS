@@ -62,11 +62,6 @@ struct SellingView: View {
             }
             .padding(.bottom, 4)
 
-            HStack(spacing: 10) {
-                CustomOutlineButton(title: "Remote", icon: AnyView(Image(systemName: "video.fill"))) {
-                    router.push(SARoute.remoteSelling)
-                }
-            }
         }
         .padding(.horizontal, 24)
         .padding(.bottom, 16)

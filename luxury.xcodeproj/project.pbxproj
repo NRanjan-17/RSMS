@@ -14,8 +14,6 @@
 		BEAC6FFD2FBCE45A006BB496 /* Realtime in Frameworks */ = {isa = PBXBuildFile; productRef = BEAC6FFC2FBCE45A006BB496 /* Realtime */; };
 		BEAC6FFF2FBCE45A006BB496 /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = BEAC6FFE2FBCE45A006BB496 /* Storage */; };
 		BEAC70012FBCE45A006BB496 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = BEAC70002FBCE45A006BB496 /* Supabase */; };
-		E23A9DCA2FD1879F00F286A0 /* Daily in Frameworks */ = {isa = PBXBuildFile; productRef = E23A9DC92FD1879F00F286A0 /* Daily */; };
-		E23A9DCC2FD1879F00F286A0 /* DailySystemBroadcast in Frameworks */ = {isa = PBXBuildFile; productRef = E23A9DCB2FD1879F00F286A0 /* DailySystemBroadcast */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,9 +33,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E23A9DCA2FD1879F00F286A0 /* Daily in Frameworks */,
 				BEAC6FFB2FBCE45A006BB496 /* PostgREST in Frameworks */,
-				E23A9DCC2FD1879F00F286A0 /* DailySystemBroadcast in Frameworks */,
 				BEAC6FF92FBCE45A006BB496 /* Functions in Frameworks */,
 				BE1ABC082FC56B6400845BA0 /* RazorpayCheckout in Frameworks */,
 				BEAC70012FBCE45A006BB496 /* Supabase in Frameworks */,
@@ -101,8 +97,6 @@
 				BEAC6FFE2FBCE45A006BB496 /* Storage */,
 				BEAC70002FBCE45A006BB496 /* Supabase */,
 				BE1ABC072FC56B6400845BA0 /* RazorpayCheckout */,
-				E23A9DC92FD1879F00F286A0 /* Daily */,
-				E23A9DCB2FD1879F00F286A0 /* DailySystemBroadcast */,
 			);
 			productName = luxury;
 			productReference = BEAC6E042FB6DAB5006BB496 /* luxury.app */;
@@ -138,7 +132,6 @@
 			packageReferences = (
 				BEAC6FF52FBCE45A006BB496 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 				BE1ABC062FC56B6400845BA0 /* XCRemoteSwiftPackageReference "razorpay-pod" */,
-				E23A9DC82FD1879F00F286A0 /* XCRemoteSwiftPackageReference "daily-client-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = BEAC6E052FB6DAB5006BB496 /* Products */;
@@ -300,12 +293,14 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = M968X6R748;
+				DEVELOPMENT_TEAM = 667V7CCT79;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "This app requires access to your calendar to schedule appointments.";
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "This app requires access to your calendar to schedule appointments.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to the camera to scan product barcodes and QR codes.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone for video consultations.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -323,7 +318,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nine.luxury.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eight.luxury.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = YES;
@@ -350,12 +345,14 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = M968X6R748;
+				DEVELOPMENT_TEAM = 667V7CCT79;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "This app requires access to your calendar to schedule appointments.";
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "This app requires access to your calendar to schedule appointments.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to the camera to scan product barcodes and QR codes.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone for video consultations.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -373,7 +370,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nine.luxury.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eight.luxury.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = YES;
@@ -431,14 +428,6 @@
 				minimumVersion = 2.5.1;
 			};
 		};
-		E23A9DC82FD1879F00F286A0 /* XCRemoteSwiftPackageReference "daily-client-ios" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/daily-co/daily-client-ios";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.37.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -476,16 +465,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = BEAC6FF52FBCE45A006BB496 /* XCRemoteSwiftPackageReference "supabase-swift" */;
 			productName = Supabase;
-		};
-		E23A9DC92FD1879F00F286A0 /* Daily */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = E23A9DC82FD1879F00F286A0 /* XCRemoteSwiftPackageReference "daily-client-ios" */;
-			productName = Daily;
-		};
-		E23A9DCB2FD1879F00F286A0 /* DailySystemBroadcast */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = E23A9DC82FD1879F00F286A0 /* XCRemoteSwiftPackageReference "daily-client-ios" */;
-			productName = DailySystemBroadcast;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

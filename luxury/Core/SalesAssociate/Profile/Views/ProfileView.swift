@@ -68,7 +68,7 @@ struct ProfileView: View {
                         VStack(alignment: .leading, spacing: 14) {
                             HStack(alignment: .top) {
                                 VStack(alignment: .leading, spacing: 5) {
-                                    Text("TODAY'S REVENUE")
+                                    Text("MONTHLY REVENUE")
                                         .font(AppFonts.sansSerif(size: 10))
                                         .foregroundStyle(AppColors.secondary)
                                         .kerning(1.5)

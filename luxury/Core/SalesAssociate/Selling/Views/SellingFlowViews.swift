@@ -75,7 +75,20 @@ struct RemoteSellingView: View {
         }
         .fullScreenCover(isPresented: $showingVideoCall) {
             if let url = URL(string: currentMeetingLink) {
-                NativeVideoCallView(meetingURL: url)
+                ZStack(alignment: .topTrailing) {
+                    JitsiWebView(url: url)
+                        .ignoresSafeArea()
+                    
+                    Button(action: { showingVideoCall = false }) {
+                        Text("Close")
+                            .font(AppFonts.sansSerif(size: 14, weight: .bold))
+                            .foregroundStyle(AppColors.text)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                    }
+                    .background(.ultraThinMaterial, in: Capsule())
+                    .padding()
+                }
             }
         }
     }
@@ -86,24 +99,9 @@ struct RemoteSellingView: View {
             return
         }
         
-        isGeneratingLink = true
-        
-        Task {
-            do {
-                let uniqueRoomURL = try await DailyAPIService.createRoom(apiKey: VideoConfig.dailyAPIKey)
-                
-                await MainActor.run {
-                    self.currentMeetingLink = uniqueRoomURL
-                    self.isGeneratingLink = false
-                    self.showingVideoOptions = true
-                }
-            } catch {
-                await MainActor.run {
-                    self.isGeneratingLink = false
-                    print("Failed to generate room: \(error)")
-                }
-            }
-        }
+        let roomName = "RSMS-Consultation-\(UUID().uuidString.prefix(8))"
+        currentMeetingLink = "https://meet.element.io/\(roomName)#config.prejoinPageEnabled=false&config.disableDeepLinking=true"
+        showingVideoOptions = true
     }
 }
 

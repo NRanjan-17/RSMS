@@ -19,6 +19,8 @@ struct BMAppointmentDetailView: View {
     @State private var showingDeleteAlert = false
     @State private var currentStatus: AppointmentStatus
     @State private var selectedDate: Date
+    @State private var showingCalendarAlert = false
+    @State private var calendarAlertMessage = ""
     
     init(appointment: AppointmentEntity) {
         self.appointment = appointment
@@ -129,6 +131,41 @@ struct BMAppointmentDetailView: View {
                         }
                     }
                     .padding(.top, 8)
+                    
+                    Button(action: {
+                        Task {
+                            let granted = await EventKitManager.shared.requestAccess()
+                            if granted {
+                                let title = "RSMS: \(appointment.displayAppointmentType)"
+                                let date = ISO8601DateFormatter().date(from: appointment.timestamp) ?? Date()
+                                let notes = appointment.remarks ?? ""
+                                EventKitManager.shared.addEventToCalendar(title: title, startDate: date, durationMinutes: 60, notes: notes)
+                                
+                                await MainActor.run {
+                                    calendarAlertMessage = "Appointment added to your iOS Calendar!"
+                                    showingCalendarAlert = true
+                                }
+                            } else {
+                                await MainActor.run {
+                                    calendarAlertMessage = "Permission denied. Please enable Calendar access in iOS Settings."
+                                    showingCalendarAlert = true
+                                }
+                            }
+                        }
+                    }) {
+                        HStack {
+                            Image(systemName: "calendar.badge.plus")
+                            Text("Add to Apple Calendar")
+                        }
+                        .font(AppFonts.sansSerif(size: 14, weight: .semibold))
+                        .foregroundStyle(AppColors.background)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.top, 16)
                 }
 
                 VStack {
@@ -204,6 +241,11 @@ struct BMAppointmentDetailView: View {
             }
         } message: {
             Text("Are you sure you want to delete this appointment? This action cannot be undone.")
+        }
+        .alert("Calendar", isPresented: $showingCalendarAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(calendarAlertMessage)
         }
         .task {
             await fetchAvailableStaff()

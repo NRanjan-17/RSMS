@@ -70,12 +70,12 @@ final class RemoteConsultationViewModel {
         }
         
         do {
-            let roomUrl = try await DailyAPIService.createRoom(apiKey: VideoConfig.dailyAPIKey)
+            let roomName = "RSMS-Consultation-\(UUID().uuidString.prefix(8))"
+            let roomUrl = "https://meet.element.io/\(roomName)#config.prejoinPageEnabled=false&config.disableDeepLinking=true"
             
-            // Send the email in the background via the new Edge Function
             let params = Params(clientEmail: client.email ?? "", salesAssociateName: "Sales Associate", meetLink: roomUrl)
             struct ResponseData: Decodable { let success: Bool? }
-            _ = try? await SupabaseManager.shared.client.functions.invoke(
+            _ = try await SupabaseManager.shared.client.functions.invoke(
                 "create-remote-consultation",
                 options: FunctionInvokeOptions(body: params)
             )

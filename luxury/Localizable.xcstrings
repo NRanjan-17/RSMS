@@ -12362,6 +12362,9 @@
         }
       }
     },
+    "Add to Apple Calendar" : {
+
+    },
     "Add to Cart" : {
       "localizations" : {
         "ar" : {
@@ -29657,6 +29660,9 @@
         }
       }
     },
+    "Calendar" : {
+
+    },
     "Camera Modal (Placeholder)" : {
       "localizations" : {
         "ar" : {
@@ -34012,6 +34018,7 @@
       }
     },
     "Clear" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -39865,6 +39872,7 @@
       }
     },
     "Connection successful. You are currently the only participant." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -77980,6 +77988,7 @@
       }
     },
     "Live Consultation" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -78389,6 +78398,7 @@
       }
     },
     "Live Whiteboard" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -162367,6 +162377,7 @@
       }
     },
     "Waiting for client to join..." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
