@@ -150,8 +150,11 @@ struct ProfileView: View {
                                     .buttonStyle(.plain)
                                     
                                     Button(action: {
-                                        // Pass a dummy UUID until SAProfileViewModel includes the actual boutique ID.
-                                        router.push(SARoute.planogramGallery(boutiqueId: UUID()))
+                                        if let bId = viewModel.boutiqueId {
+                                            router.push(SARoute.planogramGallery(boutiqueId: bId))
+                                        } else {
+                                            router.push(SARoute.planogramGallery(boutiqueId: UUID()))
+                                        }
                                     }) {
                                         HStack {
                                             Image(systemName: "photo.artframe")

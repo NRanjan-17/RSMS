@@ -15,6 +15,7 @@ final class SAProfileViewModel {
     var greeting: String = ""
     var name: String = ""
     var avatarUrl: String?
+    var boutiqueId: UUID?
     
     var revenue: Double = 0.0
     var target: Double = 0.0
@@ -53,6 +54,7 @@ final class SAProfileViewModel {
                         .value, let b = boutiques.first {
                         await MainActor.run {
                             self.store = b.name
+                            self.boutiqueId = boutiqueId
                             if let curr = b.currency, !curr.isEmpty {
                                 CurrencyManager.shared.currentCurrency = curr
                             }
