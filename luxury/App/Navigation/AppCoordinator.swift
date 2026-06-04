@@ -18,6 +18,7 @@ final class AppCoordinator: @unchecked Sendable {
     }
     
     func logout() {
+        AuditPersistence.shared.clearAllSessions()
         Task {
             try? await AuthService().signOut()
         }

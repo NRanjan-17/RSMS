@@ -8,6 +8,7 @@
 import Foundation
 import Observation
 import Supabase
+import UIKit
 
 @Observable
 final class ActiveAuditViewModel {
@@ -15,6 +16,7 @@ final class ActiveAuditViewModel {
     
     var expectedItems: [AuditCountItem] = []
     var scannedItems: [ScannedAuditItem] = []
+    var unexpectedScannedItems: [UnexpectedScannedItem] = []
     var totalExpected: Int = 0
     var totalScanned: Int = 0
     var isLoading = false
@@ -55,10 +57,22 @@ final class ActiveAuditViewModel {
             await MainActor.run {
                 self.expectedItems = cached.expectedItems
                 self.totalExpected = cached.expectedItems.reduce(0) { $0 + $1.expectedQty }
-                self.totalScanned = cached.expectedItems.reduce(0) { $0 + $1.countedQty }
-                self.scannedItems = cached.expectedItems.flatMap { item in
-                    Array(repeating: ScannedAuditItem(name: item.name, ok: true), count: item.countedQty)
+                self.unexpectedScannedItems = cached.unexpectedScannedItems ?? []
+                let expectedScanned = cached.expectedItems.reduce(0) { $0 + $1.countedQty }
+                let unexpectedScanned = self.unexpectedScannedItems.count
+                self.totalScanned = expectedScanned + unexpectedScanned
+                
+                var list: [ScannedAuditItem] = []
+                for item in cached.expectedItems {
+                    for i in 0..<item.countedQty {
+                        let isOk = (i + 1) <= item.expectedQty
+                        list.append(ScannedAuditItem(name: item.name, ok: isOk))
+                    }
                 }
+                for item in self.unexpectedScannedItems {
+                    list.append(ScannedAuditItem(name: item.barcode, ok: false))
+                }
+                self.scannedItems = list
             }
             return
         }
@@ -77,11 +91,17 @@ final class ActiveAuditViewModel {
             let _ = try await fetchBoutiquesHandler()
             
             let catalogsResponse = try await fetchCatalogsHandler()
-            let inventoryResponse = try await fetchInventoryHandler(storeId)
+            let inventoryUnits = try await InventoryService.shared.fetchInventory(forBoutique: storeId)
+            let unsoldUnits = inventoryUnits.filter { $0.status != .sold }
+            
+            var unsoldCounts: [UUID: Int] = [:]
+            for unit in unsoldUnits {
+                unsoldCounts[unit.catalogId, default: 0] += 1
+            }
             
             var items: [AuditCountItem] = []
             for product in catalogsResponse {
-                let qty = inventoryResponse.first(where: { $0.skuId == product.id })?.quantity ?? 0
+                let qty = unsoldCounts[product.id] ?? 0
                 items.append(
                     AuditCountItem(
                         productId: product.id,
@@ -115,7 +135,19 @@ final class ActiveAuditViewModel {
     func scanItem(barcode: String) -> Result<Void, Error> {
         let trimmed = barcode.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let index = expectedItems.firstIndex(where: { $0.barcode.lowercased() == trimmed.lowercased() }) else {
-            return .failure(NSError(domain: "Audit", code: 1, userInfo: [NSLocalizedDescriptionKey: "SKU mismatch. Expected boutique product, got \(trimmed)."]))
+            let unexpectedItem = UnexpectedScannedItem(id: UUID(), barcode: trimmed, status: "new_item")
+            unexpectedScannedItems.append(unexpectedItem)
+            
+            scannedItems.insert(ScannedAuditItem(name: trimmed, ok: false), at: 0)
+            totalScanned += 1
+            
+            #if os(iOS)
+            let generator = UINotificationFeedbackGenerator()
+            generator.notificationOccurred(.warning)
+            #endif
+            
+            saveSessionState()
+            return .success(())
         }
         
         expectedItems[index].countedQty += 1
@@ -141,7 +173,8 @@ final class ActiveAuditViewModel {
             controllerName: "Controller",
             isSubmitted: false,
             expectedItems: expectedItems,
-            varianceReport: nil
+            varianceReport: nil,
+            unexpectedScannedItems: unexpectedScannedItems
         )
         AuditPersistence.shared.saveSession(session)
     }
@@ -159,15 +192,22 @@ final class ActiveAuditViewModel {
             let storeName = boutiques?.first(where: { $0.id == storeId })?.name ?? "Boutique"
             
             let catalogsResponse = try await fetchCatalogsHandler()
-            let inventoryResponse = try await fetchInventoryHandler(storeId)
+            let inventoryUnits = try await InventoryService.shared.fetchInventory(forBoutique: storeId)
+            let unsoldUnits = inventoryUnits.filter { $0.status != .sold }
+            
+            var unsoldCounts: [UUID: Int] = [:]
+            for unit in unsoldUnits {
+                unsoldCounts[unit.catalogId, default: 0] += 1
+            }
             
             var reportItems: [VarianceReportItem] = []
+            var discrepancies: [DiscrepancyItem] = []
             
             for countItem in expectedItems {
                 let latestCatalog = catalogsResponse.first(where: { $0.id == countItem.productId })
                 let isArchived = latestCatalog == nil
                 
-                let snapshotExpected = inventoryResponse.first(where: { $0.skuId == countItem.productId })?.quantity ?? 0
+                let snapshotExpected = unsoldCounts[countItem.productId] ?? 0
                 let variance = countItem.countedQty - snapshotExpected
                 
                 reportItems.append(
@@ -181,6 +221,52 @@ final class ActiveAuditViewModel {
                         isArchivedProduct: isArchived
                     )
                 )
+                
+                if countItem.countedQty < snapshotExpected {
+                    let diff = snapshotExpected - countItem.countedQty
+                    for _ in 0..<diff {
+                        discrepancies.append(
+                            DiscrepancyItem(
+                                name: countItem.name,
+                                detail: "SKU: \(countItem.sku)",
+                                type: "missing"
+                            )
+                        )
+                    }
+                } else if countItem.countedQty > snapshotExpected {
+                    let diff = countItem.countedQty - snapshotExpected
+                    for _ in 0..<diff {
+                        discrepancies.append(
+                            DiscrepancyItem(
+                                name: countItem.name,
+                                detail: "SKU: \(countItem.sku)",
+                                type: "new"
+                            )
+                        )
+                    }
+                }
+            }
+            
+            for unexpected in unexpectedScannedItems {
+                discrepancies.append(
+                    DiscrepancyItem(
+                        name: "Unexpected Scan: \(unexpected.barcode)",
+                        detail: "Barcode: \(unexpected.barcode)",
+                        type: "new"
+                    )
+                )
+                
+                reportItems.append(
+                    VarianceReportItem(
+                        id: UUID(),
+                        productName: "Unexpected Scan: \(unexpected.barcode)",
+                        sku: unexpected.barcode,
+                        expectedQty: 0,
+                        countedQty: 1,
+                        variance: 1,
+                        isArchivedProduct: false
+                    )
+                )
             }
             
             let report = VarianceReport(
@@ -191,18 +277,42 @@ final class ActiveAuditViewModel {
                 items: reportItems
             )
             
+            struct SubmitAuditPayload: Codable {
+                let status: String
+                let total_expected: Int
+                let total_scanned: Int
+                let variance: Int
+                let accuracy: Double
+                let discrepancies: [DiscrepancyItem]
+            }
+            
+            let submitPayload = SubmitAuditPayload(
+                status: "in_progress",
+                total_expected: totalExpected,
+                total_scanned: totalScanned,
+                variance: totalScanned - totalExpected,
+                accuracy: totalExpected > 0 ? (max(0.0, Double(totalExpected - abs(totalScanned - totalExpected)) / Double(totalExpected)) * 100.0) : 100.0,
+                discrepancies: discrepancies
+            )
+            
+            try await SupabaseManager.shared.client.from("audits")
+                .update(submitPayload)
+                .eq("id", value: audit.id.uuidString)
+                .execute()
+            
             let session = AuditSession(
                 id: audit.id,
                 title: audit.title,
                 date: audit.date,
                 scope: audit.scope,
-                status: "Signed Off",
+                status: "Submitted",
                 badgeStatus: .success,
                 storeName: storeName,
                 controllerName: controllerName,
                 isSubmitted: true,
                 expectedItems: expectedItems,
-                varianceReport: report
+                varianceReport: report,
+                unexpectedScannedItems: unexpectedScannedItems
             )
             
             AuditPersistence.shared.saveSession(session)

@@ -61,4 +61,12 @@ final class AuditPersistence {
             UserDefaults.standard.set(data, forKey: listKey)
         }
     }
+    
+    func clearAllSessions() {
+        let ids = loadAllSessionIds()
+        for id in ids {
+            UserDefaults.standard.removeObject(forKey: keyPrefix + id.uuidString)
+        }
+        UserDefaults.standard.removeObject(forKey: listKey)
+    }
 }

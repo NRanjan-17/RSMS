@@ -54,10 +54,13 @@ final class FulfillmentViewModel {
             try await InventoryService.shared.updateInventoryStatus(serials: [serialNumber], newStatus: status)
         }
         self.updatePurchasedItemHandler = { id, status, deliveryDate in
-            var payload: [String: String] = ["status": status]
-            if let date = deliveryDate {
-                payload["delivery_date"] = ISO8601DateFormatter().string(from: date)
-            }
+            let payload: [String: String] = {
+                var dict = ["status": status]
+                if let date = deliveryDate {
+                    dict["delivery_date"] = ISO8601DateFormatter().string(from: date)
+                }
+                return dict
+            }()
             try await SupabaseManager.shared.client.from("purchased_items")
                 .update(payload)
                 .eq("id", value: id.uuidString)
@@ -337,10 +340,13 @@ final class FulfillmentViewModel {
                 icId = staff.id.uuidString
             }
             
-            var payload: [String: String] = ["status": "Ready to Pick"]
-            if let id = icId {
-                payload["inventory_manager_id"] = id
-            }
+            let payload: [String: String] = {
+                var dict = ["status": "Ready to Pick"]
+                if let id = icId {
+                    dict["inventory_manager_id"] = id
+                }
+                return dict
+            }()
             
             try await SupabaseManager.shared.client.from("purchased_items")
                 .update(payload)
