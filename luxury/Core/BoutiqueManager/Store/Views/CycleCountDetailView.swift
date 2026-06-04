@@ -1821,7 +1821,6 @@ private struct BreakdownProductRow: View {
         .background(Color(white: 0.05))
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.border.opacity(0.5), lineWidth: 1))
-        .padding(.horizontal, 24)
     }
 }
 
