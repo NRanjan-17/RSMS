@@ -17,7 +17,7 @@ struct PurchaseOrdersView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                CustomHeader(title: "Purchase Orders", showBackButton: true, backAction: { dismiss() })
+                CustomHeader(title: "Purchase Orders", showBackButton: true, backAction: { dismiss() }, isInline: true)
                 
                 if viewModel.isLoading {
                     Spacer()

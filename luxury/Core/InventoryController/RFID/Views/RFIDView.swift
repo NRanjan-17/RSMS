@@ -23,7 +23,7 @@ struct RFIDView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                CustomHeader(title: "Barcode & QR Scanner")
+                CustomHeader(title: "Scan")
                 
                 VStack(spacing: 20) {
                     CustomButton(

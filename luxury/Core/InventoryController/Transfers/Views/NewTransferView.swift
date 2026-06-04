@@ -36,7 +36,7 @@ struct NewTransferView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                CustomHeader(title: "New Transfer", showBackButton: true, backAction: { dismiss() })
+                CustomHeader(title: "New Transfer", showBackButton: true, backAction: { dismiss() }, isInline: true)
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 32) {

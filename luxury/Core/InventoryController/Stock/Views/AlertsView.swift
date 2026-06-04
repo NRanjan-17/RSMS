@@ -17,7 +17,7 @@ struct AlertsView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                CustomHeader(title: "Inventory Alerts", showBackButton: true, backAction: { dismiss() })
+                CustomHeader(title: "Inventory Alerts", showBackButton: true, backAction: { dismiss() }, isInline: true)
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 20) {

@@ -33,25 +33,8 @@ struct SFSTicketsListView: View {
             
             VStack(spacing: 0) {
                 // Header & Custom Search
-                VStack(spacing: 16) {
-                    HStack {
-                        Button(action: {
-                            router.pop()
-                        }) {
-                            Image(systemName: "arrow.left")
-                                .font(AppFonts.sansSerif(size: 20))
-                                .foregroundStyle(.white)
-                        }
-                        .padding(.trailing, 8)
-                        
-                        Text("SFS Tickets")
-                            .font(AppFonts.serif(size: 34, weight: .bold))
-                            .foregroundStyle(.white)
-                        Spacer()
-                    }
-                    .padding(.horizontal, 24)
-                    .padding(.top, 16)
-                    
+                CustomHeader(title: "SFS Tickets", showBackButton: true, backAction: { router.pop() }, isInline: true)
+                VStack(spacing: 0) {
                     HStack(spacing: 10) {
                         Image(systemName: "magnifyingglass")
                             .foregroundStyle(AppColors.secondary)
@@ -78,8 +61,8 @@ struct SFSTicketsListView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 1))
                     .padding(.horizontal, 24)
+                    .padding(.bottom, 24)
                 }
-                .padding(.bottom, 24)
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
