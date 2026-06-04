@@ -102,10 +102,7 @@ struct RemoteSellingView: View {
         
         Task {
             do {
-                // IMPORTANT: Replace with your actual Daily API key from dashboard.daily.co
-                let apiKey = "YOUR_DAILY_API_KEY_HERE"
-                
-                let uniqueRoomURL = try await DailyAPIService.createRoom(apiKey: apiKey)
+                let uniqueRoomURL = try await DailyAPIService.createRoom(apiKey: VideoConfig.dailyAPIKey)
                 
                 await MainActor.run {
                     self.currentMeetingLink = uniqueRoomURL
