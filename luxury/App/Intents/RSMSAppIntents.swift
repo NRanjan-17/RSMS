@@ -119,6 +119,39 @@ struct RSMSAppShortcuts: AppShortcutsProvider {
             shortTitle: "Start a Sale",
             systemImageName: "cart"
         )
+        
+        AppShortcut(
+            intent: FindClientIntent(),
+            phrases: [
+                "Find a client in \(.applicationName)",
+                "Search for client in \(.applicationName)",
+                "Show clients in \(.applicationName)"
+            ],
+            shortTitle: "Find Client",
+            systemImageName: "person.text.rectangle"
+        )
+        
+        AppShortcut(
+            intent: StartRemoteConsultationIntent(),
+            phrases: [
+                "Start remote consultation in \(.applicationName)",
+                "Open remote selling in \(.applicationName)",
+                "Video call in \(.applicationName)"
+            ],
+            shortTitle: "Remote Consultation",
+            systemImageName: "video.fill"
+        )
+        
+        AppShortcut(
+            intent: AddAppointmentIntent(),
+            phrases: [
+                "Add an appointment in \(.applicationName)",
+                "Schedule a client in \(.applicationName)",
+                "Create appointment in \(.applicationName)"
+            ],
+            shortTitle: "Schedule Appointment",
+            systemImageName: "calendar.badge.plus"
+        )
     }
 }
 
@@ -251,5 +284,72 @@ struct ProductEntityQuery: EntityQuery, EntityStringQuery {
             .value
             
         return catalogs.map { ProductEntity(from: $0) }
+    }
+}
+
+// MARK: - New Intents
+struct FindClientIntent: AppIntent {
+    static var title: LocalizedStringResource = "Find a Client"
+    static var description = IntentDescription("Find a client in RSMS.")
+    
+    static var openAppWhenRun: Bool = true
+
+    @Dependency
+    private var saAppState: SalesAssociateAppState
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        saAppState.selectedTab = .clients
+        return .result()
+    }
+}
+
+struct StartRemoteConsultationIntent: AppIntent {
+    static var title: LocalizedStringResource = "Start Remote Consultation"
+    static var description = IntentDescription("Start a remote video selling session in RSMS.")
+    
+    static var openAppWhenRun: Bool = true
+
+    @Dependency
+    private var saAppState: SalesAssociateAppState
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        saAppState.selectedTab = .selling
+        return .result()
+    }
+}
+
+struct AddAppointmentIntent: AppIntent {
+    static var title: LocalizedStringResource = "Schedule an Appointment"
+    static var description = IntentDescription("Add a client appointment directly to your calendar.")
+    
+    @Parameter(title: "Client Name")
+    var clientName: String
+    
+    @Parameter(title: "Date and Time")
+    var appointmentDate: Date
+    
+    static var openAppWhenRun: Bool = false
+    
+    @MainActor
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        let manager = EventKitManager.shared
+        if !manager.permissionGranted {
+            let granted = await manager.requestAccess()
+            if !granted {
+                return .result(dialog: "Please grant calendar access to RSMS in Settings first.")
+            }
+        }
+        
+        manager.addEventToCalendar(
+            title: "Client Appointment: \(clientName)",
+            startDate: appointmentDate,
+            durationMinutes: 60,
+            notes: "Scheduled via Siri",
+            location: "Boutique"
+        )
+        
+        return .result(dialog: "I've scheduled an appointment with \(clientName) on your calendar.")
     }
 }

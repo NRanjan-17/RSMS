@@ -11138,6 +11138,9 @@
         }
       }
     },
+    "Add a client appointment directly to your calendar." : {
+
+    },
     "Add a new catalog item" : {
       "localizations" : {
         "ar" : {
@@ -35110,6 +35113,9 @@
         }
       }
     },
+    "Client Name" : {
+
+    },
     "Client Profile" : {
       "localizations" : {
         "ar" : {
@@ -46141,6 +46147,9 @@
           }
         }
       }
+    },
+    "Date and Time" : {
+
     },
     "Date of Birth" : {
       "localizations" : {
@@ -65876,6 +65885,15 @@
         }
       }
     },
+    "Find a Client" : {
+
+    },
+    "Find a client in RSMS." : {
+
+    },
+    "Find Client" : {
+
+    },
     "First name is required." : {
       "localizations" : {
         "ar" : {
@@ -68867,6 +68885,9 @@
           }
         }
       }
+    },
+    "I've scheduled an appointment with %@ on your calendar." : {
+
     },
     "ID: %@" : {
       "localizations" : {
@@ -105491,6 +105512,9 @@
         }
       }
     },
+    "Please grant calendar access to RSMS in Settings first." : {
+
+    },
     "Please select a destination boutique to unlock scanner." : {
       "localizations" : {
         "ar" : {
@@ -124954,6 +124978,12 @@
         }
       }
     },
+    "Schedule an Appointment" : {
+
+    },
+    "Schedule Appointment" : {
+
+    },
     "Scheduled" : {
       "localizations" : {
         "ar" : {
@@ -139400,6 +139430,9 @@
           }
         }
       }
+    },
+    "Start a remote video selling session in RSMS." : {
+
     },
     "Start a Sale" : {
       "localizations" : {
