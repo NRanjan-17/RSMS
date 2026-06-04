@@ -46,37 +46,49 @@ struct AuditView: View {
                     List {
                         Section {
                             let counts = viewModel.scheduledCounts
-                            ForEach(counts, id: \.id) { count in
-                                Button(action: {
-                                    if count.status == "UPCOMING" {
-                                        withAnimation { showUpcomingToast = true }
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-                                            withAnimation { showUpcomingToast = false }
-                                        }
-                                    } else if count.status == "SIGNED OFF" || count.status == "Signed Off" || count.status == "Submitted" {
-                                        router.push(ICRoute.varianceReport(count))
-                                    } else {
-                                        router.presentFullScreen(ICRoute.auditDetail(count))
-                                    }
-                                }) {
-                                    HStack {
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text(count.title)
-                                                .font(AppFonts.serif(size: 17, weight: .medium))
-                                                .foregroundStyle(AppColors.text)
-                                            HStack(spacing: 8) {
-                                                Text(count.scope)
-                                                Text("•")
-                                                Text(count.date)
-                                            }
-                                            .font(AppFonts.sansSerif(size: 12))
-                                            .foregroundStyle(AppColors.secondary)
-                                        }
-                                        Spacer()
-                                        StatusBadge(text: LocalizedStringKey(count.status), status: count.badgeStatus)
-                                    }
+                            if counts.isEmpty {
+                                HStack {
+                                    Spacer()
+                                    Text("No current scheduled")
+                                        .font(AppFonts.sansSerif(size: 13))
+                                        .foregroundStyle(AppColors.secondary)
+                                    Spacer()
                                 }
+                                .padding(.vertical, 12)
                                 .listRowBackground(AppColors.surface)
+                            } else {
+                                ForEach(counts, id: \.id) { count in
+                                    Button(action: {
+                                        if count.status == "UPCOMING" {
+                                            withAnimation { showUpcomingToast = true }
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                                                withAnimation { showUpcomingToast = false }
+                                            }
+                                        } else if count.status == "SIGNED OFF" || count.status == "Signed Off" || count.status == "Submitted" {
+                                            router.push(ICRoute.varianceReport(count))
+                                        } else {
+                                            router.presentFullScreen(ICRoute.auditDetail(count))
+                                        }
+                                    }) {
+                                        HStack {
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                Text(count.title)
+                                                    .font(AppFonts.serif(size: 17, weight: .medium))
+                                                    .foregroundStyle(AppColors.text)
+                                                HStack(spacing: 8) {
+                                                    Text(count.scope)
+                                                    Text("•")
+                                                    Text(count.date)
+                                                }
+                                                .font(AppFonts.sansSerif(size: 12))
+                                                .foregroundStyle(AppColors.secondary)
+                                            }
+                                            Spacer()
+                                            StatusBadge(text: LocalizedStringKey(count.status), status: count.badgeStatus)
+                                        }
+                                    }
+                                    .listRowBackground(AppColors.surface)
+                                }
                             }
                         } header: {
                             Text("SCHEDULED COUNTS")

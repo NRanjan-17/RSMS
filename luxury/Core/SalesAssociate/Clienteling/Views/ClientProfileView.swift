@@ -1250,27 +1250,37 @@ struct ClientProfileProductRowView: View {
     
     var body: some View {
         HStack(spacing: 12) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(AppColors.surface2)
-                    .frame(width: 48, height: 48)
-                Image(systemName: "circle.grid.cross")
-                    .font(AppFonts.sansSerif(size: 16))
-                    .foregroundStyle(AppColors.gold)
-                    .opacity(0.3)
+            Group {
+                if let firstImage = product.productImages?.first, let url = URL(string: firstImage) {
+                    CachedAsyncImage(url: url) { phase in
+                        if let image = phase.image {
+                            image.resizable()
+                                 .scaledToFill()
+                                 .frame(width: 48, height: 48)
+                                 .clipShape(RoundedRectangle(cornerRadius: 10))
+                        } else {
+                            placeholderIcon
+                        }
+                    }
+                } else {
+                    placeholderIcon
+                }
             }
             
             VStack(alignment: .leading, spacing: 3) {
-                Text(product.brand)
+                Text(product.brand.uppercased())
                     .font(AppFonts.sansSerif(size: 9, weight: .bold))
                     .foregroundStyle(AppColors.gold)
-                    .kerning(1)
+                    .kerning(1.5)
+                    .lineLimit(1)
                 Text(product.name)
                     .font(AppFonts.serif(size: 14, weight: .medium))
                     .foregroundStyle(.white)
-                Text(product.formattedPrice)
-                    .font(AppFonts.sansSerif(size: 12))
-                    .foregroundStyle(AppColors.secondary)
+                    .lineLimit(1)
+                Text(CurrencyManager.shared.format(amount: product.amount))
+                    .font(AppFonts.serif(size: 13, weight: .semibold))
+                    .foregroundStyle(AppColors.gold)
+                    .lineLimit(1)
             }
             Spacer()
             Image(systemName: "plus.circle.fill")
@@ -1285,8 +1295,19 @@ struct ClientProfileProductRowView: View {
                 .stroke(AppColors.gold15, lineWidth: 0.5)
         )
     }
+    
+    private var placeholderIcon: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 10)
+                .fill(AppColors.surface2)
+                .frame(width: 48, height: 48)
+            Image(systemName: "circle.grid.cross")
+                .font(AppFonts.sansSerif(size: 16))
+                .foregroundStyle(AppColors.gold)
+                .opacity(0.3)
+        }
+    }
 }
-
 struct NoteFormView: View {
     @Environment(\.dismiss) private var dismiss
     let title: String

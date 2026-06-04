@@ -89,7 +89,6 @@ struct TransfersView: View {
                                     }
                                 }
                             }
-                            .padding(.horizontal, 20)
                             .padding(.top, 4)
                             .padding(.bottom, 24)
                         }
@@ -185,14 +184,11 @@ struct TransfersView: View {
                         .foregroundStyle(.white)
                         .lineLimit(1)
                 }
-                
-                Spacer()
+                .frame(maxWidth: .infinity, alignment: .leading)
                 
                 Image(systemName: "arrow.right")
                     .font(AppFonts.sansSerif(size: 12))
                     .foregroundStyle(AppColors.gold)
-                
-                Spacer()
                 
                 VStack(alignment: .trailing, spacing: 4) {
                     Text("Destination")
@@ -204,6 +200,7 @@ struct TransfersView: View {
                         .foregroundStyle(.white)
                         .lineLimit(1)
                 }
+                .frame(maxWidth: .infinity, alignment: .trailing)
             }
             
             Divider().background(AppColors.border)
