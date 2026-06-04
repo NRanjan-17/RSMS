@@ -132,6 +132,8 @@ struct SalesAssociateCanvas: View {
             PlanogramGalleryView(boutiqueId: boutiqueId)
         case .sfsHandover:
             SAHandoverView()
+        case .remoteConsultation:
+            RemoteConsultationView()
         }
     }
 }

@@ -22,6 +22,7 @@ enum SARoute: Hashable {
     case editProfile
     case planogramGallery(boutiqueId: UUID)
     case sfsHandover
+    case remoteConsultation
 }
 
 

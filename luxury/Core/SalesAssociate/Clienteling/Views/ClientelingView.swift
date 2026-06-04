@@ -166,6 +166,12 @@ struct ClientelingView: View {
                         }) {
                             Label("SFS Handover", systemImage: "shippingbox.fill")
                         }
+                        
+                        Button(action: {
+                            router.presentFullScreen(SARoute.remoteConsultation)
+                        }) {
+                            Label("Remote Consultation", systemImage: "video.fill")
+                        }
                     } label: {
                         ZStack {
                             RoundedRectangle(cornerRadius: 14)

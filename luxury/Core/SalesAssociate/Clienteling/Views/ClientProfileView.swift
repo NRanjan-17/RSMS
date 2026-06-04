@@ -149,6 +149,34 @@ struct ClientProfileView: View {
         } message: {
             Text("Add a quick note for \(viewModel.client.name)")
         }
+        .alert("Remote Consultation", isPresented: Binding(
+            get: { viewModel.meetLinkAlertMessage != nil },
+            set: { if !$0 { viewModel.meetLinkAlertMessage = nil } }
+        )) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(viewModel.meetLinkAlertMessage ?? "")
+        }
+        .fullScreenCover(isPresented: Binding(
+            get: { viewModel.generatedMeetUrl != nil },
+            set: { if !$0 { viewModel.generatedMeetUrl = nil } }
+        )) {
+            if let url = viewModel.generatedMeetUrl {
+                ZStack(alignment: .topTrailing) {
+                    JitsiWebView(urlString: url.absoluteString)
+                    
+                    Button(action: {
+                        viewModel.generatedMeetUrl = nil
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 30))
+                            .foregroundColor(.white)
+                            .background(Circle().fill(Color.black.opacity(0.5)))
+                    }
+                    .padding()
+                }
+            }
+        }
         .navigationTitle("Clients")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(AppColors.background, for: .navigationBar)
@@ -265,6 +293,39 @@ private struct ClientOverviewTab: View {
                     .background(AppColors.surface)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.gold15, lineWidth: 0.5))
+                }
+            }
+            
+            // QUICK ACTIONS Section
+            VStack(alignment: .leading, spacing: 12) {
+                Text("QUICK ACTIONS")
+                    .font(AppFonts.sansSerif(size: 10, weight: .bold))
+                    .foregroundStyle(AppColors.secondary)
+                    .kerning(1.5)
+                
+                HStack(spacing: 12) {
+                    Button(action: {
+                        Task {
+                            // Using a generic placeholder for the Sales Associate name
+                            await viewModel.startRemoteConsultation(salesAssociateName: "Your Sales Associate")
+                        }
+                    }) {
+                        HStack(spacing: 8) {
+                            if viewModel.isGeneratingMeetLink {
+                                ProgressView().tint(.white).scaleEffect(0.8)
+                            } else {
+                                Image(systemName: "video.fill")
+                            }
+                            Text("Start Remote Consultation")
+                                .font(AppFonts.sansSerif(size: 13, weight: .semibold))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(AppColors.gold)
+                        .foregroundStyle(AppColors.background)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                    .disabled(viewModel.isGeneratingMeetLink)
                 }
             }
             

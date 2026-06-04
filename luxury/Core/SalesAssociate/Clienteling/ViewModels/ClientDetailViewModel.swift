@@ -9,6 +9,7 @@ import Foundation
 import Observation
 import Supabase
 import PostgREST
+import UIKit
 
 @Observable
 final class ClientDetailViewModel {
@@ -332,6 +333,55 @@ final class ClientDetailViewModel {
         }
         
         return generatedTickets
+    }
+    
+    // MARK: - Remote Consultation
+    var isGeneratingMeetLink = false
+    var generatedMeetUrl: URL? = nil
+    var meetLinkAlertMessage: String? = nil
+    
+    func startRemoteConsultation(salesAssociateName: String) async {
+        await MainActor.run { 
+            isGeneratingMeetLink = true 
+            meetLinkAlertMessage = nil
+        }
+        
+        struct Params: Encodable {
+            let clientEmail: String
+            let salesAssociateName: String
+        }
+        
+        struct ResponseData: Decodable {
+            let success: Bool?
+            let meetLink: String?
+            let message: String?
+            let error: String?
+        }
+        
+        let params = Params(clientEmail: client.email ?? "", salesAssociateName: salesAssociateName)
+        
+        do {
+            let result: ResponseData = try await SupabaseManager.shared.client.functions.invoke(
+                "create-remote-consultation", 
+                options: FunctionInvokeOptions(body: params)
+            )
+            
+            await MainActor.run {
+                isGeneratingMeetLink = false
+                if let error = result.error {
+                    meetLinkAlertMessage = error
+                } else if let link = result.meetLink, let url = URL(string: link) {
+                    self.generatedMeetUrl = url
+                } else {
+                    meetLinkAlertMessage = result.message ?? "Failed to generate meeting link."
+                }
+            }
+        } catch {
+            await MainActor.run {
+                isGeneratingMeetLink = false
+                meetLinkAlertMessage = error.localizedDescription
+            }
+        }
     }
 }
 
