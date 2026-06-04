@@ -13,7 +13,7 @@ import PostgREST
 @Observable
 final class StoreViewModel {
     var pendingTransfersCount: Int = 0
-    var pendingCycleCountsCount: Int = 1
+    var pendingCycleCountsCount: Int = 0
     var activeCampaigns: [PricingCampaign] = []
     
     var events: [StoreEvent] = []
@@ -25,6 +25,7 @@ final class StoreViewModel {
         fetchPendingTransfersCount()
         Task {
             await fetchActiveCampaigns()
+            await fetchPendingAuditsCount()
         }
     }
     
@@ -67,6 +68,33 @@ final class StoreViewModel {
             $0.reference.hasPrefix("TR-") &&
             ($0.status.lowercased() == "submitted" || $0.status.lowercased() == "pending approval")
         }.count
+    }
+    
+    func fetchPendingAuditsCount() async {
+        do {
+            let profile = try await ProfileService().fetchCurrentProfile()
+            guard let manager = profile?.1 as? CorporateBoutique else { return }
+            let boutiqueId = manager.id
+            
+            let response = try await SupabaseManager.shared.client
+                .from("audits")
+                .select("id")
+                .eq("boutique_id", value: boutiqueId.uuidString)
+                .eq("status", value: "due")
+                .execute()
+            
+            struct AuditID: Codable {
+                let id: UUID
+            }
+            let decoder = JSONDecoder()
+            let fetched = try decoder.decode([AuditID].self, from: response.data)
+            
+            await MainActor.run {
+                self.pendingCycleCountsCount = fetched.count
+            }
+        } catch {
+            print("StoreViewModel: Failed to fetch pending audits count: \(error)")
+        }
     }
     
     func loadLocalEvents() {

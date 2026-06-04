@@ -16,6 +16,8 @@ struct AuditDetailView: View {
     
     @State private var showingBatchScanner = false
     @State private var tempScannedSerials: [String] = []
+    @State private var showingSubmitAlert = false
+    @State private var showingErrorAlert = false
     
     init(audit: RSMSCycleCount) {
         self.audit = audit
@@ -54,7 +56,7 @@ struct AuditDetailView: View {
                 .padding(.vertical, 16)
                 .background(AppColors.background)
                 
-
+ 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 32) {
                         
@@ -121,7 +123,7 @@ struct AuditDetailView: View {
                             .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.gold15, lineWidth: 0.5))
                             .padding(.horizontal, 24)
                         } else {
-
+ 
                             
                             // SCANNED ITEMS
                             VStack(alignment: .leading, spacing: 16) {
@@ -263,18 +265,7 @@ struct AuditDetailView: View {
                     }
                     
                     CustomButton(title: "Submit Audit", icon: AnyView(Image(systemName: "checkmark.shield.fill")), isLoading: viewModel.isLoading, action: {
-                        Task {
-                            let result = await viewModel.submitCount()
-                            switch result {
-                            case .success:
-                                dismiss()
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                    router.push(ICRoute.varianceReport(audit))
-                                }
-                            case .failure:
-                                break
-                            }
-                        }
+                        showingSubmitAlert = true
                     })
                 }
                 .padding(.horizontal, 24)
@@ -306,6 +297,30 @@ struct AuditDetailView: View {
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
         .toolbar(.hidden, for: .navigationBar)
+        .alert("Submit Audit", isPresented: $showingSubmitAlert) {
+            Button("Yes, Submit") {
+                Task {
+                    let result = await viewModel.submitCount()
+                    switch result {
+                    case .success:
+                        router.dismissModal()
+                        router.push(ICRoute.varianceReport(audit))
+                    case .failure:
+                        showingErrorAlert = true
+                    }
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Do you want to mark all not scanned items as missing? This will create a report containing \(viewModel.yetToScanItems.count) missing items and \(viewModel.newlyAddedItems.count) new items.")
+        }
+        .alert("Submission Failed", isPresented: $showingErrorAlert) {
+            Button("OK", role: .cancel) {
+                viewModel.errorMessage = nil
+            }
+        } message: {
+            Text(viewModel.errorMessage ?? "An unknown error occurred while submitting the audit.")
+        }
         .task {
             await viewModel.startSession()
         }

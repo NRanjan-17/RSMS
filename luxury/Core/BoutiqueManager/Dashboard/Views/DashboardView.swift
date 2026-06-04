@@ -65,6 +65,44 @@ struct DashboardView: View {
                             )
                         }
                         .padding(.horizontal, 24)
+                        
+                        if viewModel.pendingAuditsCount > 0 {
+                            Button(action: {
+                                router.push(BMRoute.cycleCountSignoff)
+                            }) {
+                                HStack(spacing: 16) {
+                                    Image(systemName: "exclamationmark.shield.fill")
+                                        .font(.system(size: 20))
+                                        .foregroundStyle(AppColors.background)
+                                        .frame(width: 40, height: 40)
+                                        .background(AppColors.gold)
+                                        .clipShape(Circle())
+                                    
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("Inventory Audit Pending Review")
+                                            .font(AppFonts.serif(size: 16, weight: .semibold))
+                                            .foregroundStyle(.white)
+                                        Text("\(viewModel.pendingAuditsCount) count submitted and awaiting sign-off.")
+                                            .font(AppFonts.sansSerif(size: 12))
+                                            .foregroundStyle(AppColors.secondary)
+                                    }
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 14, weight: .bold))
+                                        .foregroundStyle(AppColors.gold)
+                                }
+                                .padding(16)
+                                .background(AppColors.surface)
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .stroke(AppColors.gold.opacity(0.4), lineWidth: 1)
+                                )
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            .padding(.horizontal, 24)
+                            .padding(.bottom, 4)
+                        }
 
                         HStack(spacing: 10) {
                             CustomOutlineButton(

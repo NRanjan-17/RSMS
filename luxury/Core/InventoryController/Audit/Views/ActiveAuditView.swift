@@ -15,6 +15,8 @@ struct ActiveAuditView: View {
     
     @State private var showingBatchScanner = false
     @State private var tempScannedSerials: [String] = []
+    @State private var showingSubmitAlert = false
+    @State private var showingErrorAlert = false
     
     init(audit: RSMSCycleCount) {
         self.audit = audit
@@ -24,10 +26,10 @@ struct ActiveAuditView: View {
     var body: some View {
         ZStack {
             AppColors.background.ignoresSafeArea()
-
+ 
             VStack(spacing: 0) {
                 CustomHeader(title: LocalizedStringKey(audit.title), showBackButton: true, backAction: { dismiss() })
-
+ 
                 VStack(spacing: 8) {
                     HStack {
                         Text("Audit Progress")
@@ -38,7 +40,7 @@ struct ActiveAuditView: View {
                             .font(AppFonts.sansSerif(size: 11, weight: .bold))
                             .foregroundStyle(AppColors.gold)
                     }
-
+ 
                     ZStack(alignment: .leading) {
                         Capsule().fill(AppColors.surface).frame(height: 4)
                         if viewModel.totalExpected > 0 {
@@ -50,10 +52,10 @@ struct ActiveAuditView: View {
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 24)
-
+ 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 24) {
-
+ 
                         Text("SCANNED ITEMS")
                             .font(AppFonts.sansSerif(size: 11, weight: .bold))
                             .foregroundStyle(AppColors.tertiary)
@@ -90,7 +92,7 @@ struct ActiveAuditView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                             .padding(.horizontal, 24)
                         }
-
+ 
                         if !viewModel.newlyAddedItems.isEmpty {
                             Text("NEW ITEMS")
                                 .font(AppFonts.sansSerif(size: 11, weight: .bold))
@@ -98,7 +100,7 @@ struct ActiveAuditView: View {
                                 .kerning(1.5)
                                 .padding(.top, 8)
                                 .padding(.horizontal, 24)
-
+ 
                             VStack(spacing: 1) {
                                 ForEach(viewModel.newlyAddedItems) { item in
                                     HStack {
@@ -122,7 +124,7 @@ struct ActiveAuditView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                             .padding(.horizontal, 24)
                         }
-
+ 
                         if !viewModel.yetToScanItems.isEmpty {
                             Text("MISSING ITEMS")
                                 .font(AppFonts.sansSerif(size: 11, weight: .bold))
@@ -130,7 +132,7 @@ struct ActiveAuditView: View {
                                 .kerning(1.5)
                                 .padding(.top, 8)
                                 .padding(.horizontal, 24)
-
+ 
                             VStack(spacing: 1) {
                                 ForEach(viewModel.yetToScanItems) { item in
                                     HStack {
@@ -156,9 +158,9 @@ struct ActiveAuditView: View {
                         }
                     }
                 }
-
+ 
                 Spacer()
-
+ 
                 HStack(spacing: 10) {
                     CustomOutlineButton(title: "Scan Items", icon: AnyView(Image(systemName: "barcode.viewfinder")), action: {
                         tempScannedSerials = viewModel.scannedItems.map { $0.name }
@@ -171,16 +173,7 @@ struct ActiveAuditView: View {
                         }
                     })
                     CustomButton(title: "Submit", icon: AnyView(Image(systemName: "checkmark.shield")), action: {
-                        Task {
-                            let result = await viewModel.submitCount()
-                            switch result {
-                            case .success:
-                                router.dismissModal()
-                                router.push(ICRoute.varianceReport(audit))
-                            case .failure:
-                                break
-                            }
-                        }
+                        showingSubmitAlert = true
                     })
                 }
                 .padding(.horizontal, 24)
@@ -193,6 +186,30 @@ struct ActiveAuditView: View {
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
         .toolbar(.hidden, for: .navigationBar)
+        .alert("Submit Audit", isPresented: $showingSubmitAlert) {
+            Button("Yes, Submit") {
+                Task {
+                    let result = await viewModel.submitCount()
+                    switch result {
+                    case .success:
+                        router.dismissModal()
+                        router.push(ICRoute.varianceReport(audit))
+                    case .failure:
+                        showingErrorAlert = true
+                    }
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Do you want to mark all not scanned items as missing? This will create a report containing \(viewModel.yetToScanItems.count) missing items and \(viewModel.newlyAddedItems.count) new items.")
+        }
+        .alert("Submission Failed", isPresented: $showingErrorAlert) {
+            Button("OK", role: .cancel) {
+                viewModel.errorMessage = nil
+            }
+        } message: {
+            Text(viewModel.errorMessage ?? "An unknown error occurred while submitting the audit.")
+        }
         .task {
             await viewModel.startSession()
         }

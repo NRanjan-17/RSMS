@@ -703,8 +703,10 @@ struct YetToScanNetworkResponse: Codable {
     let catalogs: CatalogNetworkResponse?
     
     struct CatalogNetworkResponse: Codable {
+        let id: UUID?
         let name: String
         let brand: String
+        let catalog_id: String?
     }
 }
 

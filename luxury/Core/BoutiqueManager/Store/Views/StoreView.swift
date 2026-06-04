@@ -268,6 +268,7 @@ struct StoreView: View {
             viewModel.fetchPendingTransfersCount()
             Task {
                 await viewModel.fetchActiveCampaigns()
+                await viewModel.fetchPendingAuditsCount()
             }
         }
         .toolbar(.hidden, for: .navigationBar)
