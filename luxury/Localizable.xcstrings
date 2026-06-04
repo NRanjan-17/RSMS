@@ -4490,6 +4490,9 @@
         }
       }
     },
+    "%lld total" : {
+
+    },
     "%lld walk-ins" : {
       "localizations" : {
         "ar" : {
@@ -6130,6 +6133,9 @@
           }
         }
       }
+    },
+    "+%lld more" : {
+
     },
     "×%lld" : {
       "localizations" : {
@@ -43115,6 +43121,9 @@
         }
       }
     },
+    "Destination" : {
+
+    },
     "DESTINATION" : {
       "localizations" : {
         "ar" : {
@@ -63039,6 +63048,9 @@
         }
       }
     },
+    "Incoming and outgoing stock movements will appear here as soon as they are created or updated." : {
+
+    },
     "INCOMING REQUESTS (PARIS TO DELHI)" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -69999,6 +70011,9 @@
           }
         }
       }
+    },
+    "Live" : {
+
     },
     "LIVE INVENTORY" : {
       "localizations" : {
@@ -84861,6 +84876,9 @@
           }
         }
       }
+    },
+    "No Transfer Activity" : {
+
     },
     "No Transfer History Found" : {
       "localizations" : {
@@ -104353,6 +104371,9 @@
         }
       }
     },
+    "Request sent to the source boutique manager." : {
+
+    },
     "Request Transfer from Paris Boutique" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -119351,6 +119372,9 @@
         }
       }
     },
+    "Sent" : {
+
+    },
     "Serial number" : {
       "localizations" : {
         "ar" : {
@@ -124819,6 +124843,9 @@
           }
         }
       }
+    },
+    "Source" : {
+
     },
     "SOURCE" : {
       "localizations" : {

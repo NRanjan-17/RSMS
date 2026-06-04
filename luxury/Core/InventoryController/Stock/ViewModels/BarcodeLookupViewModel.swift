@@ -89,7 +89,6 @@ final class BarcodeLookupViewModel {
         
         Task {
             do {
-                // Fetch catalog item by UPC/Barcode or Catalog ID (Case Insensitive)
                 let item: CatalogEntity
                 do {
                     item = try await SupabaseManager.shared.client
@@ -109,24 +108,16 @@ final class BarcodeLookupViewModel {
                         .value
                 }
                 
-                // Get current store ID from user profile
                 var boutiqueId: UUID? = nil
                 if let profileTuple = try? await profileService.fetchCurrentProfile(),
                    let staff = profileTuple.1 as? StaffModel {
                     boutiqueId = staff.boutiqueId
                 }
                 
-                // Fetch localized inventory for this store
                 var localizedStockCount = 0
                 if let storeId = boutiqueId {
-                    if let inventory: [InventoryItem] = try? await SupabaseManager.shared.client
-                        .from("inventory")
-                        .select()
-                        .eq("sku_id", value: item.id)
-                        .eq("store_id", value: storeId)
-                        .execute()
-                        .value, let firstItem = inventory.first {
-                        localizedStockCount = firstItem.quantity
+                    if let inventory = try? await InventoryService.shared.fetchInventory(forCatalog: item.id, boutiqueId: storeId) {
+                        localizedStockCount = inventory.filter { $0.status == .available }.count
                     }
                 }
                 
