@@ -9,6 +9,8 @@ struct PurchasedItem: Codable, Identifiable {
     var transactionId: String
     var status: String
     var createdAt: Date?
+    var boutiqueId: UUID?
+    var salesAssociateId: UUID?
     
     enum CodingKeys: String, CodingKey {
         case id, uid
@@ -18,5 +20,7 @@ struct PurchasedItem: Codable, Identifiable {
         case transactionId = "transaction_id"
         case status
         case createdAt = "created_at"
+        case boutiqueId = "boutique_id"
+        case salesAssociateId = "sales_associate_id"
     }
 }

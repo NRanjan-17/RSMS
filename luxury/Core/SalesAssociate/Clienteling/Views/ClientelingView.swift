@@ -109,10 +109,6 @@ struct ClientelingView: View {
                                                     .foregroundStyle(.white)
                                                 StatusBadge(text: LocalizedStringKey(client.tier.rawValue), status: client.tier.badgeStatus)
                                             }
-                                            
-                                            Text("\(client.lastVisit) · LTV \(CurrencyManager.shared.formatCompact(amount: client.ltv))")
-                                                .font(AppFonts.sansSerif(size: 11))
-                                                .foregroundStyle(AppColors.secondary)
                                         }
                                         
                                         Spacer()

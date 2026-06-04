@@ -235,14 +235,24 @@ struct ClientPurchase: Identifiable, Hashable, Codable {
     let date: String
     var productId: UUID?
     var imageUrl: String?
+    var boutiqueId: String?
+    var boutiqueName: String?
+    var boutiqueLocation: String?
+    var advisorId: String?
+    var advisorName: String?
     
-    init(id: UUID = UUID(), name: String, price: Double, date: String, productId: UUID? = nil, imageUrl: String? = nil) {
+    init(id: UUID = UUID(), name: String, price: Double, date: String, productId: UUID? = nil, imageUrl: String? = nil, boutiqueId: String? = nil, boutiqueName: String? = nil, boutiqueLocation: String? = nil, advisorId: String? = nil, advisorName: String? = nil) {
         self.id = id
         self.name = name
         self.price = price
         self.date = date
         self.productId = productId
         self.imageUrl = imageUrl
+        self.boutiqueId = boutiqueId
+        self.boutiqueName = boutiqueName
+        self.boutiqueLocation = boutiqueLocation
+        self.advisorId = advisorId
+        self.advisorName = advisorName
     }
 }
 
