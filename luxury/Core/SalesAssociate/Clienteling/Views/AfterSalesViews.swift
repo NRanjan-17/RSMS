@@ -298,6 +298,17 @@ struct AfterSalesIntakeView: View {
                                                 .strokeBorder(AppColors.gold, style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
                                         )
                                     }
+                                    .confirmationDialog("Select Media Source", isPresented: $showMediaSourceMenu, titleVisibility: .hidden) {
+                                        Button("Take Photo") {
+                                            showCamera = true
+                                        }
+                                        Button("Choose from Library") {
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                                showPhotosPicker = true
+                                            }
+                                        }
+                                        Button("Cancel", role: .cancel) {}
+                                    }
                                     .buttonStyle(.plain)
                                     
                                     ForEach(Array(uploadedImages.enumerated()), id: \.offset) { index, image in
@@ -518,17 +529,7 @@ struct AfterSalesIntakeView: View {
             }
             // Removed custom popup, using native confirmationDialog instead
         }
-        .confirmationDialog("Select Media Source", isPresented: $showMediaSourceMenu, titleVisibility: .hidden) {
-            Button("Take Photo") {
-                showCamera = true
-            }
-            Button("Choose from Library") {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    showPhotosPicker = true
-                }
-            }
-            Button("Cancel", role: .cancel) {}
-        }
+
         .onChange(of: selectedItems) { _, newItems in
             loadImages(from: newItems)
         }
