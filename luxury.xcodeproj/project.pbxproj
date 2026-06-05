@@ -299,7 +299,9 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "luxury/Custom-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "D'LUSSO";
+				INFOPLIST_KEY_INAlternativeAppNames = "D Lusso";
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "This app requires access to your calendar to schedule appointments.";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "This app requires access to your calendar to schedule appointments.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to the camera to scan product barcodes and QR codes.";
@@ -352,7 +354,9 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "luxury/Custom-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "D'LUSSO";
+				INFOPLIST_KEY_INAlternativeAppNames = "D Lusso";
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "This app requires access to your calendar to schedule appointments.";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "This app requires access to your calendar to schedule appointments.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to the camera to scan product barcodes and QR codes.";
