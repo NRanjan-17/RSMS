@@ -44,7 +44,7 @@ struct SplashView: View {
                     .rotationEffect(.degrees(45))
                     .padding(.bottom, 22)
                 
-                Text("RSMS")
+                Text("D'LUSSO")
                     .font(AppFonts.serif(size: 60, weight: .semibold))
                     .foregroundStyle(AppColors.gold)
                     .kerning(20)
