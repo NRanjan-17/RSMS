@@ -45,7 +45,7 @@ struct SplashView: View {
                     .padding(.bottom, 22)
                 
                 Text("D'LUSSO")
-                    .font(AppFonts.serif(size: 55, weight: .semibold))
+                    .font(AppFonts.serif(size: 50, weight: .semibold))
                     .foregroundStyle(AppColors.gold)
                     .kerning(20)
                     .padding(.leading, 20)
