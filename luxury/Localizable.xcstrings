@@ -2061,7 +2061,7 @@
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ do Target"
+            "value" : "%@ do Alvo"
           }
         },
         "ru" : {
@@ -2079,7 +2079,7 @@
         "te" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ యొక్క లక్ష్యం"
+            "value" : "%@ లక్ష్యం యొక్క"
           }
         },
         "zh-Hans" : {
@@ -3960,7 +3960,7 @@
         "gu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$lld સક્રિય ઓડિટ • %2$lld આર્કાઇવ કરેલા રેકોર્ડ્સ"
+            "value" : "%1$lld સક્રિય ઑડિટ • %2$lld આર્કાઇવ કરેલા રેકોર્ડ્સ"
           }
         },
         "hi" : {
@@ -6463,7 +6463,7 @@
         "pa" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld ਭਿੰਨਤਾ ਆਈਟਮਾਂ • ਆਡਿਟ ਟ੍ਰੇਲ ਲਾਕ ਕੀਤਾ ਗਿਆ"
+            "value" : "%lld ਭਿੰਨਤਾ ਆਈਟਮਾਂ • ਆਡਿਟ ਟ੍ਰੇਲ ਲਾਕ ਕੀਤਾ ਗਿਆ ਹੈ"
           }
         },
         "pt" : {
@@ -7594,7 +7594,7 @@
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "+%@ 與平均值"
+            "value" : "+%@ vs 平均值"
           }
         }
       }
@@ -11139,7 +11139,140 @@
       }
     },
     "Add a client appointment directly to your calendar." : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أضف موعد العميل مباشرة إلى تقويمك."
+          }
+        },
+        "as" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "আপোনাৰ কেলেণ্ডাৰত পোনপটীয়াকৈ এটা ক্লায়েণ্ট এপইণ্টমেণ্ট যোগ কৰক।"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "আপনার ক্যালেন্ডারে সরাসরি ক্লায়েন্টের অ্যাপয়েন্টমেন্ট যোগ করুন।"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fügen Sie einen Kundentermin direkt in Ihren Kalender ein."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agrega una cita con un cliente directamente a tu calendario."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajoutez un rendez-vous client directement à votre calendrier."
+          }
+        },
+        "gu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "તમારા કેલેન્ડરમાં સીધા ક્લાયંટ એપોઇન્ટમેન્ટ ઉમેરો."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "अपने कैलेंडर में सीधे क्लाइंट अपॉइंटमेंट जोड़ें।"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aggiungi un appuntamento con un cliente direttamente al tuo calendario."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "顧客とのアポイントメントをカレンダーに直接追加できます。"
+          }
+        },
+        "kn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್‌ಗೆ ನೇರವಾಗಿ ಕ್ಲೈಂಟ್ ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್ ಸೇರಿಸಿ."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "고객 약속을 캘린더에 바로 추가하세요."
+          }
+        },
+        "ml" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "നിങ്ങളുടെ കലണ്ടറിലേക്ക് നേരിട്ട് ഒരു ക്ലയന്റ് അപ്പോയിന്റ്മെന്റ് ചേർക്കുക."
+          }
+        },
+        "mr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "क्लायंटची अपॉइंटमेंट थेट तुमच्या कॅलेंडरमध्ये जोडा."
+          }
+        },
+        "or" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ଆପଣଙ୍କ କ୍ୟାଲେଣ୍ଡରରେ ସିଧାସଳଖ ଏକ କ୍ଲାଏଣ୍ଟ ନିଯୁକ୍ତି ଯୋଡନ୍ତୁ।"
+          }
+        },
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਆਪਣੇ ਕੈਲੰਡਰ ਵਿੱਚ ਸਿੱਧਾ ਕਲਾਇੰਟ ਅਪੌਇੰਟਮੈਂਟ ਸ਼ਾਮਲ ਕਰੋ।"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicione um compromisso do cliente diretamente ao seu calendário."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавьте встречу с клиентом прямо в свой календарь."
+          }
+        },
+        "ta" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "வாடிக்கையாளர் சந்திப்பை உங்கள் நாட்காட்டியில் நேரடியாகச் சேர்க்கவும்."
+          }
+        },
+        "te" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "క్లయింట్ అపాయింట్‌మెంట్‌ను నేరుగా మీ క్యాలెండర్‌లో చేర్చండి."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "直接将客户预约添加到您的日历中。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "直接將客戶預約加入您的行事曆。"
+          }
+        }
+      }
     },
     "Add a new catalog item" : {
       "localizations" : {
@@ -12367,7 +12500,140 @@
       }
     },
     "Add to Apple Calendar" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أضف إلى تقويم أبل"
+          }
+        },
+        "as" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "এপল কেলেণ্ডাৰত যোগ কৰক"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "অ্যাপল ক্যালেন্ডারে যোগ করুন"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zu Apple Kalender hinzufügen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añadir al Calendario de Apple"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter au calendrier Apple"
+          }
+        },
+        "gu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "એપલ કેલેન્ડરમાં ઉમેરો"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "एप्पल कैलेंडर में जोड़ें"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aggiungi ad Apple Calendar"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appleカレンダーに追加"
+          }
+        },
+        "kn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ಆಪಲ್ ಕ್ಯಾಲೆಂಡರ್‌ಗೆ ಸೇರಿಸಿ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple 캘린더에 추가"
+          }
+        },
+        "ml" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ആപ്പിൾ കലണ്ടറിലേക്ക് ചേർക്കുക"
+          }
+        },
+        "mr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ॲपल कॅलेंडरमध्ये जोडा"
+          }
+        },
+        "or" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ଆପଲ୍ କ୍ୟାଲେଣ୍ଡରରେ ଯୋଡନ୍ତୁ"
+          }
+        },
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਐਪਲ ਕੈਲੰਡਰ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰੋ"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar ao Calendário Apple"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавить в Apple Календарь"
+          }
+        },
+        "ta" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ஆப்பிள் காலெண்டரில் சேர்க்கவும்"
+          }
+        },
+        "te" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ఆపిల్ క్యాలెండర్‌కు జోడించండి"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加到 Apple 日历"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新增至 Apple 日曆"
+          }
+        }
+      }
     },
     "Add to Cart" : {
       "localizations" : {
@@ -21704,7 +21970,7 @@
         "ml" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ഒരു എക്സ്ക്ലൂസീവ് വിഐപി എന്ന നിലയിൽ, നിങ്ങളുടെ വ്യത്യസ്തമായ അഭിരുചിക്കായി, %@ ഈ അസാധാരണമായ %@ ഞങ്ങൾ ക്യൂറേറ്റ് ചെയ്തിട്ടുണ്ട്."
+            "value" : "ഒരു എക്സ്ക്ലൂസീവ് വിഐപി എന്ന നിലയിൽ, നിങ്ങളുടെ വ്യത്യസ്തമായ അഭിരുചിക്കായി, %@ പ്രത്യേകമായി ഈ അസാധാരണമായ %@ ക്യൂറേറ്റ് ചെയ്‌തു."
           }
         },
         "mr" : {
@@ -29665,7 +29931,140 @@
       }
     },
     "Calendar" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تقويم"
+          }
+        },
+        "as" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "কেলেণ্ডাৰ"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ক্যালেন্ডার"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kalender"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calendario"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calendrier"
+          }
+        },
+        "gu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "કેલેન્ડર"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "कैलेंडर"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calendario"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カレンダー"
+          }
+        },
+        "kn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ಕ್ಯಾಲೆಂಡರ್"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "달력"
+          }
+        },
+        "ml" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "കലണ്ടർ"
+          }
+        },
+        "mr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "कॅलेंडर"
+          }
+        },
+        "or" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "କ୍ୟାଲେଣ୍ଡର"
+          }
+        },
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਕੈਲੰਡਰ"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calendário"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Календарь"
+          }
+        },
+        "ta" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "டெம்ப்ளேட்"
+          }
+        },
+        "te" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "క్యాలెండర్"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日历"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日曆"
+          }
+        }
+      }
     },
     "Camera Modal (Placeholder)" : {
       "localizations" : {
@@ -34703,7 +35102,140 @@
       }
     },
     "Client Directory" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دليل العملاء"
+          }
+        },
+        "as" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ক্লায়েন্ট ডাইৰেকটৰি"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ক্লায়েন্ট ডিরেক্টরি"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kundenverzeichnis"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Directorio de clientes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuaire des clients"
+          }
+        },
+        "gu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ક્લાયંટ ડિરેક્ટરી"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ग्राहक निर्देशिका"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elenco clienti"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クライアントディレクトリ"
+          }
+        },
+        "kn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ಕ್ಲೈಂಟ್ ಡೈರೆಕ್ಟರಿ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "고객 목록"
+          }
+        },
+        "ml" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ക്ലയന്റ് ഡയറക്ടറി"
+          }
+        },
+        "mr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ग्राहक निर्देशिका"
+          }
+        },
+        "or" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "କ୍ଲାଏଣ୍ଟ ଡାଇରେକ୍ଟୋରୀ"
+          }
+        },
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਕਲਾਇੰਟ ਡਾਇਰੈਕਟਰੀ"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diretório de Clientes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Справочник клиентов"
+          }
+        },
+        "ta" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "வாடிக்கையாளர் கோப்பகம்"
+          }
+        },
+        "te" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "క్లయింట్ డైరెక్టరీ"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "客户目录"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "客戶目錄"
+          }
+        }
+      }
     },
     "Client Handover (SFS)" : {
       "localizations" : {
@@ -35114,7 +35646,140 @@
       }
     },
     "Client Name" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اسم العميل"
+          }
+        },
+        "as" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ক্লায়েণ্টৰ নাম"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ক্লায়েন্টের নাম"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kundenname"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombre del cliente"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom du client"
+          }
+        },
+        "gu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ક્લાયન્ટનું નામ"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ग्राहक नाम"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome del cliente"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クライアント名"
+          }
+        },
+        "kn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ಕ್ಲೈಂಟ್ ಹೆಸರು"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "고객 이름"
+          }
+        },
+        "ml" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ക്ലയന്റിന്റെ പേര്"
+          }
+        },
+        "mr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "क्लायंटचे नाव"
+          }
+        },
+        "or" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "କ୍ଲାଏଣ୍ଟଙ୍କ ନାମ"
+          }
+        },
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਕਲਾਇੰਟ ਦਾ ਨਾਮ"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome do cliente"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Имя клиента"
+          }
+        },
+        "ta" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "வாடிக்கையாளர் பெயர்"
+          }
+        },
+        "te" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "క్లయింట్ పేరు"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "客户名称"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "客戶名稱"
+          }
+        }
+      }
     },
     "Client Profile" : {
       "localizations" : {
@@ -46149,7 +46814,140 @@
       }
     },
     "Date and Time" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التاريخ والوقت"
+          }
+        },
+        "as" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "তাৰিখ আৰু সময়"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "তারিখ এবং সময়"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datum und Uhrzeit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fecha y hora"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date et heure"
+          }
+        },
+        "gu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "તારીખ અને સમય"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "तिथि और समय"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data e ora"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日時"
+          }
+        },
+        "kn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ದಿನಾಂಕ ಮತ್ತು ಸಮಯ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "날짜 및 시간"
+          }
+        },
+        "ml" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "തീയതിയും സമയവും"
+          }
+        },
+        "mr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "तारीख आणि वेळ"
+          }
+        },
+        "or" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ତାରିଖ ଏବଂ ସମୟ"
+          }
+        },
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਤਾਰੀਖ਼ ਅਤੇ ਸਮਾਂ"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data e hora"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дата и время"
+          }
+        },
+        "ta" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "தேதி மற்றும் நேரம்"
+          }
+        },
+        "te" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "తేదీ మరియు సమయం"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日期和时间"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日期和時間"
+          }
+        }
+      }
     },
     "Date of Birth" : {
       "localizations" : {
@@ -53273,7 +54071,7 @@
         "gu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\nકેટલોગમાં ફેરફાર કરો."
+            "value" : "\nકેટલોગ સંપાદિત કરો."
           }
         },
         "hi" : {
@@ -60574,7 +61372,7 @@
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "預期結果： %lld"
+            "value" : "預期： %lld"
           }
         }
       }
@@ -61608,7 +62406,7 @@
         "ml" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "കാറ്റലോഗ് ഇല്ലാതാക്കാനായില്ല: %@"
+            "value" : "കാറ്റലോഗ് ഇല്ലാതാക്കുന്നതിൽ പരാജയപ്പെട്ടു: %@"
           }
         },
         "mr" : {
@@ -63724,7 +64522,7 @@
         "bn" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "MFA সেটআপ লোড করতে ব্যর্থ: %@"
+            "value" : "এমএফএ সেটআপ লোড করতে ব্যর্থ: %@"
           }
         },
         "de" : {
@@ -64428,7 +65226,7 @@
         "gu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ઉત્પાદનો દૂર કરવામાં નિષ્ફળ: %@"
+            "value" : "પ્રોડક્ટ્સ દૂર કરવામાં નિષ્ફળ: %@"
           }
         },
         "hi" : {
@@ -65886,13 +66684,412 @@
       }
     },
     "Find a Client" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ابحث عن عميل"
+          }
+        },
+        "as" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "এজন ক্লায়েণ্ট বিচাৰি উলিয়াওক"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "একজন ক্লায়েন্ট খুঁজুন"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kunden finden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encuentra un cliente"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trouver un client"
+          }
+        },
+        "gu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ક્લાયન્ટ શોધો"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ग्राहक खोजें"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trova un cliente"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クライアントを探す"
+          }
+        },
+        "kn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ಕ್ಲೈಂಟ್ ಅನ್ನು ಹುಡುಕಿ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "고객을 찾으세요"
+          }
+        },
+        "ml" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ഒരു ക്ലയന്റിനെ കണ്ടെത്തുക"
+          }
+        },
+        "mr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "क्लायंट शोधा"
+          }
+        },
+        "or" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ଜଣେ କ୍ଲାଏଣ୍ଟ ଖୋଜନ୍ତୁ"
+          }
+        },
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਇੱਕ ਕਲਾਇੰਟ ਲੱਭੋ"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encontre um cliente"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Найти клиента"
+          }
+        },
+        "ta" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ஒரு வாடிக்கையாளரைக் கண்டுபிடி"
+          }
+        },
+        "te" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "క్లయింట్‌ను కనుగొనండి"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "寻找客户"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尋找客戶"
+          }
+        }
+      }
     },
     "Find a client in RSMS." : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ابحث عن عميل في نظام إدارة علاقات العملاء (RSMS)."
+          }
+        },
+        "as" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMS ত এটা ক্লায়েণ্ট বিচাৰি উলিয়াওক।"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMS-এ একজন ক্লায়েন্ট খুঁজুন।"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suchen Sie einen Kunden in RSMS."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encuentra un cliente en RSMS."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trouver un client dans RSMS."
+          }
+        },
+        "gu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMS માં ક્લાયન્ટ શોધો."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMS में क्लाइंट ढूंढें।"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trova un cliente in RSMS."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMSでクライアントを探す。"
+          }
+        },
+        "kn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMS ನಲ್ಲಿ ಕ್ಲೈಂಟ್ ಅನ್ನು ಹುಡುಕಿ."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMS에서 고객을 찾으세요."
+          }
+        },
+        "ml" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMS-ൽ ഒരു ക്ലയന്റിനെ കണ്ടെത്തുക."
+          }
+        },
+        "mr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMS मध्ये क्लायंट शोधा."
+          }
+        },
+        "or" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMS ରେ ଜଣେ କ୍ଲାଏଣ୍ଟ ଖୋଜନ୍ତୁ।"
+          }
+        },
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMS ਵਿੱਚ ਇੱਕ ਕਲਾਇੰਟ ਲੱਭੋ।"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encontre um cliente no RSMS."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Найти клиента в RSMS."
+          }
+        },
+        "ta" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMS-இல் ஒரு வாடிக்கையாளரைக் கண்டறியவும்."
+          }
+        },
+        "te" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMSలో క్లయింట్‌ను కనుగొనండి."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在RSMS中查找客户。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在RSMS中尋找客戶。"
+          }
+        }
+      }
     },
     "Find Client" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "البحث عن عميل"
+          }
+        },
+        "as" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ক্লায়েন্ট বিচাৰি উলিয়াওক"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ক্লায়েন্ট খুঁজুন"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kunde finden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encontrar cliente"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trouver des clients"
+          }
+        },
+        "gu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ક્લાયન્ટ શોધો"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ग्राहक खोजें"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trova cliente"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クライアントを探す"
+          }
+        },
+        "kn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ಕ್ಲೈಂಟ್ ಹುಡುಕಿ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "클라이언트 찾기"
+          }
+        },
+        "ml" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ക്ലയന്റിനെ കണ്ടെത്തുക"
+          }
+        },
+        "mr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "क्लायंट शोधा"
+          }
+        },
+        "or" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "କ୍ଲାଏଣ୍ଟ ଖୋଜନ୍ତୁ"
+          }
+        },
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਕਲਾਇੰਟ ਲੱਭੋ"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encontrar cliente"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Найти клиента"
+          }
+        },
+        "ta" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "வாடிக்கையாளரைக் கண்டறியவும்"
+          }
+        },
+        "te" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "క్లయింట్‌ను కనుగొనండి"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "寻找客户"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尋找客戶"
+          }
+        }
+      }
     },
     "First name is required." : {
       "localizations" : {
@@ -68887,7 +70084,140 @@
       }
     },
     "I've scheduled an appointment with %@ on your calendar." : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لقد حددت موعدًا مع %@ في تقويمك."
+          }
+        },
+        "as" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "আপোনাৰ কেলেণ্ডাৰত %@ ৰ সৈতে এপইণ্টমেণ্ট নিৰ্ধাৰণ কৰিছো।"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "আমি আপনার ক্যালেন্ডারে %@ এর সাথে একটি সাক্ষাতের সময় নির্ধারণ করেছি।"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ich habe einen Termin mit %@ in Ihrem Kalender vereinbart."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "He programado una cita con %@ en tu calendario."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "J'ai programmé un rendez-vous avec %@ sur votre calendrier."
+          }
+        },
+        "gu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "મેં તમારા કેલેન્ડર પર %@ સાથે એપોઇન્ટમેન્ટ શેડ્યૂલ કરી છે."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "मैंने आपके कैलेंडर पर %@ के साथ एक अपॉइंटमेंट निर्धारित किया है।"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ho fissato un appuntamento con %@ sul tuo calendario."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "あなたのカレンダーに %@ との面会を予定しました。"
+          }
+        },
+        "kn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ನಾನು ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್‌ನಲ್ಲಿ %@ ಜೊತೆ ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್ ನಿಗದಿಪಡಿಸಿದ್ದೇನೆ."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 님과 캘린더에 약속을 잡았습니다."
+          }
+        },
+        "ml" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "നിങ്ങളുടെ കലണ്ടറിൽ %@ എന്നയാളുമായി ഞാൻ ഒരു അപ്പോയിന്റ്മെന്റ് ഷെഡ്യൂൾ ചെയ്തിട്ടുണ്ട്."
+          }
+        },
+        "mr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "मी तुमच्या कॅलेंडरवर %@ यांच्यासोबत भेटीची वेळ निश्चित केली आहे."
+          }
+        },
+        "or" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ମୁଁ ତୁମର କ୍ୟାଲେଣ୍ଡରରେ %@ ସହିତ ଏକ ସାକ୍ଷାତକାର ସ୍ଥିର କରିଛି।"
+          }
+        },
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਮੈਂ ਤੁਹਾਡੇ ਕੈਲੰਡਰ 'ਤੇ %@ ਨਾਲ ਇੱਕ ਮੁਲਾਕਾਤ ਤਹਿ ਕੀਤੀ ਹੈ।"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agendei uma consulta com %@ no seu calendário."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Я запланировал встречу с %@ в вашем календаре."
+          }
+        },
+        "ta" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "உங்கள் நாட்காட்டியில் %@ உடன் ஒரு சந்திப்பை நான் திட்டமிட்டுள்ளேன்."
+          }
+        },
+        "te" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "నేను మీ క్యాలెండర్‌లో %@ తో అపాయింట్‌మెంట్ షెడ్యూల్ చేసాను."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我已经在您的日历上与 %@ 预约了时间。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我已經在您的日曆上與 %@ 預約了時間。"
+          }
+        }
+      }
     },
     "ID: %@" : {
       "localizations" : {
@@ -83458,7 +84788,140 @@
       }
     },
     "MONTHLY REVENUE" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الإيرادات الشهرية"
+          }
+        },
+        "as" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "মাহেকীয়া ৰাজহ"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "মাসিক রাজস্ব"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MONATLICHE EINNAHMEN"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "INGRESOS MENSUALES"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "REVENUS MENSUELS"
+          }
+        },
+        "gu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "માસિક આવક"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "मासिक राजस्व"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ENTRATE MENSILI"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月間収益"
+          }
+        },
+        "kn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ಮಾಸಿಕ ಆದಾಯ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "월 수익"
+          }
+        },
+        "ml" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "പ്രതിമാസ വരുമാനം"
+          }
+        },
+        "mr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "मासिक महसूल"
+          }
+        },
+        "or" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ମାସିକ ରାଜସ୍ୱ"
+          }
+        },
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਮਹੀਨਾਵਾਰ ਮਾਲੀਆ"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RECEITA MENSAL"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ежемесячный доход"
+          }
+        },
+        "ta" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "மாதாந்திர வருவாய்"
+          }
+        },
+        "te" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "నెలవారీ ఆదాయం"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月收入"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月收入"
+          }
+        }
+      }
     },
     "MTD Sales" : {
       "localizations" : {
@@ -88089,7 +89552,140 @@
       }
     },
     "No clients found" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم يتم العثور على عملاء"
+          }
+        },
+        "as" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "কোনো ক্লায়েন্ট পোৱা নগ'ল"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "কোন ক্লায়েন্ট খুঁজে পাওয়া যায়নি"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Kunden gefunden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontraron clientes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun client trouvé"
+          }
+        },
+        "gu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "કોઈ ક્લાયન્ટ મળ્યા નથી"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "कोई ग्राहक नहीं मिला"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessun cliente trovato"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クライアントが見つかりませんでした"
+          }
+        },
+        "kn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ಯಾವುದೇ ಕ್ಲೈಂಟ್‌ಗಳು ಕಂಡುಬಂದಿಲ್ಲ."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "고객을 찾을 수 없습니다."
+          }
+        },
+        "ml" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ക്ലയന്റുകളെയൊന്നും കണ്ടെത്തിയില്ല."
+          }
+        },
+        "mr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "कोणतेही ग्राहक आढळले नाहीत"
+          }
+        },
+        "or" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "କୌଣସି କ୍ଲାଏଣ୍ଟ ମିଳିଲେ ନାହିଁ"
+          }
+        },
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਕੋਈ ਕਲਾਇੰਟ ਨਹੀਂ ਮਿਲਿਆ"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhum cliente encontrado"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Клиентов не найдено"
+          }
+        },
+        "ta" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "வாடிக்கையாளர்கள் யாரும் காணப்படவில்லை"
+          }
+        },
+        "te" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "క్లయింట్లు ఎవరూ కనుగొనబడలేదు"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未找到客户"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未找到客戶"
+          }
+        }
+      }
     },
     "No clients found." : {
       "localizations" : {
@@ -88228,7 +89824,140 @@
       }
     },
     "No clients match '%@'" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يوجد عملاء مطابقون لـ '%@'"
+          }
+        },
+        "as" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "কোনো ক্লায়েন্ট '%@ ' ৰ সৈতে মিল নাই।"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "কোনো ক্লায়েন্ট '%@ ' এর সাথে মেলে না"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Clients entsprechen '%@'"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay clientes que coincidan con '%@'"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun client ne correspond à '%@'"
+          }
+        },
+        "gu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "'%@' સાથે કોઈ ક્લાયન્ટ મેળ ખાતા નથી."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "'%@ ' से मेल खाने वाले कोई ग्राहक नहीं हैं"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessun client corrisponde a '%@'"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "'%@ ' に一致するクライアントはありません"
+          }
+        },
+        "kn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "'%@' ಗೆ ಹೊಂದಿಕೆಯಾಗುವ ಯಾವುದೇ ಕ್ಲೈಂಟ್‌ಗಳಿಲ್ಲ."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "'%@ '와 일치하는 클라이언트가 없습니다."
+          }
+        },
+        "ml" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "'%@' എന്നതുമായി പൊരുത്തപ്പെടുന്ന ക്ലയന്റുകളൊന്നുമില്ല."
+          }
+        },
+        "mr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "'%@ ' शी जुळणारे ग्राहक नाहीत."
+          }
+        },
+        "or" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "'%@' ସହିତ କୌଣସି କ୍ଲାଏଣ୍ଟ ମେଳ ଖାଉନାହାଁନ୍ତି।"
+          }
+        },
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਕੋਈ ਕਲਾਇੰਟ '%@' ਨਾਲ ਮੇਲ ਨਹੀਂ ਖਾਂਦਾ।"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhum cliente corresponde a '%@'"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет клиентов, соответствующих '%@'"
+          }
+        },
+        "ta" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "'%@ ' உடன் எந்த கிளையண்டுகளும் பொருந்தவில்லை"
+          }
+        },
+        "te" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "'%@ ' తో సరిపోలే క్లయింట్లు లేరు"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有客户匹配“%@”。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "沒有客戶匹配“%@”。"
+          }
+        }
+      }
     },
     "No completed audits yet." : {
       "localizations" : {
@@ -96784,7 +98513,7 @@
         "te" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ లక్ష్యం యొక్క"
+            "value" : "%@ యొక్క లక్ష్యం"
           }
         },
         "zh-Hans" : {
@@ -105513,7 +107242,140 @@
       }
     },
     "Please grant calendar access to RSMS in Settings first." : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يرجى منح صلاحية الوصول إلى التقويم لـ RSMS في الإعدادات أولاً."
+          }
+        },
+        "as" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "অনুগ্ৰহ কৰি প্ৰথমে ছেটিংছত RSMS লৈ কেলেণ্ডাৰ অভিগম প্ৰদান কৰক।"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "প্রথমে সেটিংস-এ RSMS-কে ক্যালেন্ডার ব্যবহারের অনুমতি দিন।"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bitte gewähren Sie RSMS zunächst in den Einstellungen Zugriff auf den Kalender."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primero, otorga acceso al calendario a RSMS en la configuración."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veuillez d'abord autoriser RSMS à accéder au calendrier dans les paramètres."
+          }
+        },
+        "gu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "કૃપા કરીને પહેલા સેટિંગ્સમાં RSMS ને કૅલેન્ડર ઍક્સેસ આપો."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "कृपया पहले सेटिंग्स में जाकर RSMS को कैलेंडर एक्सेस की अनुमति दें।"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Innanzitutto, concedi a RSMS l'accesso al calendario nelle Impostazioni."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まず、設定画面でRSMSにカレンダーへのアクセス権限を付与してください。"
+          }
+        },
+        "kn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ದಯವಿಟ್ಟು ಮೊದಲು ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ RSMS ಗೆ ಕ್ಯಾಲೆಂಡರ್ ಪ್ರವೇಶವನ್ನು ನೀಡಿ."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "먼저 설정에서 RSMS에 캘린더 접근 권한을 부여해 주세요."
+          }
+        },
+        "ml" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ആദ്യം ക്രമീകരണങ്ങളിൽ RSMS-ലേക്ക് കലണ്ടർ ആക്‌സസ് അനുവദിക്കുക."
+          }
+        },
+        "mr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "कृपया सर्वप्रथम सेटिंग्जमध्ये RSMS ला कॅलेंडर ॲक्सेस द्या."
+          }
+        },
+        "or" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ଦୟାକରି ପ୍ରଥମେ ସେଟିଂସରେ RSMSକୁ କ୍ୟାଲେଣ୍ଡର ଆକ୍ସେସ୍ ଦିଅନ୍ତୁ।"
+          }
+        },
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਕਿਰਪਾ ਕਰਕੇ ਪਹਿਲਾਂ ਸੈਟਿੰਗਾਂ ਵਿੱਚ RSMS ਤੱਕ ਕੈਲੰਡਰ ਪਹੁੰਚ ਦਿਓ।"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primeiro, conceda acesso ao calendário para o RSMS nas Definições."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пожалуйста, сначала предоставьте RSMS доступ к календарю в настройках."
+          }
+        },
+        "ta" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "முதலில் அமைப்புகளில் RSMS-க்கு நாட்காட்டி அணுகலை வழங்கவும்."
+          }
+        },
+        "te" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "దయచేసి ముందుగా సెట్టింగ్స్‌లో RSMSకి క్యాలెండర్ యాక్సెస్ ఇవ్వండి."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请先在设置中授予 RSMS 日历访问权限。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請先在設定中授予 RSMS 行事曆存取權限。"
+          }
+        }
+      }
     },
     "Please select a destination boutique to unlock scanner." : {
       "localizations" : {
@@ -106320,7 +108182,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "将摄像头对准 SKU 或序列号 %@。"
+            "value" : "将摄像头对准 %@的SKU或序列号。"
           }
         },
         "zh-Hant" : {
@@ -106786,7 +108648,7 @@
         "gu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%2$@ માટે %1$@ સીરીયલ તૈયાર કરો."
+            "value" : "%2$@ માટે સીરીયલ %1$@ તૈયાર કરો."
           }
         },
         "hi" : {
@@ -124979,10 +126841,276 @@
       }
     },
     "Schedule an Appointment" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حدد موعدًا"
+          }
+        },
+        "as" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "এপইণ্টমেণ্টৰ সময় নিৰ্ধাৰণ কৰক"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "একটি অ্যাপয়েন্টমেন্ট নির্ধারণ করুন"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vereinbaren Sie einen Termin"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solicite una cita"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prendre rendez-vous"
+          }
+        },
+        "gu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "એપોઇન્ટમેન્ટ શેડ્યૂલ કરો"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "मिलने का एक निश्चित समय तय करें"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fissa un appuntamento"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "予約をする"
+          }
+        },
+        "kn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ಅಪಾಯಿಂಟ್ಮೆಂಟ್ ನಿಗದಿಪಡಿಸಿ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "예약하기"
+          }
+        },
+        "ml" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ഒരു അപ്പോയിന്റ്മെന്റ് ഷെഡ്യൂൾ ചെയ്യുക"
+          }
+        },
+        "mr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "भेटीची वेळ निश्चित करा"
+          }
+        },
+        "or" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ଏକ ସାକ୍ଷାତକାର ସ୍ଥିର କରନ୍ତୁ"
+          }
+        },
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਮੁਲਾਕਾਤ ਤਹਿ ਕਰੋ"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agende uma consulta"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Записаться на прием"
+          }
+        },
+        "ta" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "சந்திப்புக்கு முன்பதிவு செய்யுங்கள்"
+          }
+        },
+        "te" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "అపాయింట్‌మెంట్ షెడ్యూల్ చేసుకోండి"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预约就诊"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "預約就診"
+          }
+        }
+      }
     },
     "Schedule Appointment" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تحديد موعد"
+          }
+        },
+        "as" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "নিযুক্তিৰ সময়সূচী"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "অ্যাপয়েন্টমেন্ট নির্ধারণ করুন"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Termin vereinbaren"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programar una cita"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prendre rendez-vous"
+          }
+        },
+        "gu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "એપોઇન્ટમેન્ટ શેડ્યૂલ કરો"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "नियुक्ति की सूची बनाना"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fissa un appuntamento"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "予約する"
+          }
+        },
+        "kn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ನೇಮಕಾತಿಯನ್ನು ನಿಗದಿಪಡಿಸಿ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "예약하기"
+          }
+        },
+        "ml" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "അപ്പോയിന്റ്മെന്റ് ഷെഡ്യൂൾ ചെയ്യുക"
+          }
+        },
+        "mr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "भेटीची वेळ निश्चित करा"
+          }
+        },
+        "or" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ସାକ୍ଷାତକାର ସ୍ଥିର କରନ୍ତୁ"
+          }
+        },
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਮੁਲਾਕਾਤ ਤਹਿ ਕਰੋ"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agendar consulta"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Записаться на прием"
+          }
+        },
+        "ta" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "சந்திப்பு நேரத்தை திட்டமிடுங்கள்"
+          }
+        },
+        "te" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "అపాయింట్‌మెంట్ షెడ్యూల్ చేయండి"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预约"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "預約"
+          }
+        }
+      }
     },
     "Scheduled" : {
       "localizations" : {
@@ -126031,7 +128159,7 @@
         "pa" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ਨਾਮ ਜਾਂ SKU… ਦੁਆਰਾ ਖੋਜ ਕਰੋ"
+            "value" : "ਨਾਮ ਜਾਂ SKU… ਦੁਆਰਾ ਖੋਜੋ"
           }
         },
         "pt" : {
@@ -127025,7 +129153,140 @@
       }
     },
     "Search Clients" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "البحث عن العملاء"
+          }
+        },
+        "as" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ক্লায়েন্ট সন্ধান কৰক"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ক্লায়েন্ট অনুসন্ধান করুন"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kunden suchen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar clientes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recherche de clients"
+          }
+        },
+        "gu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ક્લાયન્ટ્સ શોધો"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ग्राहकों की खोज करें"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clienti di ricerca"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クライアントを検索"
+          }
+        },
+        "kn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ಕ್ಲೈಂಟ್‌ಗಳನ್ನು ಹುಡುಕಿ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "클라이언트 검색"
+          }
+        },
+        "ml" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ക്ലയന്റുകൾ തിരയുക"
+          }
+        },
+        "mr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ग्राहक शोधा"
+          }
+        },
+        "or" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "କ୍ଲାଏଣ୍ଟମାନଙ୍କୁ ସନ୍ଧାନ କରନ୍ତୁ"
+          }
+        },
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਕਲਾਇੰਟ ਖੋਜੋ"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Procurar clientes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поиск клиентов"
+          }
+        },
+        "ta" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "வாடிக்கையாளர்களைத் தேடுங்கள்"
+          }
+        },
+        "te" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "శోధన క్లయింట్లు"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索客户"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜尋客戶"
+          }
+        }
+      }
     },
     "Search employees…" : {
       "localizations" : {
@@ -137704,7 +139965,7 @@
         "gu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "એસએન: %1$@ · %2$@"
+            "value" : "SN: %1$@ · %2$@"
           }
         },
         "hi" : {
@@ -139432,7 +141693,140 @@
       }
     },
     "Start a remote video selling session in RSMS." : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ابدأ جلسة بيع فيديو عن بعد في RSMS."
+          }
+        },
+        "as" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "আৰ এছ এম এছত এটা দূৰৱৰ্তী ভিডিঅ’ বিক্ৰী অধিবেশন আৰম্ভ কৰক।"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMS-এ একটি রিমোট ভিডিও সেলিং সেশন শুরু করুন।"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starten Sie eine Remote-Video-Verkaufssitzung in RSMS."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicie una sesión de venta por vídeo a distancia en RSMS."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarrez une session de vente vidéo à distance dans RSMS."
+          }
+        },
+        "gu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMS માં રિમોટ વિડીયો સેલિંગ સત્ર શરૂ કરો."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMS में रिमोट वीडियो सेलिंग सेशन शुरू करें।"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avvia una sessione di vendita video a distanza in RSMS."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMSでリモートビデオ販売セッションを開始します。"
+          }
+        },
+        "kn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMS ನಲ್ಲಿ ರಿಮೋಟ್ ವೀಡಿಯೊ ಮಾರಾಟ ಅವಧಿಯನ್ನು ಪ್ರಾರಂಭಿಸಿ."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMS에서 원격 화상 판매 세션을 시작하세요."
+          }
+        },
+        "ml" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMS-ൽ ഒരു റിമോട്ട് വീഡിയോ വിൽപ്പന സെഷൻ ആരംഭിക്കുക."
+          }
+        },
+        "mr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMS मध्ये दूरस्थ व्हिडिओ विक्री सत्र सुरू करा."
+          }
+        },
+        "or" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMS ରେ ଏକ ରିମୋଟ୍ ଭିଡିଓ ବିକ୍ରୟ ଅଧିବେଶନ ଆରମ୍ଭ କରନ୍ତୁ।"
+          }
+        },
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMS ਵਿੱਚ ਇੱਕ ਰਿਮੋਟ ਵੀਡੀਓ ਵਿਕਰੀ ਸੈਸ਼ਨ ਸ਼ੁਰੂ ਕਰੋ।"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicie uma sessão de vendas remotas por vídeo no RSMS."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Начните удаленную сессию продаж видео в RSMS."
+          }
+        },
+        "ta" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMS-இல் தொலைநிலை வீடியோ விற்பனை அமர்வைத் தொடங்கவும்."
+          }
+        },
+        "te" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSMSలో రిమోట్ వీడియో సెల్లింగ్ సెషన్‌ను ప్రారంభించండి."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在RSMS中启动远程视频销售会话。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在RSMS中啟動遠端視訊銷售會話。"
+          }
+        }
+      }
     },
     "Start a Sale" : {
       "localizations" : {
@@ -145621,7 +148015,7 @@
         "kn" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "'%@' ಐಟಂ ಅನ್ನು ಈ ಅವಧಿಯಲ್ಲಿ ಈಗಾಗಲೇ ಸ್ಕ್ಯಾನ್ ಮಾಡಲಾಗಿದೆ."
+            "value" : "'%@' ಎಂಬ ಐಟಂ ಅನ್ನು ಈ ಅವಧಿಯಲ್ಲಿ ಈಗಾಗಲೇ ಸ್ಕ್ಯಾನ್ ಮಾಡಲಾಗಿದೆ."
           }
         },
         "ko" : {
@@ -145681,7 +148075,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "本次会话中已扫描过物品“%@”。"
+            "value" : "本次扫描会话中已扫描过物品“%@”。"
           }
         },
         "zh-Hant" : {
@@ -153695,7 +156089,7 @@
         "ta" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "பரிவர்த்தனை எண்%@"
+            "value" : "பரிவர்த்தனை எண் #%@"
           }
         },
         "te" : {
@@ -159474,8 +161868,8 @@
         },
         "gu" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Verify\nIdentity."
+            "state" : "translated",
+            "value" : "\nઓળખ ચકાસો."
           }
         },
         "hi" : {
